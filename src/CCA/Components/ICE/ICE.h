@@ -743,6 +743,7 @@ using namespace ExchangeModels;
       friend class MPMICE;
       friend class AMRICE;
       friend class impAMRICE;
+      friend class MPMICE2;
 
       ICELabel* lb;
       SchedulerP d_subsched;

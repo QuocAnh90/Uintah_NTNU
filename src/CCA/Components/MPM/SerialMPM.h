@@ -162,6 +162,7 @@ protected:
   // Insert Documentation Here:
   friend class MPMICE;
   friend class MPMArches;
+  friend class MPMICE2;
 
   MaterialSubset* d_one_matl;         // matlsubset for zone of influence
 

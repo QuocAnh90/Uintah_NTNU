@@ -93,6 +93,7 @@
 
 #if !defined(NO_MPM) && !defined(NO_ICE)
 #include <CCA/Components/MPMICE/MPMICE.h>
+#include <CCA/Components/MPMICE/MPMICE2.h>
 #endif
 
 #ifndef NO_PHASEFIELD
@@ -302,6 +303,13 @@ ApplicationFactory::create(       ProblemSpecP     & prob_spec
   } 
   else {
     turned_on_options += "mpmice ";
+  }
+
+  if (sim_comp == "mpmice2" || sim_comp == "MPMICE2") {
+      return scinew MPMICE2(myworld, materialManager, STAND_MPMICE2, doAMR);
+  }
+  else {
+      turned_on_options += "mpmice2 ";
   }
 
   if (sim_comp == "smpmice" || sim_comp == "shellmpmice" || sim_comp == "SHELLMPMICE") {
