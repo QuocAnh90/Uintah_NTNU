@@ -79,6 +79,7 @@
 #include <CCA/Components/MPM/SerialMPM.h>
 #include <CCA/Components/MPM/ShellMPM.h>
 #include <CCA/Components/MPM/SingleFieldMPM.h>
+#include <CCA/Components/MPM/SegMPM.h>
 #endif
 
 #if !defined(NO_MPM) && !defined(NO_ARCHES)
@@ -254,6 +255,13 @@ ApplicationFactory::create(       ProblemSpecP     & prob_spec
   }
   else {
     turned_on_options += "impm ";
+  }
+
+  if (sim_comp == "segmpm" || sim_comp == "SEGMPM") {
+      return scinew SegMPM(myworld, materialManager);
+  }
+  else {
+      turned_on_options += "segmpm ";
   }
 #endif
 
