@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=48;
+  d_NBASICINPUTS=54;
   d_NMGDC=0;
 
 // Total number of properties
@@ -389,6 +389,14 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
 
 	cm_ps->appendElement("n_nonlocalMC", UI[46]);
 	cm_ps->appendElement("l_nonlocal", UI[47]);
+
+    cm_ps->appendElement("Use_friction", UI[48]);
+    cm_ps->appendElement("strain1", UI[49]);
+    cm_ps->appendElement("strain2", UI[50]);
+    cm_ps->appendElement("Phi_CS", UI[51]);
+
+    cm_ps->appendElement("critical_density", UI[52]);
+    cm_ps->appendElement("no_collision", UI[53]);
 
 }
 
@@ -739,6 +747,21 @@ double rho_orig = matl->getInitialDensity();
       // ROTATE pstress_new: S=R*tensorSig*R^T
       pstress_new[idx] = (tensorR*tensorSig)*(tensorR.Transpose());
 
+      // Stress-free
+      double no_collision = UI[55];
+      if (no_collision > 0)
+      {
+          double density = pmass[idx] / pvolume_new[idx];
+          double critical_density = UI[54];
+
+          if (density < critical_density)
+          {
+              pstress_new[idx] = Matrix3(0, 0, 0,
+                  0, 0, 0,
+                  0, 0, 0);
+          }
+      }
+
 	  /*
 	// Non local stress
 	  double n_nonlocal = UI[46];
@@ -1043,6 +1066,14 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
 	ps->getWithDefault("n_nonlocalMC", UI[46], 0.0);
 	ps->getWithDefault("l_nonlocal", UI[47], 0.0);
+
+    ps->getWithDefault("Use_friction", UI[48], 0.0);
+    ps->getWithDefault("strain1", UI[49], 0.0);
+    ps->getWithDefault("strain2", UI[50], 0.0);
+    ps->getWithDefault("Phi_CS", UI[51], 0.0);
+
+    ps->getWithDefault("critical_density", UI[52], 0.0);
+    ps->getWithDefault("no_collision", UI[53], 0.0);
 }
 
 void
@@ -1111,6 +1142,13 @@ MohrCoulomb::initializeLocalMPMLabels()
 	ISVNames.push_back("n_nonlocalMC");
 	ISVNames.push_back("l_nonlocal");
 
+    ISVNames.push_back("Use_friction");
+    ISVNames.push_back("strain1");
+    ISVNames.push_back("strain2");
+    ISVNames.push_back("Phi_CS");
+
+    ISVNames.push_back("critical_density");
+    ISVNames.push_back("no_collision");
 	
 
   for(int i=0;i<d_NINSV;i++){
@@ -1200,6 +1238,13 @@ int Flavour=int(UI[5]);
     double y_ref=UI[27];
     double y=svarg[37];
 
+    double Use_friction = UI[48];
+    double strain1 = UI[49];
+    double strain2 = UI[50];
+    double Phi_CS = UI[51];
+    double Phi_P = UI[3];
+
+
 /*
 Flavour
 1- classic Mohr - Coulomb,
@@ -1270,6 +1315,22 @@ if(Use_softening>0)
         c = c * (1.0/St+(1.0-1.0/St)*pow(2.71,(-3.0*shear_strain_nonlocal /strain_95)));
     }
 }
+
+double mu = 0;
+
+if (Use_friction > 0)
+{
+    if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+    {
+        mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+    }
+    else if (shear_strain_nonlocal > strain2)
+    {
+        mu = tan(Phi_CS * 3.1415 / 180);
+    }
+    Phi = tanh(mu);
+}
+
 
 if (UseWaterRetention>0)
 {

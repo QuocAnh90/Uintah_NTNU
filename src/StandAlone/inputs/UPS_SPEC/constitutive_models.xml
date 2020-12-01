@@ -1081,7 +1081,23 @@
 	
 	<n_nonlocalMC		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<l_nonlocal		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	
+
+	  <Use_friction		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <strain1		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <strain2		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <Phi_CS		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+
+	  <critical_density		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <no_collision		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
     <UseWaterRetention spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <PhiB  spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type MohrCoulomb"/>
     <suction  spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type MohrCoulomb"/>
