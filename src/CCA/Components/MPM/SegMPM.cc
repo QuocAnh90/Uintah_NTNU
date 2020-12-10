@@ -4164,6 +4164,11 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
                                pset);
       }
 
+      // critical density and volume
+      double rho_0 = mpm_matl->getInitialDensityLiquid();
+      double n_0 = mpm_matl->getInitialPorosity();
+      double rho_critical = 0.95 * rho_0;
+
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
         particleIndex idx = *iter;
@@ -4224,8 +4229,34 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
         }
         else{
           Matrix3 Amat = tensorL*delT;
-          Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
-          pFNew[idx] = Finc*pFOld[idx];
+
+          // Analytical equation to update volume (Dunatunga & Kamrin 2018)
+          double traceAmat = Amat.Trace();
+          double dJ = exp(traceAmat);
+          double pvolume_trial = pVolumeOld[idx] * dJ;
+          double pvolume_critical = pMassLiquid[idx] / n_0 / rho_critical;
+          //double rho_cur = rho_0 / J; //current density
+
+          if (pvolume_trial < pvolume_critical) {
+              // Deformation gradient
+              Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
+              pFNew[idx] = Finc * pFOld[idx];
+          }
+          else {
+              pvolume[idx] = pVolumeOld[idx];
+              pFNew[idx] = pFOld[idx];
+          }
+        }
+
+        // Temporary hack
+        double Jtest = pFNew[idx].Determinant();
+
+        if (Jtest <= 0) {
+            pFNew[idx] = pFOld[idx];
+        }
+
+        if (std::isnan(Jtest)) {
+            pFNew[idx] = pFOld[idx];
         }
 
         double J   =pFNew[idx].Determinant();
