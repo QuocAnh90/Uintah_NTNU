@@ -4233,7 +4233,7 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
           double traceAmat = Amat.Trace();
           double dJ = exp(traceAmat);
           double pvolume_trial = pVolumeOld[idx] * dJ;
-          double pvolume_critical = pMass[idx] / rho_critical;
+          double pvolume_critical = pmass[idx] / rho_critical;
           //double rho_cur = rho_0 / J; //current density
 
           if (pvolume_trial < pvolume_critical) {
