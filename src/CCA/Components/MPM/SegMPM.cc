@@ -4165,8 +4165,7 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
       }
 
       // critical density and volume
-      double rho_0 = mpm_matl->getInitialDensityLiquid();
-      double n_0 = mpm_matl->getInitialPorosity();
+      double rho_0 = mpm_matl->getInitialDensity();
       double rho_critical = 0.95 * rho_0;
 
       for(ParticleSubset::iterator iter = pset->begin();
@@ -4234,7 +4233,7 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
           double traceAmat = Amat.Trace();
           double dJ = exp(traceAmat);
           double pvolume_trial = pVolumeOld[idx] * dJ;
-          double pvolume_critical = pMassLiquid[idx] / n_0 / rho_critical;
+          double pvolume_critical = pMass[idx] / rho_critical;
           //double rho_cur = rho_0 / J; //current density
 
           if (pvolume_trial < pvolume_critical) {
