@@ -4235,15 +4235,21 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
           double pvolume_trial = pVolumeOld[idx] * dJ;
           double pvolume_critical = pmass[idx] / rho_critical;
           //double rho_cur = rho_0 / J; //current density
+          partvoldef += pvolume[idx];
 
           if (pvolume_trial < pvolume_critical) {
               // Deformation gradient
               Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
               pFNew[idx] = Finc * pFOld[idx];
+              double J = pFNew[idx].Determinant();
+              // check volume calculation
+              double JOld = pFOld[idx].Determinant();
+              pvolume[idx] = pVolumeOld[idx] * (J / JOld);
           }
           else {
               pvolume[idx] = pVolumeOld[idx];
               pFNew[idx] = pFOld[idx];
+              partvoldef += pvolume[idx];
           }
         }
 
@@ -4257,11 +4263,12 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
         if (std::isnan(Jtest)) {
             pFNew[idx] = pFOld[idx];
         }
-
+        /*
         double J   =pFNew[idx].Determinant();
         double JOld=pFOld[idx].Determinant();
         pvolume[idx]=pVolumeOld[idx]*(J/JOld)*(pmassNew[idx]/pmass[idx]);
         partvoldef += pvolume[idx];
+        */
       }
 
       // The following is used only for pressure stabilization
