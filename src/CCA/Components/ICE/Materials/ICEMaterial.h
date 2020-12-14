@@ -75,8 +75,10 @@ class ICEMaterial : public Material {
     double getThermalConductivity() const;
     double getInitialDensity() const;
     double getTinyRho() const;
+    double getPorosity() const;
 
     void initializeCells(CCVariable<double>& rhom,
+                         CCVariable<double>& Porosity_CC,
                          CCVariable<double>& rhC,
                          CCVariable<double>& temp, 
                          CCVariable<double>& ss,
@@ -97,6 +99,7 @@ class ICEMaterial : public Material {
     bool d_includeFlowWork;
     double d_specificHeat;
     double d_thermalConductivity;
+    double d_Porosity;
     double d_tiny_rho;
 
     std::vector<GeometryObject*> d_geom_objs;

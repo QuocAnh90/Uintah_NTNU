@@ -786,14 +786,14 @@ ParticleCreator::initializeParticle(const Patch* patch,
     try {
      if((*obj)->getInitialData_double("volumeFraction") == -1.0) {    
       vol_frac_CC = 1.0;
-      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i];
+      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1- matl->getInitialPorosity());
      } else {
       vol_frac_CC = (*obj)->getInitialData_double("volumeFraction");
-      pvars.pmass[i]   = matl->getInitialDensity()*pvars.pvolume[i]*vol_frac_CC;
+      pvars.pmass[i]   = matl->getInitialDensity()*pvars.pvolume[i]*vol_frac_CC * (1 - matl->getInitialPorosity());
      }
     } catch (...) {
       vol_frac_CC = 1.0;       
-      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i];
+      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1 - matl->getInitialPorosity());
     }
     pvars.pdisp[i]        = Vector(0.,0.,0.);
   }

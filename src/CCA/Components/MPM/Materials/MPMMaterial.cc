@@ -127,6 +127,10 @@ MPMMaterial::standardInitialization(ProblemSpecP& ps,
   ps->require("thermal_conductivity",d_thermalConductivity);
   ps->require("specific_heat",d_specificHeat);
   
+  // For MPMICE2
+  ps->getWithDefault("Porosity", d_Porosity, 0);
+  ps->get("Permeability", d_Permeability);
+
   // Assume the the centered specific heat is C_v
   d_Cv = d_specificHeat;
 
@@ -249,6 +253,10 @@ ProblemSpecP MPMMaterial::outputProblemSpec(ProblemSpecP& ps)
   mpm_ps->appendElement("melt_temp",d_tmelt);
   mpm_ps->appendElement("is_rigid",d_is_rigid);
 
+  // For MPMICE2
+  mpm_ps->appendElement("Porosity", d_Porosity);
+  mpm_ps->appendElement("Permeability", d_Permeability);
+
   d_cm->outputProblemSpec(mpm_ps);
   d_damageModel->outputProblemSpec(mpm_ps);
   d_erosionModel->outputProblemSpec(mpm_ps);
@@ -278,6 +286,10 @@ MPMMaterial::copyWithoutGeom(ProblemSpecP& ps,const MPMMaterial* mat,
   d_troom = mat->d_troom;
   d_tmelt = mat->d_tmelt;
   d_is_rigid = mat->d_is_rigid;
+
+  // For MPMICE2
+  d_Porosity = mat->d_Porosity;
+  d_Permeability = mat->d_Permeability;
 
   // Check to see which ParticleCreator object we need
   d_particle_creator = ParticleCreatorFactory::create(ps,this,flags);
@@ -383,6 +395,17 @@ double MPMMaterial::getSpecificHeat() const
 double MPMMaterial::getThermalConductivity() const
 {
   return d_thermalConductivity;
+}
+
+// For MPMICE2
+double MPMMaterial::getInitialPorosity() const
+{
+    return d_Porosity;
+}
+
+double MPMMaterial::getInitialPermeability() const
+{
+    return d_Permeability;
 }
 
 

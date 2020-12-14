@@ -818,6 +818,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->requires(Task::OldDW, Ilb->timeStepLabel);
 
         t->computes(MIlb->cMassLabel);
+        t->computes(MIlb->cVolumeLabel);
         t->computes(MIlb->vel_CCLabel);
         t->computes(MIlb->temp_CCLabel);
         t->computes(Ilb->sp_vol_CCLabel, mss);
@@ -859,11 +860,12 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             // Create arrays for the grid data
             constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol;
             constNCVariable<Vector> gvelocity;
-            CCVariable<double> cmass, Temp_CC, sp_vol_CC, rho_CC;
+            CCVariable<double> cmass, Volume_CC, Temp_CC, sp_vol_CC, rho_CC;
             CCVariable<Vector> vel_CC;
             constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
 
             new_dw->allocateAndPut(cmass, MIlb->cMassLabel, indx, patch);
+            new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
@@ -889,6 +891,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 IntVector c = *iter;
                 patch->findNodesFromCell(*iter, nodeIdx);
 
+                double Vol_CC_mpm = 0.0;
                 double Temp_CC_mpm = 0.0;
                 double sp_vol_mpm = 0.0;
                 Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
@@ -896,6 +899,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 for (int in = 0; in < 8; in++) {
                     double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
                     cmass[c] += NC_CCw_mass;
+                    Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
                     sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
                     vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
                     Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
@@ -904,22 +908,28 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 vel_CC_mpm *= inv_cmass;
                 Temp_CC_mpm *= inv_cmass;
                 sp_vol_mpm *= inv_cmass;
+                Vol_CC_mpm *= inv_cmass;
 
-                //__________________________________
+                //__________________________________ in MPMICE
                 // set *_CC = to either vel/Temp_CC_mpm or some safe values
                 // depending upon if there is cmass.  You need
                 // a well defined vel/temp_CC even if there isn't any mass
                 // If you change this you must also change 
                 // MPMICE2::computeLagrangianValuesMPM
-                double one_or_zero = (cmass[c] - very_small_mass) / cmass[c];
 
+                //Note for MPMICE2: because the ICE materials also exist inside the MPM material
+                // so it is not necessary to define a safe values for the cell without MPM material
+
+                //double one_or_zero = (cmass[c] - very_small_mass) / cmass[c];
                 //        Temp_CC[c]  =(1.0-one_or_zero)*999.        + one_or_zero*Temp_CC_mpm;
                 //        sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_orig + one_or_zero*sp_vol_mpm;
-
-                Temp_CC[c] = (1.0 - one_or_zero) * Temp_CC_ice[c] + one_or_zero * Temp_CC_mpm;
-                sp_vol_CC[c] = (1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm;
+                // Temp_CC[c] = (1.0 - one_or_zero) * Temp_CC_ice[c] + one_or_zero * Temp_CC_mpm;
+                // sp_vol_CC[c] = (1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm;
 
                 vel_CC[c] = vel_CC_mpm;
+                Temp_CC[c] = Temp_CC_mpm;
+                sp_vol_CC[c] = sp_vol_mpm;
+                Volume_CC[c] = Vol_CC_mpm;
                 rho_CC[c] = cmass[c] / cell_vol;
             }
 
@@ -929,7 +939,35 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             setBC(vel_CC, "Velocity", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             //  Set if symmetric Boundary conditions
             setBC(cmass, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+            setBC(Volume_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(sp_vol_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+
+            /*
+            // Calculate the porosity
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                patch->findNodesFromCell(*iter, nodeIdx);
+
+                double Vol_CC_mpm = 0.0;
+                double Temp_CC_mpm = 0.0;
+                double sp_vol_mpm = 0.0;
+                Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
+
+                for (int in = 0; in < 8; in++) {
+                    double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
+                    cmass[c] += NC_CCw_mass;
+                    Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
+                    sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
+                    vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
+                    Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
+                }
+                double inv_cmass = 1.0 / cmass[c];
+                vel_CC_mpm *= inv_cmass;
+                Temp_CC_mpm *= inv_cmass;
+                sp_vol_mpm *= inv_cmass;
+                Vol_CC_mpm *= inv_cmass;
+            }
+            */
 
             //---- B U L L E T   P R O O F I N G------
             // ignore BP if recompute time step has already been requested
@@ -949,6 +987,11 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             if (!areAllValuesPositive(rho_CC, neg_cell) && !rts) {
                 warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
                     << " cell " << neg_cell << " rho_CC " << rho_CC[neg_cell] << "\n ";
+                throw InvalidValue(warn.str(), __FILE__, __LINE__);
+            }
+            if (!areAllValuesPositive(Volume_CC, neg_cell) && !rts) {
+                warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
+                    << " cell " << neg_cell << " Volume_CC " << Volume_CC[neg_cell] << "\n ";
                 throw InvalidValue(warn.str(), __FILE__, __LINE__);
             }
             if (!areAllValuesPositive(sp_vol_CC, neg_cell) && !rts) {

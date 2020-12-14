@@ -2227,6 +2227,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
     std::vector<constCCVariable<double> > placeHolder(0);
     std::vector<CCVariable<double>   > rho_micro(max_indx);
     std::vector<CCVariable<double>   > sp_vol_CC(max_indx);
+    std::vector<CCVariable<double>   > Porosity_CC(max_indx);
     std::vector<CCVariable<double>   > rho_CC(max_indx); 
     std::vector<CCVariable<double>   > Temp_CC(max_indx);
     std::vector<CCVariable<double>   > speedSound(max_indx);
@@ -2283,6 +2284,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
       int indx= ice_matl->getDWIndex();
       new_dw->allocateAndPut(rho_micro[indx],  lb->rho_micro_CCLabel, indx,patch); 
       new_dw->allocateAndPut(sp_vol_CC[indx],  lb->sp_vol_CCLabel,    indx,patch); 
+      new_dw->allocateAndPut(Porosity_CC[indx],lb->Porosity_CCLabel,  indx, patch);
       new_dw->allocateAndPut(rho_CC[indx],     lb->rho_CCLabel,       indx,patch); 
       new_dw->allocateAndPut(Temp_CC[indx],    lb->temp_CCLabel,      indx,patch); 
       new_dw->allocateAndPut(speedSound[indx], lb->speedSound_CCLabel,indx,patch); 
@@ -2296,7 +2298,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
     for (unsigned int m = 0; m < numMatls; m++ ) {
       ICEMaterial* ice_matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE", m);
       int indx = ice_matl->getDWIndex();
-      ice_matl->initializeCells(rho_micro[indx],  rho_CC[indx],
+      ice_matl->initializeCells(rho_micro[indx], Porosity_CC[indx], rho_CC[indx],
                                 Temp_CC[indx],    speedSound[indx], 
                                 vol_frac_CC[indx], vel_CC[indx], 
                                 press_CC, numALLMatls, patch, new_dw);

@@ -76,6 +76,7 @@ ICELabel::ICELabel()
   sum_rho_CCLabel         = VarLabel::create("sum_rho_CC",    CC_double);
   compressibilityLabel    = VarLabel::create("compressiblity",CC_double);
   sumKappaLabel           = VarLabel::create("sumKappa",      CC_double);
+  Porosity_CCLabel        = VarLabel::create("Porosity_CC",   CC_double);
   rho_CCLabel             = VarLabel::create("rho_CC",        CC_double);
   temp_CCLabel            = VarLabel::create("temp_CC",       CC_double);
   vel_CCLabel             = VarLabel::create("vel_CC",        CC_Vector);
@@ -278,6 +279,7 @@ ICELabel::~ICELabel()
     VarLabel::destroy(eq_press_itersLabel);
     VarLabel::destroy(delP_DilatateLabel);
     VarLabel::destroy(delP_MassXLabel);
+    VarLabel::destroy(Porosity_CCLabel);
     VarLabel::destroy(rho_CCLabel);
     VarLabel::destroy(sum_rho_CCLabel);
     VarLabel::destroy(compressibilityLabel);

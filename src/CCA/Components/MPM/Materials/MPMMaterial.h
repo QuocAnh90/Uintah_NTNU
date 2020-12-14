@@ -148,6 +148,9 @@ WARNING
 
    int nullGeomObject() const;
 
+   // For MPMICE2
+   double getInitialPermeability() const;
+   double getInitialPorosity() const;
 
    // For MPMICE
    double getGamma() const;
@@ -181,6 +184,9 @@ WARNING
    double d_thermalConductivity;
    bool   d_pLocalizedComputed  =  false;        // set to true if any task computes pLocalizedMPM or pLocalizedMPM_preReloc
 
+   // for MPMICE2
+   double d_Porosity;
+   double d_Permeability;
 
    // Specific heats at constant pressure and constant volume
    // (values at room temperature - [273.15 + 20] K)
