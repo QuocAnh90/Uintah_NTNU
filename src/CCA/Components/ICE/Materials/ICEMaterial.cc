@@ -75,7 +75,7 @@ ICEMaterial::ICEMaterial( ProblemSpecP     & ps,
 
   //__________________________________
   // For MPMICE2
-  ps->getWithDefault("PorosityICE", d_Porosity, 1);
+  //ps->getWithDefault("PorosityICE", d_Porosity, 1);
 
   //__________________________________
   //  Misc. Flags
@@ -93,6 +93,7 @@ ICEMaterial::ICEMaterial( ProblemSpecP     & ps,
   geom_obj_data.push_back(GeometryObject::DataItem("temperature",GeometryObject::Double));
   geom_obj_data.push_back(GeometryObject::DataItem("pressure",   GeometryObject::Double));
   geom_obj_data.push_back(GeometryObject::DataItem("density",    GeometryObject::Double)); 
+  geom_obj_data.push_back(GeometryObject::DataItem("Porosity", GeometryObject::Double));
   try{
     geom_obj_data.push_back(GeometryObject::DataItem("volumeFraction", GeometryObject::Double));
    }
@@ -153,7 +154,7 @@ ProblemSpecP ICEMaterial::outputProblemSpec(ProblemSpecP& ps)
   ice_ps->appendElement("isSurroundingMatl",   d_isSurroundingMatl);
   ice_ps->appendElement("includeFlowWork",     d_includeFlowWork);
   ice_ps->appendElement("tiny_rho",            d_tiny_rho);
-  ice_ps->appendElement("PorosityICE",         d_Porosity);
+  //ice_ps->appendElement("PorosityICE",         d_Porosity);
 
   for (vector<GeometryObject*>::const_iterator it = d_geom_objs.begin();
        it != d_geom_objs.end(); it++) {
@@ -186,7 +187,7 @@ double ICEMaterial::getTinyRho() const
 
 double ICEMaterial::getPorosity() const
 {
-    return d_Porosity;
+    return d_geom_objs[0]->getInitialData_double("density");
 }
 
 double ICEMaterial::getViscosity() const
@@ -253,7 +254,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
   // Zero the arrays so they don't get wacky values
   vel_CC.initialize(Vector(0.,0.,0.));
   rho_micro.initialize(0.);
-  Porosity_CC.initialize(0.);
+  Porosity_CC.initialize(1.);
   rho_CC.initialize(0.);
   temp.initialize(0.);
   vol_frac_CC.initialize(0.);
@@ -286,6 +287,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
         press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
         vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
         rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
+        Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity");
         rho_CC[c]     = rho_micro[*iter] + d_tiny_rho*rho_micro[*iter];
         temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
         IveBeenHere[c]= 1;
@@ -341,7 +343,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
             vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
             rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
             rho_CC[c]     = rho_micro[c] + d_tiny_rho*rho_micro[c];
-            Porosity_CC[c]= 1; // Porosity = 1
+            Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity"); // Porosity = 1
             temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
             IveBeenHere[c]= 1;
           }

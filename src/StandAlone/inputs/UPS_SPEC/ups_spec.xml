@@ -356,6 +356,7 @@
       <temperature             spec="OPTIONAL DOUBLE" />
       <color                   spec="OPTIONAL DOUBLE" />
       <density                 spec="OPTIONAL DOUBLE" />
+	  <Porosity                 spec="OPTIONAL DOUBLE" />
       <pressure                spec="OPTIONAL DOUBLE" />
       <volumeFraction          spec="OPTIONAL DOUBLE" />
       <affineTransformation_A0 spec="OPTIONAL VECTOR" /> <!-- If you like to add some new input variables to ... -->

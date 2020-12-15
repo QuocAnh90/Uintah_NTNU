@@ -459,8 +459,8 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
                 vol_frac_sum[c] += vol_frac[c];
             }
         }  // num_ICE_matls loop
-
-        double errorThresholdTop = 1.0e0 + 1.0e-10;
+        /*
+        double errorThresholdTop = 1.0e0 *  + 1.0e-10;
         double errorThresholdBottom = 1.0e0 - 1.0e-10;
 
         for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
@@ -477,6 +477,7 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
                 throw ProblemSetupException(warn.str(), __FILE__, __LINE__);
             }
         } // cell iterator for volume fraction
+        */
     } // Patch loop
 }
 
