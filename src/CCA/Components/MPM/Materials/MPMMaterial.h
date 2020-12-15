@@ -156,6 +156,7 @@ WARNING
    double getGamma() const;
    void initializeCCVariables(CCVariable<double>& rhom,
                               CCVariable<double>& rhC,
+                              CCVariable<double>& Porosity_CC,
                               CCVariable<double>& temp,   
                               CCVariable<Vector>& vCC,
                               CCVariable<double>& vfCC,

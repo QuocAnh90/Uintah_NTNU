@@ -1096,7 +1096,7 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
     unsigned int numMPM_matls = m_materialManager->getNumMatls( "MPM" );
     double p_ref = d_ice->getRefPress();
     for (unsigned int m = 0; m < numMPM_matls; m++ ) {
-      CCVariable<double> rho_micro, sp_vol_CC, rho_CC, Temp_CC, speedSound, vol_frac_CC;
+      CCVariable<double> rho_micro, sp_vol_CC, Porosity_CC, rho_CC, Temp_CC, speedSound, vol_frac_CC;
       CCVariable<Vector> vel_CC;
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM", m);
       int indx= mpm_matl->getDWIndex();
@@ -1104,6 +1104,7 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
       // Allocate volume fraction for use in intializeCCVariables
       new_dw->allocateTemporary(vol_frac_CC,patch);
       new_dw->allocateAndPut(sp_vol_CC,   Ilb->sp_vol_CCLabel,    indx,patch);
+      new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
       new_dw->allocateAndPut(rho_CC,      Ilb->rho_CCLabel,       indx,patch);
       new_dw->allocateAndPut(speedSound,  Ilb->speedSound_CCLabel,indx,patch);
       new_dw->allocateAndPut(Temp_CC,    MIlb->temp_CCLabel,      indx,patch);
@@ -1114,10 +1115,10 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
       new_dw->allocateAndPut(heatFlux, Mlb->heatRate_CCLabel,    indx, patch);
       heatFlux.initialize(0.0);
 
-      mpm_matl->initializeCCVariables(rho_micro,   rho_CC,
+      mpm_matl->initializeCCVariables(rho_micro,   Porosity_CC, rho_CC,
                                       Temp_CC,     vel_CC,  
                                       vol_frac_CC, patch);
-
+      setBC(Porosity_CC, "Porosity", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
       setBC(rho_CC,    "Density",      patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
       setBC(rho_micro, "Density",      patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
       setBC(Temp_CC,   "Temperature",  patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);

@@ -704,6 +704,7 @@ void ICE::scheduleInitialize(const LevelP & level,
   
   t->computes(lb->vel_CCLabel);
   t->computes(lb->rho_CCLabel); 
+  t->computes(lb->Porosity_CCLabel);
   t->computes(lb->temp_CCLabel);
   t->computes(lb->sp_vol_CCLabel);
   t->computes(lb->vol_frac_CCLabel);

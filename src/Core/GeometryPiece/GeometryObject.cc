@@ -48,6 +48,9 @@ GeometryObject::GeometryObject(GeometryPieceP   geom_piece,
           if(it->name == "volumeFraction"){
             ps->getWithDefault(it->name,val,-1.0);
           } 
+          if (it->name == "Porosity") {
+              ps->getWithDefault(it->name, val, 1.0);
+          }
           else {
             ps->require(it->name,val);
           }

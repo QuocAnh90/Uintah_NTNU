@@ -286,8 +286,15 @@ void MPMICE2::scheduleInitialize(const LevelP& level,
     Task* t = scinew Task("MPMICE2::actuallyInitialize",
         this, &MPMICE2::actuallyInitialize);
 
+    // because there is ICE material inside the MPM material so there is no necessary to 
+    // create CCLabel for MPM material in MPMICE2!!!
+   
     // Get the material subsets
     const MaterialSubset* ice_matls = m_materialManager->allMaterials("ICE")->getUnion();
+    
+    //-------------------------------------------------------------------------------------
+        // This section should be removed later because there is ICE material inside the MPM material 
+        //so there is no necessary to create CCLabel for MPM material in MPMICE2!!!
     const MaterialSubset* mpm_matls = m_materialManager->allMaterials("MPM")->getUnion();
 
     t->requires(Task::NewDW, Ilb->timeStepLabel);
@@ -299,11 +306,13 @@ void MPMICE2::scheduleInitialize(const LevelP& level,
     t->computes(Ilb->sp_vol_CCLabel, mpm_matls);
     t->computes(Ilb->speedSound_CCLabel, mpm_matls);
     t->computes(Mlb->heatRate_CCLabel, mpm_matls);
+    //-------------------------------------------------------------------------------------
 
     // This is compute in d_ice->actuallyInitalize(...), and it is needed in 
     //  MPMICE2's actuallyInitialize()
     t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, ice_matls, Ghost::None, 0);
-
+    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, ice_matls, Ghost::None, 0);
+    
     if (d_switchCriteria) {
         d_switchCriteria->scheduleInitialize(level, sched);
     }
@@ -318,8 +327,9 @@ void MPMICE2::scheduleInitialize(const LevelP& level,
             am->scheduleInitialize(sched, level);
         }
     }
-
+    
     sched->addTask(t, level->eachPatch(), m_materialManager->allMaterials());
+    
 }
 
 //______________________________________________________________________
@@ -354,10 +364,20 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
             cout << "\n";
         }
 
-        // Sum variable for testing that the volume fractions sum to 1
+        // Sum variable for testing that the volume fractions sum to Porosity
         CCVariable<double> vol_frac_sum;
         new_dw->allocateTemporary(vol_frac_sum, patch);
         vol_frac_sum.initialize(0.0);
+
+        CCVariable<double> errorThresholdTop, errorThresholdBottom;
+        new_dw->allocateTemporary(errorThresholdTop, patch);
+        new_dw->allocateTemporary(errorThresholdBottom, patch);
+        errorThresholdTop.initialize(0.0);
+        errorThresholdBottom.initialize(0.0);
+
+        //-------------------------------------------------------------------------------------
+        // This section should be removed later because there is ICE material inside the MPM material 
+        //so there is no necessary to create CCLabel for MPM material in MPMICE2!!!
 
         //__________________________________
         //  Initialize CCVaribles for MPM Materials
@@ -367,7 +387,7 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
         unsigned int numMPM_matls = m_materialManager->getNumMatls("MPM");
         double p_ref = d_ice->getRefPress();
         for (unsigned int m = 0; m < numMPM_matls; m++) {
-            CCVariable<double> rho_micro, sp_vol_CC, rho_CC, Temp_CC, speedSound, vol_frac_CC;
+            CCVariable<double> rho_micro, sp_vol_CC, Porosity_CC, rho_CC, Temp_CC, speedSound, vol_frac_CC;
             CCVariable<Vector> vel_CC;
             MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
             int indx = mpm_matl->getDWIndex();
@@ -375,20 +395,21 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
             // Allocate volume fraction for use in intializeCCVariables
             new_dw->allocateTemporary(vol_frac_CC, patch);
             new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
+            new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho_CC, Ilb->rho_CCLabel, indx, patch);
             new_dw->allocateAndPut(speedSound, Ilb->speedSound_CCLabel, indx, patch);
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
 
-
             CCVariable<double> heatFlux;
             new_dw->allocateAndPut(heatFlux, Mlb->heatRate_CCLabel, indx, patch);
             heatFlux.initialize(0.0);
 
-            mpm_matl->initializeCCVariables(rho_micro, rho_CC,
+            mpm_matl->initializeCCVariables(rho_micro, Porosity_CC, rho_CC,
                 Temp_CC, vel_CC,
                 vol_frac_CC, patch);
 
+            setBC(Porosity_CC, "Porosity", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(rho_CC, "Density", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(rho_micro, "Density", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(Temp_CC, "Temperature", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
@@ -440,44 +461,49 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
                 throw ProblemSetupException(warn.str(), __FILE__, __LINE__);
             }
         }  // num_MPM_matls loop 
+        //-------------------------------------------------------------------------------------
 
         //___________________________________
         //   B U L L E T  P R O O F I N G
-        // Verify volume fractions sum to 1.0
+        // Verify volume fractions sum to 1.0 * Porosity
         // Loop through ICE materials to get their contribution to volume fraction
         unsigned int numICE_matls = m_materialManager->getNumMatls("ICE");
         for (unsigned int m = 0; m < numICE_matls; m++) {
             constCCVariable<double> vol_frac;
+            constCCVariable<double> Porosity_CC;
             ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
             int indx = ice_matl->getDWIndex();
 
             // Get the Volume Fraction computed in ICE's actuallyInitialize(...)
             new_dw->get(vol_frac, Ilb->vol_frac_CCLabel, indx, patch, Ghost::None, 0);
+            new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, Ghost::None, 0);
 
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
-                vol_frac_sum[c] += vol_frac[c];
+                vol_frac_sum[c] +=vol_frac[c];
+                errorThresholdTop[c] = Porosity_CC[c] + 1.0e-10;
+                errorThresholdBottom[c] = Porosity_CC[c] - 1.0e-10;
+
+                cerr << "ICE"  << Porosity_CC[c] << " " <<vol_frac_sum[c] << endl;
             }
         }  // num_ICE_matls loop
-        /*
-        double errorThresholdTop = 1.0e0 *  + 1.0e-10;
-        double errorThresholdBottom = 1.0e0 - 1.0e-10;
+     
 
         for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
             IntVector c = *iter;
             Point pt = patch->getCellPosition(c);
 
-            if (!(vol_frac_sum[c] <= errorThresholdTop && vol_frac_sum[c] >= errorThresholdBottom)) {
-                \
+            if (!(vol_frac_sum[c] <= errorThresholdTop[c] && vol_frac_sum[c] >= errorThresholdBottom[c])) {
+                
                     ostringstream warn;
                 warn << "ERROR MPMICE2::actuallyInitialize cell " << *iter << " position" << pt << "\n\n"
-                    << "volume fraction (" << std::setprecision(13) << vol_frac_sum[*iter] << ") does not sum to 1.0 +- 1e-10.\n"
+                    << "volume fraction (" << std::setprecision(13) << vol_frac_sum[*iter] << ") does not sum to Porosity +- 1e-10.\n"
                     << "Verify that this region of the domain contains at least 1 geometry object.  If you're using the optional\n"
                     << "'volumeFraction' tags verify that they're correctly specified.\n";
                 throw ProblemSetupException(warn.str(), __FILE__, __LINE__);
             }
         } // cell iterator for volume fraction
-        */
+        
     } // Patch loop
 }
 

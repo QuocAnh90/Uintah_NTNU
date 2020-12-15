@@ -417,6 +417,7 @@ double MPMMaterial::getInitialPermeability() const
  ICEMaterial.cc
 _____________________________________________________________________*/
 void MPMMaterial::initializeCCVariables(CCVariable<double>& rho_micro,
+                                  CCVariable<double>& Porosity_CC,
                                   CCVariable<double>& rho_CC,
                                   CCVariable<double>& temp,
                                   CCVariable<Vector>& vel_CC,
@@ -428,6 +429,7 @@ void MPMMaterial::initializeCCVariables(CCVariable<double>& rho_micro,
   vel_CC.initialize(Vector(0.,0.,0.));
   rho_micro.initialize(-9.0);
   rho_CC.initialize(-9.0);
+  Porosity_CC.initialize(0.0);
   temp.initialize(-9.0);
   vol_frac_CC.initialize(0.0);
   Vector dx = patch->dCell();
@@ -469,15 +471,17 @@ void MPMMaterial::initializeCCVariables(CCVariable<double>& rho_micro,
         }
       }
 
+      Porosity_CC[c] = getInitialPorosity();
+
       double ups_volFrac = d_geom_objs[obj]->getInitialData_double("volumeFraction");
       if( ups_volFrac == -1.0 ) {    
-        vol_frac_CC[c] += count/totalppc;  // there can be contributions from multiple objects 
+        vol_frac_CC[c] += Porosity_CC[c] * count/totalppc;  // there can be contributions from multiple objects 
       } else {
-        vol_frac_CC[c] = ups_volFrac * count/(totalppc);
+        vol_frac_CC[c] = Porosity_CC[c] * ups_volFrac * count/(totalppc);
       }
       
-      rho_micro[c]  = getInitialDensity();
-      rho_CC[c]     = rho_micro[c] * vol_frac_CC[c] + d_TINY_RHO;     
+      rho_micro[c]  = getInitialDensity(); 
+      rho_CC[c]     = Porosity_CC[c] * rho_micro[c] * vol_frac_CC[c] + d_TINY_RHO;
  
       // these values of temp_CC and vel_CC are only used away from the mpm objects
       // on the first timestep in interpolateNC_CC_0.  We just need reasonable values
