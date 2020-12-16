@@ -377,7 +377,7 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
 
         //-------------------------------------------------------------------------------------
         // This section should be removed later because there is ICE material inside the MPM material 
-        //so there is no necessary to create CCLabel for MPM material in MPMICE2!!!
+        //so it is not necessary to create CCLabel for MPM material in MPMICE2!!!
 
         //__________________________________
         //  Initialize CCVaribles for MPM Materials
@@ -846,6 +846,8 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
 
         t->computes(MIlb->cMassLabel);
         t->computes(MIlb->cVolumeLabel);
+        t->computes(Ilb->Porosity_CCLabel);
+        t->computes(MIlb->cPermeabilityLabel);
         t->computes(MIlb->vel_CCLabel);
         t->computes(MIlb->temp_CCLabel);
         t->computes(Ilb->sp_vol_CCLabel, mss);
@@ -887,12 +889,14 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             // Create arrays for the grid data
             constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol;
             constNCVariable<Vector> gvelocity;
-            CCVariable<double> cmass, Volume_CC, Temp_CC, sp_vol_CC, rho_CC;
+            CCVariable<double> cmass, Volume_CC, Temp_CC, sp_vol_CC, rho_CC, Porosity_CC, Permeability_CC;
             CCVariable<Vector> vel_CC;
             constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
 
             new_dw->allocateAndPut(cmass, MIlb->cMassLabel, indx, patch);
             new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
+            new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
+            new_dw->allocateAndPut(Permeability_CC, MIlb->cPermeabilityLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
@@ -910,6 +914,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             old_dw->get(Temp_CC_ice, MIlb->temp_CCLabel, indx, patch, gn, 0);
             IntVector nodeIdx[8];
 
+            double IniDensity = mpm_matl->getInitialDensity();
+            double IniPermeability = mpm_matl->getInitialPermeability();
             //      double sp_vol_orig = 1.0/(mpm_matl->getInitialDensity());
 
                   //__________________________________
@@ -952,12 +958,21 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 //        sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_orig + one_or_zero*sp_vol_mpm;
                 // Temp_CC[c] = (1.0 - one_or_zero) * Temp_CC_ice[c] + one_or_zero * Temp_CC_mpm;
                 // sp_vol_CC[c] = (1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm;
+                // __________________________________
 
                 vel_CC[c] = vel_CC_mpm;
                 Temp_CC[c] = Temp_CC_mpm;
                 sp_vol_CC[c] = sp_vol_mpm;
                 Volume_CC[c] = Vol_CC_mpm;
                 rho_CC[c] = cmass[c] / cell_vol;
+
+                // Calculate cell centered porosity
+                Porosity_CC[c] = 1 - (cmass[c]/ Volume_CC[c]/ IniDensity);
+
+                // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
+                Permeability_CC[c] = IniPermeability;
+
+                // Calculate momentum exchange coefficient
             }
 
             //  Set BC's
@@ -969,40 +984,13 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             setBC(Volume_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(sp_vol_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
 
-            /*
-            // Calculate the porosity
-            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
-                IntVector c = *iter;
-                patch->findNodesFromCell(*iter, nodeIdx);
-
-                double Vol_CC_mpm = 0.0;
-                double Temp_CC_mpm = 0.0;
-                double sp_vol_mpm = 0.0;
-                Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
-
-                for (int in = 0; in < 8; in++) {
-                    double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
-                    cmass[c] += NC_CCw_mass;
-                    Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
-                    sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
-                    vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
-                    Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
-                }
-                double inv_cmass = 1.0 / cmass[c];
-                vel_CC_mpm *= inv_cmass;
-                Temp_CC_mpm *= inv_cmass;
-                sp_vol_mpm *= inv_cmass;
-                Vol_CC_mpm *= inv_cmass;
-            }
-            */
-
             //---- B U L L E T   P R O O F I N G------
             // ignore BP if recompute time step has already been requested
             IntVector neg_cell;
             ostringstream warn;
             bool rts = new_dw->recomputeTimeStep();
 
-            int L = getLevel(patches)->getIndex();
+            int L = getLevel(patches)->getIndex();               
             if (d_testForNegTemps_mpm) {
                 if (!areAllValuesPositive(Temp_CC, neg_cell) && !rts) {
                     warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
@@ -1025,6 +1013,16 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
                     << " cell "
                     << neg_cell << " sp_vol_CC " << sp_vol_CC[neg_cell] << "\n ";
+                throw InvalidValue(warn.str(), __FILE__, __LINE__);
+            }
+            if (!areAllValuesPositive(Porosity_CC, neg_cell) && !rts) {
+                warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
+                    << " cell " << neg_cell << " Porosity_CC " << Porosity_CC[neg_cell] << "\n ";
+                throw InvalidValue(warn.str(), __FILE__, __LINE__);
+            }
+            if (!areAllValuesPositive(Permeability_CC, neg_cell) && !rts) {
+                warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
+                    << " cell " << neg_cell << " Permeability_CC " << Permeability_CC[neg_cell] << "\n ";
                 throw InvalidValue(warn.str(), __FILE__, __LINE__);
             }
         }

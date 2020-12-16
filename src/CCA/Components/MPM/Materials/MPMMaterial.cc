@@ -475,13 +475,13 @@ void MPMMaterial::initializeCCVariables(CCVariable<double>& rho_micro,
 
       double ups_volFrac = d_geom_objs[obj]->getInitialData_double("volumeFraction");
       if( ups_volFrac == -1.0 ) {    
-        vol_frac_CC[c] += Porosity_CC[c] * count/totalppc;  // there can be contributions from multiple objects 
+        vol_frac_CC[c] += (1-Porosity_CC[c]) * count/totalppc;  // there can be contributions from multiple objects 
       } else {
-        vol_frac_CC[c] = Porosity_CC[c] * ups_volFrac * count/(totalppc);
+        vol_frac_CC[c] = (1 - Porosity_CC[c]) * ups_volFrac * count/(totalppc);
       }
       
       rho_micro[c]  = getInitialDensity(); 
-      rho_CC[c]     = Porosity_CC[c] * rho_micro[c] * vol_frac_CC[c] + d_TINY_RHO;
+      rho_CC[c]     = (1 - Porosity_CC[c]) * rho_micro[c] * vol_frac_CC[c] + d_TINY_RHO;
  
       // these values of temp_CC and vel_CC are only used away from the mpm objects
       // on the first timestep in interpolateNC_CC_0.  We just need reasonable values
