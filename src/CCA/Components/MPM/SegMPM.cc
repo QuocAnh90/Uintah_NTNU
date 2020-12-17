@@ -4264,7 +4264,7 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
 
          // Temporary hack
         double Jtest = pFNew[idx].Determinant();
-        if (Jtest < 0) {
+        if (Jtest <= 0) {
             pFNew[idx] = pFOld[idx];
             double J = pFNew[idx].Determinant();
             pvolume[idx] = pVolumeOld[idx];
