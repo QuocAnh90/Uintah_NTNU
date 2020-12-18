@@ -481,8 +481,8 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
                 vol_frac_sum[c] +=vol_frac[c];
-                errorThresholdTop[c] = Porosity_CC[c] + 1.0e-10;
-                errorThresholdBottom[c] = Porosity_CC[c] - 1.0e-10;
+                errorThresholdTop[c] = 1.0e0 + 1.0e-10;
+                errorThresholdBottom[c] = 1.0e0 - 1.0e-10;
 
                 cerr << "ICE"  << Porosity_CC[c] << " " <<vol_frac_sum[c] << endl;
             }
@@ -639,10 +639,6 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
             press_matl,
             all_matls);
 
-
-        d_ice->scheduleComputeTempFC(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            all_matls);
         d_ice->scheduleComputeModelSources(sched, ice_level, all_matls);
 
         d_ice->scheduleUpdateVolumeFraction(sched, ice_level, press_matl,
