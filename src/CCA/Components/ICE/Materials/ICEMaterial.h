@@ -80,6 +80,7 @@ class ICEMaterial : public Material {
     void initializeCells(CCVariable<double>& rhom,
                          CCVariable<double>& Porosity_CC,
                          CCVariable<double>& rhC,
+                         CCVariable<double>& rhC1,
                          CCVariable<double>& temp, 
                          CCVariable<double>& ss,
                          CCVariable<double>& volf,  

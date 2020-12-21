@@ -239,6 +239,7 @@ _____________________________________________________________________*/
 void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
                                   CCVariable<double>& Porosity_CC,
                                   CCVariable<double>& rho_CC,
+                                  CCVariable<double>& rho1_CC,
                                   CCVariable<double>& temp,
                                   CCVariable<double>& speedSound,
                                   CCVariable<double>& vol_frac_CC,
@@ -256,6 +257,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
   rho_micro.initialize(0.);
   Porosity_CC.initialize(1.);
   rho_CC.initialize(0.);
+  rho1_CC.initialize(0.);
   temp.initialize(0.);
   vol_frac_CC.initialize(0.);
   speedSound.initialize(0.);
@@ -283,12 +285,13 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
       // First initialize all variables everywhere.
       for(CellIterator iter = patch->getExtraCellIterator();!iter.done();iter++){
         IntVector c = *iter;
-        vol_frac_CC[c]= Porosity_CC[c];
+        vol_frac_CC[c]= 1;
         press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
         vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
         rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
         Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity");
         rho_CC[c]     = rho_micro[*iter] + d_tiny_rho*rho_micro[*iter];
+        rho1_CC[c]    = Porosity_CC[c] * rho_micro[*iter] + d_tiny_rho * rho_micro[*iter];
         temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
         IveBeenHere[c]= 1;
       }
@@ -309,6 +312,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
       for(CellIterator iter = patch->getExtraCellIterator();!iter.done();iter++){
         IntVector c = *iter;
         rho_CC[c] = rho_micro[c] * vol_frac_CC[c] + d_tiny_rho*rho_micro[c];
+        rho1_CC[c] = Porosity_CC[c] * rho_micro[c] * vol_frac_CC[c] + d_tiny_rho * rho_micro[c];
       }
     } else {
 
@@ -338,12 +342,13 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
         // For single materials with more than one object 
         if(numMatls == 1)  {
           if ( count > 0 ) {
-            vol_frac_CC[c]= Porosity_CC[c];
+            vol_frac_CC[c]= 1;
             press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
             vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
             rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
-            Porosity_CC[c] = d_geom_objs[obj]->getInitialData_double("Porosity"); // Porosity = 1
-            rho_CC[c]     = Porosity_CC[c] * rho_micro[c] + d_tiny_rho*rho_micro[c];
+            Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity"); // Porosity = 1
+            rho_CC[c]     = rho_micro[c] + d_tiny_rho*rho_micro[c];
+            rho1_CC[c]    = Porosity_CC[c] * rho_micro[c] + d_tiny_rho * rho_micro[c];
             temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
             IveBeenHere[c]= 1;
           }
