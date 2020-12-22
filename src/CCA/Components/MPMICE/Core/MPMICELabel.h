@@ -36,6 +36,7 @@ namespace Uintah {
       ~MPMICELabel();
 
       const VarLabel* cMassLabel;
+      const VarLabel* stress_CCLabel;
       const VarLabel* cPermeabilityLabel;
       const VarLabel* cVolumeLabel;
       const VarLabel* vel_CCLabel;

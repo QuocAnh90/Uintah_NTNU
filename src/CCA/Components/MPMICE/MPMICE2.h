@@ -167,6 +167,54 @@ namespace Uintah {
             double& sum,
             IntVector c);
 
+        void scheduleComputeVelICE_FC(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computeVelICE_FC(const ProcessorGroup*,
+            const PatchSubset*,
+            const MaterialSubset*,
+            DataWarehouse*,
+            DataWarehouse*);
+
+        template<class T> void computeVelICEFace(int dir, CellIterator it,
+            IntVector adj_offset,
+            double dx,
+            double delT,
+            double gravity,
+            constCCVariable<double>& rho_CC,
+            constCCVariable<double>& sp_vol_CC,
+            constCCVariable<Vector>& vel_CC,
+            constCCVariable<double>& press_CC,
+            T& vel_FC,
+            T& gradP_FC);
+
+        void scheduleComputeVelMPM_FC(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computeVelMPM_FC(const ProcessorGroup*,
+            const PatchSubset*,
+            const MaterialSubset*,
+            DataWarehouse*,
+            DataWarehouse*);
+
+        template<class T> void computeVelMPMFace(int dir, CellIterator it,
+            IntVector adj_offset,
+            double dx,
+            double delT,
+            double gravity,
+            constCCVariable<double>& rho_CC,
+            constCCVariable<double>& sp_vol_CC,
+            constCCVariable<Vector>& vel_CC,
+            constCCVariable<double>& press_CC,
+            T& vel_FC,
+            T& gradP_FC);
+
         void scheduleInterpolatePressCCToPressNC(SchedulerP&,
             const PatchSet*,
             const MaterialSubset*,
@@ -357,8 +405,6 @@ namespace Uintah {
             constNCVariable<T>& fine_q_NC,
             NCVariable<T>& coarse_q_NC);
 
-
-
         template<typename T>
         void coarsenVariableCC(const ProcessorGroup*,
             const PatchSubset* patch,
@@ -386,6 +432,10 @@ namespace Uintah {
             const MaterialSubset*,
             DataWarehouse* fine_old_dw,
             DataWarehouse* fine_new_dw);
+
+        Vector getGravity() const {
+            return d_gravity;
+        }
 
     private:
 
@@ -423,6 +473,7 @@ namespace Uintah {
         std::vector<MPMPhysicalBC*> d_physicalBCs;
         double d_SMALL_NUM;
         double d_TINY_RHO;
+        Vector d_gravity;
     };
 
 } // End namespace Uintah

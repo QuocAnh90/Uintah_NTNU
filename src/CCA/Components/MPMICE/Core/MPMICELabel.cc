@@ -44,6 +44,8 @@ MPMICELabel::MPMICELabel()
   // Cell centered variables
   cMassLabel         = VarLabel::create( "c.mass",
                      CCVariable<double>::getTypeDescription() );
+  stress_CCLabel     = VarLabel::create("stress_CC",
+                     CCVariable<Matrix3>::getTypeDescription());
   cPermeabilityLabel = VarLabel::create("c.permeability",
                      CCVariable<double>::getTypeDescription());
   cVolumeLabel       = VarLabel::create("c.volume",
@@ -89,6 +91,7 @@ MPMICELabel::~MPMICELabel()
 {
   
   VarLabel::destroy(cMassLabel);
+  VarLabel::destroy(stress_CCLabel);
   VarLabel::destroy(cPermeabilityLabel);
   VarLabel::destroy(cVolumeLabel);
   VarLabel::destroy(vel_CCLabel);

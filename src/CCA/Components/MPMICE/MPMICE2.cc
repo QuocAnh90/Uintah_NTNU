@@ -608,6 +608,10 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     d_mpm->scheduleApplyExternalLoads(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleComputeCurrentParticleSize(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleInterpolateParticlesToGrid(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeInternalForce(sched, mpm_patches, mpm_matls);
+    // Move internal force here because we need nodal stress but we need to set
+    // p.pressure = 0 because the stress is subtracted p.pressure in MPMICE, not in
+    // MPMICE2
     d_mpm->scheduleComputeHeatExchange(sched, mpm_patches, mpm_matls);
 
     if (d_mpm->flags->d_computeNormals) {
@@ -739,7 +743,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
             mpm_matls);
     }
 
-    d_mpm->scheduleComputeInternalForce(sched, mpm_patches, mpm_matls);
+    
     d_mpm->scheduleComputeInternalHeatRate(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleComputeNodalHeatFlux(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleSolveHeatEquations(sched, mpm_patches, mpm_matls);
@@ -829,6 +833,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
             this, &MPMICE2::interpolateNCToCC_0);
         const MaterialSubset* mss = mpm_matls->getUnion();
         t->requires(Task::NewDW, Mlb->gMassLabel, Ghost::AroundCells, 1);
+        t->requires(Task::NewDW, Mlb->gStressLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVolumeLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVelocityBCLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gTemperatureLabel, Ghost::AroundCells, 1);
@@ -840,7 +845,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
 
         t->requires(Task::OldDW, Ilb->timeStepLabel);
 
-        t->computes(MIlb->cMassLabel);
+        t->computes(MIlb->cMassLabel);       
         t->computes(MIlb->cVolumeLabel);
         t->computes(Ilb->Porosity_CCLabel);
         t->computes(MIlb->cPermeabilityLabel);
@@ -848,6 +853,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->computes(MIlb->temp_CCLabel);
         t->computes(Ilb->sp_vol_CCLabel, mss);
         t->computes(Ilb->rho_CCLabel, mss);
+        t->computes(MIlb->stress_CCLabel);
 
         sched->addTask(t, patches, mpm_matls);
     }
@@ -887,6 +893,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             constNCVariable<Vector> gvelocity;
             CCVariable<double> cmass, Volume_CC, Temp_CC, sp_vol_CC, rho_CC, Porosity_CC, Permeability_CC;
             CCVariable<Vector> vel_CC;
+            constNCVariable<Matrix3> gstress;
+            CCVariable<Matrix3> stress_CC;
             constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
 
             new_dw->allocateAndPut(cmass, MIlb->cMassLabel, indx, patch);
@@ -897,11 +905,14 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho_CC, Ilb->rho_CCLabel, indx, patch);
+            new_dw->allocateAndPut(stress_CC, MIlb->stress_CCLabel, indx, patch);
 
             double very_small_mass = d_TINY_RHO * cell_vol;
             cmass.initialize(very_small_mass);
+            stress_CC.initialize(Matrix3(0.0));
 
             new_dw->get(gmass, Mlb->gMassLabel, indx, patch, gac, 1);
+            new_dw->get(gstress, Mlb->gStressLabel, indx, patch, gac, 1);
             new_dw->get(gvolume, Mlb->gVolumeLabel, indx, patch, gac, 1);
             new_dw->get(gvelocity, Mlb->gVelocityBCLabel, indx, patch, gac, 1);
             new_dw->get(gtemperature, Mlb->gTemperatureLabel, indx, patch, gac, 1);
@@ -924,6 +935,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 double Temp_CC_mpm = 0.0;
                 double sp_vol_mpm = 0.0;
                 Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
+                Matrix3 stress_CC_mpm = Matrix3(0.0);
 
                 for (int in = 0; in < 8; in++) {
                     double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
@@ -932,13 +944,14 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                     sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
                     vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
                     Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
+                    stress_CC_mpm += gstress[nodeIdx[in]] * NC_CCw_mass;
                 }
                 double inv_cmass = 1.0 / cmass[c];
                 vel_CC_mpm *= inv_cmass;
                 Temp_CC_mpm *= inv_cmass;
                 sp_vol_mpm *= inv_cmass;
                 Vol_CC_mpm *= inv_cmass;
-
+                stress_CC_mpm *= inv_cmass;
                 //__________________________________ in MPMICE
                 // set *_CC = to either vel/Temp_CC_mpm or some safe values
                 // depending upon if there is cmass.  You need
@@ -957,6 +970,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 // __________________________________
 
                 vel_CC[c] = vel_CC_mpm;
+                stress_CC[c] = stress_CC_mpm;
                 Temp_CC[c] = Temp_CC_mpm;
                 sp_vol_CC[c] = sp_vol_mpm;
                 Volume_CC[c] = Vol_CC_mpm;
@@ -1127,6 +1141,364 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
 
     sched->addTask(t, patches, all_matls);
 }
+
+void MPMICE2::scheduleComputeVelICE_FC(SchedulerP& sched,
+    const PatchSet* patches,
+    const MaterialSubset* ice_matls,
+    const MaterialSubset* press_matl,
+    const MaterialSet* all_matls)
+{
+    int levelIndex = getLevel(patches)->getIndex();
+    Task* t = 0;
+
+    cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputeVelICE_FC"
+        << "\t\t\t\t\tL-" << levelIndex << endl;
+
+    t = scinew Task("MPMICE2::computeVelICE_FC",
+        this, &MPMICE2::computeVelICE_FC);
+
+    Ghost::GhostType  gac = Ghost::AroundCells;
+    Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
+    t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
+    t->requires(Task::NewDW, Ilb->press_equil_CCLabel, press_matl, oims, gac, 1);
+    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel,    /*all_matls*/ gac, 1);
+    t->requires(Task::NewDW, Ilb->rho_CCLabel,       /*all_matls*/ gac, 1);
+    t->requires(Task::OldDW, Ilb->vel_CCLabel, ice_matls, gac, 1);
+
+    t->computes(Ilb->uvel_FCLabel);
+    t->computes(Ilb->vvel_FCLabel);
+    t->computes(Ilb->wvel_FCLabel);
+    t->computes(Ilb->grad_P_XFCLabel);
+    t->computes(Ilb->grad_P_YFCLabel);
+    t->computes(Ilb->grad_P_ZFCLabel);
+    sched->addTask(t, patches, all_matls);
+}
+
+//______________________________________________________________________
+//                       
+void MPMICE2::computeVelICE_FC(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset* /*matls*/,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    const Level* level = getLevel(patches);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+        printTask(patches, patch, cout_doing, "Doing MPMICE2::computeVelICE_FCVel");
+
+        unsigned int numMatls = m_materialManager->getNumMatls("ICE");
+        Vector dx = patch->dCell();
+        Vector gravity = getGravity();
+
+        constCCVariable<double> press_CC;
+        Ghost::GhostType  gac = Ghost::AroundCells;
+        new_dw->get(press_CC, Ilb->press_equil_CCLabel, 0, patch, gac, 1);
+
+        delt_vartype delT;
+        old_dw->get(delT, Ilb->delTLabel, level);
+
+        // Compute the face centered velocities
+        for (unsigned int m = 0; m < numMatls; m++) {
+
+            ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+            int indx = ice_matl->getDWIndex();
+
+            constCCVariable<double> rho_CC, sp_vol_CC;
+            constCCVariable<Vector> vel_CC;
+            
+            new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
+            old_dw->get(vel_CC, Ilb->vel_CCLabel, indx, patch, gac, 1);
+            new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gac, 1);
+
+            SFCXVariable<double> uvel_FC, grad_P_XFC;
+            SFCYVariable<double> vvel_FC, grad_P_YFC;
+            SFCZVariable<double> wvel_FC, grad_P_ZFC;
+
+            new_dw->allocateAndPut(uvel_FC, Ilb->uvel_FCLabel, indx, patch);
+            new_dw->allocateAndPut(vvel_FC, Ilb->vvel_FCLabel, indx, patch);
+            new_dw->allocateAndPut(wvel_FC, Ilb->wvel_FCLabel, indx, patch);
+            // debugging variables
+            new_dw->allocateAndPut(grad_P_XFC, Ilb->grad_P_XFCLabel, indx, patch);
+            new_dw->allocateAndPut(grad_P_YFC, Ilb->grad_P_YFCLabel, indx, patch);
+            new_dw->allocateAndPut(grad_P_ZFC, Ilb->grad_P_ZFCLabel, indx, patch);
+
+            IntVector lowIndex(patch->getExtraSFCXLowIndex());
+            uvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCXHighIndex());
+            vvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCYHighIndex());
+            wvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCZHighIndex());
+
+            grad_P_XFC.initialize(0.0);
+            grad_P_YFC.initialize(0.0);
+            grad_P_ZFC.initialize(0.0);
+
+            vector<IntVector> adj_offset(3);
+            adj_offset[0] = IntVector(-1, 0, 0);    // X faces
+            adj_offset[1] = IntVector(0, -1, 0);    // Y faces
+            adj_offset[2] = IntVector(0, 0, -1);   // Z faces     
+
+            CellIterator XFC_iterator = patch->getSFCXIterator();
+            CellIterator YFC_iterator = patch->getSFCYIterator();
+            CellIterator ZFC_iterator = patch->getSFCZIterator();
+
+            //__________________________________
+            //  Compute vel_FC for each face
+            computeVelICEFace<SFCXVariable<double> >(0, XFC_iterator,
+                adj_offset[0], dx[0], delT, gravity[0],
+                rho_CC, sp_vol_CC, vel_CC, press_CC,
+                uvel_FC, grad_P_XFC);
+
+            computeVelICEFace<SFCYVariable<double> >(1, YFC_iterator,
+                adj_offset[1], dx[1], delT, gravity[1],
+                rho_CC, sp_vol_CC, vel_CC, press_CC,
+                vvel_FC, grad_P_YFC);
+
+            computeVelICEFace<SFCZVariable<double> >(2, ZFC_iterator,
+                adj_offset[2], dx[2], delT, gravity[2],
+                rho_CC, sp_vol_CC, vel_CC, press_CC,
+                wvel_FC, grad_P_ZFC);
+
+            //__________________________________
+            // (*)vel_FC BC are updated in 
+            // ICE::addExchangeContributionToFCVel()
+
+        } // matls loop
+    }  // patch loop
+}
+
+    /* _____________________________________________________________________
+     Function~  ICE::computeFaceCenteredVelocities--
+     Purpose~   compute the face centered velocities minus the exchange
+                contribution.
+    _____________________________________________________________________*/
+    template<class T> void MPMICE2::computeVelICEFace(int dir,
+        CellIterator it,
+        IntVector adj_offset,
+        double dx,
+        double delT, double gravity,
+        constCCVariable<double>& rho_CC,
+        constCCVariable<double>& sp_vol_CC,
+        constCCVariable<Vector>& vel_CC,
+        constCCVariable<double>& press_CC,
+        T& vel_FC,
+        T& grad_P_FC)
+    {
+        double inv_dx = 1.0 / dx;
+
+        for (; !it.done(); it++) {
+            IntVector R = *it;
+            IntVector L = R + adj_offset;
+
+            double rho_FC = rho_CC[L] + rho_CC[R];
+
+#if SCI_ASSERTION_LEVEL >=2
+            if (rho_FC <= 0.0) {
+                cout << d_myworld->myRank() << " rho_fc <= 0: " << rho_FC << " with L= " << L << " ("
+                    << rho_CC[L] << ") R= " << R << " (" << rho_CC[R] << ")\n";
+            }
+#endif
+            ASSERT(rho_FC > 0.0);
+
+            //__________________________________
+            // interpolation to the face
+            double term1 = (rho_CC[L] * vel_CC[L][dir] +
+                rho_CC[R] * vel_CC[R][dir]) / (rho_FC);
+            //__________________________________
+            // pressure term           
+            double sp_vol_brack = 2. * (sp_vol_CC[L] * sp_vol_CC[R]) /
+                (sp_vol_CC[L] + sp_vol_CC[R]);
+
+            grad_P_FC[R] = (press_CC[R] - press_CC[L]) * inv_dx;
+            double term2 = delT * sp_vol_brack * grad_P_FC[R];
+
+            //__________________________________
+            // gravity term
+            double term3 = delT * gravity;
+
+            vel_FC[R] = term1 - term2 + term3;
+        }
+    }
+
+
+    void MPMICE2::scheduleComputeVelMPM_FC(SchedulerP& sched,
+        const PatchSet* patches,
+        const MaterialSubset* ice_matls,
+        const MaterialSubset* press_matl,
+        const MaterialSet* all_matls)
+    {
+        int levelIndex = getLevel(patches)->getIndex();
+        Task* t = 0;
+
+        cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputeVelMPM_FC"
+            << "\t\t\t\t\tL-" << levelIndex << endl;
+
+        t = scinew Task("MPMICE2::computeVelMPM_FC",
+            this, &MPMICE2::computeVelMPM_FC);
+
+        Ghost::GhostType  gac = Ghost::AroundCells;
+        Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
+        t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
+        t->requires(Task::NewDW, Ilb->press_equil_CCLabel, press_matl, oims, gac, 1);
+        t->requires(Task::NewDW, Ilb->sp_vol_CCLabel,    /*all_matls*/ gac, 1);
+        t->requires(Task::NewDW, Ilb->rho_CCLabel,       /*all_matls*/ gac, 1);
+        t->requires(Task::OldDW, Ilb->vel_CCLabel, ice_matls, gac, 1);
+
+        t->computes(Ilb->uvel_FCLabel);
+        t->computes(Ilb->vvel_FCLabel);
+        t->computes(Ilb->wvel_FCLabel);
+        t->computes(Ilb->grad_P_XFCLabel);
+        t->computes(Ilb->grad_P_YFCLabel);
+        t->computes(Ilb->grad_P_ZFCLabel);
+        sched->addTask(t, patches, all_matls);
+    }
+
+    //______________________________________________________________________
+    //                       
+    void MPMICE2::computeVelMPM_FC(const ProcessorGroup*,
+        const PatchSubset* patches,
+        const MaterialSubset* /*matls*/,
+        DataWarehouse* old_dw,
+        DataWarehouse* new_dw)
+    {
+        const Level* level = getLevel(patches);
+
+        for (int p = 0; p < patches->size(); p++) {
+            const Patch* patch = patches->get(p);
+            printTask(patches, patch, cout_doing, "Doing MPMICE2::computeVelMPM_FCVel");
+
+            unsigned int numMatls = m_materialManager->getNumMatls("ICE");
+            Vector dx = patch->dCell();
+            Vector gravity = getGravity();
+
+            constCCVariable<double> press_CC;
+            Ghost::GhostType  gac = Ghost::AroundCells;
+            new_dw->get(press_CC, Ilb->press_equil_CCLabel, 0, patch, gac, 1);
+
+            delt_vartype delT;
+            old_dw->get(delT, Ilb->delTLabel, level);
+
+            // Compute the face centered velocities
+            for (unsigned int m = 0; m < numMatls; m++) {
+
+                ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+                int indx = ice_matl->getDWIndex();
+
+                constCCVariable<double> rho_CC, sp_vol_CC;
+                constCCVariable<Vector> vel_CC;
+
+                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
+                old_dw->get(vel_CC, Ilb->vel_CCLabel, indx, patch, gac, 1);
+                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gac, 1);
+
+                SFCXVariable<double> uvel_FC, grad_P_XFC;
+                SFCYVariable<double> vvel_FC, grad_P_YFC;
+                SFCZVariable<double> wvel_FC, grad_P_ZFC;
+
+                new_dw->allocateAndPut(uvel_FC, Ilb->uvel_FCLabel, indx, patch);
+                new_dw->allocateAndPut(vvel_FC, Ilb->vvel_FCLabel, indx, patch);
+                new_dw->allocateAndPut(wvel_FC, Ilb->wvel_FCLabel, indx, patch);
+                // debugging variables
+                new_dw->allocateAndPut(grad_P_XFC, Ilb->grad_P_XFCLabel, indx, patch);
+                new_dw->allocateAndPut(grad_P_YFC, Ilb->grad_P_YFCLabel, indx, patch);
+                new_dw->allocateAndPut(grad_P_ZFC, Ilb->grad_P_ZFCLabel, indx, patch);
+
+                IntVector lowIndex(patch->getExtraSFCXLowIndex());
+                uvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCXHighIndex());
+                vvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCYHighIndex());
+                wvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCZHighIndex());
+
+                grad_P_XFC.initialize(0.0);
+                grad_P_YFC.initialize(0.0);
+                grad_P_ZFC.initialize(0.0);
+
+                vector<IntVector> adj_offset(3);
+                adj_offset[0] = IntVector(-1, 0, 0);    // X faces
+                adj_offset[1] = IntVector(0, -1, 0);    // Y faces
+                adj_offset[2] = IntVector(0, 0, -1);   // Z faces     
+
+                CellIterator XFC_iterator = patch->getSFCXIterator();
+                CellIterator YFC_iterator = patch->getSFCYIterator();
+                CellIterator ZFC_iterator = patch->getSFCZIterator();
+
+                //__________________________________
+                //  Compute vel_FC for each face
+                computeVelMPMFace<SFCXVariable<double> >(0, XFC_iterator,
+                    adj_offset[0], dx[0], delT, gravity[0],
+                    rho_CC, sp_vol_CC, vel_CC, press_CC,
+                    uvel_FC, grad_P_XFC);
+
+                computeVelMPMFace<SFCYVariable<double> >(1, YFC_iterator,
+                    adj_offset[1], dx[1], delT, gravity[1],
+                    rho_CC, sp_vol_CC, vel_CC, press_CC,
+                    vvel_FC, grad_P_YFC);
+
+                computeVelMPMFace<SFCZVariable<double> >(2, ZFC_iterator,
+                    adj_offset[2], dx[2], delT, gravity[2],
+                    rho_CC, sp_vol_CC, vel_CC, press_CC,
+                    wvel_FC, grad_P_ZFC);
+
+                //__________________________________
+                // (*)vel_FC BC are updated in 
+                // ICE::addExchangeContributionToFCVel()
+
+            } // matls loop
+        }  // patch loop
+    }
+
+    /* _____________________________________________________________________
+     Function~  ICE::computeFaceCenteredVelocities--
+     Purpose~   compute the face centered velocities minus the exchange
+                contribution.
+    _____________________________________________________________________*/
+    template<class T> void MPMICE2::computeVelMPMFace(int dir,
+        CellIterator it,
+        IntVector adj_offset,
+        double dx,
+        double delT, double gravity,
+        constCCVariable<double>& rho_CC,
+        constCCVariable<double>& sp_vol_CC,
+        constCCVariable<Vector>& vel_CC,
+        constCCVariable<double>& press_CC,
+        T& vel_FC,
+        T& grad_P_FC)
+    {
+        double inv_dx = 1.0 / dx;
+
+        for (; !it.done(); it++) {
+            IntVector R = *it;
+            IntVector L = R + adj_offset;
+
+            double rho_FC = rho_CC[L] + rho_CC[R];
+
+#if SCI_ASSERTION_LEVEL >=2
+            if (rho_FC <= 0.0) {
+                cout << d_myworld->myRank() << " rho_fc <= 0: " << rho_FC << " with L= " << L << " ("
+                    << rho_CC[L] << ") R= " << R << " (" << rho_CC[R] << ")\n";
+            }
+#endif
+            ASSERT(rho_FC > 0.0);
+
+            //__________________________________
+            // interpolation to the face
+            double term1 = (rho_CC[L] * vel_CC[L][dir] +
+                rho_CC[R] * vel_CC[R][dir]) / (rho_FC);
+            //__________________________________
+            // pressure term           
+            double sp_vol_brack = 2. * (sp_vol_CC[L] * sp_vol_CC[R]) /
+                (sp_vol_CC[L] + sp_vol_CC[R]);
+
+            grad_P_FC[R] = (press_CC[R] - press_CC[L]) * inv_dx;
+            double term2 = delT * sp_vol_brack * grad_P_FC[R];
+
+            //__________________________________
+            // gravity term
+            double term3 = delT * gravity;
+
+            vel_FC[R] = term1 - term2 + term3;
+        }
+    }
+
 
 /* ---------------------------------------------------------------------
  Function~  MPMICE2::computeEquilibrationPressure--
