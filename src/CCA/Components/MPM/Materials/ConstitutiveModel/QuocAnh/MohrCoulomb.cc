@@ -988,12 +988,22 @@ void MohrCoulomb::computePressEOSCM(double rho_cur, double& pressure,
 {
 
   double bulk = UI[1];
+  double shear = UI[0];
+
   double rho_orig = matl->getInitialDensity();
 
+  /*
   double p_g = bulk*(1.0 - rho_orig/rho_cur);
   pressure = p_ref + p_g;
   dp_drho  = bulk*rho_orig/(rho_cur*rho_cur);
   tmp = bulk/rho_cur;  // speed of sound squared
+  */
+
+  // Copy from Arenisca
+  double p_g = .5 * bulk * (rho_cur / rho_orig - rho_orig / rho_cur);
+  pressure = p_ref + p_g;
+  dp_drho = .5 * bulk * (rho_orig / (rho_cur * rho_cur) + 1. / rho_orig);
+  tmp = (bulk + 4. * shear / 3.) / rho_cur;  // speed of sound squared
 
 #if 1
   //cout << "NO VERSION OF computePressEOSCM EXISTS YET FOR MohrCoulomb" << endl;
