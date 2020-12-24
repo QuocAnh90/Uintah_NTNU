@@ -208,12 +208,15 @@ namespace Uintah {
             double dx,
             double delT,
             double gravity,
+            double rho_init,
             constCCVariable<double>& rho_CC,
+            constCCVariable<double>& stress_CC,
             constCCVariable<double>& sp_vol_CC,
             constCCVariable<Vector>& vel_CC,
             constCCVariable<double>& press_CC,
             T& vel_FC,
-            T& gradP_FC);
+            T& grad_P_FC,
+            T& grad_stress_FC);
 
         void scheduleInterpolatePressCCToPressNC(SchedulerP&,
             const PatchSet*,

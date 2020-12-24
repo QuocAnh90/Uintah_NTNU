@@ -54,7 +54,16 @@ namespace Uintah {
       const VarLabel* gMassLabel;
       const VarLabel* gVelocityLabel;
       const VarLabel* TempGradLabel;      // Needed by burn model --- temporary 
-      const VarLabel* aveSurfTempLabel;    
+      const VarLabel* aveSurfTempLabel;  
+
+      const VarLabel* grad_stress_XFCLabel;
+      const VarLabel* grad_stress_YFCLabel;
+      const VarLabel* grad_stress_ZFCLabel;
+
+      const VarLabel* stressX_CCLabel;
+      const VarLabel* stressY_CCLabel;
+      const VarLabel* stressZ_CCLabel;
+
     };
 
 } // end namespace Uintah

@@ -41,6 +41,11 @@ using namespace Uintah;
 
 MPMICELabel::MPMICELabel()
 {
+    // shortcuts
+    const TypeDescription* SFCX_double = SFCXVariable<double>::getTypeDescription();
+    const TypeDescription* SFCY_double = SFCYVariable<double>::getTypeDescription();
+    const TypeDescription* SFCZ_double = SFCZVariable<double>::getTypeDescription();
+
   // Cell centered variables
   cMassLabel         = VarLabel::create( "c.mass",
                      CCVariable<double>::getTypeDescription() );
@@ -79,6 +84,18 @@ MPMICELabel::MPMICELabel()
   gVelocityLabel       = VarLabel::create( "g.velocity",
                      NCVariable<Vector>::getTypeDescription() );
 
+  stressX_CCLabel = VarLabel::create("stressX_CC",
+      CCVariable<double>::getTypeDescription());
+  stressY_CCLabel = VarLabel::create("stressY_CC",
+      CCVariable<double>::getTypeDescription());
+  stressZ_CCLabel = VarLabel::create("stressZ_CC",
+      CCVariable<double>::getTypeDescription());
+
+  // Face centered variables
+  grad_stress_XFCLabel = VarLabel::create("grad_stress_XFC", SFCX_double);
+  grad_stress_YFCLabel = VarLabel::create("grad_stress_YFC", SFCY_double);
+  grad_stress_ZFCLabel = VarLabel::create("grad_stress_ZFC", SFCZ_double);
+
   //______ D U C T   T A P E__________
   //  WSB1 burn model
   TempGradLabel        = VarLabel::create("TempGrad",
@@ -108,6 +125,11 @@ MPMICELabel::~MPMICELabel()
   VarLabel::destroy(NC_CCweightLabel);
   VarLabel::destroy(gMassLabel);
   VarLabel::destroy(gVelocityLabel);
+
+  VarLabel::destroy(grad_stress_XFCLabel);
+  VarLabel::destroy(grad_stress_YFCLabel);
+  VarLabel::destroy(grad_stress_ZFCLabel);
+
   //______ D U C T   T A P E__________
   //  WSB1 burn model
   VarLabel::destroy(TempGradLabel);
