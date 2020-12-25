@@ -61,9 +61,10 @@ namespace ExchangeModels{
     int conv_fluid_matlindex();
     int conv_solid_matlindex();
     std::string d_heatExchCoeffModel;
-
-  private:
+    std::string d_MomExchCoeffModel;
     std::vector<double> d_K_mom_V;
+
+  private:  
     std::vector<double> d_K_heat_V;
     bool d_convective = false;
     int d_conv_fluid_matlindex = -9;

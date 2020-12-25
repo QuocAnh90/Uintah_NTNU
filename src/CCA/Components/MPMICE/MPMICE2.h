@@ -167,6 +167,24 @@ namespace Uintah {
             double& sum,
             IntVector c);
 
+        void scheduleComputePorosityFC(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computePorosityFC(const ProcessorGroup*,
+            const PatchSubset* patch,
+            const MaterialSubset*,
+            DataWarehouse*,
+            DataWarehouse*);
+
+        template<class T> void computePorosityFace(CellIterator it,
+            IntVector adj_offset,
+            constCCVariable<double>& rho_CC,
+            constCCVariable<double>& Porosity_CC,
+            T& Porosity_FC);
+
         void scheduleComputeVelICE_FC(SchedulerP&,
             const PatchSet*,
             const MaterialSubset*,

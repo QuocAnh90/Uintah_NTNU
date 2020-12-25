@@ -58,7 +58,7 @@ namespace Uintah {
 
       const VarLabel* grad_stress_XFCLabel;
       const VarLabel* grad_stress_YFCLabel;
-      const VarLabel* grad_stress_ZFCLabel;
+      const VarLabel* grad_stress_ZFCLabel;    
 
       const VarLabel* stressX_CCLabel;
       const VarLabel* stressY_CCLabel;

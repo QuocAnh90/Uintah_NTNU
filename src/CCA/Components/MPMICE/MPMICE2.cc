@@ -379,6 +379,8 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
         // This section should be removed later because there is ICE material inside the MPM material 
         //so it is not necessary to create CCLabel for MPM material in MPMICE2!!!
 
+        //vol_frac_CC of MPM = 1; generate defaut value for safe!
+
         //__________________________________
         //  Initialize CCVaribles for MPM Materials
         //  Even if mass = 0 in a cell you still need
@@ -1000,7 +1002,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
                 Permeability_CC[c] = IniPermeability;
 
-                // Calculate momentum exchange coefficient
+                // Calculate momentum exchange coefficient in Scalar.cc              
             }
 
             //  Set BC's
@@ -1159,6 +1161,140 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
 
     sched->addTask(t, patches, all_matls);
 }
+
+/* Projecting porosity from cell to face, currently turn it off
+
+
+void MPMICE2::scheduleComputePorosityFC(SchedulerP& sched,
+    const PatchSet* patches,
+    const MaterialSubset* ice_matls,
+    const MaterialSubset* mpm_matls,
+    const MaterialSet* all_matls)
+{
+    int levelIndex = getLevel(patches)->getIndex();
+        Task* t;
+        cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputePorosityFC"
+            << "\t\t\t\t\tL-" << levelIndex << endl;
+
+        t = scinew Task("MPMICE2::computePorosityFC", this, &MPMICE2::computePorosityFC);
+
+        Ghost::GhostType  gac = Ghost::AroundCells;
+
+        if (ice_matls) {
+            t->requires(Task::NewDW, Ilb->Porosity_CCLabel, ice_matls, gac, 1);
+        }
+        if (mpm_matls) {
+            t->requires(Task::NewDW, Ilb->Porosity_CCLabel, mpm_matls, gac, 1);
+        }
+
+        t->computes(Ilb->PorosityX_FCLabel);
+        t->computes(Ilb->PorosityY_FCLabel);
+        t->computes(Ilb->PorosityZ_FCLabel);
+        sched->addTask(t, patches, all_matls);
+}
+
+//______________________________________________________________________
+//                       
+void MPMICE2::computePorosityFC(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset* ,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    const Level* level = getLevel(patches);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing MPMICE2::computePorosity_FCVel");
+
+        unsigned int numMatls = m_materialManager->getNumMatls();
+        Ghost::GhostType  gac = Ghost::AroundCells;
+
+        // Compute the face centered Temperatures
+        for (unsigned int m = 0; m < numMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+            MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
+
+            constCCVariable<double> rho_CC, Porosity_CC;
+
+            if (ice_matl) {
+                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gac, 1);
+                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
+            }
+            if (mpm_matl) {
+                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gac, 1);
+                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
+            }
+
+            SFCXVariable<double> PorosityX_FC;
+            SFCYVariable<double> PorosityY_FC;
+            SFCZVariable<double> PorosityZ_FC;
+
+            new_dw->allocateAndPut(PorosityX_FC, Ilb->PorosityX_FCLabel, indx, patch);
+            new_dw->allocateAndPut(PorosityY_FC, Ilb->PorosityX_FCLabel, indx, patch);
+            new_dw->allocateAndPut(PorosityZ_FC, Ilb->PorosityX_FCLabel, indx, patch);
+
+            IntVector lowIndex(patch->getExtraSFCXLowIndex());
+            PorosityX_FC.initialize(0.0, lowIndex, patch->getExtraSFCXHighIndex());
+            PorosityY_FC.initialize(0.0, lowIndex, patch->getExtraSFCYHighIndex());
+            PorosityZ_FC.initialize(0.0, lowIndex, patch->getExtraSFCZHighIndex());
+
+            vector<IntVector> adj_offset(3);
+            adj_offset[0] = IntVector(-1, 0, 0);    // X faces
+            adj_offset[1] = IntVector(0, -1, 0);    // Y faces
+            adj_offset[2] = IntVector(0, 0, -1);   // Z faces
+
+            CellIterator XFC_iterator = patch->getSFCXIterator();
+            CellIterator YFC_iterator = patch->getSFCYIterator();
+            CellIterator ZFC_iterator = patch->getSFCZIterator();
+
+            if (level->getIndex() > 0) {  // Finer levels need to hit the ghost cells
+                IntVector l, h;
+                l = patch->getExtraCellIterator().begin();
+                h = patch->getExtraCellIterator().end();
+                XFC_iterator = CellIterator(l + IntVector(1, 0, 0), h);
+                YFC_iterator = CellIterator(l + IntVector(0, 1, 0), h);
+                ZFC_iterator = CellIterator(l + IntVector(0, 0, 1), h);
+            }
+
+            //__________________________________
+            //  Compute the porosity on each face     
+            computePorosityFace<SFCXVariable<double> >(XFC_iterator, adj_offset[0],
+                rho_CC, Porosity_CC, PorosityX_FC);
+
+            computePorosityFace<SFCYVariable<double> >(YFC_iterator, adj_offset[1],
+                rho_CC, Porosity_CC, PorosityY_FC);
+
+            computePorosityFace<SFCZVariable<double> >(ZFC_iterator, adj_offset[2],
+                rho_CC, Porosity_CC, PorosityZ_FC);
+
+        } // matls loop
+    }  // patch loop
+}
+
+template<class T> void MPMICE2::computePorosityFace(CellIterator it,
+    IntVector adj_offset,
+    constCCVariable<double>& rho_CC,
+    constCCVariable<double>& Porosity_CC,
+    T& Porosity_FC)
+{
+    for (; !it.done(); it++) {
+        IntVector R = *it;
+        IntVector L = R + adj_offset;
+
+        double rho_FC = rho_CC[L] + rho_CC[R];
+        ASSERT(rho_FC > 0.0);
+        //__________________________________
+        // interpolation to the face
+        //  based on continuity of porosity
+        double term1 = (rho_CC[L] * Porosity_CC[L] + rho_CC[R] * Porosity_CC[R]) / (rho_FC);
+        Porosity_FC[R] = term1;
+    }
+}
+*/
 
 //______________________________________________________________________
 // The density in MPMICE2 is rho1_CC instead of rho_CC in MPMICE.

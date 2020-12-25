@@ -129,6 +129,10 @@ namespace Uintah {
     const VarLabel* tau_Y_FCLabel;
     const VarLabel* tau_Z_FCLabel;
 
+    const VarLabel* PorosityX_FCLabel;
+    const VarLabel* PorosityY_FCLabel;
+    const VarLabel* PorosityZ_FCLabel;
+
     // Model support
     const VarLabel* modelMass_srcLabel;
     const VarLabel* modelMom_srcLabel;

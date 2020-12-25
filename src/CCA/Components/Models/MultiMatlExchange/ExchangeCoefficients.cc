@@ -39,6 +39,7 @@ extern DebugStream dbgExch;
 ExchangeCoefficients::ExchangeCoefficients()
 {
   d_heatExchCoeffModel = "constant"; // default
+  d_MomExchCoeffModel = "constant"; // default
   d_convective = false;
   d_K_mom_V.clear();
   d_K_heat_V.clear();
@@ -69,6 +70,7 @@ void ExchangeCoefficients::problemSetup(const ProblemSpecP  & matl_ps,
   //__________________________________
   // variable coefficient models
   exch_ps->get("heatExchangeCoeff",d_heatExchCoeffModel);
+  exch_ps->get("MomExchangeCoeff", d_MomExchCoeffModel);
 
   if(d_heatExchCoeffModel !="constant" &&
      d_heatExchCoeffModel !="variable" &&
@@ -76,6 +78,15 @@ void ExchangeCoefficients::problemSetup(const ProblemSpecP  & matl_ps,
      ostringstream warn;
       warn<<"ERROR\n Heat exchange coefficient model (" << d_heatExchCoeffModel
           <<") does not exist.\n";
+      throw ProblemSetupException(warn.str(), __FILE__, __LINE__);
+  }
+
+  if (d_MomExchCoeffModel != "constant" &&
+      d_MomExchCoeffModel != "darcy" &&
+      d_MomExchCoeffModel != "Darcy") {
+      ostringstream warn;
+      warn << "ERROR\n Momentum exchange coefficient model (" << d_MomExchCoeffModel
+          << ") does not exist.\n";
       throw ProblemSetupException(warn.str(), __FILE__, __LINE__);
   }
 
@@ -137,6 +148,7 @@ void ExchangeCoefficients::outputProblemSpec(ProblemSpecP& matl_ps,
   // <exchange_properties>
   exch_prop_ps = matl_ps->appendChild("exchange_properties");
   exch_prop_ps->appendElement("heatExchangeCoeff",d_heatExchCoeffModel);
+  exch_prop_ps->appendElement("MomExchangeCoeff", d_MomExchCoeffModel);
 
   // <exchange_coefficients>
   ProblemSpecP exch_coeff_ps = exch_prop_ps->appendChild("exchange_coefficients");

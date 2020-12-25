@@ -104,6 +104,7 @@ namespace ExchangeModels{
                           double        delT,
                           std::vector<constCCVariable<double> >& vol_frac_CC,
                           std::vector<constCCVariable<double> >& sp_vol_CC,
+                          std::vector<constCCVariable<double> >& Porosity_CC,
                           std::vector< constSFC>               & vel_FC,
                           std::vector< SFC >                   & sp_vol_FC,
                           std::vector< SFC >                   & vel_FCME);

@@ -246,6 +246,7 @@
       <convective_solid            spec="OPTIONAL INTEGER" /> 
       <do_convective_heat_transfer spec="OPTIONAL BOOLEAN" />
       <heatExchangeCoeff           spec="OPTIONAL STRING 'variable'" />
+	  <MomExchangeCoeff            spec="OPTIONAL STRING 'Darcy'" />
       
       <exchange_coefficients       spec="REQUIRED NO_DATA" >
         <momentum                  spec="REQUIRED MULTIPLE_DOUBLES" />

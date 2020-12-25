@@ -133,6 +133,9 @@ ICELabel::ICELabel()
   vol_fracX_FCLabel       = VarLabel::create("vol_fracX_FC",SFCX_double);  
   vol_fracY_FCLabel       = VarLabel::create("vol_fracY_FC",SFCY_double);  
   vol_fracZ_FCLabel       = VarLabel::create("vol_fracZ_FC",SFCZ_double);  
+  PorosityX_FCLabel       = VarLabel::create("PorosityX_FC", SFCX_double);
+  PorosityY_FCLabel       = VarLabel::create("PorosityY_FC", SFCY_double);
+  PorosityZ_FCLabel       = VarLabel::create("PorosityZ_FC", SFCZ_double);
     
   //__________________________________
   // Face centered variables
@@ -361,6 +364,10 @@ ICELabel::~ICELabel()
     VarLabel::destroy(tau_X_FCLabel);
     VarLabel::destroy(tau_Y_FCLabel);
     VarLabel::destroy(tau_Z_FCLabel);
+
+    VarLabel::destroy(PorosityX_FCLabel);
+    VarLabel::destroy(PorosityY_FCLabel);
+    VarLabel::destroy(PorosityY_FCLabel);
 
     // Misc labels
     VarLabel::destroy(IveBeenHereLabel);
