@@ -222,7 +222,6 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
 
         tmp[m] = -0.5 * delT * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
         vel[m] = vel_FC[m][c];
-        Porosity_FC[m] = 0.5 * (Porosity_CC[m][adj] + Porosity_CC[m][c]);
       }
 
       // Compute Darcy momentum exchange coefficient
@@ -230,9 +229,11 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
           for (int m = 0; m < numMatls; m++) {
 
               Material* matl1 = d_matlManager->getMaterial(m);
-              int indx1 = matl1->getDWIndex();
+              //int indx1 = matl1->getDWIndex();
               ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
               MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+              Porosity_FC[m] = 0.5 * (Porosity_CC[m][adj] + Porosity_CC[m][c]);
 
               if (ice_matl1) {
                   visc1 = ice_matl1->getViscosity();
@@ -245,9 +246,11 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
               for (int n = 0; n < numMatls; n++) {
 
                   Material* matl2 = d_matlManager->getMaterial(n);
-                  int indx2 = matl2->getDWIndex();
+                  //int indx2 = matl2->getDWIndex();
                   ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
                   MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+                  Porosity_FC[n] = 0.5 * (Porosity_CC[n][adj] + Porosity_CC[n][c]);
 
                   if (ice_matl2) {
                       visc2 = ice_matl2->getViscosity();
@@ -261,18 +264,18 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
                       if (ice_matl2) { // ICE - ICE interaction
                           // Do nothing because the momentum exchange coefficient is taken from input file
                       }
-                      if (mpm_matl2) { // MPM - ICE inteaction
+                      if (mpm_matl2) { // MPM - ICE interaction
                           // Calculate the momentum exchange coefficient K = porosity(MPM) * viscosity (ICE) / Permeability (MPM)
                           K(n, m) = Porosity_FC[n] * visc1 / IniPermeability2;
                       }
                   }
 
                   if (mpm_matl1) {
-                      if (ice_matl2) {  // MPM - ICE inteaction
+                      if (ice_matl2) {  // MPM - ICE interaction
                           // Calculate the momentum exchange coefficient K = porosity(MPM)^2/(1-porosity(MPM)) * viscosity (ICE) / Permeability (MPM)
                           K(n, m) = Porosity_FC[m] * Porosity_FC[m] * visc2 / (IniPermeability1 * (1 - Porosity_FC[m]));
                       }
-                      if (mpm_matl2) { // MPM - ICE inteaction
+                      if (mpm_matl2) { // MPM - MPM interaction
                           K(n, m) = 0;
                       }
                   }
@@ -517,6 +520,7 @@ void ScalarExch::sched_AddExch_Vel_Temp_CC( SchedulerP           & sched,
   t->requires(Task::NewDW,  Ilb->int_eng_L_CCLabel, gn);
   t->requires(Task::NewDW,  Ilb->sp_vol_CCLabel,    gn);
   t->requires(Task::NewDW,  Ilb->vol_frac_CCLabel,  gn);
+  t->requires(Task::NewDW,  Ilb->Porosity_CCLabel,  gn);
 
   computesRequires_CustomBCs(t, "CC_Exchange", Ilb, ice_matls, BC_globalVars);
 
@@ -593,6 +597,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     std::vector<CCVariable<double> > Temp_CC(numALLMatls);
     std::vector<constCCVariable<double> > gamma(numALLMatls);
     std::vector<constCCVariable<double> > vol_frac_CC(numALLMatls);
+    std::vector<constCCVariable<double> > Porosity_CC(numALLMatls);
     std::vector<constCCVariable<double> > sp_vol_CC(numALLMatls);
     std::vector<constCCVariable<Vector> > mom_L(numALLMatls);
     std::vector<constCCVariable<double> > int_eng_L(numALLMatls);
@@ -622,10 +627,12 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     H.zero();
     a.zero();
 
-    d_exchCoeff->getConstantExchangeCoeff(K, H);
+    double IniPermeability1 = 0;
+    double visc1 = 0;
+    double IniPermeability2 = 0;
+    double visc2 = 0;
 
-    if (d_exchCoeff->d_MomExchCoeffModel == "Darcy") {
-    }
+    d_exchCoeff->getConstantExchangeCoeff(K, H);
 
     for (int m = 0; m < numALLMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
@@ -655,6 +662,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
 
       new_dw->get(mass_L[m],        Ilb->mass_L_CCLabel,   indx, patch,gn, 0);
       new_dw->get(sp_vol_CC[m],     Ilb->sp_vol_CCLabel,   indx, patch,gn, 0);
+      new_dw->get(Porosity_CC[m],   Ilb->Porosity_CCLabel, indx, patch,gn, 0);
       new_dw->get(mom_L[m],         Ilb->mom_L_CCLabel,    indx, patch,gn, 0);
       new_dw->get(int_eng_L[m],     Ilb->int_eng_L_CCLabel,indx, patch,gn, 0);
       new_dw->get(vol_frac_CC[m],   Ilb->vol_frac_CCLabel, indx, patch,gn, 0);
@@ -678,6 +686,60 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
       IntVector c = *iter;
 
       //---------- M O M E N T U M   E X C H A N G E
+
+      // Compute Darcy momentum exchange coefficient
+      if (d_exchCoeff->d_MomExchCoeffModel == "Darcy") {
+          for (int m = 0; m < numALLMatls; m++) {
+
+              Material* matl1 = d_matlManager->getMaterial(m);
+              ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
+              MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+              if (ice_matl1) {
+                  visc1 = ice_matl1->getViscosity();
+              }
+
+              if (mpm_matl1) {
+                  IniPermeability1 = mpm_matl1->getInitialPermeability();
+              }
+
+              for (int n = 0; n < numALLMatls; n++) {
+
+                  Material* matl2 = d_matlManager->getMaterial(n);
+                  ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
+                  MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+                  if (ice_matl2) {
+                      visc2 = ice_matl2->getViscosity();
+                  }
+
+                  if (mpm_matl2) {
+                      IniPermeability2 = mpm_matl2->getInitialPermeability();
+                  }
+
+                  if (ice_matl1) {
+                      if (ice_matl2) { // ICE - ICE interaction
+                          // Do nothing because the momentum exchange coefficient is taken from input file
+                      }
+                      if (mpm_matl2) { // MPM - ICE interaction
+                          // Calculate the momentum exchange coefficient K = porosity(MPM) * viscosity (ICE) / Permeability (MPM)
+                          K(n, m) = Porosity_CC[n][c] * visc1 / IniPermeability2;
+                      }
+                  }
+
+                  if (mpm_matl1) {
+                      if (ice_matl2) {  // MPM - ICE interaction
+                          // Calculate the momentum exchange coefficient K = porosity(MPM)^2/(1-porosity(MPM)) * viscosity (ICE) / Permeability (MPM)
+                          K(n, m) = Porosity_CC[m][c] * Porosity_CC[m][c] * visc2 / (IniPermeability1 * (1 - Porosity_CC[m][c]));
+                      }
+                      if (mpm_matl2) { // MPM - MPM interaction
+                          K(n, m) = 0;
+                      }
+                  }
+              }
+          }
+      }
+
       //   Form BETA matrix (a), off diagonal terms
       for(int m = 0; m < numALLMatls; m++)  {
         tmp = delT*sp_vol_CC[m][c];
