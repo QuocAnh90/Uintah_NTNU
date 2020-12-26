@@ -1883,6 +1883,7 @@ void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
                              d_BC_globalVars);
                              
   task->modifies(lb->rho_CCLabel,     fat);
+  ask->modifies(lb->Porosity_CCLabel, fat);
   task->modifies(lb->sp_vol_CCLabel,  fat);               
   if( where == "afterAdvection"){
     task->computes(lb->temp_CCLabel);
@@ -3853,10 +3854,12 @@ void ICE::viscousShearStress(const ProcessorGroup*,
       if( d_viscousFlow ){
         constCCVariable<double>   vol_frac;
         constCCVariable<double>   rho_CC;
-        
+        constCCVariable<double>   Porosity_CC;
+
         Ghost::GhostType  gac = Ghost::AroundCells;
         new_dw->get(vol_frac,  lb->vol_frac_CCLabel, indx,patch,gac,2);
         new_dw->get(rho_CC,    lb->rho_CCLabel,      indx,patch,gac,2);
+        ew_dw->get(Porosity_CC, lb->Porosity_CCLabel, indx, patch, gac, 2);
       
         SFCXVariable<Vector> tau_X_FC, Ttau_X_FC;
         SFCYVariable<Vector> tau_Y_FC, Ttau_Y_FC;
@@ -3879,6 +3882,7 @@ void ICE::viscousShearStress(const ProcessorGroup*,
           CCVariable<double>        viscosity;         // total *OR* molecular viscosity;
           constCCVariable<double>   molecularVis;      // molecular viscosity
           constCCVariable<Vector>   velTau_CC;
+         
 
           new_dw->get(molecularVis, lb->viscosityLabel, indx, patch, gac,2); 
           new_dw->get(velTau_CC,    lb->velTau_CCLabel, indx, patch, gac,2); 
@@ -3922,29 +3926,36 @@ void ICE::viscousShearStress(const ProcessorGroup*,
                                                                 Ttau_X_FC, Ttau_Y_FC, Ttau_Z_FC); 
           }
 
-          for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
-            IntVector c = *iter;
-            right    = c + IntVector(1,0,0);    left     = c + IntVector(0,0,0);
-            top      = c + IntVector(0,1,0);    bottom   = c + IntVector(0,0,0);
-            front    = c + IntVector(0,0,1);    back     = c + IntVector(0,0,0);       
+          for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+              IntVector c = *iter;
 
-            viscous_src[c].x(  (Ttau_X_FC[right].x() - Ttau_X_FC[left].x())  * areaX +
-                               (Ttau_Y_FC[top].x()   - Ttau_Y_FC[bottom].x())* areaY +    
-                               (Ttau_Z_FC[front].x() - Ttau_Z_FC[back].x())  * areaZ  );  
+              // The condition is for Darcy flow with the assumption that the flow inside the porous media
+              // (porosity !=1) is thin and the shear stress is negligible (Darcy's law) and the influence of vicosity 
+              // will be in the drag term
 
-            viscous_src[c].y(  (Ttau_X_FC[right].y() - Ttau_X_FC[left].y())  * areaX +
-                               (Ttau_Y_FC[top].y()   - Ttau_Y_FC[bottom].y())* areaY +      
-                               (Ttau_Z_FC[front].y() - Ttau_Z_FC[back].y())  * areaZ  );          
+              if (Porosity_CC[c] == 1) {
+                  right = c + IntVector(1, 0, 0);    left = c + IntVector(0, 0, 0);
+                  top = c + IntVector(0, 1, 0);    bottom = c + IntVector(0, 0, 0);
+                  front = c + IntVector(0, 0, 1);    back = c + IntVector(0, 0, 0);
 
-            viscous_src[c].z(  (Ttau_X_FC[right].z() - Ttau_X_FC[left].z())  * areaX +
-                               (Ttau_Y_FC[top].z()   - Ttau_Y_FC[bottom].z())* areaY +
-                               (Ttau_Z_FC[front].z() - Ttau_Z_FC[back].z())  * areaZ  );
+                  viscous_src[c].x((Ttau_X_FC[right].x() - Ttau_X_FC[left].x()) * areaX +
+                      (Ttau_Y_FC[top].x() - Ttau_Y_FC[bottom].x()) * areaY +
+                      (Ttau_Z_FC[front].x() - Ttau_Z_FC[back].x()) * areaZ);
+
+                  viscous_src[c].y((Ttau_X_FC[right].y() - Ttau_X_FC[left].y()) * areaX +
+                      (Ttau_Y_FC[top].y() - Ttau_Y_FC[bottom].y()) * areaY +
+                      (Ttau_Z_FC[front].y() - Ttau_Z_FC[back].y()) * areaZ);
+
+                  viscous_src[c].z((Ttau_X_FC[right].z() - Ttau_X_FC[left].z()) * areaX +
+                      (Ttau_Y_FC[top].z() - Ttau_Y_FC[bottom].z()) * areaY +
+                      (Ttau_Z_FC[front].z() - Ttau_Z_FC[back].z()) * areaZ);
+              
+                  // copy the temporary data
+                  tau_X_FC.copyPatch(Ttau_X_FC, tau_X_FC.getLowIndex(), tau_X_FC.getHighIndex());
+                  tau_Y_FC.copyPatch(Ttau_Y_FC, tau_Y_FC.getLowIndex(), tau_Y_FC.getHighIndex());
+                  tau_Z_FC.copyPatch(Ttau_Z_FC, tau_Z_FC.getLowIndex(), tau_Z_FC.getHighIndex());
+              }
           }
-          // copy the temporary data
-          tau_X_FC.copyPatch( Ttau_X_FC, tau_X_FC.getLowIndex(), tau_X_FC.getHighIndex() );
-          tau_Y_FC.copyPatch( Ttau_Y_FC, tau_Y_FC.getLowIndex(), tau_Y_FC.getHighIndex() );
-          tau_Z_FC.copyPatch( Ttau_Z_FC, tau_Z_FC.getLowIndex(), tau_Z_FC.getHighIndex() );
-          
         }  // hasViscosity
       }  // ice_matl
     }  // matl loop
@@ -4901,7 +4912,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
       
-      CCVariable<double> rho_CC, temp_CC, sp_vol_CC,mach;
+      CCVariable<double> rho_CC, temp_CC, sp_vol_CC,mach, Porosity_CC;
       CCVariable<Vector> vel_CC;
       constCCVariable<double> int_eng_adv, mass_adv,sp_vol_adv,speedSound, cv;
       constCCVariable<double> gamma, placeHolder, vol_frac;
@@ -4918,8 +4929,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       new_dw->get(int_eng_adv, lb->eng_advLabel,       indx,patch,gn,0); 
       
       new_dw->getModifiable(sp_vol_CC, lb->sp_vol_CCLabel,indx,patch);
+      new_dw->getModifiable(Porosity_CC, lb->Porosity_CCLabel, indx, patch);
       new_dw->getModifiable(rho_CC,    lb->rho_CCLabel,   indx,patch);
-
       new_dw->allocateAndPut(temp_CC,lb->temp_CCLabel,  indx,patch);          
       new_dw->allocateAndPut(vel_CC, lb->vel_CCLabel,   indx,patch);
       new_dw->allocateAndPut(mach,   lb->machLabel,     indx,patch);  
@@ -4937,6 +4948,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
         rho_CC[c]    = mass_adv[c] * invvol;
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
+        Porosity_CC[c] = 1;
       }
 
       //__________________________________
