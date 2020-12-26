@@ -1883,7 +1883,7 @@ void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
                              d_BC_globalVars);
                              
   task->modifies(lb->rho_CCLabel,     fat);
-  ask->modifies(lb->Porosity_CCLabel, fat);
+  task->modifies(lb->Porosity_CCLabel, fat);
   task->modifies(lb->sp_vol_CCLabel,  fat);               
   if( where == "afterAdvection"){
     task->computes(lb->temp_CCLabel);
@@ -3859,7 +3859,7 @@ void ICE::viscousShearStress(const ProcessorGroup*,
         Ghost::GhostType  gac = Ghost::AroundCells;
         new_dw->get(vol_frac,  lb->vol_frac_CCLabel, indx,patch,gac,2);
         new_dw->get(rho_CC,    lb->rho_CCLabel,      indx,patch,gac,2);
-        ew_dw->get(Porosity_CC, lb->Porosity_CCLabel, indx, patch, gac, 2);
+        new_dw->get(Porosity_CC, lb->Porosity_CCLabel, indx, patch, gac, 2);
       
         SFCXVariable<Vector> tau_X_FC, Ttau_X_FC;
         SFCYVariable<Vector> tau_Y_FC, Ttau_Y_FC;
