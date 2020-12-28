@@ -1066,6 +1066,7 @@ void ICE::scheduleComputeThermoTransportProperties(SchedulerP& sched,
   t->requires(Task::OldDW,lb->temp_CCLabel, ice_matls->getUnion(), Ghost::None, 0);  
 
   t->computes(lb->viscosityLabel);
+  t->computes(lb->Porosity_CCLabel);
   t->computes(lb->thermalCondLabel);
   t->computes(lb->gammaLabel);
   t->computes(lb->specific_heatLabel);
@@ -2481,7 +2482,10 @@ void ICE::computeThermoTransportProperties(const ProcessorGroup*,
       int indx = ice_matl->getDWIndex();
 
       constCCVariable<double> temp_CC;
+      CCVariable<double> Porosity_CC;
+
       old_dw->get(temp_CC, lb->temp_CCLabel, indx,patch,Ghost::None,0);
+      new_dw->allocateAndPut(Porosity_CC, lb->Porosity_CCLabel, indx, patch, Ghost::None, 0);
 
       CCVariable<double> viscosity, thermalCond, gamma, cv;
       
@@ -2494,6 +2498,13 @@ void ICE::computeThermoTransportProperties(const ProcessorGroup*,
       gamma.initialize  (     ice_matl->getGamma());
       cv.initialize(          ice_matl->getSpecificHeat());
       SpecificHeat *cvModel = ice_matl->getSpecificHeatModel();
+
+      // Contact cannot catch the porosity so initialize porosity here
+      for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+          IntVector c = *iter;
+          Porosity_CC[c] = 1;
+      }
+
       if(cvModel != 0) {
         // loop through cells and compute pointwise
         for(CellIterator iter = patch->getCellIterator();!iter.done();iter++) {
@@ -4901,7 +4912,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
       
-      CCVariable<double> rho_CC, temp_CC, sp_vol_CC,mach;
+      CCVariable<double> rho_CC, temp_CC, sp_vol_CC,mach, Porosity_CC;
       CCVariable<Vector> vel_CC;
       constCCVariable<double> int_eng_adv, mass_adv,sp_vol_adv,speedSound, cv;
       constCCVariable<double> gamma, placeHolder, vol_frac;
@@ -4923,10 +4934,12 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       new_dw->allocateAndPut(temp_CC,lb->temp_CCLabel,  indx,patch);          
       new_dw->allocateAndPut(vel_CC, lb->vel_CCLabel,   indx,patch);
       new_dw->allocateAndPut(mach,   lb->machLabel,     indx,patch);  
+      new_dw->allocateAndPut(Porosity_CC, lb->Porosity_CCLabel, indx, patch);
 
       rho_CC.initialize(-d_EVIL_NUM);
       temp_CC.initialize(-d_EVIL_NUM);
       vel_CC.initialize(Vector(0.0,0.0,0.0)); 
+      Porosity_CC.initialize(1);
 
       //__________________________________
       // Backout primitive quantities from 
@@ -4937,6 +4950,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
         rho_CC[c]    = mass_adv[c] * invvol;
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
+        Porosity_CC[c] = 1;
       }
 
       //__________________________________

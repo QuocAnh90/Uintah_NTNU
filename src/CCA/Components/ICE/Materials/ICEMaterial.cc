@@ -294,6 +294,8 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
         rho1_CC[c]    = Porosity_CC[c] * rho_micro[*iter] + d_tiny_rho * rho_micro[*iter];
         temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
         IveBeenHere[c]= 1;
+
+        cerr << Porosity_CC[c] << endl;
       }
 
       IntVector ppc = d_geom_objs[obj]->getInitialData_IntVector("res");

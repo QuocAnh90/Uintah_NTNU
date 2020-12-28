@@ -134,7 +134,10 @@ void ScalarExch::sched_AddExch_VelFC( SchedulerP            & sched,
 
   // All matls
   t->requires( pNewDW,      Ilb->sp_vol_CCLabel,  gac,   1);
-  t->requires( pNewDW,      Ilb->Porosity_CCLabel,gac,   1);
+  if(mpm_matls){
+      t->requires(pNewDW, Ilb->Porosity_CCLabel, gac, 1);
+  }
+  
   t->requires( pNewDW,      Ilb->vol_frac_CCLabel,gac,   1);
   t->requires( Task::NewDW, Ilb->uvel_FCLabel,    gaf_X, 1);
   t->requires( Task::NewDW, Ilb->vvel_FCLabel,    gaf_Y, 1);
@@ -403,9 +406,14 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
       Material* matl = d_matlManager->getMaterial( m );
       int indx = matl->getDWIndex();
      
+      ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+      MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
+
+      pNewDW->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gac, 1);
+
       pNewDW->get( sp_vol_CC[m],    Ilb->sp_vol_CCLabel,  indx, patch, gac,   1 );
       pNewDW->get( vol_frac_CC[m],  Ilb->vol_frac_CCLabel,indx, patch, gac,   1 );
-      pNewDW->get(Porosity_CC[m],   Ilb->Porosity_CCLabel,indx, patch, gac,   1 );
+      
       new_dw->get( uvel_FC[m],      Ilb->uvel_FCLabel,    indx, patch, gaf_X, 1 );
       new_dw->get( vvel_FC[m],      Ilb->vvel_FCLabel,    indx, patch, gaf_Y, 1 );
       new_dw->get( wvel_FC[m],      Ilb->wvel_FCLabel,    indx, patch, gaf_Z, 1 );
@@ -646,6 +654,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
         new_dw->getCopy(oldTemp,          Ilb->temp_CCLabel,indx,patch,gn,0);
         new_dw->getModifiable(vel_CC[m],  Ilb->vel_CCLabel, indx,patch);
         new_dw->getModifiable(Temp_CC[m], Ilb->temp_CCLabel,indx,patch);
+        new_dw->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gn, 0);
         old_temp[m] = oldTemp;
         cv[m].initialize(mpm_matl->getSpecificHeat());
       }
@@ -662,7 +671,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
 
       new_dw->get(mass_L[m],        Ilb->mass_L_CCLabel,   indx, patch,gn, 0);
       new_dw->get(sp_vol_CC[m],     Ilb->sp_vol_CCLabel,   indx, patch,gn, 0);
-      new_dw->get(Porosity_CC[m],   Ilb->Porosity_CCLabel, indx, patch,gn, 0);
+     
       new_dw->get(mom_L[m],         Ilb->mom_L_CCLabel,    indx, patch,gn, 0);
       new_dw->get(int_eng_L[m],     Ilb->int_eng_L_CCLabel,indx, patch,gn, 0);
       new_dw->get(vol_frac_CC[m],   Ilb->vol_frac_CCLabel, indx, patch,gn, 0);

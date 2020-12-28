@@ -783,6 +783,7 @@ void MPMICE::scheduleInterpolateNCToCC_0(SchedulerP& sched,
                                                     Ghost::AroundCells, 1);
     t->requires(Task::OldDW, Ilb->sp_vol_CCLabel,   Ghost::None, 0); 
     t->requires(Task::OldDW, MIlb->temp_CCLabel,    Ghost::None, 0);
+    t->requires(Task::OldDW, Ilb->Porosity_CCLabel, Ghost::None, 0);
 
     t->requires(Task::OldDW, Ilb->timeStepLabel);
     
@@ -791,6 +792,7 @@ void MPMICE::scheduleInterpolateNCToCC_0(SchedulerP& sched,
     t->computes(MIlb->temp_CCLabel);
     t->computes(Ilb->sp_vol_CCLabel, mss);
     t->computes(Ilb->rho_CCLabel, mss); 
+    t->computes(Ilb->Porosity_CCLabel, mss);
    
     sched->addTask(t, patches, mpm_matls);
   }
@@ -1329,9 +1331,9 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int indx = mpm_matl->getDWIndex();
       // Create arrays for the grid data
-      constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol;
+      constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol, Porosityold_CC;
       constNCVariable<Vector> gvelocity;
-      CCVariable<double> cmass,Temp_CC, sp_vol_CC, rho_CC;
+      CCVariable<double> cmass,Temp_CC, sp_vol_CC, rho_CC, Porosity_CC;
       CCVariable<Vector> vel_CC;
       constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
 
@@ -1340,7 +1342,8 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       new_dw->allocateAndPut(Temp_CC,  MIlb->temp_CCLabel,   indx, patch);  
       new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch); 
       new_dw->allocateAndPut(rho_CC,    Ilb->rho_CCLabel,    indx, patch);
-      
+      new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
+
       double very_small_mass = d_TINY_RHO * cell_vol;
       cmass.initialize(very_small_mass);
 
@@ -1351,6 +1354,7 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       new_dw->get(gSp_vol,      Mlb->gSp_volLabel,      indx, patch,gac, 1);
       old_dw->get(sp_vol_CC_ice,Ilb->sp_vol_CCLabel,    indx, patch,gn, 0); 
       old_dw->get(Temp_CC_ice,  MIlb->temp_CCLabel,     indx, patch,gn, 0);
+      old_dw->get(Porosityold_CC, Ilb->Porosity_CCLabel,indx, patch, gn, 0);
       IntVector nodeIdx[8];
 
 //      double sp_vol_orig = 1.0/(mpm_matl->getInitialDensity());
@@ -1393,6 +1397,9 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
 
         vel_CC[c]   =vel_CC_mpm;
         rho_CC[c]   = cmass[c]/cell_vol;
+
+        // Porosity is not used in MPMICE but in MPMICE2, but need to compute
+        Porosity_CC[c] = Porosityold_CC[c];
       }
 
       //  Set BC's
