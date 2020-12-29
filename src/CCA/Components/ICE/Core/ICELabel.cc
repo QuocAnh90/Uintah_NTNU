@@ -89,6 +89,7 @@ ICELabel::ICELabel()
   vol_frac_CCLabel        = VarLabel::create("vol_frac_CC",   CC_double);
   viscous_src_CCLabel     = VarLabel::create("viscous_src_CC", CC_Vector);
   mom_source_CCLabel      = VarLabel::create("mom_source_CC", CC_Vector);
+  mom_source2_CCLabel     = VarLabel::create("mom_source2_CC", CC_Vector);
   int_eng_source_CCLabel  = VarLabel::create("intE_source_CC",CC_double);
   heatCond_src_CCLabel    = VarLabel::create("heatCond_src_CC",CC_double);
   sp_vol_src_CCLabel      = VarLabel::create("sp_vol_src_CC", CC_double);
@@ -301,6 +302,7 @@ ICELabel::~ICELabel()
     VarLabel::destroy(vol_frac_CCLabel);
     VarLabel::destroy(viscous_src_CCLabel);
     VarLabel::destroy(mom_source_CCLabel);
+    VarLabel::destroy(mom_source2_CCLabel);
     VarLabel::destroy(int_eng_source_CCLabel);
     VarLabel::destroy(heatCond_src_CCLabel);
     VarLabel::destroy(sp_vol_src_CCLabel);

@@ -65,6 +65,7 @@ namespace Uintah {
     const VarLabel* vol_frac_CCLabel;
     const VarLabel* viscous_src_CCLabel;
     const VarLabel* mom_source_CCLabel;
+    const VarLabel* mom_source2_CCLabel;
     const VarLabel* int_eng_source_CCLabel;
     const VarLabel* heatCond_src_CCLabel;
     const VarLabel* sp_vol_src_CCLabel;
