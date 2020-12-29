@@ -271,6 +271,17 @@ namespace Uintah {
             DataWarehouse* old_dw,
             DataWarehouse* new_dw);
 
+        void scheduleComputeLagrangianValuesMPMtest(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computeLagrangianValuesMPMtest(const ProcessorGroup*,
+            const PatchSubset* patch,
+            const MaterialSubset* matls,
+            DataWarehouse* old_dw,
+            DataWarehouse* new_dw);
+
         void scheduleCoarsenLagrangianValuesMPM(SchedulerP&,
             const PatchSet*,
             const MaterialSet*);

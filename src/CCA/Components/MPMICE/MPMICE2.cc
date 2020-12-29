@@ -2728,6 +2728,196 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
     }  //patches
 }
 
+
+void MPMICE2::scheduleComputeLagrangianValuesMPMtest(SchedulerP& sched,
+    const PatchSet* patches,
+    const MaterialSubset* one_matl,
+    const MaterialSet* mpm_matls)
+{
+    if (d_mpm->flags->doMPMOnLevel(getLevel(patches)->getIndex(),
+        getLevel(patches)->getGrid()->numLevels())) {
+
+        printSchedule(patches, cout_doing, "MPMICE2::scheduleComputeLagrangianValuesMPM");
+
+        Task* t = scinew Task("MPMICE2::computeLagrangianValuesMPM",
+            this, &MPMICE2::computeLagrangianValuesMPMtest);
+
+        const MaterialSubset* mss = mpm_matls->getUnion();
+        Ghost::GhostType  gac = Ghost::AroundCells;
+        Ghost::GhostType  gn = Ghost::None;
+        t->requires(Task::NewDW, Mlb->gVelocityStarLabel, mss, gac, 1);
+        t->requires(Task::NewDW, Mlb->gMassLabel, gac, 1);
+        t->requires(Task::NewDW, Mlb->gTemperatureStarLabel, gac, 1);
+        t->requires(Task::OldDW, Mlb->NC_CCweightLabel, one_matl, gac, 1);
+        t->requires(Task::NewDW, MIlb->cMassLabel, gn);
+        t->requires(Task::NewDW, Ilb->mom_source2_CCLabel, gn);
+
+        t->requires(Task::OldDW, Ilb->timeStepLabel);
+
+        if (d_ice->d_models.size() > 0 && !do_mlmpmice2) {
+            t->requires(Task::NewDW, Ilb->modelMass_srcLabel, gn);
+            t->requires(Task::NewDW, Ilb->modelMom_srcLabel, gn);
+            t->requires(Task::NewDW, Ilb->modelEng_srcLabel, gn);
+        }
+
+        t->computes(Ilb->mass_L_CCLabel);
+        t->computes(Ilb->mom_L_CCLabel);
+        t->computes(Ilb->int_eng_L_CCLabel);
+
+        sched->addTask(t, patches, mpm_matls);
+    }
+}
+
+//______________________________________________________________________
+//
+void MPMICE2::computeLagrangianValuesMPMtest(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    timeStep_vartype timeStep;
+    old_dw->get(timeStep, VarLabel::find(timeStep_name));
+
+    bool isNotInitialTimeStep = (timeStep > 0);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+        printTask(patches, patch, cout_doing, "Doing computeLagrangianValuesMPM");
+
+        unsigned int numMatls = m_materialManager->getNumMatls("MPM");
+        Vector dx = patch->dCell();
+        double cellVol = dx.x() * dx.y() * dx.z();
+        double very_small_mass = d_TINY_RHO * cellVol;
+        Ghost::GhostType  gn = Ghost::None;
+        Ghost::GhostType  gac = Ghost::AroundCells;
+
+        constNCVariable<double> NC_CCweight;
+        old_dw->get(NC_CCweight, Mlb->NC_CCweightLabel, 0, patch, gac, 1);
+        for (unsigned int m = 0; m < numMatls; m++) {
+            MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
+            int indx = mpm_matl->getDWIndex();
+
+            // Create arrays for the grid data
+            constNCVariable<double> gmass, gvolume, gtempstar;
+            constNCVariable<Vector> gvelocity;
+            CCVariable<Vector> cmomentum;
+            CCVariable<double> int_eng_L, mass_L;
+            constCCVariable<double> cmass;
+            constCCVariable<Vector> mom_source2;
+            new_dw->get(gmass, Mlb->gMassLabel, indx, patch, gac, 1);
+            new_dw->get(gvelocity, Mlb->gVelocityStarLabel, indx, patch, gac, 1);
+            new_dw->get(gtempstar, Mlb->gTemperatureStarLabel, indx, patch, gac, 1);
+            new_dw->get(cmass, MIlb->cMassLabel, indx, patch, gn, 0);
+            new_dw->get(mom_source2, Ilb->mom_source2_CCLabel, indx, patch, gn, 0);
+
+            new_dw->allocateAndPut(mass_L, Ilb->mass_L_CCLabel, indx, patch);
+            new_dw->allocateAndPut(cmomentum, Ilb->mom_L_CCLabel, indx, patch);
+            new_dw->allocateAndPut(int_eng_L, Ilb->int_eng_L_CCLabel, indx, patch);
+
+            cmomentum.initialize(Vector(0.0, 0.0, 0.0));
+            int_eng_L.initialize(0.);
+            mass_L.initialize(0.);
+            double cv = mpm_matl->getSpecificHeat();
+
+            IntVector nodeIdx[8];
+
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done();
+                iter++) {
+                IntVector c = *iter;
+                patch->findNodesFromCell(c, nodeIdx);
+                double int_eng_L_mpm = 0.0;
+                Vector cmomentum_mpm = Vector(0.0, 0.0, 0.0);
+
+                for (int in = 0; in < 8; in++) {
+                    double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
+                    cmomentum_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
+                    int_eng_L_mpm += gtempstar[nodeIdx[in]] * cv * NC_CCw_mass;
+                }
+
+                // Add pore water pressure term
+                cmomentum_mpm += mom_source2[c];
+            }
+            //__________________________________
+            //  NO REACTION
+            if (d_ice->d_models.size() == 0 || do_mlmpmice2) {
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done();
+                    iter++) {
+                    IntVector c = *iter;
+                    mass_L[c] = cmass[c];
+                }
+            }
+            //__________________________________
+            //   M O D E L   B A S E D   E X C H A N G E (NOT YET CONSIDERED IN MPMICE2)
+            // The reaction can't completely eliminate 
+            //  all the mass, momentum and internal E.
+            // If it does then we'll get erroneous vel,
+            // and temps in CCMomExchange.  If the mass
+            // goes to min_mass then cmomentum and int_eng_L
+            // need to be scaled by min_mass to avoid inf temp and vel_CC
+            // in 
+            if (d_ice->d_models.size() > 0 && !do_mlmpmice2) {
+                constCCVariable<double> modelMass_src;
+                constCCVariable<double> modelEng_src;
+                constCCVariable<Vector> modelMom_src;
+                new_dw->get(modelMass_src, Ilb->modelMass_srcLabel, indx, patch, gn, 0);
+                new_dw->get(modelMom_src, Ilb->modelMom_srcLabel, indx, patch, gn, 0);
+                new_dw->get(modelEng_src, Ilb->modelEng_srcLabel, indx, patch, gn, 0);
+
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done();
+                    iter++) {
+                    IntVector c = *iter;
+                    //  must have a minimum mass
+                    double min_mass = very_small_mass;
+                    double inv_cmass = 1.0 / cmass[c];
+                    mass_L[c] = std::max((cmass[c] + modelMass_src[c]), min_mass);
+
+                    //  must have a minimum momentum 
+                    for (int dir = 0; dir < 3; dir++) {  //loop over all three directons
+                        double min_mom_L = min_mass * cmomentum[c][dir] * inv_cmass;
+                        double mom_L_tmp = cmomentum[c][dir] + modelMom_src[c][dir];
+
+                        // Preserve the original sign on momemtum     
+                        // Use d_SMALL_NUMs to avoid nans when mom_L_temp = 0.0
+                        double plus_minus_one = (mom_L_tmp + d_SMALL_NUM) /
+                            (fabs(mom_L_tmp + d_SMALL_NUM));
+
+                        mom_L_tmp = (mom_L_tmp / mass_L[c]) * (cmass[c] + modelMass_src[c]);
+
+                        cmomentum[c][dir] = plus_minus_one *
+                            std::max(fabs(mom_L_tmp), fabs(min_mom_L));
+                    }
+                    // must have a minimum int_eng   
+                    double min_int_eng = min_mass * int_eng_L[c] * inv_cmass;
+                    int_eng_L[c] = (int_eng_L[c] / mass_L[c]) * (cmass[c] + modelMass_src[c]);
+                    int_eng_L[c] = std::max((int_eng_L[c] + modelEng_src[c]), min_int_eng);
+                }
+            }  // if(model.size() >0)      
+
+             //__________________________________
+             //  Set Boundary conditions
+            setBC(cmomentum, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+            setBC(int_eng_L, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+
+            //---- B U L L E T   P R O O F I N G------
+            // ignore BP if recompute time step has already been requested
+            IntVector neg_cell;
+            ostringstream warn;
+            bool rts = new_dw->recomputeTimeStep();
+
+            if (d_testForNegTemps_mpm) {
+                if (!areAllValuesPositive(int_eng_L, neg_cell) && !rts) {
+                    int L = getLevel(patches)->getIndex();
+                    warn << "ERROR MPMICE2:(" << L << "):computeLagrangianValuesMPM, mat "
+                        << indx << " cell "
+                        << neg_cell << " int_eng_L_CC " << int_eng_L[neg_cell] << "\n ";
+                    throw InvalidValue(warn.str(), __FILE__, __LINE__);
+                }
+            }
+        }  //numMatls
+    }  //patches
+}
+
 //______________________________________________________________________
 //
 void MPMICE2::scheduleComputeCCVelAndTempRates(SchedulerP& sched,

@@ -1399,7 +1399,7 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
         rho_CC[c]   = cmass[c]/cell_vol;
 
         // Porosity is not used in MPMICE but in MPMICE2, but need to compute
-        Porosity_CC[c] = Porosityold_CC[c];
+        Porosity_CC[c] = 1;
       }
 
       //  Set BC's

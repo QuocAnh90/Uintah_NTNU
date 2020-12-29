@@ -54,7 +54,7 @@ void KnaussSeaWater::outputProblemSpec(ProblemSpecP& ps)
   eos_ps->setAttribute("type","KnaussSeaWater");
   eos_ps->appendElement("a", d_a);
   eos_ps->appendElement("b", d_b);
-  eos_ps->appendElement("k", d_k);
+  eos_ps->appendElement("K", d_k);
   eos_ps->appendElement("T0",d_T0);
   eos_ps->appendElement("P0",d_T0);
   eos_ps->appendElement("S", d_S);
