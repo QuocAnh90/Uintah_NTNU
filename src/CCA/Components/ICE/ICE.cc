@@ -1484,13 +1484,12 @@ ICE::scheduleAccumulateMomentumSourceSinks(SchedulerP& sched,
   t->requires( Task::NewDW, lb->pressX_FCLabel,   press_matl,    oims, gac, 1);
   t->requires( Task::NewDW, lb->pressY_FCLabel,   press_matl,    oims, gac, 1);
   t->requires( Task::NewDW, lb->pressZ_FCLabel,   press_matl,    oims, gac, 1);
-  //t->requires( Task::NewDW, lb->viscous_src_CCLabel, ice_matls, gn, 0);
+  t->requires( Task::NewDW, lb->viscous_src_CCLabel, ice_matls, gn, 0);
   t->requires( Task::NewDW, lb->rho_CCLabel,         gn, 0);
   t->requires( Task::NewDW, lb->vol_frac_CCLabel,    gn, 0);
   t->requires( Task::NewDW, lb->Porosity_CCLabel,    gn, 0);
 
   t->computes(lb->mom_source_CCLabel);
-  t->modifies(lb->viscous_src_CCLabel);
 
   // This is for MPMICE2
   t->computes(lb->mom_source2_CCLabel);
@@ -4094,11 +4093,9 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
       //__________________________________
       //  ICE _matls: 
       if(ice_matl){
-        //constCCVariable<Vector> viscous_src;
-        //new_dw->get(viscous_src, lb->viscous_src_CCLabel, indx, patch,gn,0);
-
-        CCVariable<Vector> viscous_src;
-        new_dw->getModifiable(viscous_src, lb->viscous_src_CCLabel, indx, patch);
+        constCCVariable<Vector> viscous_src;
+        Vector viscous_source(0.0, 0.0, 0.0);
+        new_dw->get(viscous_src, lb->viscous_src_CCLabel, indx, patch, gn, 0);
 
         for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
           IntVector c = *iter;
@@ -4106,14 +4103,11 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
 
           // Darcy's law vicous_src = 0 inside the porous media 
           // (for MPMICE2.cc only because Porosity_CC always equal to 1 in MPMICE.cc)
-          if (Porosity_CC[c] < 1) {
-              viscous_src[c] = (0,0,0);
-          }
-          else {
-              viscous_src[c] = viscous_src[c];
+          if (Porosity_CC[c] == 1.0) {
+              viscous_source = viscous_src[c];
           }
 
-          mom_source[c] = (mom_source[c] + viscous_src[c] + mass * gravity );
+          mom_source[c] = (mom_source[c] + viscous_source + mass * gravity );
         }
        
       }  //ice_matl
