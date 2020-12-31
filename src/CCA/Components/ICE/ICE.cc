@@ -1491,8 +1491,9 @@ ICE::scheduleAccumulateMomentumSourceSinks(SchedulerP& sched,
 
   t->computes(lb->mom_source_CCLabel);
 
-  // This is for MPMICE2
+  // This is for MPMICE2 to add this mom_source to solid momentum balance eqs
   t->computes(lb->mom_source2_CCLabel);
+
   sched->addTask(t, patches, matls);
 }
 
@@ -4117,6 +4118,7 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
       for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
         IntVector c = *iter;
         mom_source[c] *= delT; 
+        mom_source2[c] *= delT;
       }
       
     }  // matls loop
