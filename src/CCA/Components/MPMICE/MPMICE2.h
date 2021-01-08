@@ -286,6 +286,20 @@ namespace Uintah {
             const PatchSet*,
             const MaterialSet*);
 
+
+        void scheduleComputeLagrangianSpecificVolume(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computeLagrangianSpecificVolume(const ProcessorGroup*,
+            const PatchSubset* patches,
+            const MaterialSubset* matls,
+            DataWarehouse*,
+            DataWarehouse*);
+
         void scheduleComputeCCVelAndTempRates(SchedulerP&, const PatchSet*,
             const MaterialSet*);
 

@@ -595,6 +595,8 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
         cout_doing << inlevel->getIndex() << endl;
     }
 
+    // MPMICE schedules
+    /*
     //__________________________________
     // Scheduling
     for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
@@ -746,6 +748,242 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     }
 
     
+    d_mpm->scheduleComputeInternalHeatRate(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeNodalHeatFlux(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleSolveHeatEquations(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeAndIntegrateAcceleration(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleIntegrateTemperatureRate(sched, mpm_patches, mpm_matls);
+
+    scheduleComputeLagrangianValuesMPM(sched, mpm_patches, one_matl,
+        mpm_matls);
+
+    // do coarsens in reverse order, and before the other tasks
+    if (do_mlmpmice2) {
+        for (int l = inlevel->getGrid()->numLevels() - 2; l >= 0; l--) {
+            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+            const PatchSet* ice_patches = ice_level->eachPatch();
+            scheduleCoarsenLagrangianValuesMPM(sched, ice_patches, mpm_matls);
+        }
+    }
+
+    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+        const PatchSet* ice_patches = ice_level->eachPatch();
+
+        d_ice->scheduleComputeLagrangianValues(sched, ice_patches, ice_matls);
+
+        d_ice->d_exchModel->sched_AddExch_Vel_Temp_CC(
+            sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            all_matls,
+            d_ice->d_BC_globalVars);
+
+        d_ice->scheduleComputeLagrangianSpecificVolume(
+            sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            press_matl,
+            all_matls);
+
+        d_ice->scheduleComputeLagrangian_Transported_Vars(
+            sched, ice_patches, ice_matls);
+
+    }
+
+    scheduleComputeCCVelAndTempRates(sched, mpm_patches, mpm_matls);
+
+    //  if(do_mlmpmice2){
+    //    scheduleRefineCC(                         sched, mpm_patches, mpm_matls);
+    //  }
+
+    scheduleInterpolateCCToNC(sched, mpm_patches, mpm_matls);
+
+    d_mpm->scheduleExMomIntegrated(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleSetGridBoundaryConditions(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleInterpolateToParticlesAndUpdate(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeParticleGradients(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeStressTensor(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleFinalParticleUpdate(sched, mpm_patches, mpm_matls);
+    if (d_mpm->flags->d_computeScaleFactor) {
+        d_mpm->scheduleComputeParticleScaleFactor(sched, mpm_patches, mpm_matls);
+    }
+
+    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+        const PatchSet* ice_patches = ice_level->eachPatch();
+
+        d_ice->scheduleAdvectAndAdvanceInTime(sched, ice_patches, ice_matls_sub,
+            ice_matls);
+
+        d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub,
+            ice_matls, "afterAdvection");
+    }
+
+    */
+
+    //__________________________________
+    // Scheduling
+    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+        d_ice->scheduleComputeThermoTransportProperties(sched, ice_level, ice_matls);
+
+        d_ice->scheduleMaxMach_on_Lodi_BC_Faces(sched, ice_level, ice_matls);
+    }
+
+    d_mpm->scheduleApplyExternalLoads(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeCurrentParticleSize(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleInterpolateParticlesToGrid(sched, mpm_patches, mpm_matls);
+    d_mpm->scheduleComputeInternalForce(sched, mpm_patches, mpm_matls);
+    // Move internal force here because we need nodal stress but we need to set
+    // p.pressure = 0 because the stress is subtracted p.pressure in MPMICE, not in
+    // MPMICE2
+
+    d_mpm->scheduleComputeHeatExchange(sched, mpm_patches, mpm_matls);
+    if (d_mpm->flags->d_computeNormals) {
+        d_mpm->scheduleComputeNormals(sched, mpm_patches, mpm_matls);
+    }
+    d_mpm->scheduleExMomInterpolated(sched, mpm_patches, mpm_matls);
+
+    // schedule the interpolation of mass and volume to the cell centers
+    scheduleInterpolateNCToCC_0(sched, mpm_patches, one_matl,
+        mpm_matls);
+
+    // do coarsens in reverse order, and before the other tasks
+    if (do_mlmpmice2) {
+        for (int l = inlevel->getGrid()->numLevels() - 2; l >= 0; l--) {
+            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+            const PatchSet* ice_patches = ice_level->eachPatch();
+
+            scheduleCoarsenCC_0(sched, ice_patches, mpm_matls);
+            scheduleCoarsenNCMass(sched, ice_patches, mpm_matls);
+        }
+    }
+
+    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+        const PatchSet* ice_patches = ice_level->eachPatch();
+
+        // Only compute the ICCE  pressure
+        d_ice->scheduleComputePressure(sched, ice_patches, press_matl,
+            all_matls);
+
+        // Currently there is no need for face centered temp
+        /*
+        d_ice->scheduleComputeTempFC(sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            all_matls);
+        */
+
+        d_ice->scheduleComputeModelSources(sched, ice_level, all_matls);
+
+        d_ice->scheduleUpdateVolumeFraction(sched, ice_level, press_matl,
+            all_matls);
+
+        // Replace the ComputeVel_FC by two functions
+        /*
+        d_ice->scheduleComputeVel_FC(sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            press_matl,
+            all_matls);
+            */
+
+        scheduleComputeVelICE_FC(sched, ice_patches, ice_matls_sub,
+            press_matl,
+            all_matls);
+
+        scheduleComputeVelMPM_FC(sched, ice_patches, mpm_matls_sub,
+            press_matl,
+            all_matls);
+
+        d_ice->d_exchModel->sched_PreExchangeTasks(sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            all_matls);
+
+        d_ice->d_exchModel->sched_AddExch_VelFC(sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            all_matls,
+            d_ice->d_BC_globalVars,
+            false);
+    }
+
+    if (d_ice->d_impICE) {        //  I M P L I C I T, won't work with AMR yet
+      // we should use the AMR multi-level pressure solve
+        for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+            const PatchSet* ice_patches = ice_level->eachPatch();
+
+            d_ice->scheduleSetupRHS(sched, ice_patches, one_matl,
+                all_matls,
+                false,
+                "computes");
+            d_ice->scheduleCompute_maxRHS(sched, ice_level, one_matl,
+                all_matls);
+
+            d_ice->scheduleImplicitPressureSolve(sched, ice_level, ice_patches,
+                one_matl,
+                press_matl,
+                ice_matls_sub,
+                mpm_matls_sub,
+                all_matls);
+
+            d_ice->scheduleComputeDel_P(sched, ice_level, ice_patches,
+                one_matl,
+                press_matl,
+                all_matls);
+        }
+    }                           //  IMPLICIT AND EXPLICIT
+
+    if (!(d_ice->d_impICE)) {       //  E X P L I C I T 
+        for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+            const PatchSet* ice_patches = ice_level->eachPatch();
+
+            d_ice->scheduleComputeDelPressAndUpdatePressCC(
+                sched, ice_patches, press_matl,
+                ice_matls_sub,
+                mpm_matls_sub,
+                all_matls);
+        }
+    }
+
+    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
+        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
+        const PatchSet* ice_patches = ice_level->eachPatch();
+
+        d_ice->scheduleComputePressFC(sched, ice_patches, press_matl,
+            all_matls);
+
+        d_ice->scheduleVelTau_CC(sched, ice_patches, ice_matls);
+
+        d_ice->scheduleViscousShearStress(sched, ice_patches, ice_matls);
+
+        d_ice->scheduleAccumulateMomentumSourceSinks(
+            sched, ice_patches, press_matl,
+            ice_matls_sub,
+            mpm_matls_sub,
+            all_matls);
+
+        d_ice->scheduleAccumulateEnergySourceSinks(sched, ice_patches, ice_matls_sub,
+            mpm_matls_sub,
+            press_matl,
+            all_matls);
+    }
+
+    // This one can be used for vizualization of pore pressure in particles if (vizualization)
+    if (!d_rigidMPM) {
+        //    if(do_mlmpmice2){
+        //      scheduleRefinePressCC(                  sched, mpm_patches, press_matl,
+        //                                                                  mpm_matls);
+        //    }
+
+        scheduleInterpolatePressCCToPressNC(sched, mpm_patches, press_matl,
+            mpm_matls);
+
+        scheduleInterpolatePAndGradP(sched, mpm_patches, press_matl,
+            one_matl,
+            mpm_matls_sub,
+            mpm_matls);
+    }
+
     d_mpm->scheduleComputeInternalHeatRate(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleComputeNodalHeatFlux(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleSolveHeatEquations(sched, mpm_patches, mpm_matls);
@@ -2917,6 +3155,266 @@ void MPMICE2::computeLagrangianValuesMPMtest(const ProcessorGroup*,
         }  //numMatls
     }  //patches
 }
+
+
+/* _____________________________________________________________________
+ Function~  MPMICE2:: scheduleComputeLagrangianSpecificVolume--
+_____________________________________________________________________*/
+void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
+    const PatchSet* patches,
+    const MaterialSubset* ice_matls,
+    const MaterialSubset* mpm_matls,
+    const MaterialSubset* press_matl,
+    const MaterialSet* matls)
+{
+    int levelIndex = getLevel(patches)->getIndex();
+    Task* t = 0;
+    cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputeLagrangianSpecificVolume"
+        << "\t\t\tL-" << levelIndex << endl;
+    t = scinew Task("MPMICE2::computeLagrangianSpecificVolume",
+        this, &MPMICE2::computeLagrangianSpecificVolume);
+
+    Ghost::GhostType  gn = Ghost::None;
+    Ghost::GhostType  gac = Ghost::AroundCells;
+    Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
+
+    t->requires(Task::OldDW, Mlb->delTLabel, getLevel(patches));
+    t->requires(Task::NewDW, Ilb->rho_CCLabel, gn);
+    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, gn);
+    t->requires(Task::NewDW, Ilb->Tdot_CCLabel, gn);
+    t->requires(Task::NewDW, Ilb->f_theta_CCLabel, gn);
+    t->requires(Task::NewDW, Ilb->compressibilityLabel, gn);
+    t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, gac, 1);
+
+    t->requires(Task::OldDW, Ilb->temp_CCLabel, ice_matls, gn);
+    t->requires(Task::NewDW, Ilb->specific_heatLabel, ice_matls, gn);
+    if (mpm_matls)
+        t->requires(Task::NewDW, Ilb->temp_CCLabel, mpm_matls, gn);
+
+    t->requires(Task::NewDW, Ilb->delP_DilatateLabel, press_matl, oims, gn);
+    t->requires(Task::NewDW, Ilb->press_CCLabel, press_matl, oims, gn);
+    if (d_ice->d_with_mpm) {
+        t->requires(Task::NewDW, Ilb->TMV_CCLabel, press_matl, oims, gn);
+    }
+
+    if (d_ice->d_models.size() > 0) {
+        t->requires(Task::NewDW, Ilb->modelVol_srcLabel, gn);
+    }
+
+    t->computes(Ilb->sp_vol_L_CCLabel);
+    t->computes(Ilb->sp_vol_src_CCLabel);
+
+    t->computes(VarLabel::find(abortTimeStep_name));
+    t->computes(VarLabel::find(recomputeTimeStep_name));
+
+    sched->addTask(t, patches, matls);
+}
+
+/* _____________________________________________________________________
+ Function~  ICE::computeLagrangianSpecificVolume--
+ _____________________________________________________________________  */
+void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset* /*matls*/,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    const Level* level = getLevel(patches);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing MPMICE2::computeLagrangianSpecificVolume");
+
+        delt_vartype delT;
+        old_dw->get(delT, Mlb->delTLabel, level);
+
+        unsigned int numALLMatls = m_materialManager->getNumMatls();
+        Vector  dx = patch->dCell();
+        double vol = dx.x() * dx.y() * dx.z();
+        Ghost::GhostType  gn = Ghost::None;
+        Ghost::GhostType  gac = Ghost::AroundCells;
+
+        std::vector<constCCVariable<double> > Tdot(numALLMatls);
+        std::vector<constCCVariable<double> > vol_frac(numALLMatls);
+        std::vector<constCCVariable<double> > Temp_CC(numALLMatls);
+        std::vector<CCVariable<double> > alpha(numALLMatls);
+        constCCVariable<double> rho_CC, f_theta, sp_vol_CC, cv;
+        constCCVariable<double> delP, P;
+        constCCVariable<double> TMV_CC;
+        CCVariable<double> sum_therm_exp;
+        vector<double> if_mpm_matl_ignore(numALLMatls);
+
+        new_dw->allocateTemporary(sum_therm_exp, patch);
+        new_dw->get(delP, Ilb->delP_DilatateLabel, 0, patch, gn, 0);
+        new_dw->get(P, Ilb->press_CCLabel, 0, patch, gn, 0);
+        sum_therm_exp.initialize(0.);
+
+        if (d_ice->d_with_mpm) {
+            new_dw->get(TMV_CC, Ilb->TMV_CCLabel, 0, patch, gn, 0);
+        }
+        else {
+            CCVariable<double>  TMV_create;
+            new_dw->allocateTemporary(TMV_create, patch);
+            TMV_create.initialize(vol);
+            TMV_CC = TMV_create; // reference created data
+        }
+
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
+            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+            int indx = matl->getDWIndex();
+
+            new_dw->get(Tdot[m], Ilb->Tdot_CCLabel, indx, patch, gn, 0);
+            new_dw->get(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch, gac, 1);
+            new_dw->allocateTemporary(alpha[m], patch);
+            if (ice_matl) {
+                old_dw->get(Temp_CC[m], Ilb->temp_CCLabel, indx, patch, gn, 0);
+            }
+            if (mpm_matl) {
+                new_dw->get(Temp_CC[m], Ilb->temp_CCLabel, indx, patch, gn, 0);
+            }
+        }
+
+        //__________________________________
+        // Sum of thermal expansion
+        // ignore contributions from mpm_matls
+        // UNTIL we have temperature dependent EOS's for the solids
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+            int indx = matl->getDWIndex();
+
+            if (ice_matl) {
+                if_mpm_matl_ignore[m] = 1.0;
+                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
+                new_dw->get(cv, Ilb->specific_heatLabel, indx, patch, gn, 0);
+
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    alpha[m][c] =
+                        ice_matl->getEOS()->getAlpha(Temp_CC[m][c], sp_vol_CC[c], P[c], cv[c]);
+                    sum_therm_exp[c] += vol_frac[m][c] * alpha[m][c] * Tdot[m][c];
+                }
+            }
+            else {
+                if_mpm_matl_ignore[m] = 0.0;
+                alpha[m].initialize(0.0);
+            }
+        }
+
+        //__________________________________ 
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+            CCVariable<double> sp_vol_L, sp_vol_src;
+            constCCVariable<double> kappa;
+            new_dw->allocateAndPut(sp_vol_L, Ilb->sp_vol_L_CCLabel, indx, patch);
+            new_dw->allocateAndPut(sp_vol_src, Ilb->sp_vol_src_CCLabel, indx, patch);
+            sp_vol_src.initialize(0.);
+            double tiny_rho = 1.e-12;
+            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+            if (ice_matl) {
+                tiny_rho = ice_matl->getTinyRho();
+            }
+
+            new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
+            new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gn, 0);
+            new_dw->get(f_theta, Ilb->f_theta_CCLabel, indx, patch, gn, 0);
+            new_dw->get(kappa, Ilb->compressibilityLabel, indx, patch, gn, 0);
+
+            //__________________________________
+            //  compute sp_vol_L * mass
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                sp_vol_L[c] = (rho_CC[c] * vol) * sp_vol_CC[c];
+            }
+
+            //__________________________________
+            //   Contributions from models
+            constCCVariable<double> Modelsp_vol_src;
+            if (d_ice->d_models.size() > 0) {
+                new_dw->get(Modelsp_vol_src, Ilb->modelVol_srcLabel, indx, patch, gn, 0);
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    sp_vol_L[c] += Modelsp_vol_src[c];
+                }
+            }
+
+            //__________________________________
+            //  add the sources to sp_vol_L
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                //__________________________________
+                //  term1
+        //        double term1 = -vol_frac[m][c] * kappa[c] * TMV_CC[c] * delP[c];
+                double term1 = -vol_frac[m][c] * kappa[c] * vol * delP[c];
+                //        double term2 = delT * TMV_CC[c] *
+                double term2 = delT * vol *
+                    (vol_frac[m][c] * alpha[m][c] * Tdot[m][c] -
+                        f_theta[c] * sum_therm_exp[c]);
+
+                // This is actually mass * sp_vol
+                double src = term1 + if_mpm_matl_ignore[m] * term2;
+                sp_vol_L[c] += src;
+                sp_vol_src[c] = src / (rho_CC[c] * vol);
+            }
+
+            if (d_ice->d_clampSpecificVolume) {
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    /*`==========TESTING==========*/
+                    sp_vol_L[c] = max(sp_vol_L[c], tiny_rho * vol * sp_vol_CC[c]);
+                    /*==========TESTING==========`*/
+                }
+            }
+
+            //__________________________________
+            // Apply boundary conditions
+            setSpecificVolBC(sp_vol_L, "SpecificVol", true, rho_CC, vol_frac[m],
+                patch, m_materialManager, indx);
+
+
+            //____ B U L L E T   P R O O F I N G----
+            // ignore BP if recompute time step has already been requested
+            IntVector neg_cell;
+            bool rts = new_dw->recomputeTimeStep();
+
+            if (!areAllValuesPositive(sp_vol_L, neg_cell) && !rts) {
+                cout << "\nICE:WARNING......Negative specific Volume" << endl;
+                cout << "cell              " << neg_cell << " level " << level->getIndex() << endl;
+                cout << "matl              " << indx << endl;
+                cout << "sum_thermal_exp   " << sum_therm_exp[neg_cell] << endl;
+                cout << "sp_vol_src        " << sp_vol_src[neg_cell] << endl;
+                cout << "mass sp_vol_L     " << sp_vol_L[neg_cell] << endl;
+                cout << "mass sp_vol_L_old "
+                    << (rho_CC[neg_cell] * vol * sp_vol_CC[neg_cell]) << endl;
+                cout << "-----------------------------------" << endl;
+                //        ostringstream warn;
+                //        int L = level->getIndex();
+                //        warn<<"ERROR ICE:("<<L<<"):computeLagrangianSpecificVolumeRF, mat "<<indx
+                //            << " cell " <<neg_cell << " sp_vol_L is negative\n";
+                //        throw InvalidValue(warn.str(), __FILE__, __LINE__);
+
+                new_dw->put(bool_or_vartype(true), VarLabel::find(abortTimeStep_name));
+                new_dw->put(bool_or_vartype(true), VarLabel::find(recomputeTimeStep_name));
+            }
+        }  // end numALLMatl loop
+    }  // patch loop
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 //______________________________________________________________________
 //
