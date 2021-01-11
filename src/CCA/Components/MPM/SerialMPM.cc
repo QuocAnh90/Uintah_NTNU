@@ -4164,6 +4164,10 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
                                pset);
       }
 
+      // critical density and volume
+      double rho_0 = mpm_matl->getInitialDensity();
+      double rho_critical = 0.9 * rho_0;
+
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
         particleIndex idx = *iter;
@@ -4214,6 +4218,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
           //if(num_scs > 1000){
           //  cout << "NUM_SCS = " << num_scs << endl;
           //}
+          /*
           double dtsc = delT/(double (num_scs));
           Matrix3 OP_tensorL_DT = Identity + tensorL*dtsc;
           Matrix3 F = pFOld[idx];
@@ -4221,6 +4226,31 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
             F=OP_tensorL_DT*F;
           }
           pFNew[idx]=F;
+          */
+
+          // Analytical equation to update volume (Dunatunga & Kamrin 2018)
+          Matrix3 Amat = tensorL * delT;
+          double traceAmat = Amat.Trace();
+          double dJ = exp(traceAmat);
+          double pvolume_trial = pVolumeOld[idx] * dJ;
+          double pvolume_critical = pmass[idx] / rho_critical;
+          //double rho_cur = rho_0 / J; //current density
+          //partvoldef += pvolume[idx];
+
+          if (pvolume_trial < pvolume_critical) {
+              // Deformation gradient
+              Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
+              pFNew[idx] = Finc * pFOld[idx];
+              pvolume[idx] = pvolume_trial;
+              //double J = pFNew[idx].Determinant();
+              //double JOld = pFOld[idx].Determinant();
+              //pvolume[idx] = pVolumeOld[idx] * (J / JOld);
+          }
+          else {
+              pvolume[idx] = pVolumeOld[idx];
+              pFNew[idx] = pFOld[idx];
+              //partvoldef += pvolume[idx];
+          }
         }
         else{
           Matrix3 Amat = tensorL*delT;
