@@ -190,6 +190,10 @@ namespace Uintah {
     const VarLabel* mass_Y_FC_fluxLabel;
     const VarLabel* mass_Z_FC_fluxLabel;
     
+    const VarLabel* Porosity_X_FC_fluxLabel;
+    const VarLabel* Porosity_Y_FC_fluxLabel;
+    const VarLabel* Porosity_Z_FC_fluxLabel;
+
     const VarLabel* mom_X_FC_fluxLabel;
     const VarLabel* mom_Y_FC_fluxLabel;
     const VarLabel* mom_Z_FC_fluxLabel;

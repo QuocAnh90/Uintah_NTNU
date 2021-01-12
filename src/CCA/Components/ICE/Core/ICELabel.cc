@@ -228,7 +228,11 @@ ICELabel::ICELabel()
   mass_X_FC_fluxLabel      = VarLabel::create("mass_X_FC_flux",    SFCX_double);
   mass_Y_FC_fluxLabel      = VarLabel::create("mass_Y_FC_flux",    SFCY_double);
   mass_Z_FC_fluxLabel      = VarLabel::create("mass_Z_FC_flux",    SFCZ_double);
-    
+  
+  Porosity_X_FC_fluxLabel  = VarLabel::create("Porosity_X_FC_flux", SFCX_double);
+  Porosity_Y_FC_fluxLabel  = VarLabel::create("Porosity_Y_FC_flux", SFCY_double);
+  Porosity_Z_FC_fluxLabel  = VarLabel::create("Porosity_Z_FC_flux", SFCZ_double);
+
   mom_X_FC_fluxLabel       = VarLabel::create("mom_X_FC_flux",     SFCX_Vector); 
   mom_Y_FC_fluxLabel       = VarLabel::create("mom_Y_FC_flux",     SFCY_Vector); 
   mom_Z_FC_fluxLabel       = VarLabel::create("mom_Z_FC_flux",     SFCZ_Vector); 
@@ -428,6 +432,10 @@ ICELabel::~ICELabel()
     VarLabel::destroy(mass_Y_FC_fluxLabel);
     VarLabel::destroy(mass_Z_FC_fluxLabel);
     
+    VarLabel::destroy(Porosity_X_FC_fluxLabel);
+    VarLabel::destroy(Porosity_Y_FC_fluxLabel);
+    VarLabel::destroy(Porosity_Z_FC_fluxLabel);
+
     VarLabel::destroy(mom_X_FC_fluxLabel);
     VarLabel::destroy(mom_Y_FC_fluxLabel);
     VarLabel::destroy(mom_Z_FC_fluxLabel);

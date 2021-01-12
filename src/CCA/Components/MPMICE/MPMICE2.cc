@@ -975,6 +975,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
         //                                                                  mpm_matls);
         //    }
 
+        /*
         scheduleInterpolatePressCCToPressNC(sched, mpm_patches, press_matl,
             mpm_matls);
 
@@ -982,6 +983,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
             one_matl,
             mpm_matls_sub,
             mpm_matls);
+            */
     }
 
     d_mpm->scheduleComputeInternalHeatRate(sched, mpm_patches, mpm_matls);
@@ -990,7 +992,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     d_mpm->scheduleComputeAndIntegrateAcceleration(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleIntegrateTemperatureRate(sched, mpm_patches, mpm_matls);
 
-    scheduleComputeLagrangianValuesMPM(sched, mpm_patches, one_matl,
+    scheduleComputeLagrangianValuesMPMtest(sched, mpm_patches, one_matl,
         mpm_matls);
 
     // do coarsens in reverse order, and before the other tasks
@@ -1014,7 +1016,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
             all_matls,
             d_ice->d_BC_globalVars);
 
-        d_ice->scheduleComputeLagrangianSpecificVolume(
+        scheduleComputeLagrangianSpecificVolume(
             sched, ice_patches, ice_matls_sub,
             mpm_matls_sub,
             press_matl,
@@ -3073,7 +3075,7 @@ void MPMICE2::computeLagrangianValuesMPMtest(const ProcessorGroup*,
                     int_eng_L_mpm += gtempstar[nodeIdx[in]] * cv * NC_CCw_mass;
                 }
 
-                // Add pore water pressure term
+                // Add pore water pressure term  (1-n) * gradP
                 cmomentum_mpm += mom_source2[c];
             }
             //__________________________________
@@ -3211,7 +3213,7 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
 }
 
 /* _____________________________________________________________________
- Function~  ICE::computeLagrangianSpecificVolume--
+ Function~  MPMICE2::computeLagrangianSpecificVolume--
  _____________________________________________________________________  */
 void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
     const PatchSubset* patches,
@@ -3229,6 +3231,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         delt_vartype delT;
         old_dw->get(delT, Mlb->delTLabel, level);
 
+        Advector* advector = d_ice->d_advector->clone(new_dw, patch, isRegridTimeStep());
+
         unsigned int numALLMatls = m_materialManager->getNumMatls();
         Vector  dx = patch->dCell();
         double vol = dx.x() * dx.y() * dx.z();
@@ -3240,15 +3244,22 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         std::vector<constCCVariable<double> > Temp_CC(numALLMatls);
         std::vector<CCVariable<double> > alpha(numALLMatls);
         constCCVariable<double> rho_CC, f_theta, sp_vol_CC, cv;
-        constCCVariable<double> delP, P;
+        constCCVariable<double> P, Porosity_CC;
         constCCVariable<double> TMV_CC;
         CCVariable<double> sum_therm_exp;
-        vector<double> if_mpm_matl_ignore(numALLMatls);
 
         new_dw->allocateTemporary(sum_therm_exp, patch);
-        new_dw->get(delP, Ilb->delP_DilatateLabel, 0, patch, gn, 0);
         new_dw->get(P, Ilb->press_CCLabel, 0, patch, gn, 0);
         sum_therm_exp.initialize(0.);
+
+        // Aditional line
+        CCVariable<double> termICE, termMPM, q_advectedICE, q_advectedMPM, vol_fracICE, vol_fracMPM;
+        new_dw->allocateTemporary(termICE, patch);
+        new_dw->allocateTemporary(termMPM, patch);
+        new_dw->allocateTemporary(q_advectedICE, patch);
+        new_dw->allocateTemporary(q_advectedMPM, patch);
+        new_dw->allocateTemporary(vol_fracICE, patch);
+        new_dw->allocateTemporary(vol_fracMPM, patch);
 
         if (d_ice->d_with_mpm) {
             new_dw->get(TMV_CC, Ilb->TMV_CCLabel, 0, patch, gn, 0);
@@ -3265,7 +3276,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
             ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
             int indx = matl->getDWIndex();
-
+          
             new_dw->get(Tdot[m], Ilb->Tdot_CCLabel, indx, patch, gn, 0);
             new_dw->get(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch, gac, 1);
             new_dw->allocateTemporary(alpha[m], patch);
@@ -3279,16 +3290,27 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
         //__________________________________
         // Sum of thermal expansion
-        // ignore contributions from mpm_matls
-        // UNTIL we have temperature dependent EOS's for the solids
         for (unsigned int m = 0; m < numALLMatls; m++) {
             Material* matl = m_materialManager->getMaterial(m);
             ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+            MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
+
             int indx = matl->getDWIndex();
 
+            constSFCXVariable<double> uvel_FC;
+            constSFCYVariable<double> vvel_FC;
+            constSFCZVariable<double> wvel_FC;
+            constCCVariable<double> mass_L;
+
+            Ghost::GhostType  gac = Ghost::AroundCells;
+            new_dw->get(uvel_FC, Ilb->uvel_FCMELabel, indx, patch, gac, 2);
+            new_dw->get(vvel_FC, Ilb->vvel_FCMELabel, indx, patch, gac, 2);
+            new_dw->get(wvel_FC, Ilb->wvel_FCMELabel, indx, patch, gac, 2);
+            new_dw->get(mass_L, Ilb->mass_L_CCLabel, indx, patch, gac, 2);
+
             if (ice_matl) {
-                if_mpm_matl_ignore[m] = 1.0;
                 new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
+                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gn, 0);
                 new_dw->get(cv, Ilb->specific_heatLabel, indx, patch, gn, 0);
 
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
@@ -3298,9 +3320,45 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                     sum_therm_exp[c] += vol_frac[m][c] * alpha[m][c] * Tdot[m][c];
                 }
             }
-            else {
-                if_mpm_matl_ignore[m] = 0.0;
-                alpha[m].initialize(0.0);
+
+             // Calculate the divergence of velocity
+             //__________________________________
+             // Advection preprocessing
+            bool bulletProof_test = true;
+            advectVarBasket* varBasket = scinew advectVarBasket();
+
+            advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
+                bulletProof_test, new_dw, varBasket);       
+
+            varBasket->doRefluxing = false;  // don't need to reflux here
+            //__________________________________
+            //   advect vol_frac * Porosity
+            if (ice_matl) {
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    vol_fracICE[c] = Porosity_CC[c] * vol_frac[m][c];
+                }
+                 //advector->advectQ(vol_fracICE, patch, q_advectedICE, varBasket,
+                 //   d_notUsedX, d_notUsedY, d_notUsedZ, new_dw);
+                advector->advectQ(vol_fracICE, mass_L, q_advectedICE, varBasket);
+            }
+
+            if (mpm_matl) {           
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    vol_fracMPM[c] = 1 - Porosity_CC[c];
+                }
+                //advector->advectQ(vol_fracMPM, patch, q_advectedMPM, varBasket,
+                 //   d_notUsedX, d_notUsedY, d_notUsedZ, new_dw);
+                advector->advectQ(vol_fracMPM, mass_L, q_advectedMPM, varBasket);
+            }
+
+            delete varBasket;
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                termICE[c] -= q_advectedICE[c];
+                termMPM[c] -= q_advectedMPM[c];
             }
         }
 
@@ -3348,15 +3406,15 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 //__________________________________
                 //  term1
-        //        double term1 = -vol_frac[m][c] * kappa[c] * TMV_CC[c] * delP[c];
-                double term1 = -vol_frac[m][c] * kappa[c] * vol * delP[c];
-                //        double term2 = delT * TMV_CC[c] *
+                double term1 =  vol * (termICE[c] + termMPM[c]);
+                
+                //  term2
                 double term2 = delT * vol *
                     (vol_frac[m][c] * alpha[m][c] * Tdot[m][c] -
                         f_theta[c] * sum_therm_exp[c]);
 
                 // This is actually mass * sp_vol
-                double src = term1 + if_mpm_matl_ignore[m] * term2;
+                double src = term1 + term2;
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (rho_CC[c] * vol);
             }
@@ -3382,7 +3440,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             bool rts = new_dw->recomputeTimeStep();
 
             if (!areAllValuesPositive(sp_vol_L, neg_cell) && !rts) {
-                cout << "\nICE:WARNING......Negative specific Volume" << endl;
+                cout << "\nMPMICE2:WARNING......Negative specific Volume" << endl;
                 cout << "cell              " << neg_cell << " level " << level->getIndex() << endl;
                 cout << "matl              " << indx << endl;
                 cout << "sum_thermal_exp   " << sum_therm_exp[neg_cell] << endl;
@@ -3404,16 +3462,6 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
     }  // patch loop
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 //______________________________________________________________________

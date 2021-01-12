@@ -4863,7 +4863,7 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
       //__________________________________
       // internal energy
       varBasket->is_Q_massSpecific = true;
-      varBasket->desc = "int_eng";
+      varBasket->desc = "Porosity";
       advector->advectQ(int_eng_L_ME, mass_L, q_advected, varBasket);
 
       for(CellIterator iter = patch->getCellIterator(); !iter.done();  iter++){
