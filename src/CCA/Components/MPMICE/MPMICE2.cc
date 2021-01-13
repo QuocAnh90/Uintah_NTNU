@@ -3321,6 +3321,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 }
             }
 
+
+            /*
              // Calculate the divergence of velocity
              //__________________________________
              // Advection preprocessing
@@ -3359,9 +3361,9 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 termICE[c] -= q_advectedICE[c];
                 termMPM[c] -= q_advectedMPM[c];
-            }
+            }*/
         }
-
+        
         //__________________________________ 
         for (unsigned int m = 0; m < numALLMatls; m++) {
             Material* matl = m_materialManager->getMaterial(m);
@@ -3406,8 +3408,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 //__________________________________
                 //  term1
-                double term1 =  vol * (termICE[c] + termMPM[c]);
-                
+                //double term1 =  vol * (termICE[c] + termMPM[c]);
+                double term1 = 0;
                 //  term2
                 double term2 = delT * vol *
                     (vol_frac[m][c] * alpha[m][c] * Tdot[m][c] -
