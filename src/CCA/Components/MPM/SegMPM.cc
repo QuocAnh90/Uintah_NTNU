@@ -4262,7 +4262,7 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
           pvolume[idx] = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
         }
 
-         // Temporary hack
+        // Temporary hack for negative jacobian
         double Jtest = pFNew[idx].Determinant();
         if (Jtest <= 0) {
             pFNew[idx] = pFOld[idx];

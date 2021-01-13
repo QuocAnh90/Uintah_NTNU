@@ -4256,11 +4256,20 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
           Matrix3 Amat = tensorL*delT;
           Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
           pFNew[idx] = Finc*pFOld[idx];
+
+          double J = pFNew[idx].Determinant();
+          double JOld = pFOld[idx].Determinant();
+          pvolume[idx] = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
         }
 
-        double J   =pFNew[idx].Determinant();
-        double JOld=pFOld[idx].Determinant();
-        pvolume[idx]=pVolumeOld[idx]*(J/JOld)*(pmassNew[idx]/pmass[idx]);
+        // Temporary hack for negative jacobian
+        double Jtest = pFNew[idx].Determinant();
+        if (Jtest <= 0) {
+            pFNew[idx] = pFOld[idx];
+            double J = pFNew[idx].Determinant();
+            pvolume[idx] = pVolumeOld[idx];
+        }
+
         partvoldef += pvolume[idx];
       }
 
