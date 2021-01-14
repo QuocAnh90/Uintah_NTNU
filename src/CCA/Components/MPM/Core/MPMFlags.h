@@ -119,6 +119,7 @@ class Output;
     bool        d_GEVelProj;                                   // Use the velocity gradient in projecting particle velocity to grid
 
     bool        d_with_ice;
+    bool        d_with_mpmice;
     bool        d_with_arches;
     std::string d_mms_type;                                    // MMS Flag
 

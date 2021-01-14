@@ -166,6 +166,8 @@ void MPMICE::problemSetup(const ProblemSpecP& prob_spec,
   dynamic_cast<ApplicationCommon*>(d_mpm)->problemSetup( prob_spec );
 
   d_mpm->setWithICE();
+  d_mpm->setWithMPMICE();
+  d_ice->setWithMPMICE();
   d_mpm->problemSetup(prob_spec, restart_prob_spec,grid);
 
   d_8or27 = d_mpm->flags->d_8or27; 

@@ -25,6 +25,10 @@
 #ifndef UINTAH_HOMEBREW_MPMICE2_H
 #define UINTAH_HOMEBREW_MPMICE2_H
 
+ // NOTE: SOMETHING IS FUBAR IN THE DEFINITION OF fflux AS IT RELATES TO
+ // swapbytes. AS SUCH, Advector.h MUST BE CALLED BEFORE ApplicationCommon.h
+
+#include <CCA/Components/ICE/Advection/Advector.h>
 #include <CCA/Components/Application/ApplicationCommon.h>
 
 #include <Core/ProblemSpec/ProblemSpecP.h>
@@ -172,7 +176,7 @@ namespace Uintah {
             const MaterialSubset*,
             const MaterialSubset*,
             const MaterialSet*);
-
+        
         void computePorosityFC(const ProcessorGroup*,
             const PatchSubset* patch,
             const MaterialSubset*,
@@ -196,6 +200,21 @@ namespace Uintah {
             const MaterialSubset*,
             DataWarehouse*,
             DataWarehouse*);
+            
+            /*
+        void scheduleComputeVel_FC(SchedulerP&,
+            const PatchSet*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSubset*,
+            const MaterialSet*);
+
+        void computeVel_FC(const ProcessorGroup*,
+            const PatchSubset*,
+            const MaterialSubset*,
+            DataWarehouse*,
+            DataWarehouse*);
+            */
 
         template<class T> void computeVelICEFace(int dir, CellIterator it,
             IntVector adj_offset,
@@ -208,7 +227,7 @@ namespace Uintah {
             constCCVariable<double>& press_CC,
             T& vel_FC,
             T& gradP_FC);
-
+        
         void scheduleComputeVelMPM_FC(SchedulerP&,
             const PatchSet*,
             const MaterialSubset*,
@@ -220,7 +239,7 @@ namespace Uintah {
             const MaterialSubset*,
             DataWarehouse*,
             DataWarehouse*);
-
+        
         template<class T> void computeVelMPMFace(int dir, CellIterator it,
             IntVector adj_offset,
             double dx,
@@ -491,6 +510,8 @@ namespace Uintah {
             SYMMETRY,
             NEIGHBOR
         };
+
+        Advector* d_advector;
 
     protected:
         MPMICE2(const MPMICE2&);

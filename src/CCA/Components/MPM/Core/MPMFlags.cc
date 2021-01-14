@@ -101,6 +101,7 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_min_mass_for_acceleration          =  0;            // Min mass to allow division by in computing acceleration
   d_max_vel                            =  3.e105;
   d_with_ice                           =  false;
+  d_with_mpmice                        =  false;
   d_with_arches                        =  false;
   d_myworld                            =  myworld;
   

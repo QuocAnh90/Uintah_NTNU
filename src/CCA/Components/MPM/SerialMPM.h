@@ -145,6 +145,11 @@ public:
         flags->d_with_ice = true;
   };
 
+  void setWithMPMICE()
+  {
+      flags->d_with_mpmice = true;
+  };
+
   void setWithARCHES()
   {
         flags->d_with_arches = true;

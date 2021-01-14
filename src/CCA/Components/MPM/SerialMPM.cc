@@ -1147,7 +1147,7 @@ void SerialMPM::scheduleComputeInternalForce(SchedulerP& sched,
   t->requires(Task::OldDW,lb->pXLabel,                    gan,NGP);
   t->requires(Task::NewDW,lb->pCurSizeLabel,              gan,NGP);
 
-  if(flags->d_with_ice){
+  if(flags->d_with_mpmice){
     t->requires(Task::NewDW, lb->pPressureLabel,          gan,NGP);
   }
 
@@ -2997,7 +2997,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
       new_dw->allocateAndPut(gstress,      lb->gStressForSavingLabel,dwi,patch);
       new_dw->allocateAndPut(internalforce,lb->gInternalForceLabel,  dwi,patch);
 
-      if(flags->d_with_ice){
+      if(flags->d_with_mpmice){
         new_dw->get(p_pressure,lb->pPressureLabel, pset);
       }
       else {
