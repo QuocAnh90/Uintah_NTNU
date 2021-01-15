@@ -1019,6 +1019,8 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->computes(MIlb->stressY_CCLabel);
         t->computes(MIlb->stressZ_CCLabel);
 
+        t->computes(Ilb->int_eng_source_CCLabel);
+
         sched->addTask(t, patches, mpm_matls);
     }
 }
@@ -1044,7 +1046,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
         Vector dx = patch->dCell();
         double cell_vol = dx.x() * dx.y() * dx.z();
         Ghost::GhostType  gac = Ghost::AroundCells;
-        Ghost::GhostType  gn = Ghost::None;
+        //Ghost::GhostType  gn = Ghost::None;
 
         constNCVariable<double> NC_CCweight;
         old_dw->get(NC_CCweight, Mlb->NC_CCweightLabel, 0, patch, gac, 1);
@@ -1072,6 +1074,9 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             new_dw->allocateAndPut(rho_CC, Ilb->rho_CCLabel, indx, patch);
             new_dw->allocateAndPut(vol_frac_CC, Ilb->vol_frac_CCLabel, indx, patch);
             new_dw->allocateAndPut(stress_CC, MIlb->stress_CCLabel, indx, patch);
+
+            CCVariable<double> int_eng_source;
+            new_dw->allocateAndPut(int_eng_source,Ilb->int_eng_source_CCLabel, indx, patch);
 
             // Hacking
             CCVariable<double> stressX_CC, stressY_CC, stressZ_CC;
@@ -1127,23 +1132,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 sp_vol_mpm *= inv_cmass;
                 Vol_CC_mpm *= inv_cmass;
                 stress_CC_mpm *= inv_cmass;
-                //__________________________________ in MPMICE
-                // set *_CC = to either vel/Temp_CC_mpm or some safe values
-                // depending upon if there is cmass.  You need
-                // a well defined vel/temp_CC even if there isn't any mass
-                // If you change this you must also change 
-                // MPMICE2::computeLagrangianValuesMPM
 
-                //Note for MPMICE2: because the ICE materials also exist inside the MPM material
-                // so it is not necessary to define a safe values for the cell without MPM material
-
-                //double one_or_zero = (cmass[c] - very_small_mass) / cmass[c];
-                //        Temp_CC[c]  =(1.0-one_or_zero)*999.        + one_or_zero*Temp_CC_mpm;
-                //        sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_orig + one_or_zero*sp_vol_mpm;
-                // Temp_CC[c] = (1.0 - one_or_zero) * Temp_CC_ice[c] + one_or_zero * Temp_CC_mpm;
-                // sp_vol_CC[c] = (1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm;
-                // __________________________________
-
+                // Locate on cell
                 vel_CC[c] = vel_CC_mpm;
                 stress_CC[c] = stress_CC_mpm;
                 Temp_CC[c] = Temp_CC_mpm;
@@ -1151,18 +1141,25 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 Volume_CC[c] = Vol_CC_mpm;
                 rho_CC[c] = cmass[c] / cell_vol;
                 vol_frac_CC[c] = 1;
+                int_eng_source[c] = 0;
+
                 // Hacking here because stuggling to deal with stress_CC when computing face centered velocity
                 stressX_CC[c] = stress_CC[c](0, 0);
                 stressY_CC[c] = stress_CC[c](1, 1);
-                stressZ_CC[c] = stress_CC[c](2, 2);
+                stressZ_CC[c] = stress_CC[c](2, 2);                                         
+            }
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
 
                 // Calculate cell centered porosity
-                Porosity_CC[c] = 1 - (cmass[c]/ Volume_CC[c]/ IniDensity);
+                Porosity_CC[c] = 1 - (cmass[c] / Volume_CC[c] / IniDensity);
+                cerr << Porosity_CC[c] << endl;
 
                 // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
                 Permeability_CC[c] = IniPermeability;
 
-                // Calculate momentum exchange coefficient in Scalar.cc              
+                // Calculate momentum exchange coefficient in Scalar.cc    
             }
 
             //  Set BC's
