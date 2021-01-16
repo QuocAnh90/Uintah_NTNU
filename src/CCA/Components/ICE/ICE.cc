@@ -2510,7 +2510,7 @@ void ICE::computeThermoTransportProperties(const ProcessorGroup*,
       SpecificHeat *cvModel = ice_matl->getSpecificHeatModel();
 
       // Contact cannot catch the porosity so initialize porosity here
-      for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+      for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
           IntVector c = *iter;
           Porosity_CC[c] = 1;
       }
