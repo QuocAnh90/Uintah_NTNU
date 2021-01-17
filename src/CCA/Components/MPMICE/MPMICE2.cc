@@ -167,6 +167,7 @@ void MPMICE2::problemSetup(const ProblemSpecP& prob_spec,
     dynamic_cast<ApplicationCommon*>(d_mpm)->problemSetup(prob_spec);
 
     d_mpm->setWithICE();
+    d_mpm->setWithMPMICE2();
     d_mpm->problemSetup(prob_spec, restart_prob_spec, grid);
 
     d_8or27 = d_mpm->flags->d_8or27;
@@ -505,231 +506,6 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
         cout_doing << inlevel->getIndex() << endl;
     }
 
-    // MPMICE schedules
-    /*
-    //__________________________________
-    // Scheduling
-    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-        d_ice->scheduleComputeThermoTransportProperties(sched, ice_level, ice_matls);
-
-        d_ice->scheduleMaxMach_on_Lodi_BC_Faces(sched, ice_level, ice_matls);
-    }
-
-    // diagnostic task
-    //d_mpm->scheduleTotalParticleCount(          sched, mpm_patches, mpm_matls);
-
-    d_mpm->scheduleApplyExternalLoads(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeCurrentParticleSize(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleInterpolateParticlesToGrid(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeInternalForce(sched, mpm_patches, mpm_matls);
-    // Move internal force here because we need nodal stress but we need to set
-    // p.pressure = 0 because the stress is subtracted p.pressure in MPMICE, not in
-    // MPMICE2
-    d_mpm->scheduleComputeHeatExchange(sched, mpm_patches, mpm_matls);
-
-    if (d_mpm->flags->d_computeNormals) {
-        d_mpm->scheduleComputeNormals(sched, mpm_patches, mpm_matls);
-    }
-    d_mpm->scheduleExMomInterpolated(sched, mpm_patches, mpm_matls);
-
-    // schedule the interpolation of mass and volume to the cell centers
-    scheduleInterpolateNCToCC_0(sched, mpm_patches, one_matl,
-        mpm_matls);
-
-    // do coarsens in reverse order, and before the other tasks
-    if (do_mlmpmice2) {
-        for (int l = inlevel->getGrid()->numLevels() - 2; l >= 0; l--) {
-            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-            const PatchSet* ice_patches = ice_level->eachPatch();
-
-            scheduleCoarsenCC_0(sched, ice_patches, mpm_matls);
-            scheduleCoarsenNCMass(sched, ice_patches, mpm_matls);
-        }
-    }
-
-    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-        const PatchSet* ice_patches = ice_level->eachPatch();
-
-        scheduleComputePressure(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            press_matl,
-            all_matls);
-
-        d_ice->scheduleComputeModelSources(sched, ice_level, all_matls);
-
-        d_ice->scheduleUpdateVolumeFraction(sched, ice_level, press_matl,
-            all_matls);
-
-        d_ice->scheduleComputeVel_FC(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            press_matl,
-            all_matls);
-
-        d_ice->d_exchModel->sched_PreExchangeTasks(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            all_matls);
-
-        d_ice->d_exchModel->sched_AddExch_VelFC(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            all_matls,
-            d_ice->d_BC_globalVars,
-            false);
-
-    }
-    if (d_ice->d_impICE) {        //  I M P L I C I T, won't work with AMR yet
-      // we should use the AMR multi-level pressure solve
-        for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-            const PatchSet* ice_patches = ice_level->eachPatch();
-
-            d_ice->scheduleSetupRHS(sched, ice_patches, one_matl,
-                all_matls,
-                false,
-                "computes");
-            d_ice->scheduleCompute_maxRHS(sched, ice_level, one_matl,
-                all_matls);
-
-            d_ice->scheduleImplicitPressureSolve(sched, ice_level, ice_patches,
-                one_matl,
-                press_matl,
-                ice_matls_sub,
-                mpm_matls_sub,
-                all_matls);
-
-            d_ice->scheduleComputeDel_P(sched, ice_level, ice_patches,
-                one_matl,
-                press_matl,
-                all_matls);
-        }
-    }                           //  IMPLICIT AND EXPLICIT
-
-
-    if (!(d_ice->d_impICE)) {       //  E X P L I C I T 
-        for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-            const PatchSet* ice_patches = ice_level->eachPatch();
-
-            d_ice->scheduleComputeDelPressAndUpdatePressCC(
-                sched, ice_patches, press_matl,
-                ice_matls_sub,
-                mpm_matls_sub,
-                all_matls);
-        }
-    }
-
-    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-        const PatchSet* ice_patches = ice_level->eachPatch();
-
-        d_ice->scheduleComputePressFC(sched, ice_patches, press_matl,
-            all_matls);
-
-        d_ice->scheduleVelTau_CC(sched, ice_patches, ice_matls);
-
-        d_ice->scheduleViscousShearStress(sched, ice_patches, ice_matls);
-
-        d_ice->scheduleAccumulateMomentumSourceSinks(
-            sched, ice_patches, press_matl,
-            ice_matls_sub,
-            mpm_matls_sub,
-            all_matls);
-
-        d_ice->scheduleAccumulateEnergySourceSinks(sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            press_matl,
-            all_matls);
-    }
-
-    if (!d_rigidMPM) {
-        //    if(do_mlmpmice2){
-        //      scheduleRefinePressCC(                  sched, mpm_patches, press_matl,
-        //                                                                  mpm_matls);
-        //    }
-
-        scheduleInterpolatePressCCToPressNC(sched, mpm_patches, press_matl,
-            mpm_matls);
-
-        scheduleInterpolatePAndGradP(sched, mpm_patches, press_matl,
-            one_matl,
-            mpm_matls_sub,
-            mpm_matls);
-    }
-
-    
-    d_mpm->scheduleComputeInternalHeatRate(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeNodalHeatFlux(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleSolveHeatEquations(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeAndIntegrateAcceleration(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleIntegrateTemperatureRate(sched, mpm_patches, mpm_matls);
-
-    scheduleComputeLagrangianValuesMPM(sched, mpm_patches, one_matl,
-        mpm_matls);
-
-    // do coarsens in reverse order, and before the other tasks
-    if (do_mlmpmice2) {
-        for (int l = inlevel->getGrid()->numLevels() - 2; l >= 0; l--) {
-            const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-            const PatchSet* ice_patches = ice_level->eachPatch();
-            scheduleCoarsenLagrangianValuesMPM(sched, ice_patches, mpm_matls);
-        }
-    }
-
-    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-        const PatchSet* ice_patches = ice_level->eachPatch();
-
-        d_ice->scheduleComputeLagrangianValues(sched, ice_patches, ice_matls);
-
-        d_ice->d_exchModel->sched_AddExch_Vel_Temp_CC(
-            sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            all_matls,
-            d_ice->d_BC_globalVars);
-
-        d_ice->scheduleComputeLagrangianSpecificVolume(
-            sched, ice_patches, ice_matls_sub,
-            mpm_matls_sub,
-            press_matl,
-            all_matls);
-
-        d_ice->scheduleComputeLagrangian_Transported_Vars(
-            sched, ice_patches, ice_matls);
-
-    }
-
-    scheduleComputeCCVelAndTempRates(sched, mpm_patches, mpm_matls);
-
-    //  if(do_mlmpmice2){
-    //    scheduleRefineCC(                         sched, mpm_patches, mpm_matls);
-    //  }
-
-    scheduleInterpolateCCToNC(sched, mpm_patches, mpm_matls);
-
-    d_mpm->scheduleExMomIntegrated(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleSetGridBoundaryConditions(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleInterpolateToParticlesAndUpdate(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeParticleGradients(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleComputeStressTensor(sched, mpm_patches, mpm_matls);
-    d_mpm->scheduleFinalParticleUpdate(sched, mpm_patches, mpm_matls);
-    if (d_mpm->flags->d_computeScaleFactor) {
-        d_mpm->scheduleComputeParticleScaleFactor(sched, mpm_patches, mpm_matls);
-    }
-
-    for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
-        const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
-        const PatchSet* ice_patches = ice_level->eachPatch();
-
-        d_ice->scheduleAdvectAndAdvanceInTime(sched, ice_patches, ice_matls_sub,
-            ice_matls);
-
-        d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub,
-            ice_matls, "afterAdvection");
-    }
-
-    */
-
     //__________________________________
     // Scheduling
     for (int l = 0; l < inlevel->getGrid()->numLevels(); l++) {
@@ -958,6 +734,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     d_mpm->scheduleComputeParticleGradients(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleComputeStressTensor(sched, mpm_patches, mpm_matls);
     d_mpm->scheduleFinalParticleUpdate(sched, mpm_patches, mpm_matls);
+
     if (d_mpm->flags->d_computeScaleFactor) {
         d_mpm->scheduleComputeParticleScaleFactor(sched, mpm_patches, mpm_matls);
     }
@@ -994,6 +771,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->requires(Task::NewDW, Mlb->gMassLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gStressForSavingLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVolumeLabel, Ghost::AroundCells, 1);
+        t->requires(Task::NewDW, Mlb->gPorosityLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVelocityBCLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gTemperatureLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gSp_volLabel, Ghost::AroundCells, 1);
@@ -1005,7 +783,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->requires(Task::OldDW, Ilb->timeStepLabel);
 
         t->computes(MIlb->cMassLabel);       
-        t->computes(MIlb->cVolumeLabel);
+        //t->computes(MIlb->cVolumeLabel);
         t->computes(Ilb->Porosity_CCLabel);
         t->computes(MIlb->cPermeabilityLabel);
         t->computes(MIlb->vel_CCLabel);
@@ -1055,9 +833,10 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
             int indx = mpm_matl->getDWIndex();
             // Create arrays for the grid data
-            constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol;
+            constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol, gPorosity;
             constNCVariable<Vector> gvelocity;
-            CCVariable<double> cmass, Volume_CC, Temp_CC, Porosity_CC, Permeability_CC;
+            CCVariable<double> cmass, Temp_CC, Porosity_CC, Permeability_CC;
+            //CCVariable<double> Volume_CC;
             CCVariable<double> sp_vol_CC, rho_CC, vol_frac_CC;
             CCVariable<Vector> vel_CC;
             constNCVariable<Matrix3> gstress;
@@ -1065,7 +844,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             //constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
 
             new_dw->allocateAndPut(cmass, MIlb->cMassLabel, indx, patch);
-            new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
+            //new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
             new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
             new_dw->allocateAndPut(Permeability_CC, MIlb->cPermeabilityLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
@@ -1094,6 +873,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             new_dw->get(gmass, Mlb->gMassLabel, indx, patch, gac, 1);
             new_dw->get(gstress, Mlb->gStressForSavingLabel, indx, patch, gac, 1);
             new_dw->get(gvolume, Mlb->gVolumeLabel, indx, patch, gac, 1);
+            new_dw->get(gPorosity, Mlb->gPorosityLabel, indx, patch, gac, 1);
             new_dw->get(gvelocity, Mlb->gVelocityBCLabel, indx, patch, gac, 1);
             new_dw->get(gtemperature, Mlb->gTemperatureLabel, indx, patch, gac, 1);
             new_dw->get(gSp_vol, Mlb->gSp_volLabel, indx, patch, gac, 1);
@@ -1101,7 +881,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             //old_dw->get(Temp_CC_ice, MIlb->temp_CCLabel, indx, patch, gn, 0);
             IntVector nodeIdx[8];
 
-            double IniDensity = mpm_matl->getInitialDensity();
+            //double IniDensity = mpm_matl->getInitialDensity();
             double IniPermeability = mpm_matl->getInitialPermeability();
             //      double sp_vol_orig = 1.0/(mpm_matl->getInitialDensity());
 
@@ -1111,7 +891,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 IntVector c = *iter;
                 patch->findNodesFromCell(*iter, nodeIdx);
 
-                double Vol_CC_mpm = 0.0;
+               // double Vol_CC_mpm = 0.0;
+                double Porosity_CC_mpm = 0.0;
                 double Temp_CC_mpm = 0.0;
                 double sp_vol_mpm = 0.0;
                 Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
@@ -1120,17 +901,20 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 for (int in = 0; in < 8; in++) {
                     double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
                     cmass[c] += NC_CCw_mass;
-                    Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
+                    //Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
+                    Porosity_CC_mpm += gPorosity[nodeIdx[in]] * NC_CCw_mass;
                     sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
                     vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
                     Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
                     stress_CC_mpm += gstress[nodeIdx[in]] * NC_CCw_mass;
                 }
+
                 double inv_cmass = 1.0 / cmass[c];
                 vel_CC_mpm *= inv_cmass;
                 Temp_CC_mpm *= inv_cmass;
                 sp_vol_mpm *= inv_cmass;
-                Vol_CC_mpm *= inv_cmass;
+                //Vol_CC_mpm *= inv_cmass;
+                Porosity_CC_mpm *= inv_cmass;
                 stress_CC_mpm *= inv_cmass;
 
                 // Locate on cell
@@ -1138,7 +922,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 stress_CC[c] = stress_CC_mpm;
                 Temp_CC[c] = Temp_CC_mpm;
                 sp_vol_CC[c] = sp_vol_mpm;
-                Volume_CC[c] = Vol_CC_mpm;
+                //Volume_CC[c] = Vol_CC_mpm;
+                Porosity_CC[c] = Porosity_CC_mpm;
                 rho_CC[c] = cmass[c] / cell_vol;
                 vol_frac_CC[c] = 1;
                 int_eng_source[c] = 0;
@@ -1152,9 +937,11 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
 
+                /*
                 // Calculate cell centered porosity
                 Porosity_CC[c] = 1 - (cmass[c] / Volume_CC[c] / IniDensity);
-                cerr << Porosity_CC[c] << endl;
+                cerr << Porosity_CC[c] << ' ' << cmass[c] << ' ' << Volume_CC[c] << ' ' << cmass[c] << endl;
+                */
 
                 // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
                 Permeability_CC[c] = IniPermeability;
@@ -1168,7 +955,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             setBC(vel_CC, "Velocity", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             //  Set if symmetric Boundary conditions
             setBC(cmass, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
-            setBC(Volume_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+            //setBC(Volume_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+            setBC(Porosity_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(sp_vol_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
 
             //---- B U L L E T   P R O O F I N G------
@@ -1191,11 +979,11 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                      << " cell " << neg_cell << " rho_CC " << rho_CC[neg_cell] << "\n ";
                throw InvalidValue(warn.str(), __FILE__, __LINE__);
             }
-            if (!areAllValuesPositive(Volume_CC, neg_cell) && !rts) {
-                warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
-                    << " cell " << neg_cell << " Volume_CC " << Volume_CC[neg_cell] << "\n ";
-                throw InvalidValue(warn.str(), __FILE__, __LINE__);
-            }
+            //if (!areAllValuesPositive(Volume_CC, neg_cell) && !rts) {
+            //    warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
+            //        << " cell " << neg_cell << " Volume_CC " << Volume_CC[neg_cell] << "\n ";
+            //    throw InvalidValue(warn.str(), __FILE__, __LINE__);
+            //}
             if (!areAllValuesPositive(sp_vol_CC, neg_cell) && !rts) {
                 warn << "ERROR MPMICE2:(" << L << "):interpolateNCToCC_0, mat " << indx
                     << " cell "
@@ -1576,7 +1364,6 @@ void MPMICE2::computeVel_FC(const ProcessorGroup*,
 }
 
 */
-
 
 void MPMICE2::scheduleComputeVelICE_FC(SchedulerP& sched,
     const PatchSet* patches,
@@ -3115,7 +2902,6 @@ void MPMICE2::computeCCVelAndTempRates(const ProcessorGroup*,
         }
     }  //patches
 }
-
 
 //______________________________________________________________________
 

@@ -540,6 +540,7 @@ ParticleCreator::allocateVariables(particleIndex numParticles,
   new_dw->allocateAndPut(pvars.pexternalforce,d_lb->pExternalForceLabel,subset);
   new_dw->allocateAndPut(pvars.pmass,         d_lb->pMassLabel,         subset);
   new_dw->allocateAndPut(pvars.pvolume,       d_lb->pVolumeLabel,       subset);
+  new_dw->allocateAndPut(pvars.pPorosity,     d_lb->pPorosityLabel,     subset);
   new_dw->allocateAndPut(pvars.ptemperature,  d_lb->pTemperatureLabel,  subset);
   new_dw->allocateAndPut(pvars.pparticleID,   d_lb->pParticleIDLabel,   subset);
   new_dw->allocateAndPut(pvars.psize,         d_lb->pSizeLabel,         subset);
@@ -798,6 +799,9 @@ ParticleCreator::initializeParticle(const Patch* patch,
     pvars.pdisp[i]        = Vector(0.,0.,0.);
   }
   
+    // Porosity for MPMICE2
+    pvars.pPorosity[i] = matl->getInitialPorosity();
+
   if(d_with_color){
     pvars.pcolor[i] = (*obj)->getInitialData_double("color");
   }
@@ -1022,6 +1026,9 @@ void ParticleCreator::registerPermanentParticleState(MPMMaterial* matl)
 
   particle_state.push_back(d_lb->pVolumeLabel);
   particle_state_preReloc.push_back(d_lb->pVolumeLabel_preReloc);
+
+  particle_state.push_back(d_lb->pPorosityLabel);
+  particle_state_preReloc.push_back(d_lb->pPorosityLabel_preReloc);
 
   particle_state.push_back(d_lb->pTemperatureLabel);
   particle_state_preReloc.push_back(d_lb->pTemperatureLabel_preReloc);

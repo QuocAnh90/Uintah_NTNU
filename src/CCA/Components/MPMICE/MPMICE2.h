@@ -171,18 +171,6 @@ namespace Uintah {
             double& sum,
             IntVector c);
 
-        void scheduleComputePorosityFC(SchedulerP&,
-            const PatchSet*,
-            const MaterialSubset*,
-            const MaterialSubset*,
-            const MaterialSet*);
-        
-        void computePorosityFC(const ProcessorGroup*,
-            const PatchSubset* patch,
-            const MaterialSubset*,
-            DataWarehouse*,
-            DataWarehouse*);
-
         template<class T> void computePorosityFace(CellIterator it,
             IntVector adj_offset,
             constCCVariable<double>& rho_CC,
@@ -333,15 +321,6 @@ namespace Uintah {
 
         void interpolateCCToNC(const ProcessorGroup*,
             const PatchSubset* patch,
-            const MaterialSubset* matls,
-            DataWarehouse* old_dw,
-            DataWarehouse* new_dw);
-
-        void scheduleComputeInternalForce(SchedulerP&, const PatchSet*,
-            const MaterialSet*);
-
-        void computeInternalForce(const ProcessorGroup*,
-            const PatchSubset* patches,
             const MaterialSubset* matls,
             DataWarehouse* old_dw,
             DataWarehouse* new_dw);

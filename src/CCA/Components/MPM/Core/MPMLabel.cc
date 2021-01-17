@@ -117,6 +117,9 @@ MPMLabel::MPMLabel()
   
   pVolumeLabel = VarLabel::create( "p.volume",
                         ParticleVariable<double>::getTypeDescription());
+
+  pPorosityLabel = VarLabel::create("p.Porosity",
+                        ParticleVariable<double>::getTypeDescription());
   
   pVolumeDeformedLabel = VarLabel::create( "p.volumedeformed",
                         ParticleVariable<double>::getTypeDescription());
@@ -226,6 +229,9 @@ MPMLabel::MPMLabel()
   pVolumeLabel_preReloc = VarLabel::create( "p.volume+",
                         ParticleVariable<double>::getTypeDescription());
   
+  pPorosityLabel_preReloc = VarLabel::create("p.Porosity+",
+                        ParticleVariable<double>::getTypeDescription());
+
   pMassLabel_preReloc = VarLabel::create( "p.mass+",
                         ParticleVariable<double>::getTypeDescription() );
   
@@ -468,6 +474,9 @@ MPMLabel::MPMLabel()
 
   gStressForSavingLabel   = VarLabel::create( "g.stressFS",
                    NCVariable<Matrix3>::getTypeDescription() );
+
+  gPorosityLabel = VarLabel::create("g.Porosity",
+                  NCVariable<double>::getTypeDescription());
 
   gVolumeLabel     = VarLabel::create("g.volume",
                         NCVariable<double>::getTypeDescription());
@@ -888,6 +897,8 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(pStressLabel_preReloc);
   VarLabel::destroy(pVolumeLabel);
   VarLabel::destroy(pVolumeLabel_preReloc);
+  VarLabel::destroy(pPorosityLabel);
+  VarLabel::destroy(pPorosityLabel_preReloc);
   VarLabel::destroy(pMassLabel);
   VarLabel::destroy(pMassLabel_preReloc);
   VarLabel::destroy(pVelocityLabel);
@@ -1010,6 +1021,7 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(NC_CCweightLabel);
   VarLabel::destroy(gThermalContactTemperatureRateLabel);
   VarLabel::destroy(gStressForSavingLabel);
+  VarLabel::destroy(gPorosityLabel);
   VarLabel::destroy(gVolumeLabel);
   VarLabel::destroy(gVolumeF0Label);
   VarLabel::destroy(gVolumeF1Label);

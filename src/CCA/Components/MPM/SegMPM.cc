@@ -4212,13 +4212,14 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
         }
 
         if(flags->d_min_subcycles_for_F>0){
-          double Lnorm_dt = tensorL.Norm()*delT;
+            /*
+          double Lnorm_dt = tensorL.Norm()*delT;       
           int num_scs = min(max(flags->d_min_subcycles_for_F,
                                  2*((int) Lnorm_dt)),10000);
           //if(num_scs > 1000){
           //  cout << "NUM_SCS = " << num_scs << endl;
           //}
-          /*
+          
           double dtsc = delT/(double (num_scs));
           Matrix3 OP_tensorL_DT = Identity + tensorL*dtsc;
           Matrix3 F = pFOld[idx];
@@ -4266,7 +4267,6 @@ void SegMPM::computeParticleGradients(const ProcessorGroup*,
         double Jtest = pFNew[idx].Determinant();
         if (Jtest <= 0) {
             pFNew[idx] = pFOld[idx];
-            double J = pFNew[idx].Determinant();
             pvolume[idx] = pVolumeOld[idx];
         }
        partvoldef += pvolume[idx];       

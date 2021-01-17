@@ -891,6 +891,11 @@ void SerialMPM::scheduleInterpolateParticlesToGrid(SchedulerP& sched,
     t->computes(lb->diffusion->gExternalScalarFlux);
   }
 
+  if (flags->d_with_mpmice2) {
+      t->requires(Task::OldDW, lb->pPorosityLabel, gan, NGP);
+      t->computes(lb->gPorosityLabel);
+  }
+
   t->computes(lb->gMassLabel,        m_materialManager->getAllInOneMatls(),
               Task::OutOfDomain);
   t->computes(lb->gTemperatureLabel, m_materialManager->getAllInOneMatls(),
@@ -1458,6 +1463,10 @@ void SerialMPM::scheduleComputeParticleGradients(SchedulerP& sched,
     t->requires(Task::OldDW, lb->diffusion->pArea,              gnone);
     t->computes(lb->diffusion->pGradConcentration_preReloc);
     t->computes(lb->diffusion->pArea_preReloc);
+  }
+
+  if (flags->d_with_mpmice2) {
+      t->computes(lb->pPorosityLabel_preReloc);
   }
 
   if(flags->d_reductionVars->volDeformed){
@@ -2277,7 +2286,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
 
       // Create arrays for the particle data
       constParticleVariable<Point>  px;
-      constParticleVariable<double> pmass, pvolume, pTemperature, pColor;
+      constParticleVariable<double> pmass, pvolume, pTemperature, pColor, pPorosity;
       constParticleVariable<Vector> pvelocity, pexternalforce;
       constParticleVariable<Point> pExternalForceCorner1, pExternalForceCorner2,
                                    pExternalForceCorner3, pExternalForceCorner4;
@@ -2300,6 +2309,10 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
       }
       old_dw->get(pTemperature,   lb->pTemperatureLabel,   pset);
       new_dw->get(psize,          lb->pCurSizeLabel,       pset);
+
+      if (flags->d_with_mpmice2) {
+          old_dw->get(pPorosity, lb->pPorosityLabel, pset);
+      }
 
       // JBH -- Scalar diffusion related
       constParticleVariable<double> pConcentration, pExternalScalarFlux;
@@ -2330,6 +2343,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
 
       // Create arrays for the grid data
       NCVariable<double> gmass;
+      NCVariable<double> gPorosity;
       NCVariable<double> gvolume;
       NCVariable<Vector> gvelocity;
       NCVariable<Vector> gexternalforce;
@@ -2354,7 +2368,9 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
                              dwi,patch);
       new_dw->allocateAndPut(gexternalheatrate,lb->gExternalHeatRateLabel,
                              dwi,patch);
-
+     new_dw->allocateAndPut(gPorosity, lb->gPorosityLabel, dwi, patch);
+     
+      gPorosity.initialize(0);
       gmass.initialize(d_SMALL_NUM_MPM);
       gvolume.initialize(d_SMALL_NUM_MPM);
 //      gColor.initialize(0.0);
@@ -2416,13 +2432,16 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
               Vector pvel_ext = pvelocity[idx] - pVelGrad[idx]*distance;
               pmom = pvel_ext*pmass[idx];
               ptemp_ext = pTemperature[idx] - Dot(pTempGrad[idx],distance);
-            }
+            }         
             gmass[node]          += pmass[idx]                     * S[k];
             gvelocity[node]      += pmom                           * S[k];
             gvolume[node]        += pvolume[idx]                   * S[k];
 //            gColor[node]         += pColor[idx]*pmass[idx]         * S[k];
             if (!flags->d_useCBDI) {
               gexternalforce[node] += pexternalforce[idx]          * S[k];
+            }
+            if (flags->d_with_mpmice2) {
+                gPorosity[node] += pPorosity[idx] * pmass[idx] * S[k];
             }
             gTemperature[node]   += ptemp_ext * pmass[idx] * S[k];
             gSp_vol[node]        += pSp_vol   * pmass[idx] * S[k];
@@ -2495,6 +2514,9 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
         gvelocity[c]      /= gmass[c];
         gtempglobal[c]    += gTemperature[c];
         gTemperature[c]   /= gmass[c];
+        if (flags->d_with_mpmice2) {
+            gPorosity[c] /= gmass[c];
+        }
 //        gColor[c]         /= gmass[c];
         gTemperatureNoBC[c] = gTemperature[c];
         gSp_vol[c]        /= gmass[c];
@@ -4117,6 +4139,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
       ParticleVariable<double> pvolume,pTempNew;
       ParticleVariable<Matrix3> pFNew,pVelGrad;
       ParticleVariable<Vector> pTempGrad;
+      ParticleVariable<double> pPorosity;
 
       // Get the arrays of grid data on which the new part. values depend
       constNCVariable<Vector>  gvelocity_star;
@@ -4138,6 +4161,11 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
                                                                           pset);
       new_dw->allocateAndPut(pFNew,      lb->pDeformationMeasureLabel_preReloc,
                                                                           pset);
+      if (flags->d_with_mpmice2) {
+          new_dw->allocateAndPut(pPorosity, lb->pPorosityLabel_preReloc,
+              pset);
+      }
+      
 
       new_dw->get(gvelocity_star,  lb->gVelocityStarLabel,   dwi,patch,gac,NGP);
       if (flags->d_doExplicitHeatConduction){
@@ -4325,6 +4353,15 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
           pvolume[idx]=pVolumeOld[idx]*(J/JOld)*(pmassNew[idx]/pmass[idx]);
         }
       } //end of pressureStabilization loop  at the patch level
+
+      if (flags->d_with_mpmice2) {
+          for (ParticleSubset::iterator iter = pset->begin();
+              iter != pset->end(); iter++) {
+              particleIndex idx = *iter;
+
+              pPorosity[idx] = 1 - (pmassNew[idx] / pvolume[idx] / rho_0);
+          }
+      }
 
       //__________________________________
       //  Apply Erosion

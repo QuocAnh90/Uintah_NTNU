@@ -150,6 +150,10 @@ public:
       flags->d_with_mpmice = true;
   };
 
+  void setWithMPMICE2() {
+      flags->d_with_mpmice2 = true;
+  };
+
   void setWithARCHES()
   {
         flags->d_with_arches = true;
