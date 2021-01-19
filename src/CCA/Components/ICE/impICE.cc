@@ -849,7 +849,7 @@ void ICE::updatePressure(const ProcessorGroup*,
 
     setBC(press_CC, placeHolder, sp_vol_CC, d_surroundingMatl_indx,
           "sp_vol", "Pressure", patch ,m_materialManager, 0, new_dw, 
-          d_BC_globalVars, BC_localVars, isNotInitialTimeStep );
+          d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
            
     delete_CustomBCs(d_BC_globalVars, BC_localVars);
 

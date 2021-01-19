@@ -406,8 +406,8 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
       Material* matl = d_matlManager->getMaterial( m );
       int indx = matl->getDWIndex();
      
-      ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
-      MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
+      //ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
+      //MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
 
       pNewDW->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gac, 1);
 

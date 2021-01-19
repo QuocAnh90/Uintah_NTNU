@@ -338,6 +338,10 @@ using namespace ExchangeModels;
            d_with_mpmice = true;
        };
 
+       void setWithMPMICE2() {
+           d_with_mpmice2 = true;
+       };
+
        void setWithRigidMPM() {
          d_with_rigid_mpm = true;
        };
@@ -670,6 +674,7 @@ using namespace ExchangeModels;
       bool d_impICE                = false;
       bool d_with_mpm              = false;
       bool d_with_mpmice           = false;
+      bool d_with_mpmice2          = false;
       bool d_with_rigid_mpm        = false;
       bool d_viscousFlow           = false;
       bool d_applyHydrostaticPress = true;

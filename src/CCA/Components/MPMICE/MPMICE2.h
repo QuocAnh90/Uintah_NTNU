@@ -136,8 +136,8 @@ namespace Uintah {
 
         void scheduleCoarsenNCMass(SchedulerP&,
             const PatchSet*,
-            const MaterialSet*);
-
+            const MaterialSet*);       
+        
         void scheduleComputePressure(SchedulerP&,
             const PatchSet*,
             const MaterialSubset*,
@@ -152,30 +152,6 @@ namespace Uintah {
             DataWarehouse*,
             const MaterialSubset* press_matl);
 
-        void binaryPressureSearch(std::vector<constCCVariable<double> >& Temp,
-            std::vector<CCVariable<double> >& rho_micro,
-            std::vector<CCVariable<double> >& vol_frac,
-            std::vector<CCVariable<double> >& rho_CC_new,
-            std::vector<CCVariable<double> >& speedSound_new,
-            std::vector<double>& dp_drho,
-            std::vector<double>& dp_de,
-            std::vector<double>& press_eos,
-            constCCVariable<double>& press,
-            CCVariable<double>& press_new,
-            double press_ref,
-            std::vector<constCCVariable<double> >& cv,
-            std::vector<constCCVariable<double> >& gamma,
-            double convergence_crit,
-            unsigned int numALLMatls,
-            int& count,
-            double& sum,
-            IntVector c);
-
-        template<class T> void computePorosityFace(CellIterator it,
-            IntVector adj_offset,
-            constCCVariable<double>& rho_CC,
-            constCCVariable<double>& Porosity_CC,
-            T& Porosity_FC);
 
         void scheduleComputeVelICE_FC(SchedulerP&,
             const PatchSet*,
@@ -273,17 +249,6 @@ namespace Uintah {
             const MaterialSet*);
 
         void computeLagrangianValuesMPM(const ProcessorGroup*,
-            const PatchSubset* patch,
-            const MaterialSubset* matls,
-            DataWarehouse* old_dw,
-            DataWarehouse* new_dw);
-
-        void scheduleComputeLagrangianValuesMPMtest(SchedulerP&,
-            const PatchSet*,
-            const MaterialSubset*,
-            const MaterialSet*);
-
-        void computeLagrangianValuesMPMtest(const ProcessorGroup*,
             const PatchSubset* patch,
             const MaterialSubset* matls,
             DataWarehouse* old_dw,

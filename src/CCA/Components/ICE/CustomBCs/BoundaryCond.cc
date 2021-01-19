@@ -416,7 +416,6 @@ void get_rho_micro(std::vector<CCVariable<double> >& rho_micro,
   Vector gravity = globalVars->d_gravity; 
   int numICEMatls  = materialManager->getNumMatls( "ICE" );
     
-
 //  This doesn't work with AMR.  The refine/setBC_fineLevel task only
 //  refines ICE matls so we don't have access to sp_vol_mpm.
 //
@@ -429,7 +428,7 @@ void get_rho_micro(std::vector<CCVariable<double> >& rho_micro,
   // Iterate over the faces encompassing the domain
   vector<Patch::FaceType> bf;
   patch->getBoundaryFaces(bf);
-  
+
   for( vector<Patch::FaceType>::const_iterator iter = bf.begin(); iter != bf.end(); ++iter ){
     Patch::FaceType face = *iter;
     
@@ -453,17 +452,20 @@ void get_rho_micro(std::vector<CCVariable<double> >& rho_micro,
         lo[P_dir] -= 2;
       }
       CellIterator iterLimits(lo,hi);
-      
+                 
       for (int m = 0; m < numICEMatls; m++) {
         ICEMaterial* ice_matl = (ICEMaterial*) materialManager->getMaterial( "ICE", m);
         int matl= ice_matl->getDWIndex();
                 
         if (which_Var == "rho_micro") { 
+           
           for (CellIterator cIter = iterLimits; !cIter.done(); cIter++) {
             IntVector c = *cIter;
+
             rho_micro[matl][c] =  rho_micro_tmp[matl][c];
           }
         }
+
         if (which_Var == "sp_vol") { 
           for (CellIterator cIter = iterLimits; !cIter.done(); cIter++) {
             IntVector c = *cIter;
@@ -575,6 +577,7 @@ void setBC(CCVariable<double>& press_CC,
             << " mat_id = " << mat_id <<  ", Patch: "<< patch->getID() << endl;
 
   int numALLMatls = materialManager->getNumMatls();
+
   // bool isNotInitialTimeStep = (materialManager->getCurrentTopLevelTimeStep() > 0);  
   Vector gravity = globalVars->d_gravity;
   std::vector<CCVariable<double> > rho_micro(numALLMatls);
@@ -582,11 +585,11 @@ void setBC(CCVariable<double>& press_CC,
   for (int m = 0; m < numALLMatls; m++) {
     new_dw->allocateTemporary(rho_micro[m],  patch);
   }
-  
+
   get_rho_micro(rho_micro, rho_micro_tmp, sp_vol_CC, 
                 patch, which_Var, materialManager,  new_dw, globalVars,
                 isNotInitialTimeStep);
-                
+
   //__________________________________
   //  -Set the LODI BC's first, then let the other BC's wipe out what
   //   was set in the corners and edges. 
@@ -1384,7 +1387,7 @@ void setBC(CCVariable<double>& press_CC,
   
   setBC(press_CC, rho_micro, sp_vol, surroundingMatl_indx,
         whichVar, kind, p, materialManager, mat_id, new_dw, globalVars, localVars,
-        isNotInitialTimeStep); 
+        isNotInitialTimeStep);
 
   delete globalVars;
   delete localVars;         

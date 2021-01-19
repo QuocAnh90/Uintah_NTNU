@@ -145,11 +145,13 @@ public:
         flags->d_with_ice = true;
   };
 
+  // This tag is set for MPMICE only
   void setWithMPMICE()
   {
       flags->d_with_mpmice = true;
   };
 
+  // This tag is set for MPMICE2 only
   void setWithMPMICE2() {
       flags->d_with_mpmice2 = true;
   };

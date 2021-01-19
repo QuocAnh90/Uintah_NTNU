@@ -891,10 +891,10 @@ void SerialMPM::scheduleInterpolateParticlesToGrid(SchedulerP& sched,
     t->computes(lb->diffusion->gExternalScalarFlux);
   }
 
-  if (flags->d_with_mpmice2) {
+  //if (flags->d_with_mpmice2) {
       t->requires(Task::OldDW, lb->pPorosityLabel, gan, NGP);
       t->computes(lb->gPorosityLabel);
-  }
+  //}
 
   t->computes(lb->gMassLabel,        m_materialManager->getAllInOneMatls(),
               Task::OutOfDomain);
@@ -1465,9 +1465,9 @@ void SerialMPM::scheduleComputeParticleGradients(SchedulerP& sched,
     t->computes(lb->diffusion->pArea_preReloc);
   }
 
-  if (flags->d_with_mpmice2) {
+  //if (flags->d_with_mpmice2) {
       t->computes(lb->pPorosityLabel_preReloc);
-  }
+  //}
 
   if(flags->d_reductionVars->volDeformed){
     t->computes(lb->TotalVolumeDeformedLabel);
@@ -2368,8 +2368,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
                              dwi,patch);
       new_dw->allocateAndPut(gexternalheatrate,lb->gExternalHeatRateLabel,
                              dwi,patch);
-     new_dw->allocateAndPut(gPorosity, lb->gPorosityLabel, dwi, patch);
-     
+     new_dw->allocateAndPut(gPorosity, lb->gPorosityLabel, dwi, patch);    
       gPorosity.initialize(0);
       gmass.initialize(d_SMALL_NUM_MPM);
       gvolume.initialize(d_SMALL_NUM_MPM);
@@ -4161,10 +4160,10 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
                                                                           pset);
       new_dw->allocateAndPut(pFNew,      lb->pDeformationMeasureLabel_preReloc,
                                                                           pset);
-      if (flags->d_with_mpmice2) {
+      //if (flags->d_with_mpmice2) {
           new_dw->allocateAndPut(pPorosity, lb->pPorosityLabel_preReloc,
               pset);
-      }
+      //}
       
 
       new_dw->get(gvelocity_star,  lb->gVelocityStarLabel,   dwi,patch,gac,NGP);
@@ -4354,14 +4353,14 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
         }
       } //end of pressureStabilization loop  at the patch level
 
-      if (flags->d_with_mpmice2) {
+      //if (flags->d_with_mpmice2) {
           for (ParticleSubset::iterator iter = pset->begin();
               iter != pset->end(); iter++) {
               particleIndex idx = *iter;
 
               pPorosity[idx] = 1 - (pmassNew[idx] / pvolume[idx] / rho_0);
           }
-      }
+     // }
 
       //__________________________________
       //  Apply Erosion
