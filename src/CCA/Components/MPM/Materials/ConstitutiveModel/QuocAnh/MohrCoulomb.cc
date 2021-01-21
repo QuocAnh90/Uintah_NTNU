@@ -610,10 +610,11 @@ double rho_orig = matl->getInitialDensity();
 	  // Undrained increase linearly with depth
 	  double n = svarg[38];
 
-	  for (int i = 0; i < n; i++) {
+      // Temporary turn off for Herve
+	  //for (int i = 0; i < n; i++) {
 		  svarg[37] = px[idx](1);
-		  n = n - 1;
-	  }
+		  //n = n - 1;
+	  //}
 	  svarg[38] = n;
 
 	  // Compute Ko
