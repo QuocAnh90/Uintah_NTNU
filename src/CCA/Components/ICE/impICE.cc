@@ -367,7 +367,8 @@ void ICE::scheduleImplicitPressureSolve(  SchedulerP& sched,
   if(d_models.size() > 0){  
     t->requires(Task::NewDW,lb->modelMass_srcLabel, gn,0);
   } 
-  t->requires( Task::NewDW, lb->speedSound_CCLabel, gn,0);
+
+  t->requires(Task::NewDW, lb->speedSound_CCLabel, gn, 0);
   t->requires( Task::NewDW, lb->max_RHSLabel);
   
   //__________________________________
@@ -451,6 +452,12 @@ ICE::setupMatrix( const ProcessorGroup *,
     parent_old_dw->get(delT, lb->delTLabel,level);
     Vector dx     = patch->dCell();
     int numMatls  = m_materialManager->getNumMatls();
+
+    // MPMICE2 only compute the pressure for ICE materials
+    if (d_with_mpmice2) {
+        numMatls = m_materialManager->getNumMatls("ICE");
+    }
+
     CCVariable<Stencil7> A; 
     CCVariable<double> imp_delP;
     constCCVariable<double> sumKappa;
@@ -479,6 +486,13 @@ ICE::setupMatrix( const ProcessorGroup *,
     for(int m = 0; m < numMatls; m++) {
       Material* matl = m_materialManager->getMaterial( m );
       int indx = matl->getDWIndex();
+
+      // MPMICE2 only compute the pressure for ICE materials
+      if (d_with_mpmice2) {
+          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+          indx = ice_matl->getDWIndex();
+      }
+
       constSFCXVariable<double> sp_volX_FC, vol_fracX_FC;
       constSFCYVariable<double> sp_volY_FC, vol_fracY_FC;
       constSFCZVariable<double> sp_volZ_FC, vol_fracZ_FC;
@@ -559,6 +573,9 @@ void ICE::setupRHS(const ProcessorGroup*,
   Vector dx     = level->dCell();
   double vol    = dx.x()*dx.y()*dx.z();
       
+
+  cerr << "begin setupRHS" << endl;
+
   for(int p=0;p<patches->size();p++){
     const Patch* patch = patches->get(p);
     
@@ -576,6 +593,14 @@ void ICE::setupRHS(const ProcessorGroup*,
     }
            
     int numMatls  = m_materialManager->getNumMatls();
+
+    /*
+    // MPMICE2 only compute the pressure for ICE materials
+    if (d_with_mpmice2) {
+        numMatls = m_materialManager->getNumMatls("ICE");
+    }
+    */
+
     delt_vartype delT;
     pOldDW->get(delT, lb->delTLabel, level);
     
@@ -606,11 +631,20 @@ void ICE::setupRHS(const ProcessorGroup*,
     rhs.initialize(0.0);
     sumAdvection.initialize(0.0);
     massExchTerm.initialize(0.0);
-
     
     for(int m = 0; m < numMatls; m++) {
-      Material* matl = m_materialManager->getMaterial( m );
-      int indx = matl->getDWIndex();
+
+        Material* matl = m_materialManager->getMaterial(m);
+        int indx = matl->getDWIndex();
+
+        /*
+        // MPMICE2 only compute the pressure for ICE materials
+        if (d_with_mpmice2) {
+            ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+            indx = ice_matl->getDWIndex();
+        }
+        */
+
       constSFCXVariable<double> uvel_FC;
       constSFCYVariable<double> vvel_FC;
       constSFCZVariable<double> wvel_FC;
@@ -690,7 +724,7 @@ void ICE::setupRHS(const ProcessorGroup*,
       IntVector c = *iter;
       term1[c] = vol * sumKappa[c] * sum_imp_delP[c]; 
     }    
-      
+     
     //__________________________________
     //  Form RHS
     // note:  massExchangeTerm has delT incorporated inside of it
@@ -728,6 +762,9 @@ void ICE::setupRHS(const ProcessorGroup*,
       rhs.initialize(0.0, l, h);
     }     
   }  // patches loop
+
+  cerr << "pass setup RHS" << endl;
+
 //  cout << " Level " << level->getIndex() << " rhs " 
 //       << rhs_max << " rhs * vol " << rhs_max * vol <<  endl;
 }
@@ -807,8 +844,13 @@ void ICE::updatePressure(const ProcessorGroup*,
     printTask(patches, patch, cout_doing, "Doing ICE::updatePressure" );
                     
     int numMatls  = m_materialManager->getNumMatls(); 
-    Ghost::GhostType  gn = Ghost::None;
-          
+
+    // MPMICE2 only compute the pressure for ICE materials
+    //if (d_with_mpmice2) {
+    //    numMatls = m_materialManager->getNumMatls("ICE");
+    //}
+
+    Ghost::GhostType  gn = Ghost::None;         
     CCVariable<double> press_CC;     
     CCVariable<double> imp_delP;
     CCVariable<double> sum_imp_delP;
@@ -827,10 +869,18 @@ void ICE::updatePressure(const ProcessorGroup*,
     for(int m = 0; m < numMatls; m++) {
       Material* matl = m_materialManager->getMaterial( m );
       int indx = matl->getDWIndex();
+
+      // MPMICE2 only compute the pressure for ICE materials
+      //if (d_with_mpmice2) {
+      //    ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+       //   indx = ice_matl->getDWIndex();
+      //}    
       parent_new_dw->get(sp_vol_CC[m],lb->sp_vol_CCLabel, indx,patch,gn,0);
-    }             
+    }        
+
     // set boundary conditions on imp_delP
     set_imp_DelP_BC(imp_delP, patch, lb->imp_delPLabel, new_dw);
+
     //__________________________________
     //  add delP to press_equil
     //  AMR:  hit the extra cells, you need to update the pressure in these cells
@@ -840,18 +890,18 @@ void ICE::updatePressure(const ProcessorGroup*,
       press_CC[c] = press_equil[c] + sum_imp_delP[c];
       press_CC[c] = max(1.0e-12, press_CC[c]);   // C L A M P
     }   
+
     //__________________________________
     //  set boundary conditions   
     customBC_localVars* BC_localVars = scinew customBC_localVars();
     
     preprocess_CustomBCs("imp_update_press_CC",parent_old_dw,parent_new_dw, 
                             lb,  patch, 999, d_BC_globalVars, BC_localVars );
-
     setBC(press_CC, placeHolder, sp_vol_CC, d_surroundingMatl_indx,
           "sp_vol", "Pressure", patch ,m_materialManager, 0, new_dw, 
-          d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
-           
+          d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
     delete_CustomBCs(d_BC_globalVars, BC_localVars);
+
 
     //____ B U L L E T   P R O O F I N G----
     // ignore BP if a recompute time step has already been requested
@@ -883,6 +933,11 @@ void ICE::computeDel_P(const ProcessorGroup*,
             
     int numMatls  = m_materialManager->getNumMatls(); 
       
+    // MPMICE2 only compute the pressure for ICE materials
+    if (d_with_mpmice2) {
+        numMatls = m_materialManager->getNumMatls("ICE");
+    }
+
     CCVariable<double> delP_Dilatate;
     CCVariable<double> delP_MassX;
     CCVariable<double> sum_rho_CC, initialGuess;
@@ -909,6 +964,13 @@ void ICE::computeDel_P(const ProcessorGroup*,
     for(int m = 0; m < numMatls; m++) {
       Material* matl = m_materialManager->getMaterial( m );
       int indx = matl->getDWIndex();
+
+      // MPMICE2 only compute the pressure for ICE materials
+      if (d_with_mpmice2) {
+          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+          indx = ice_matl->getDWIndex();
+      }
+
       new_dw->get(rho_CC,      lb->rho_CCLabel,    indx,patch,gn,0);
       //__________________________________
       //  compute sum_rho_CC used by press_FC
@@ -938,16 +1000,37 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
                                 DataWarehouse* ParentOldDW,    
                                 DataWarehouse* ParentNewDW,    
                                 LevelP level,                 
-                                const MaterialSubset* ice_matls,
-                                const MaterialSubset* mpm_matls)
+                                const MaterialSubset* ice_matls_sub,
+                                const MaterialSubset* mpm_matls_sub)
 {
   int proc = d_myworld->myRank();
   printTask(patch_sub, cout_doing, "Doing implicitPressureSolve" );
-  
+
+  cerr << "begin implicit Pressure Solve" << endl;
+
   //__________________________________
   // define Matl sets and subsets
+  // MPMICE2 only compute the pressure for ICE materials
+  const MaterialSet* matls;
+  const MaterialSet* ice_matls = m_materialManager->allMaterials("ICE");
   const MaterialSet* all_matls = m_materialManager->allMaterials();
+
+  const MaterialSubset* matls_sub;
+  //const MaterialSubset* ice_matls_sub = ice_matls->getUnion();  // Not need as it is in input
   const MaterialSubset* all_matls_sub = all_matls->getUnion();
+  
+  //if (d_with_mpmice2) {
+   //   matls = ice_matls;
+   //   matls_sub = ice_matls_sub;
+  //}
+  //else {
+      matls = all_matls;
+      matls_sub = all_matls_sub;
+  //}
+
+  // Only require ice_matls during initialization, we don't have *_CC
+  // variables for mpm_matls_sub at this point
+
   MaterialSubset* one_matl    = d_press_matl;
   
   //__________________________________
@@ -1025,9 +1108,10 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
   fname << "." << proc <<"." << timeStep << "." << counter;
   m_solver->getParameters()->setOutputFileName(fname.str());
   
-
   d_subsched->setInitTimestep(false);
   
+  cerr << " pass begin compiler of implicit solver " << endl;
+
   while( counter < d_max_iter_implicit && max_RHS > d_outer_iter_tolerance && !recompute) {
   //__________________________________
   // recompile the subscheduler
@@ -1037,39 +1121,38 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
       // schedule the tasks
 
       scheduleSetupMatrix(    d_subsched, level,  patch_set,  one_matl, 
-                              all_matls);
-
-
-      
+                              matls);
+     
       m_solver->scheduleSolve(level, d_subsched, d_press_matlSet,
                               lb->matrixLabel,   Task::NewDW,
                               lb->imp_delPLabel, modifies_X,
                               lb->rhsLabel,      Task::OldDW,
                               whichInitialGuess, Task::OldDW,
                               true);
-      
-      scheduleUpdatePressure( d_subsched,  level, patch_set,  ice_matls,
-                              mpm_matls, 
+                
+      scheduleUpdatePressure( d_subsched,  level, patch_set, ice_matls_sub,
+                              mpm_matls_sub,
                               d_press_matl,  
-                              all_matls);
-      
-      scheduleRecomputeVel_FC(d_subsched,         patch_set,  ice_matls,
-                              mpm_matls, 
+                              matls);
+     
+      scheduleRecomputeVel_FC(d_subsched,         patch_set, ice_matls_sub,
+                              mpm_matls_sub,
                               d_press_matl, 
                               all_matls,
                               recursion);
       
       scheduleSetupRHS(       d_subsched,         patch_set,  one_matl, 
-                              all_matls,
+                              matls,
                               recursion,
                               "computes");
-      
+
       scheduleCompute_maxRHS( d_subsched,         level,       one_matl,
-                              all_matls);
-      
+                               matls);
+            
       d_subsched->compile();
       d_recompileSubsched = false;
     }
+   
     //__________________________________
     //  - move subNewDW to subOldDW
     //  - scrub the subScheduler
@@ -1077,6 +1160,7 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
     d_subsched->advanceDataWarehouse(grid); 
     subOldDW = d_subsched->get_dw(2);
     subNewDW = d_subsched->get_dw(3);
+
     subOldDW->setScrubbing(DataWarehouse::ScrubComplete);
     subNewDW->setScrubbing(DataWarehouse::ScrubNone);
     
@@ -1085,6 +1169,8 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
     counter ++;
     whichInitialGuess = nullptr;
     
+    cerr << " pass the executation of implicit solver" << endl;
+
     //__________________________________
     // diagnostics
     subNewDW->get(max_RHS,     lb->max_RHSLabel);
@@ -1152,7 +1238,6 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
   }
 #endif
 
-
   ParentNewDW->transferFrom(subNewDW,         // press
                     lb->press_CCLabel,       patch_sub,  d_press_matl, replace);
   ParentNewDW->transferFrom(subNewDW,         // press
@@ -1165,11 +1250,11 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
                     lb->rhsLabel,            patch_sub,  one_matl,     replace);
                       
   ParentNewDW->transferFrom(subNewDW,         // uvel_FC
-                    lb->uvel_FCMELabel,      patch_sub,  all_matls_sub,replace);
+                    lb->uvel_FCMELabel,      patch_sub, matls_sub,replace);
   ParentNewDW->transferFrom(subNewDW,         // vvel_FC
-                    lb->vvel_FCMELabel,      patch_sub,  all_matls_sub,replace);
+                    lb->vvel_FCMELabel,      patch_sub, matls_sub,replace);
   ParentNewDW->transferFrom(subNewDW,         // wvel_FC
-                    lb->wvel_FCMELabel,      patch_sub,  all_matls_sub,replace);
+                    lb->wvel_FCMELabel,      patch_sub, matls_sub,replace);
                     
   ParentNewDW->transferFrom(subNewDW,         // grad_impDelP_XFC
                     lb->grad_dp_XFCLabel,     patch_sub, d_press_matl, replace);
@@ -1179,11 +1264,11 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
                     lb->grad_dp_ZFCLabel,     patch_sub, d_press_matl, replace);
                      
   ParentNewDW->transferFrom(subNewDW,        // vol_fracX_FC
-                    lb->vol_fracX_FCLabel,   patch_sub, all_matls_sub,replace);
+                    lb->vol_fracX_FCLabel,   patch_sub, matls_sub,replace);
   ParentNewDW->transferFrom(subNewDW,         // vol_fracY_FC
-                    lb->vol_fracY_FCLabel,   patch_sub, all_matls_sub,replace);
+                    lb->vol_fracY_FCLabel,   patch_sub, matls_sub,replace);
   ParentNewDW->transferFrom(subNewDW,         // vol_fracZ_FC
-                    lb->vol_fracZ_FCLabel,   patch_sub, all_matls_sub,replace);
+                    lb->vol_fracZ_FCLabel,   patch_sub, matls_sub,replace);
     
   //__________________________________
   //  Turn scrubbing back on

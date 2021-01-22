@@ -2328,7 +2328,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
       setBC( vel_CC[indx],     "Velocity",    patch, m_materialManager, indx, new_dw, isNotInitialTimeStep );
       setBC( press_CC, rho_micro, placeHolder, d_surroundingMatl_indx, 
              "rho_micro","Pressure", patch, m_materialManager, 0, new_dw,
-             isNotInitialTimeStep);
+             isNotInitialTimeStep/*, d_with_mpmice2*/);
       
       SpecificHeat *cvModel = ice_matl->getSpecificHeatModel();
       if(cvModel != 0) {
@@ -2830,7 +2830,7 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
 
         setBC(press_new, rho_micro, placeHolder, d_surroundingMatl_indx,
             "rho_micro", "Pressure", patch, m_materialManager, 0, new_dw,
-            d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
+            d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
 
         delete_CustomBCs(d_BC_globalVars, BC_localVars);
 
@@ -2950,7 +2950,7 @@ void ICE::computeEquilPressure_1_matl(const ProcessorGroup*,
 
         setBC(press_eq, rho_micro, placeHolder, d_surroundingMatl_indx,
             "rho_micro", "Pressure", patch, m_materialManager, 0, new_dw,
-            d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
+            d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
 
         delete_CustomBCs(d_BC_globalVars, BC_localVars);
 
@@ -3270,6 +3270,13 @@ void ICE::updateVel_FC(const ProcessorGroup*,
 
     unsigned int numMatls = m_materialManager->getNumMatls();
     
+    /*
+    // MPMICE2 only compute the pressure for ICE materials
+    if (d_with_mpmice2) {
+        numMatls = m_materialManager->getNumMatls("ICE");
+    }
+    */
+
     Vector dx      = patch->dCell();
     Ghost::GhostType  gac = Ghost::AroundCells; 
     Ghost::GhostType  gn = Ghost::None; 
@@ -3293,8 +3300,18 @@ void ICE::updateVel_FC(const ProcessorGroup*,
     new_dw->get(imp_delP, lb->imp_delPLabel, 0,   patch,gac, 1);
  
     for(unsigned int m = 0; m < numMatls; m++) {
+
       Material* matl = m_materialManager->getMaterial( m );
       int indx = matl->getDWIndex(); 
+
+      /*
+      // MPMICE2 only compute the pressure for ICE materials
+      if (d_with_mpmice2) {
+          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+          indx = ice_matl->getDWIndex();
+      }
+      */
+
       constCCVariable<double> sp_vol_CC;         
       pNewDW->get(sp_vol_CC, lb->sp_vol_CCLabel,indx,patch, gac, 1);
               
@@ -3521,7 +3538,7 @@ void ICE::computeDelPressAndUpdatePressCC(const ProcessorGroup*,
     
     setBC(press_CC, placeHolder, sp_vol_CC, d_surroundingMatl_indx,
           "sp_vol", "Pressure", patch ,m_materialManager, 0, new_dw,
-          d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
+          d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
 #if SET_CFI_BC          
     set_CFI_BC<double>(press_CC,patch);
 #endif   
@@ -4139,6 +4156,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
 {  
   // double simTime = m_materialManager->getElapsedSimTime();
 
+    cerr << "begin accumulateEnergySourceSinks" << endl;
   simTime_vartype simTimeVar;
   old_dw->get(simTimeVar, lb->simulationTimeLabel);
   double simTime = simTimeVar;
@@ -4150,7 +4168,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
     printTask(patches, patch, cout_doing, "Doing ICE::accumulateEnergySourceSinks" );
 
     unsigned int numMatls = m_materialManager->getNumMatls();
-
+   
     delt_vartype delT;
     old_dw->get(delT, lb->delTLabel, level);
 
@@ -4250,6 +4268,8 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
 
     }  // matl loop
   }  // patch loop
+
+  cerr << "end accumulateEnergySourceSinks" << endl;
 }
 
 /* _____________________________________________________________________

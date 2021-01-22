@@ -697,7 +697,7 @@ void AMRICE::setBC_FineLevel(const ProcessorGroup*,
       
       setBC(press_CC, placeHolder, sp_vol_const, d_surroundingMatl_indx,
             "sp_vol", "Pressure", patch , m_materialManager, 0, fine_new_dw, 
-            d_BC_globalVars, notUsed, isNotInitialTimeStep);
+            d_BC_globalVars, notUsed, isNotInitialTimeStep/*, d_with_mpmice2*/);
             
       delete_CustomBCs(d_BC_globalVars, notUsed);
                   

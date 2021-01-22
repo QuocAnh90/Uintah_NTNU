@@ -578,6 +578,11 @@ void setBC(CCVariable<double>& press_CC,
 
   int numALLMatls = materialManager->getNumMatls();
 
+  // MPMICE2 only compute the pressure for ICE materials
+  //if (d_with_mpmice2) {
+  //    numALLMatls = materialManager->getNumMatls("ICE");
+  //}
+
   // bool isNotInitialTimeStep = (materialManager->getCurrentTopLevelTimeStep() > 0);  
   Vector gravity = globalVars->d_gravity;
   std::vector<CCVariable<double> > rho_micro(numALLMatls);

@@ -2164,7 +2164,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     
     setBC(press_new,   rho_micro, placeHolder,d_ice->d_surroundingMatl_indx,
           "rho_micro", "Pressure", patch , m_materialManager, 0, new_dw, 
-          d_ice->d_BC_globalVars, BC_localVars, isNotInitialTimeStep);
+          d_ice->d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_ice->d_with_mpmice2*/);
     
     delete_CustomBCs( d_ice->d_BC_globalVars, BC_localVars );
 
