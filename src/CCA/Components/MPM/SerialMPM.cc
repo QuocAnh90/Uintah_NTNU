@@ -4291,6 +4291,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
         pvolume[idx] = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
         partvoldef += pvolume[idx];
 
+        /*
         // Temporary hack for negative jacobian
         double Jtest = pFNew[idx].Determinant();
         if (Jtest <= 0) {
@@ -4299,6 +4300,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
             pvolume[idx] = pVolumeOld[idx];
         }
       }
+      */
 
       // The following is used only for pressure stabilization
       CCVariable<double> J_CC;
