@@ -4299,8 +4299,9 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
             double J = pFNew[idx].Determinant();
             pvolume[idx] = pVolumeOld[idx];
         }
+        */
       }
-      */
+      
 
       // The following is used only for pressure stabilization
       CCVariable<double> J_CC;
