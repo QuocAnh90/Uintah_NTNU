@@ -403,6 +403,18 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
         }  // num_ICE_matls loop
 
 
+        // Loop of MPM Materials
+        unsigned int numMPM_matls = m_materialManager->getNumMatls("MPM");
+        for (unsigned int m = 0; m < numMPM_matls; m++) {
+
+            MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
+            int indx = mpm_matl->getDWIndex();
+
+            CCVariable<double> heatFlux;
+            new_dw->allocateAndPut(heatFlux, Mlb->heatRate_CCLabel, indx, patch);
+            heatFlux.initialize(0.0);
+        } // num_MPM_matls loop
+
         for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
             IntVector c = *iter;
             Point pt = patch->getCellPosition(c);
@@ -2553,11 +2565,15 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
     Ghost::GhostType  gac = Ghost::AroundCells;
     Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
 
+    t->requires(Task::NewDW, Ilb->uvel_FCMELabel, gac, 2);
+    t->requires(Task::NewDW, Ilb->vvel_FCMELabel, gac, 2);
+    t->requires(Task::NewDW, Ilb->wvel_FCMELabel, gac, 2);
+    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, gac, 1);
+
     t->requires(Task::OldDW, Mlb->delTLabel, getLevel(patches));
     t->requires(Task::NewDW, Ilb->rho_CCLabel, gn);
     t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, gn);
     t->requires(Task::NewDW, Ilb->Tdot_CCLabel, gn);
-
 
     t->requires(Task::NewDW, Ilb->f_theta_CCLabel, ice_matls, gn);
     t->requires(Task::NewDW, Ilb->compressibilityLabel, ice_matls, gn);
@@ -2605,9 +2621,12 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         delt_vartype delT;
         old_dw->get(delT, Mlb->delTLabel, level);
 
-        //Advector* advector = d_advector->clone(new_dw, patch, isRegridTimeStep());
+        Advector* advector = d_ice->d_advector->clone(new_dw, patch, isRegridTimeStep());
 
-        unsigned int numALLMatls = m_materialManager->getNumMatls();
+        unsigned int numICEMatls = m_materialManager->getNumMatls("ICE");
+        unsigned int numMPMMatls = m_materialManager->getNumMatls("MPM");
+        unsigned int numALLMatls = numICEMatls + numMPMMatls;
+
         Vector  dx = patch->dCell();
         double vol = dx.x() * dx.y() * dx.z();
         Ghost::GhostType  gn = Ghost::None;
@@ -2656,9 +2675,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 new_dw->get(Temp_CC[m], Ilb->temp_CCLabel, indx, patch, gn, 0);
             }
         }
-
-        cerr << "pass here" << endl;
-
+        
         //__________________________________
         // Sum of thermal expansion and avection of porosity
         for (unsigned int m = 0; m < numALLMatls; m++) {
@@ -2678,15 +2695,11 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             new_dw->get(vvel_FC, Ilb->vvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(wvel_FC, Ilb->wvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(mass_L, Ilb->mass_L_CCLabel, indx, patch, gac, 2);
-
-            cerr << "is here 2" << endl;
+            new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gn, 0);
 
             if (ice_matl) {
-                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
-                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gn, 0);
+                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);             
                 new_dw->get(cv, Ilb->specific_heatLabel, indx, patch, gn, 0);
-
-                cerr << "is here 3" << endl;
 
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
@@ -2698,42 +2711,46 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
             // Calculate the divergence of velocity
             //__________________________________
-
-
-            cerr << "before advection" << endl;
-
+            
             // Advection preprocessing
             bool bulletProof_test = true;
             advectVarBasket* varBasket = scinew advectVarBasket();
+            varBasket->new_dw = new_dw;
+            varBasket->old_dw = old_dw;
+            varBasket->indx = indx;
+            varBasket->patch = patch;
+            varBasket->level = level;
+            varBasket->lb = Ilb;
+            varBasket->doRefluxing = isAMR(); // always reflux with amr
+            varBasket->is_Q_massSpecific = false;
+            varBasket->useCompatibleFluxes = d_ice->d_useCompatibleFluxes;
+            varBasket->AMR_subCycleProgressVar = 0;       // for lockstep it's always 0
 
-            d_ice->d_advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
+            advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
                 bulletProof_test, new_dw, varBasket);
-            varBasket->doRefluxing = false;  // don't need to reflux here
+
             //__________________________________
             //   advect vol_frac * Porosity
             if (ice_matl) {
-                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     vol_fracICE[c] = Porosity_CC[c] * vol_frac[m][c];
                 }
                 //advector->advectQ(vol_fracICE, patch, q_advectedICE, varBasket,
                  //   vol_fracX_FC, vol_fracY_FC, vol_fracZ_FC, new_dw);
-                d_ice->d_advector->advectQ(vol_fracICE, mass_L, q_advectedICE, varBasket);
+                
+                advector->advectQ(vol_fracICE, mass_L, q_advectedICE, varBasket);
             }
-
-            cerr << "end ICE advection" << endl;
 
             if (mpm_matl) {
-                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     vol_fracMPM[c] = 1 - Porosity_CC[c];
-                }
+                }           
                 //advector->advectQ(vol_fracMPM, patch, q_advectedMPM, varBasket,
                  //   vol_fracX_FC, vol_fracY_FC, vol_fracZ_FC, new_dw);
-                d_ice->d_advector->advectQ(vol_fracMPM, mass_L, q_advectedMPM, varBasket);
+                advector->advectQ(vol_fracMPM, mass_L, q_advectedMPM, varBasket);
             }
-
-            cerr << "end MPM advection" << endl;
 
             delete varBasket;
 
@@ -2745,7 +2762,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         }
 
         //__________________________________ 
-        for (unsigned int m = 0; m < numALLMatls; m++) {
+        for (unsigned int m = 0; m < numICEMatls; m++) {
             //Material* matl = m_materialManager->getMaterial(m);
             // indx = matl->getDWIndex();
 
@@ -2845,7 +2862,6 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
     }  // patch loop
 
     cerr << "end computeLagrangianSpecificVolume" << endl;
-
 }
 
 

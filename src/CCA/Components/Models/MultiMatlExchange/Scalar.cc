@@ -405,7 +405,9 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     for(int m = 0; m < d_numMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
       int indx = matl->getDWIndex();
-     
+
+      cerr << "update for m" << indx << endl;
+    
       //ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
       //MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
 
@@ -433,7 +435,6 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
       sp_vol_XFC[m].initialize(0.0, lowIndex,patch->getExtraSFCXHighIndex());
       sp_vol_YFC[m].initialize(0.0, lowIndex,patch->getExtraSFCYHighIndex());
       sp_vol_ZFC[m].initialize(0.0, lowIndex,patch->getExtraSFCZHighIndex());
-
     }
 
     vector<IntVector> adj_offset(3);

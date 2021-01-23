@@ -211,11 +211,11 @@ void FirstOrderAdvector::advectQ(const CCVariable<double>& q_CC,
                                  const CCVariable<double>& /*mass*/,
                                  CCVariable<double>& q_advected,
                                  advectVarBasket* varBasket)
-{                                 
+{           
   advectSlabs<double>(q_CC,varBasket->patch,q_advected, 
                       d_notUsedX, d_notUsedY, d_notUsedZ, 
                       ignore_q_FC_calc_D(), varBasket);
-                      
+                    
   // fluxes on faces at the coarse fine interfaces                    
   q_FC_fluxes<double>(q_CC, varBasket->desc, varBasket);
 }
@@ -268,12 +268,13 @@ template <class T, typename F>
                                        SFCZVariable<double>& q_ZFC,
                                        F save_q_FC,
                                        advectVarBasket* VB) // function is passed in
-{                  
-  Vector dx = patch->dCell();            
+{      
+  Vector dx = patch->dCell();          
   double invvol = 1.0/(dx.x() * dx.y() * dx.z());                     
-
+ 
   CCVariable<fflux>& OFS = VB->OFS;  // for brevity
-    
+   
+
   for(CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) { 
     const IntVector& c = *iter;  
     

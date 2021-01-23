@@ -3362,7 +3362,6 @@ void ICE::updateVel_FC(const ProcessorGroup*,
                                      adj_offset[2],dx[2],delT,
                                      sp_vol_CC,imp_delP,
                                      wvel_FC, grad_dp_ZFC);
-
       //__________________________________
       // (*)vel_FC BC are updated in 
       // ICE::addExchangeContributionToFCVel()
@@ -4156,7 +4155,6 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
 {  
   // double simTime = m_materialManager->getElapsedSimTime();
 
-    cerr << "begin accumulateEnergySourceSinks" << endl;
   simTime_vartype simTimeVar;
   old_dw->get(simTimeVar, lb->simulationTimeLabel);
   double simTime = simTimeVar;
@@ -4268,8 +4266,6 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
 
     }  // matl loop
   }  // patch loop
-
-  cerr << "end accumulateEnergySourceSinks" << endl;
 }
 
 /* _____________________________________________________________________

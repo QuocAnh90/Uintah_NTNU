@@ -455,7 +455,7 @@ namespace Uintah {
             NEIGHBOR
         };
 
-        Advector* d_advector;
+        //Advector* d_advector;
 
     protected:
         MPMICE2(const MPMICE2&);
