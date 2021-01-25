@@ -405,8 +405,6 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     for(int m = 0; m < d_numMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
       int indx = matl->getDWIndex();
-
-      cerr << "update for m" << indx << endl;
     
       //ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
       //MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);

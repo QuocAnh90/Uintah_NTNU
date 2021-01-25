@@ -573,9 +573,6 @@ void ICE::setupRHS(const ProcessorGroup*,
   Vector dx     = level->dCell();
   double vol    = dx.x()*dx.y()*dx.z();
       
-
-  cerr << "begin setupRHS" << endl;
-
   for(int p=0;p<patches->size();p++){
     const Patch* patch = patches->get(p);
     
@@ -762,9 +759,6 @@ void ICE::setupRHS(const ProcessorGroup*,
       rhs.initialize(0.0, l, h);
     }     
   }  // patches loop
-
-  cerr << "pass setup RHS" << endl;
-
 //  cout << " Level " << level->getIndex() << " rhs " 
 //       << rhs_max << " rhs * vol " << rhs_max * vol <<  endl;
 }
@@ -1006,8 +1000,6 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
   int proc = d_myworld->myRank();
   printTask(patch_sub, cout_doing, "Doing implicitPressureSolve" );
 
-  cerr << "begin implicit Pressure Solve" << endl;
-
   //__________________________________
   // define Matl sets and subsets
   // MPMICE2 only compute the pressure for ICE materials
@@ -1110,8 +1102,6 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
   
   d_subsched->setInitTimestep(false);
   
-  cerr << " pass begin compiler of implicit solver " << endl;
-
   while( counter < d_max_iter_implicit && max_RHS > d_outer_iter_tolerance && !recompute) {
   //__________________________________
   // recompile the subscheduler
@@ -1169,8 +1159,6 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
     counter ++;
     whichInitialGuess = nullptr;
     
-    cerr << " pass the executation of implicit solver" << endl;
-
     //__________________________________
     // diagnostics
     subNewDW->get(max_RHS,     lb->max_RHSLabel);

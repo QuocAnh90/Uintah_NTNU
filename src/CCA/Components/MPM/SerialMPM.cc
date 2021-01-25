@@ -2503,22 +2503,25 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
           }
         }
       } // End of particle loop
-      for(NodeIterator iter=patch->getExtraNodeIterator();
-                       !iter.done();iter++){
-        IntVector c = *iter;
 
-        gmassglobal[c]    += gmass[c];
-        gvolumeglobal[c]  += gvolume[c];
-        gvelglobal[c]     += gvelocity[c];
-        gvelocity[c]      /= gmass[c];
-        gtempglobal[c]    += gTemperature[c];
-        gTemperature[c]   /= gmass[c];
-        if (flags->d_with_mpmice2) {
-            gPorosity[c] /= gmass[c];
-        }
-//        gColor[c]         /= gmass[c];
-        gTemperatureNoBC[c] = gTemperature[c];
-        gSp_vol[c]        /= gmass[c];
+      for (NodeIterator iter = patch->getExtraNodeIterator();
+          !iter.done(); iter++) {
+          IntVector c = *iter;
+
+          gmassglobal[c] += gmass[c];
+          gvolumeglobal[c] += gvolume[c];
+          gvelglobal[c] += gvelocity[c];
+          gvelocity[c] /= gmass[c];
+          gtempglobal[c] += gTemperature[c];
+          gTemperature[c] /= gmass[c];
+
+          if (flags->d_with_mpmice2) {
+              gPorosity[c] /= gmass[c];
+          }
+
+          //        gColor[c]         /= gmass[c];
+          gTemperatureNoBC[c] = gTemperature[c];
+          gSp_vol[c] /= gmass[c];
       }
 
       if (flags->d_doScalarDiffusion) {
