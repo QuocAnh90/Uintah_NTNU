@@ -1067,6 +1067,7 @@ void ICE::scheduleComputeThermoTransportProperties(SchedulerP& sched,
 
   t->computes(lb->viscosityLabel);
   t->computes(lb->Porosity_CCLabel);
+  t->computes(lb->VolumeFraction_CCLabel);
   t->computes(lb->thermalCondLabel);
   t->computes(lb->gammaLabel);
   t->computes(lb->specific_heatLabel);
@@ -1896,7 +1897,6 @@ void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
   task->modifies(lb->sp_vol_CCLabel,  fat);               
   if( where == "afterAdvection"){
     task->computes(lb->temp_CCLabel);
-    task->computes(lb->rho1_CCLabel);
     task->computes(lb->vel_CCLabel);
     task->computes(lb->machLabel);
   }
@@ -2239,9 +2239,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
     std::vector<constCCVariable<double> > placeHolder(0);
     std::vector<CCVariable<double>   > rho_micro(max_indx);
     std::vector<CCVariable<double>   > sp_vol_CC(max_indx);
-    std::vector<CCVariable<double>   > Porosity_CC(max_indx);
     std::vector<CCVariable<double>   > rho_CC(max_indx);
-    std::vector<CCVariable<double>   > rho1_CC(max_indx);
     std::vector<CCVariable<double>   > Temp_CC(max_indx);
     std::vector<CCVariable<double>   > speedSound(max_indx);
     std::vector<CCVariable<double>   > vol_frac_CC(max_indx);
@@ -2297,9 +2295,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
       int indx= ice_matl->getDWIndex();
       new_dw->allocateAndPut(rho_micro[indx],  lb->rho_micro_CCLabel, indx,patch); 
       new_dw->allocateAndPut(sp_vol_CC[indx],  lb->sp_vol_CCLabel,    indx,patch); 
-      new_dw->allocateAndPut(Porosity_CC[indx],lb->Porosity_CCLabel,  indx, patch);
       new_dw->allocateAndPut(rho_CC[indx],     lb->rho_CCLabel,       indx,patch);
-      new_dw->allocateAndPut(rho1_CC[indx],    lb->rho1_CCLabel,      indx, patch);
       new_dw->allocateAndPut(Temp_CC[indx],    lb->temp_CCLabel,      indx,patch); 
       new_dw->allocateAndPut(speedSound[indx], lb->speedSound_CCLabel,indx,patch); 
       new_dw->allocateAndPut(vol_frac_CC[indx],lb->vol_frac_CCLabel,  indx,patch);
@@ -2312,7 +2308,7 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
     for (unsigned int m = 0; m < numMatls; m++ ) {
       ICEMaterial* ice_matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE", m);
       int indx = ice_matl->getDWIndex();
-      ice_matl->initializeCells(rho_micro[indx], Porosity_CC[indx], rho_CC[indx], rho1_CC[indx],
+      ice_matl->initializeCells(rho_micro[indx], rho_CC[indx],
                                 Temp_CC[indx],    speedSound[indx], 
                                 vol_frac_CC[indx], vel_CC[indx], 
                                 press_CC, numALLMatls, patch, new_dw);
@@ -2492,10 +2488,11 @@ void ICE::computeThermoTransportProperties(const ProcessorGroup*,
       int indx = ice_matl->getDWIndex();
 
       constCCVariable<double> temp_CC;
-      CCVariable<double> Porosity_CC;
+      CCVariable<double> Porosity_CC, VolumeFraction_CC;
 
       old_dw->get(temp_CC, lb->temp_CCLabel, indx,patch,Ghost::None,0);
-      new_dw->allocateAndPut(Porosity_CC, lb->Porosity_CCLabel, indx, patch, Ghost::None, 0);
+      new_dw->allocateAndPut(Porosity_CC, lb->Porosity_CCLabel, indx, patch);
+      new_dw->allocateAndPut(VolumeFraction_CC, lb->VolumeFraction_CCLabel, indx, patch);
 
       CCVariable<double> viscosity, thermalCond, gamma, cv;
       
@@ -2513,6 +2510,7 @@ void ICE::computeThermoTransportProperties(const ProcessorGroup*,
       for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
           IntVector c = *iter;
           Porosity_CC[c] = 1;
+          VolumeFraction_CC[c] = 0;   // Should not be used
       }
 
       if(cvModel != 0) {
@@ -4971,7 +4969,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
       
-      CCVariable<double> rho_CC, rho1_CC, temp_CC, sp_vol_CC,mach;
+      CCVariable<double> rho_CC, temp_CC, sp_vol_CC,mach;
       //CCVariable<double> Porosity_CC;
       CCVariable<Vector> vel_CC;
       constCCVariable<double> int_eng_adv, mass_adv,sp_vol_adv,speedSound, cv, Porosity_CC;
@@ -4993,7 +4991,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       new_dw->getModifiable(sp_vol_CC, lb->sp_vol_CCLabel,indx,patch);
       //new_dw->getModifiable(Porosity_CC, lb->Porosity_CCLabel, indx, patch);
       new_dw->getModifiable(rho_CC,    lb->rho_CCLabel,   indx,patch);
-      new_dw->allocateAndPut(rho1_CC, lb->rho1_CCLabel, indx, patch);
       new_dw->allocateAndPut(temp_CC,lb->temp_CCLabel,  indx,patch);          
       new_dw->allocateAndPut(vel_CC, lb->vel_CCLabel,   indx,patch);
       new_dw->allocateAndPut(mach,   lb->machLabel,     indx,patch);  
@@ -5011,7 +5008,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
         IntVector c = *iter;
         double inv_mass_adv = 1.0/mass_adv[c];
         rho_CC[c]    = mass_adv[c] * invvol;
-        rho1_CC[c] = rho_CC[c] * Porosity_CC[c];
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
         //Porosity_CC[c] = 1; // actually porosity is calculated in everytime steps so this value

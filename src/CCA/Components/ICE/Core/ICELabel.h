@@ -54,6 +54,7 @@ namespace Uintah {
     const VarLabel* compressibilityLabel;
     const VarLabel* sumKappaLabel;
     const VarLabel* Porosity_CCLabel;
+    const VarLabel* VolumeFraction_CCLabel;
     const VarLabel* rho_CCLabel;
     const VarLabel* rho1_CCLabel;
     const VarLabel* temp_CCLabel;

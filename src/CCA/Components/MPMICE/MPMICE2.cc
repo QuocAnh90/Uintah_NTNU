@@ -313,7 +313,6 @@ void MPMICE2::scheduleInitialize(const LevelP& level,
     // This is compute in d_ice->actuallyInitalize(...), and it is needed in 
     //  MPMICE2's actuallyInitialize()
     t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, ice_matls, Ghost::None, 0);
-    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, ice_matls, Ghost::None, 0);
 
     if (d_switchCriteria) {
         d_switchCriteria->scheduleInitialize(level, sched);
@@ -384,13 +383,11 @@ void MPMICE2::actuallyInitialize(const ProcessorGroup*,
         unsigned int numICE_matls = m_materialManager->getNumMatls("ICE");
         for (unsigned int m = 0; m < numICE_matls; m++) {
             constCCVariable<double> vol_frac;
-            constCCVariable<double> Porosity_CC;
             ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
             int indx = ice_matl->getDWIndex();
 
             // Get the Volume Fraction computed in ICE's actuallyInitialize(...)
             new_dw->get(vol_frac, Ilb->vol_frac_CCLabel, indx, patch, Ghost::None, 0);
-            new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, Ghost::None, 0);
 
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
@@ -541,7 +538,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     d_mpm->scheduleExMomInterpolated(sched, mpm_patches, mpm_matls);
 
     // schedule the interpolation of mass and volume to the cell centers
-    scheduleInterpolateNCToCC_0(sched, mpm_patches, one_matl,
+    scheduleInterpolateNCToCC_0(sched, mpm_patches, one_matl, press_matl,
         mpm_matls);
 
     // do coarsens in reverse order, and before the other tasks
@@ -772,6 +769,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
 void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
     const PatchSet* patches,
     const MaterialSubset* one_matl,
+    const MaterialSubset* press_matl,
     const MaterialSet* mpm_matls)
 {
     if (d_mpm->flags->doMPMOnLevel(getLevel(patches)->getIndex(),
@@ -786,7 +784,8 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->requires(Task::NewDW, Mlb->gMassLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gStressForSavingLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVolumeLabel, Ghost::AroundCells, 1);
-        t->requires(Task::NewDW, Mlb->gPorosityLabel, Ghost::AroundCells, 1);
+        //t->requires(Task::NewDW, Mlb->gPorosityLabel, Ghost::AroundCells, 1);
+        t->requires(Task::NewDW, Mlb->gVolumeFractionLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gVelocityBCLabel, Ghost::AroundCells, 1);
         t->requires(Task::NewDW, Mlb->gTemperatureLabel, Ghost::AroundCells, 1);
         //t->requires(Task::NewDW, Mlb->gSp_volLabel, Ghost::AroundCells, 1);
@@ -799,7 +798,8 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
 
         t->computes(MIlb->cMassLabel);
         //t->computes(MIlb->cVolumeLabel);
-        t->computes(Ilb->Porosity_CCLabel);
+        //t->computes(Ilb->Porosity_CCLabel);
+        t->computes(Ilb->Porosity_CCLabel, press_matl);
         t->computes(MIlb->cPermeabilityLabel);
         t->computes(MIlb->vel_CCLabel);
         t->computes(MIlb->temp_CCLabel);
@@ -846,14 +846,18 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
         constNCVariable<double> NC_CCweight;
         old_dw->get(NC_CCweight, Mlb->NC_CCweightLabel, 0, patch, gac, 1);
 
+        CCVariable<double> Porosity_CC;
+        new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch);
+        Porosity_CC.initialize(1.0);
+
         for (unsigned int m = 0; m < numMatls; m++) {
             MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
             int indx = mpm_matl->getDWIndex();
             // Create arrays for the grid data
-            //constNCVariable<double> gSp_vol;
-            constNCVariable<double> gmass, gvolume, gtemperature, gPorosity;
+            //constNCVariable<double> gSp_vol, gPorosity;
+            constNCVariable<double> gmass, gvolume, gtemperature, gVolumeFraction;
             constNCVariable<Vector> gvelocity;
-            CCVariable<double> cmass, Temp_CC, Porosity_CC, Permeability_CC;
+            CCVariable<double> cmass, Temp_CC, Permeability_CC, VolumeFraction_CC;
             //CCVariable<double> Volume_CC, sp_vol_CC, vol_frac_CC;
             CCVariable<double> rho_CC;
             CCVariable<Vector> vel_CC;
@@ -863,7 +867,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
 
             new_dw->allocateAndPut(cmass, MIlb->cMassLabel, indx, patch);
             //new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
-            new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);
+            //new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);    
+            new_dw->allocateAndPut(VolumeFraction_CC, Ilb->VolumeFraction_CCLabel, indx, patch);
             new_dw->allocateAndPut(Permeability_CC, MIlb->cPermeabilityLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
@@ -892,7 +897,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             new_dw->get(gmass, Mlb->gMassLabel, indx, patch, gac, 1);
             new_dw->get(gstress, Mlb->gStressForSavingLabel, indx, patch, gac, 1);
             new_dw->get(gvolume, Mlb->gVolumeLabel, indx, patch, gac, 1);
-            new_dw->get(gPorosity, Mlb->gPorosityLabel, indx, patch, gac, 1);
+            //new_dw->get(gPorosity, Mlb->gPorosityLabel, indx, patch, gac, 1);
+            new_dw->get(gVolumeFraction, Mlb->gVolumeFractionLabel, indx, patch, gac, 1);
             new_dw->get(gvelocity, Mlb->gVelocityBCLabel, indx, patch, gac, 1);
             new_dw->get(gtemperature, Mlb->gTemperatureLabel, indx, patch, gac, 1);
             //new_dw->get(gSp_vol, Mlb->gSp_volLabel, indx, patch, gac, 1);
@@ -912,7 +918,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 patch->findNodesFromCell(*iter, nodeIdx);
 
                 // double Vol_CC_mpm = 0.0;
-                double Porosity_CC_mpm = 0.0;
+                //double Porosity_CC_mpm = 0.0;
+                double Volumefraction_CC_mpm = 0.0;
                 double Temp_CC_mpm = 0.0;
                 //double sp_vol_mpm = 0.0;
                 Vector vel_CC_mpm = Vector(0.0, 0.0, 0.0);
@@ -922,7 +929,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                     double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
                     cmass[c] += NC_CCw_mass;
                     //Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
-                    Porosity_CC_mpm += gPorosity[nodeIdx[in]] * NC_CCw_mass;
+                    //Porosity_CC_mpm += gPorosity[nodeIdx[in]] * NC_CCw_mass;
+                    Volumefraction_CC_mpm += gVolumeFraction[nodeIdx[in]] * NC_CCw_mass;
                     //sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
                     vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
                     Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
@@ -934,7 +942,8 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 Temp_CC_mpm *= inv_cmass;
                 //sp_vol_mpm *= inv_cmass;
                 //Vol_CC_mpm *= inv_cmass;
-                Porosity_CC_mpm *= inv_cmass;
+                //Porosity_CC_mpm *= inv_cmass
+                Volumefraction_CC_mpm *= inv_cmass;
                 stress_CC_mpm *= inv_cmass;
 
                 // Locate on cell
@@ -943,11 +952,14 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 Temp_CC[c] = Temp_CC_mpm;
                 //sp_vol_CC[c] = sp_vol_mpm;
                 //Volume_CC[c] = Vol_CC_mpm;
+                VolumeFraction_CC[c] = Volumefraction_CC_mpm;
 
+                // Global porosity variable (press_matl) 1 - sum(volumrfractionMPM)
                 if (cmass[c] > very_small_mass) { // For cell with particles (only MPM material)
-                    Porosity_CC[c] = Porosity_CC_mpm;
+                    Porosity_CC[c] -= Volumefraction_CC_mpm;
                 }
-                else { // For cell without particles (only ICE material)
+
+                if (Porosity_CC[c] > 1) { // Cap the porosity
                     Porosity_CC[c] = 1;
                 }
 
@@ -965,7 +977,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
 
                 // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
                 Permeability_CC[c] = IniPermeability;
-            }
+            } // cell
 
             /*
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
@@ -988,7 +1000,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             //  Set if symmetric Boundary conditions
             setBC(cmass, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             //setBC(Volume_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
-            setBC(Porosity_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
+            setBC(Porosity_CC, "set_if_sym_BC", patch, m_materialManager, 0, new_dw, isNotInitialTimeStep);
             //setBC(sp_vol_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
 
             //---- B U L L E T   P R O O F I N G------
@@ -1032,7 +1044,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                     << " cell " << neg_cell << " Permeability_CC " << Permeability_CC[neg_cell] << "\n ";
                 throw InvalidValue(warn.str(), __FILE__, __LINE__);
             }
-        }
+        }  //materials
     }  //patches
 }
 

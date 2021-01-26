@@ -541,6 +541,7 @@ ParticleCreator::allocateVariables(particleIndex numParticles,
   new_dw->allocateAndPut(pvars.pmass,         d_lb->pMassLabel,         subset);
   new_dw->allocateAndPut(pvars.pvolume,       d_lb->pVolumeLabel,       subset);
   new_dw->allocateAndPut(pvars.pPorosity,     d_lb->pPorosityLabel,     subset);
+  new_dw->allocateAndPut(pvars.pVolumeFraction, d_lb->pVolumeFractionLabel, subset);
   new_dw->allocateAndPut(pvars.ptemperature,  d_lb->pTemperatureLabel,  subset);
   new_dw->allocateAndPut(pvars.pparticleID,   d_lb->pParticleIDLabel,   subset);
   new_dw->allocateAndPut(pvars.psize,         d_lb->pSizeLabel,         subset);
@@ -787,19 +788,23 @@ ParticleCreator::initializeParticle(const Patch* patch,
     try {
      if((*obj)->getInitialData_double("volumeFraction") == -1.0) {    
       vol_frac_CC = 1.0;
-      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1- matl->getInitialPorosity());
+      //pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1- matl->getInitialPorosity());
+      pvars.pmass[i] = matl->getInitialDensity() * pvars.pvolume[i] * (matl->getInitialVolumeFraction());
      } else {
       vol_frac_CC = (*obj)->getInitialData_double("volumeFraction");
-      pvars.pmass[i]   = matl->getInitialDensity()*pvars.pvolume[i]*vol_frac_CC * (1 - matl->getInitialPorosity());
+      //pvars.pmass[i]   = matl->getInitialDensity()*pvars.pvolume[i]*vol_frac_CC * (1 - matl->getInitialPorosity());
+      pvars.pmass[i]   = matl->getInitialDensity() * pvars.pvolume[i] * vol_frac_CC * (matl->getInitialVolumeFraction());
      }
     } catch (...) {
       vol_frac_CC = 1.0;       
-      pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1 - matl->getInitialPorosity());
+      //pvars.pmass[i]      = matl->getInitialDensity()*pvars.pvolume[i] * (1 - matl->getInitialPorosity());
+      pvars.pmass[i] = matl->getInitialDensity() * pvars.pvolume[i] * (matl->getInitialVolumeFraction());
     }
     pvars.pdisp[i]        = Vector(0.,0.,0.);
   }
   
     // Porosity for MPMICE2
+    pvars.pVolumeFraction[i] = matl->getInitialVolumeFraction();
     pvars.pPorosity[i] = matl->getInitialPorosity();
 
   if(d_with_color){
@@ -1029,6 +1034,9 @@ void ParticleCreator::registerPermanentParticleState(MPMMaterial* matl)
 
   particle_state.push_back(d_lb->pPorosityLabel);
   particle_state_preReloc.push_back(d_lb->pPorosityLabel_preReloc);
+
+  particle_state.push_back(d_lb->pVolumeFractionLabel);
+  particle_state_preReloc.push_back(d_lb->pVolumeFractionLabel_preReloc);
 
   particle_state.push_back(d_lb->pTemperatureLabel);
   particle_state_preReloc.push_back(d_lb->pTemperatureLabel_preReloc);

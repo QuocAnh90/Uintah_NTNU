@@ -55,6 +55,8 @@ MPMICELabel::MPMICELabel()
                      CCVariable<double>::getTypeDescription());
   cVolumeLabel       = VarLabel::create("c.volume",
                      CCVariable<double>::getTypeDescription());
+  //VolumeFraction_CCLabel = VarLabel::create("VolumeFraction_CC",
+  //                  CCVariable<double>::getTypeDescription());
   vel_CCLabel        = VarLabel::create( "vel_CC",
                      CCVariable<Vector>::getTypeDescription() );
   temp_CCLabel       = VarLabel::create("temp_CC",
@@ -111,6 +113,7 @@ MPMICELabel::~MPMICELabel()
   VarLabel::destroy(stress_CCLabel);
   VarLabel::destroy(cPermeabilityLabel);
   VarLabel::destroy(cVolumeLabel);
+  //VarLabel::destroy(VolumeFraction_CCLabel);
   VarLabel::destroy(vel_CCLabel);
   VarLabel::destroy(temp_CCLabel);
   VarLabel::destroy(press_NCLabel);

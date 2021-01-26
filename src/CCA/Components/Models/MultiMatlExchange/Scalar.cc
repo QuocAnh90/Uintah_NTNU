@@ -135,7 +135,8 @@ void ScalarExch::sched_AddExch_VelFC( SchedulerP            & sched,
   // All matls
   t->requires( pNewDW,      Ilb->sp_vol_CCLabel,  gac,   1);
   if(mpm_matls){
-      t->requires(pNewDW, Ilb->Porosity_CCLabel, gac, 1);
+      //t->requires(pNewDW, Ilb->Porosity_CCLabel, gac, 1);
+      t->requires(pNewDW, Ilb->VolumeFraction_CCLabel, gac, 1);
   }
   
   t->requires( pNewDW,      Ilb->vol_frac_CCLabel,gac,   1);
@@ -168,7 +169,7 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
                                   double          delT,
                                   std::vector<constCCVariable<double> >& vol_frac_CC,
                                   std::vector<constCCVariable<double> >& sp_vol_CC,
-                                  std::vector<constCCVariable<double> >& Porosity_CC,
+                                  std::vector<constCCVariable<double> >& VolumeFraction_CC,
                                   std::vector< constSFC>               & vel_FC,
                                   std::vector< SFC >                   & sp_vol_FC,
                                   std::vector< SFC >                   & vel_FCME)
@@ -201,6 +202,7 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
     double vel[MAX_MATLS];
     double tmp[MAX_MATLS];
     double Porosity_FC[MAX_MATLS];
+    double VolumeFraction_FC[MAX_MATLS];
     FastMatrix a(numMatls, numMatls);
 
     double IniPermeability1 = 0;
@@ -234,9 +236,7 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
               Material* matl1 = d_matlManager->getMaterial(m);
               //int indx1 = matl1->getDWIndex();
               ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
-              MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
-
-              Porosity_FC[m] = 0.5 * (Porosity_CC[m][adj] + Porosity_CC[m][c]);
+              MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);             
 
               if (ice_matl1) {
                   visc1 = ice_matl1->getViscosity();
@@ -244,6 +244,8 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
 
               if (mpm_matl1) {
                   IniPermeability1 = mpm_matl1->getInitialPermeability();
+                  VolumeFraction_FC[m] = 0.5 * (VolumeFraction_CC[m][adj] + VolumeFraction_CC[m][c]);
+                  Porosity_FC[m] = 1 - VolumeFraction_FC[m];
               }
 
               for (int n = 0; n < numMatls; n++) {
@@ -253,14 +255,14 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
                   ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
                   MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
 
-                  Porosity_FC[n] = 0.5 * (Porosity_CC[n][adj] + Porosity_CC[n][c]);
-
                   if (ice_matl2) {
                       visc2 = ice_matl2->getViscosity();
                   }
 
                   if (mpm_matl2) {
                       IniPermeability2 = mpm_matl2->getInitialPermeability();
+                      VolumeFraction_FC[n] = 0.5 * (VolumeFraction_CC[n][adj] + VolumeFraction_CC[n][c]);
+                      Porosity_FC[n] = 1 - VolumeFraction_FC[n];
                   }
 
                   if (ice_matl1) {
@@ -374,7 +376,8 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
 
     std::vector< constCCVariable<double> >   sp_vol_CC(d_numMatls);
     std::vector< constCCVariable<double> >   vol_frac_CC(d_numMatls);
-    std::vector< constCCVariable<double> >   Porosity_CC(d_numMatls);
+    //std::vector< constCCVariable<double> >   Porosity_CC(d_numMatls);
+    std::vector< constCCVariable<double> >   VolumeFraction_CC(d_numMatls);
     std::vector< constSFCXVariable<double> > uvel_FC(d_numMatls);
     std::vector< constSFCYVariable<double> > vvel_FC(d_numMatls);
     std::vector< constSFCZVariable<double> > wvel_FC(d_numMatls);
@@ -409,7 +412,8 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
       //ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
       //MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
 
-      pNewDW->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gac, 1);
+      //pNewDW->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gac, 1);
+      pNewDW->get(VolumeFraction_CC[m], Ilb->VolumeFraction_CCLabel, indx, patch, gac, 1);
 
       pNewDW->get( sp_vol_CC[m],    Ilb->sp_vol_CCLabel,  indx, patch, gac,   1 );
       pNewDW->get( vol_frac_CC[m],  Ilb->vol_frac_CCLabel,indx, patch, gac,   1 );
@@ -449,19 +453,19 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     vel_FC_exchange<constSFCXVariable<double>, SFCXVariable<double> >
                     (XFC_iterator,
                     adj_offset[0],  d_numMatls,    K,
-                    delT,           vol_frac_CC, sp_vol_CC, Porosity_CC,
+                    delT,           vol_frac_CC, sp_vol_CC, VolumeFraction_CC,
                     uvel_FC,        sp_vol_XFC,  uvel_FCME);
 
     vel_FC_exchange<constSFCYVariable<double>, SFCYVariable<double> >
                     (YFC_iterator,
                     adj_offset[1],  d_numMatls,    K,
-                    delT,           vol_frac_CC, sp_vol_CC, Porosity_CC,
+                    delT,           vol_frac_CC, sp_vol_CC, VolumeFraction_CC,
                     vvel_FC,        sp_vol_YFC,  vvel_FCME);
 
     vel_FC_exchange<constSFCZVariable<double>, SFCZVariable<double> >
                     (ZFC_iterator,
                     adj_offset[2],  d_numMatls,    K,
-                    delT,           vol_frac_CC, sp_vol_CC, Porosity_CC,
+                    delT,           vol_frac_CC, sp_vol_CC, VolumeFraction_CC,
                     wvel_FC,        sp_vol_ZFC,  wvel_FCME);
 
     //________________________________
@@ -527,8 +531,8 @@ void ScalarExch::sched_AddExch_Vel_Temp_CC( SchedulerP           & sched,
   t->requires(Task::NewDW,  Ilb->int_eng_L_CCLabel, gn);
   t->requires(Task::NewDW,  Ilb->sp_vol_CCLabel,    gn);
   t->requires(Task::NewDW,  Ilb->vol_frac_CCLabel,  gn);
-  t->requires(Task::NewDW,  Ilb->Porosity_CCLabel,  gn);
-
+  //t->requires(Task::NewDW,  Ilb->Porosity_CCLabel,  gn);
+  t->requires(Task::NewDW, Ilb->VolumeFraction_CCLabel, gn);
   computesRequires_CustomBCs(t, "CC_Exchange", Ilb, ice_matls, BC_globalVars);
 
   t->computes(Ilb->Tdot_CCLabel);
@@ -604,7 +608,8 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     std::vector<CCVariable<double> > Temp_CC(numALLMatls);
     std::vector<constCCVariable<double> > gamma(numALLMatls);
     std::vector<constCCVariable<double> > vol_frac_CC(numALLMatls);
-    std::vector<constCCVariable<double> > Porosity_CC(numALLMatls);
+    //std::vector<constCCVariable<double> > Porosity_CC(numALLMatls);
+    std::vector<constCCVariable<double> > VolumeFraction_CC(numALLMatls);
     std::vector<constCCVariable<double> > sp_vol_CC(numALLMatls);
     std::vector<constCCVariable<Vector> > mom_L(numALLMatls);
     std::vector<constCCVariable<double> > int_eng_L(numALLMatls);
@@ -653,7 +658,8 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
         new_dw->getCopy(oldTemp,          Ilb->temp_CCLabel,indx,patch,gn,0);
         new_dw->getModifiable(vel_CC[m],  Ilb->vel_CCLabel, indx,patch);
         new_dw->getModifiable(Temp_CC[m], Ilb->temp_CCLabel,indx,patch);
-        new_dw->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gn, 0);
+        //new_dw->get(Porosity_CC[m], Ilb->Porosity_CCLabel, indx, patch, gn, 0);
+        new_dw->get(VolumeFraction_CC[m], Ilb->VolumeFraction_CCLabel, indx, patch, gn, 0);
         old_temp[m] = oldTemp;
         cv[m].initialize(mpm_matl->getSpecificHeat());
       }
@@ -731,14 +737,14 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
                       }
                       if (mpm_matl2) { // MPM - ICE interaction
                           // Calculate the momentum exchange coefficient K = porosity(MPM) * viscosity (ICE) / Permeability (MPM)
-                          K(n, m) = Porosity_CC[n][c] * visc1 / IniPermeability2;
+                          K(n, m) = (1 - VolumeFraction_CC[n][c]) * visc1 / IniPermeability2;
                       }
                   }
 
                   if (mpm_matl1) {
                       if (ice_matl2) {  // MPM - ICE interaction
                           // Calculate the momentum exchange coefficient K = porosity(MPM)^2/(1-porosity(MPM)) * viscosity (ICE) / Permeability (MPM)
-                          K(n, m) = Porosity_CC[m][c] * Porosity_CC[m][c] * visc2 / (IniPermeability1 * (1 - Porosity_CC[m][c]));
+                          K(n, m) = (1 - VolumeFraction_CC[m][c]) * (1 - VolumeFraction_CC[m][c]) * visc2 / (IniPermeability1 * VolumeFraction_CC[m][c]);
                       }
                       if (mpm_matl2) { // MPM - MPM interaction
                           K(n, m) = 0;

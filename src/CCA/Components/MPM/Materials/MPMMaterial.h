@@ -151,12 +151,12 @@ WARNING
    // For MPMICE2
    double getInitialPermeability() const;
    double getInitialPorosity() const;
+   double getInitialVolumeFraction() const;
 
    // For MPMICE
    double getGamma() const;
    void initializeCCVariables(CCVariable<double>& rhom,
                               CCVariable<double>& rhC,
-                              CCVariable<double>& Porosity_CC,
                               CCVariable<double>& temp,   
                               CCVariable<Vector>& vCC,
                               CCVariable<double>& vfCC,
@@ -187,6 +187,7 @@ WARNING
 
    // for MPMICE2
    double d_Porosity;
+   double d_VolumeFraction;
    double d_Permeability;
 
    // Specific heats at constant pressure and constant volume

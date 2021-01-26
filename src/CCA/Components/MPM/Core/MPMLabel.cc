@@ -120,6 +120,8 @@ MPMLabel::MPMLabel()
 
   pPorosityLabel = VarLabel::create("p.Porosity",
                         ParticleVariable<double>::getTypeDescription());
+  pVolumeFractionLabel = VarLabel::create("p.VolumeFraction",
+      ParticleVariable<double>::getTypeDescription());
   
   pVolumeDeformedLabel = VarLabel::create( "p.volumedeformed",
                         ParticleVariable<double>::getTypeDescription());
@@ -231,7 +233,8 @@ MPMLabel::MPMLabel()
   
   pPorosityLabel_preReloc = VarLabel::create("p.Porosity+",
                         ParticleVariable<double>::getTypeDescription());
-
+  pVolumeFractionLabel_preReloc = VarLabel::create("p.VolumeFraction+",
+      ParticleVariable<double>::getTypeDescription());
   pMassLabel_preReloc = VarLabel::create( "p.mass+",
                         ParticleVariable<double>::getTypeDescription() );
   
@@ -477,7 +480,8 @@ MPMLabel::MPMLabel()
 
   gPorosityLabel = VarLabel::create("g.Porosity",
                   NCVariable<double>::getTypeDescription());
-
+  gVolumeFractionLabel = VarLabel::create("g.VolumeFraction",
+      NCVariable<double>::getTypeDescription());
   gVolumeLabel     = VarLabel::create("g.volume",
                         NCVariable<double>::getTypeDescription());
 

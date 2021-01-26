@@ -39,6 +39,7 @@ namespace Uintah {
       const VarLabel* stress_CCLabel;
       const VarLabel* cPermeabilityLabel;
       const VarLabel* cVolumeLabel;
+      //const VarLabel* VolumeFraction_CCLabel;
       const VarLabel* vel_CCLabel;
       const VarLabel* temp_CCLabel;
       const VarLabel* press_NCLabel;

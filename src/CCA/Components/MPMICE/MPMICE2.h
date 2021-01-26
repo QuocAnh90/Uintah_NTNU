@@ -122,6 +122,7 @@ namespace Uintah {
         void scheduleInterpolateNCToCC_0(SchedulerP&,
             const PatchSet*,
             const MaterialSubset*,
+            const MaterialSubset*,
             const MaterialSet*);
 
         void interpolateNCToCC_0(const ProcessorGroup*,

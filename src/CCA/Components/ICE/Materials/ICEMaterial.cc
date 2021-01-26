@@ -237,9 +237,7 @@ double ICEMaterial::getInitialDensity() const
  |____|____|____|____|          |____|____|____|____|=
 _____________________________________________________________________*/
 void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
-                                  CCVariable<double>& Porosity_CC,
                                   CCVariable<double>& rho_CC,
-                                  CCVariable<double>& rho1_CC,
                                   CCVariable<double>& temp,
                                   CCVariable<double>& speedSound,
                                   CCVariable<double>& vol_frac_CC,
@@ -255,9 +253,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
   // Zero the arrays so they don't get wacky values
   vel_CC.initialize(Vector(0.,0.,0.));
   rho_micro.initialize(0.);
-  Porosity_CC.initialize(1.);
   rho_CC.initialize(0.);
-  rho1_CC.initialize(0.);
   temp.initialize(0.);
   vol_frac_CC.initialize(0.);
   speedSound.initialize(0.);
@@ -289,13 +285,9 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
         press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
         vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
         rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
-        Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity");
         rho_CC[c]     = rho_micro[*iter] + d_tiny_rho*rho_micro[*iter];
-        rho1_CC[c]    = Porosity_CC[c] * rho_CC[c];
         temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
         IveBeenHere[c]= 1;
-
-        cerr << Porosity_CC[c] << endl;
       }
 
       IntVector ppc = d_geom_objs[obj]->getInitialData_IntVector("res");
@@ -314,7 +306,6 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
       for(CellIterator iter = patch->getExtraCellIterator();!iter.done();iter++){
         IntVector c = *iter;
         rho_CC[c] = rho_micro[c] * vol_frac_CC[c] + d_tiny_rho*rho_micro[c];
-        rho1_CC[c] = Porosity_CC[c] * rho_CC[c];
       }
     } else {
 
@@ -348,9 +339,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
             press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
             vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
             rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
-            Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity"); // Porosity = 1
             rho_CC[c]     = rho_micro[c] + d_tiny_rho*rho_micro[c];
-            rho1_CC[c] = Porosity_CC[c] * rho_CC[c];
             temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
             IveBeenHere[c]= 1;
           }
@@ -372,9 +361,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
             // to ensure that everything is set to something everywhere
             vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
             rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
-            Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity");
             rho_CC[c]     = rho_micro[c] * vol_frac_CC[c] + d_tiny_rho*rho_micro[c];
-            rho1_CC[c]    = Porosity_CC[c] * rho_CC[c];
             temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
             IveBeenHere[c]= obj; 
           }
@@ -385,9 +372,7 @@ void ICEMaterial::initializeCells(CCVariable<double>& rho_micro,
             press_CC[c]   = d_geom_objs[obj]->getInitialData_double("pressure");
             vel_CC[c]     = d_geom_objs[obj]->getInitialData_Vector("velocity");
             rho_micro[c]  = d_geom_objs[obj]->getInitialData_double("density");
-            Porosity_CC[c]= d_geom_objs[obj]->getInitialData_double("Porosity");
             rho_CC[c]     = rho_micro[c] * vol_frac_CC[c] + d_tiny_rho*rho_micro[c];
-            rho1_CC[c]    = Porosity_CC[c] * rho_CC[c];
             temp[c]       = d_geom_objs[obj]->getInitialData_double("temperature");
             IveBeenHere[c]= obj; 
           }

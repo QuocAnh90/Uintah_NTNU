@@ -76,6 +76,8 @@ namespace Uintah {
       const VarLabel* pVolumeLabel_preReloc;
       const VarLabel* pPorosityLabel;
       const VarLabel* pPorosityLabel_preReloc;
+      const VarLabel* pVolumeFractionLabel;
+      const VarLabel* pVolumeFractionLabel_preReloc;
       const VarLabel* pMassLabel;
       const VarLabel* pMassLabel_preReloc;
       const VarLabel* pVelocityLabel;
@@ -199,6 +201,7 @@ namespace Uintah {
       const VarLabel* gStressF1Label;
       const VarLabel* gStressForSavingLabel;
       const VarLabel* gPorosityLabel;
+      const VarLabel* gVolumeFractionLabel;
       const VarLabel* gVolumeLabel;
       const VarLabel* gVolumeF0Label;
       const VarLabel* gVolumeF1Label;
