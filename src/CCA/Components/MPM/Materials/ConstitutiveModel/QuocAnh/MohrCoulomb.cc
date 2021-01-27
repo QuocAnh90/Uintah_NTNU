@@ -556,7 +556,7 @@ double rho_orig = matl->getInitialDensity();
         constParticleVariable<long64> pParticleID;
         old_dw->get(pParticleID, lb->pParticleIDLabel, pset);
         cerr << "**ERROR** Negative Jacobian of deformation gradient"
-             << " in particle " << pParticleID[idx] << endl;
+             << " in particle " << pParticleID[idx] << "at position" << px[idx] << endl;
         cerr << "l = " << velGrad[idx] << endl;
         cerr << "F_old = " << deformationGradient[idx] << endl;
         cerr << "F_new = " << deformationGradient_new[idx] << endl;
