@@ -134,10 +134,10 @@ void ScalarExch::sched_AddExch_VelFC( SchedulerP            & sched,
 
   // All matls
   t->requires( pNewDW,      Ilb->sp_vol_CCLabel,  gac,   1);
-  if(mpm_matls){
+  //if(mpm_matls){
       //t->requires(pNewDW, Ilb->Porosity_CCLabel, gac, 1);
-      t->requires(pNewDW, Ilb->VolumeFraction_CCLabel, gac, 1);
-  }
+  t->requires(pNewDW, Ilb->VolumeFraction_CCLabel, gac, 1);
+  //}
   
   t->requires( pNewDW,      Ilb->vol_frac_CCLabel,gac,   1);
   t->requires( Task::NewDW, Ilb->uvel_FCLabel,    gaf_X, 1);

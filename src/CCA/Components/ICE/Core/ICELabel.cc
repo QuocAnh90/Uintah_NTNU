@@ -77,7 +77,7 @@ ICELabel::ICELabel()
   compressibilityLabel    = VarLabel::create("compressiblity",CC_double);
   sumKappaLabel           = VarLabel::create("sumKappa",      CC_double);
   Porosity_CCLabel        = VarLabel::create("Porosity_CC",   CC_double);
-  VolumeFraction_CCLabel  = VarLabel::create("VolumeFractrion_CC", CC_double);
+  VolumeFraction_CCLabel  = VarLabel::create("VolumeFraction_CC", CC_double);
   rho_CCLabel             = VarLabel::create("rho_CC",        CC_double);
   rho1_CCLabel            = VarLabel::create("rho1_CC",       CC_double);
   temp_CCLabel            = VarLabel::create("temp_CC",       CC_double);

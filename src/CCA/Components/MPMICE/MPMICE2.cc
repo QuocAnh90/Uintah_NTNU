@@ -713,7 +713,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
         const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
         const PatchSet* ice_patches = ice_level->eachPatch();
 
-        d_ice->scheduleComputeLagrangianValues(sched, ice_patches, ice_matls);
+        d_ice->scheduleComputeLagrangianValues(sched, ice_patches, press_matl, ice_matls);
 
         d_ice->d_exchModel->sched_AddExch_Vel_Temp_CC(
             sched, ice_patches, ice_matls_sub,
@@ -807,6 +807,7 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->computes(Ilb->rho_CCLabel, mss);
         //t->computes(Ilb->vol_frac_CCLabel, mss);
         t->computes(MIlb->stress_CCLabel);
+        t->computes(Ilb->VolumeFraction_CCLabel, mss);
 
         t->computes(MIlb->stressX_CCLabel);
         t->computes(MIlb->stressY_CCLabel);
@@ -1070,18 +1071,21 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     t = scinew Task("MPMICE2::computeEquilibrationPressure",
         this, &MPMICE2::computeEquilibrationPressure, press_matl);
 
+    Ghost::GhostType  gn = Ghost::None;
+
     t->requires(Task::OldDW, Ilb->timeStepLabel);
     t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
 
-    // I C E
-    Ghost::GhostType  gn = Ghost::None;
+    //Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
+    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, press_matl, gn);
+    t->requires(Task::OldDW, Ilb->press_CCLabel, press_matl, gn);
 
+    // I C E   
     t->requires(Task::OldDW, Ilb->temp_CCLabel, ice_matls, gn);
     t->requires(Task::OldDW, Ilb->rho_CCLabel, ice_matls, gn);
     t->requires(Task::OldDW, Ilb->sp_vol_CCLabel, ice_matls, gn);
     t->requires(Task::NewDW, Ilb->specific_heatLabel, ice_matls, gn);
-    t->requires(Task::NewDW, Ilb->gammaLabel, ice_matls, gn);
-    t->requires(Task::OldDW, Ilb->press_CCLabel, press_matl, gn);
+    t->requires(Task::NewDW, Ilb->gammaLabel, ice_matls, gn);   
     //t->requires(Task::OldDW, Ilb->vel_CCLabel, ice_matls, gn);
 
     // M P M
@@ -1113,6 +1117,7 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     //t->computes(Ilb->sp_vol_CCLabel, ice_matls);
     t->computes(Ilb->sp_vol_CCLabel);
     t->computes(Ilb->rho_CCLabel, ice_matls);
+    t->computes(Ilb->rho1_CCLabel);
 
     sched->addTask(t, patches, all_matls);
 }
@@ -1176,8 +1181,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
         //rho_micro also need MPM mateiral index
         std::vector<CCVariable<double> > rho_micro(numALLMatls);
-
         std::vector<CCVariable<double> > rho_CC_new(numALLMatls);
+        std::vector<CCVariable<double> > rho1_CC(numALLMatls);
         std::vector<CCVariable<double> > sp_vol_new(numALLMatls);
         std::vector<CCVariable<double> > speedSound(numALLMatls);
         std::vector<CCVariable<double> > speedSound_new(numALLMatls);
@@ -1192,11 +1197,13 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
         CCVariable<int> n_iters_equil_press;
         constCCVariable<double> press;
+        constCCVariable<double> Porosity_CC;
         CCVariable<double> press_new, sumKappa, sum_imp_delP;
         Ghost::GhostType  gn = Ghost::None;
 
         //__________________________________ 
         old_dw->get(press, Ilb->press_CCLabel, 0, patch, gn, 0);
+        new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch, gn, 0);
         new_dw->allocateAndPut(press_new, Ilb->press_equil_CCLabel, 0, patch);
         new_dw->allocateAndPut(sumKappa, Ilb->sumKappaLabel, 0, patch);
         new_dw->allocateAndPut(sum_imp_delP, Ilb->sum_imp_delPLabel, 0, patch);
@@ -1235,6 +1242,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             new_dw->allocateAndPut(speedSound_new[m], Ilb->speedSound_CCLabel,
                 indx, patch);
             new_dw->allocateAndPut(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch);
+            new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
             new_dw->allocateTemporary(rho_micro[m], patch);           
         }       
         press_new.copyData(press);
@@ -1314,7 +1322,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
                     if (mpm_matl[m]) {
                         rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
-                        vol_frac[m][c] = 0;
+                        vol_frac[m][c] = 0;                       
                     }               
                 }
                               
@@ -1324,7 +1332,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 sum = 0.0;
                 for (unsigned int m = 0; m < numALLMatls; m++) {
                     if (ice_matl[m]) {
-                        sum += vol_frac[m][c];                    }
+                        sum += vol_frac[m][c];                      
+                    }
                 }
 
                 if (fabs(sum - 1.0) < convergence_crit) {
@@ -1460,7 +1469,6 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             }
         } // end of cell interator
         
-       
         cout_norm << "max. iterations in any cell " << test_max_iter <<
             " on patch " << patch->getID() << endl;
 
@@ -1470,9 +1478,21 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
         // therefore need the machinery here
         for (unsigned int m = 0; m < numALLMatls; m++) {
             if (ice_matl[m]) {
-                rho_CC_new[m].copyData(rho_CC[m]);
+                rho_CC_new[m].copyData(rho_CC[m]);             
+            }
+
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+             
+                if (ice_matl[m]) {
+                    rho1_CC[m][c] = rho_CC_new[m][c] * Porosity_CC[c];
+                }
+                if (mpm_matl[m]) {
+                    rho1_CC[m][c] = rho_micro[m][c] * (1 - Porosity_CC[c]);
+                }               
             }
         }
+    
 
         //__________________________________
         // - update Boundary conditions
@@ -1565,271 +1585,10 @@ void MPMICE2::scheduleCoarsenNCMass(SchedulerP& sched,
         1.e-200, modifies, "sum");
 }
 
-/* Projecting porosity from cell to face, currently turn it off
-void MPMICE2::scheduleComputePorosityFC(SchedulerP& sched,
-    const PatchSet* patches,
-    const MaterialSubset* ice_matls,
-    const MaterialSubset* mpm_matls,
-    const MaterialSet* all_matls)
-{
-    int levelIndex = getLevel(patches)->getIndex();
-        Task* t;
-        cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputePorosityFC"
-            << "\t\t\t\t\tL-" << levelIndex << endl;
-        t = scinew Task("MPMICE2::computePorosityFC", this, &MPMICE2::computePorosityFC);
-        Ghost::GhostType  gac = Ghost::AroundCells;
-        if (ice_matls) {
-            t->requires(Task::NewDW, Ilb->Porosity_CCLabel, ice_matls, gac, 1);
-        }
-        if (mpm_matls) {
-            t->requires(Task::NewDW, Ilb->Porosity_CCLabel, mpm_matls, gac, 1);
-        }
-        t->computes(Ilb->PorosityX_FCLabel);
-        t->computes(Ilb->PorosityY_FCLabel);
-        t->computes(Ilb->PorosityZ_FCLabel);
-        sched->addTask(t, patches, all_matls);
-}
-//______________________________________________________________________
-//
-void MPMICE2::computePorosityFC(const ProcessorGroup*,
-    const PatchSubset* patches,
-    const MaterialSubset* ,
-    DataWarehouse* old_dw,
-    DataWarehouse* new_dw)
-{
-    const Level* level = getLevel(patches);
-    for (int p = 0; p < patches->size(); p++) {
-        const Patch* patch = patches->get(p);
-        printTask(patches, patch, cout_doing, "Doing MPMICE2::computePorosity_FCVel");
-        unsigned int numMatls = m_materialManager->getNumMatls();
-        Ghost::GhostType  gac = Ghost::AroundCells;
-        // Compute the face centered Temperatures
-        for (unsigned int m = 0; m < numMatls; m++) {
-            Material* matl = m_materialManager->getMaterial(m);
-            int indx = matl->getDWIndex();
-            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
-            MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
-            constCCVariable<double> rho_CC, Porosity_CC;
-            if (ice_matl) {
-                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gac, 1);
-                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
-            }
-            if (mpm_matl) {
-                new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gac, 1);
-                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
-            }
-            SFCXVariable<double> PorosityX_FC;
-            SFCYVariable<double> PorosityY_FC;
-            SFCZVariable<double> PorosityZ_FC;
-            new_dw->allocateAndPut(PorosityX_FC, Ilb->PorosityX_FCLabel, indx, patch);
-            new_dw->allocateAndPut(PorosityY_FC, Ilb->PorosityX_FCLabel, indx, patch);
-            new_dw->allocateAndPut(PorosityZ_FC, Ilb->PorosityX_FCLabel, indx, patch);
-            IntVector lowIndex(patch->getExtraSFCXLowIndex());
-            PorosityX_FC.initialize(0.0, lowIndex, patch->getExtraSFCXHighIndex());
-            PorosityY_FC.initialize(0.0, lowIndex, patch->getExtraSFCYHighIndex());
-            PorosityZ_FC.initialize(0.0, lowIndex, patch->getExtraSFCZHighIndex());
-            vector<IntVector> adj_offset(3);
-            adj_offset[0] = IntVector(-1, 0, 0);    // X faces
-            adj_offset[1] = IntVector(0, -1, 0);    // Y faces
-            adj_offset[2] = IntVector(0, 0, -1);   // Z faces
-            CellIterator XFC_iterator = patch->getSFCXIterator();
-            CellIterator YFC_iterator = patch->getSFCYIterator();
-            CellIterator ZFC_iterator = patch->getSFCZIterator();
-            if (level->getIndex() > 0) {  // Finer levels need to hit the ghost cells
-                IntVector l, h;
-                l = patch->getExtraCellIterator().begin();
-                h = patch->getExtraCellIterator().end();
-                XFC_iterator = CellIterator(l + IntVector(1, 0, 0), h);
-                YFC_iterator = CellIterator(l + IntVector(0, 1, 0), h);
-                ZFC_iterator = CellIterator(l + IntVector(0, 0, 1), h);
-            }
-            //__________________________________
-            //  Compute the porosity on each face
-            computePorosityFace<SFCXVariable<double> >(XFC_iterator, adj_offset[0],
-                rho_CC, Porosity_CC, PorosityX_FC);
-            computePorosityFace<SFCYVariable<double> >(YFC_iterator, adj_offset[1],
-                rho_CC, Porosity_CC, PorosityY_FC);
-            computePorosityFace<SFCZVariable<double> >(ZFC_iterator, adj_offset[2],
-                rho_CC, Porosity_CC, PorosityZ_FC);
-        } // matls loop
-    }  // patch loop
-}
-template<class T> void MPMICE2::computePorosityFace(CellIterator it,
-    IntVector adj_offset,
-    constCCVariable<double>& rho_CC,
-    constCCVariable<double>& Porosity_CC,
-    T& Porosity_FC)
-{
-    for (; !it.done(); it++) {
-        IntVector R = *it;
-        IntVector L = R + adj_offset;
-        double rho_FC = rho_CC[L] + rho_CC[R];
-        ASSERT(rho_FC > 0.0);
-        //__________________________________
-        // interpolation to the face
-        //  based on continuity of porosity
-        double term1 = (rho_CC[L] * Porosity_CC[L] + rho_CC[R] * Porosity_CC[R]) / (rho_FC);
-        Porosity_FC[R] = term1;
-    }
-}
-*/
-
 //______________________________________________________________________
 // The density in MPMICE2 is rho1_CC instead of rho_CC in MPMICE.
 // rho1_CC = rho_CC * porosity
 // 
-
-/*
-void MPMICE2::scheduleComputeVel_FC(SchedulerP& sched,
-    const PatchSet* patches,
-    const MaterialSubset* ice_matls,
-    const MaterialSubset* mpm_matls,
-    const MaterialSubset* press_matl,
-    const MaterialSet* all_matls)
-{
-    int levelIndex = getLevel(patches)->getIndex();
-    Task* t = 0;
-    cout_doing << d_myworld->myRank() << " MPMICE2::scheduleComputeVel_FC"
-        << "\t\t\t\t\tL-" << levelIndex << endl;
-    t = scinew Task("MPMICE2::computeVel_FC",
-        this, &MPMICE2::computeVel_FC);
-    Ghost::GhostType  gac = Ghost::AroundCells;
-    Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
-    t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
-    t->requires(Task::NewDW, Ilb->press_equil_CCLabel, press_matl, oims, gac, 1);
-    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel,     gac, 1);
-    t->requires(Task::NewDW, Ilb->rho1_CCLabel,        gac, 1);
-    t->requires(Task::NewDW, Ilb->rho_CCLabel,        gac, 1);
-    t->requires(Task::OldDW, Ilb->vel_CCLabel, ice_matls, gac, 1);
-    t->requires(Task::NewDW, MIlb->vel_CCLabel, mpm_matls, gac, 1);
-    // Hacking
-    t->requires(Task::NewDW, MIlb->stressX_CCLabel, mpm_matls, gac, 1);
-    t->requires(Task::NewDW, MIlb->stressY_CCLabel, mpm_matls, gac, 1);
-    t->requires(Task::NewDW, MIlb->stressZ_CCLabel, mpm_matls, gac, 1);
-    t->computes(Ilb->uvel_FCLabel);
-    t->computes(Ilb->vvel_FCLabel);
-    t->computes(Ilb->wvel_FCLabel);
-    t->computes(Ilb->grad_P_XFCLabel);
-    t->computes(Ilb->grad_P_YFCLabel);
-    t->computes(Ilb->grad_P_ZFCLabel);
-    t->computes(MIlb->grad_stress_XFCLabel);
-    t->computes(MIlb->grad_stress_YFCLabel);
-    t->computes(MIlb->grad_stress_ZFCLabel);
-    sched->addTask(t, patches, all_matls);
-}
-//______________________________________________________________________
-//
-void MPMICE2::computeVel_FC(const ProcessorGroup*,
-    const PatchSubset* patches,
-    const MaterialSubset* ,
-    DataWarehouse* old_dw,
-    DataWarehouse* new_dw)
-{
-    const Level* level = getLevel(patches);
-    for (int p = 0; p < patches->size(); p++) {
-        const Patch* patch = patches->get(p);
-        printTask(patches, patch, cout_doing, "Doing MPMICE2::computeVel_FCVel");
-        unsigned int numMatls = m_materialManager->getNumMatls();
-        Vector dx = patch->dCell();
-        Vector gravity = getGravity();
-        constCCVariable<double> press_CC;
-        Ghost::GhostType  gac = Ghost::AroundCells;
-        new_dw->get(press_CC, Ilb->press_equil_CCLabel, 0, patch, gac, 1);
-        delt_vartype delT;
-        old_dw->get(delT, Ilb->delTLabel, level);
-        // Compute the face centered velocities
-        for (unsigned int m = 0; m < numMatls; m++) {
-            Material* matl = m_materialManager->getMaterial(m);
-            int indx = matl->getDWIndex();
-            ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
-            MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl);
-            constCCVariable<double> rho1_CC, rho_CC, sp_vol_CC;
-            constCCVariable<Vector> vel_CC;
-            double rho_init = mpm_matl->getInitialDensity();
-            constCCVariable<double> stressX_CC, stressY_CC, stressZ_CC;
-            if (ice_matl) {
-                new_dw->get(rho1_CC, Ilb->rho1_CCLabel, indx, patch, gac, 1);
-                old_dw->get(vel_CC, Ilb->vel_CCLabel, indx, patch, gac, 1);
-                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gac, 1);
-            }
-            else {
-                new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gac, 1);
-                new_dw->get(vel_CC, MIlb->vel_CCLabel, indx, patch, gac, 1);
-                new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gac, 1);
-
-                new_dw->get(stressX_CC, MIlb->stressX_CCLabel, indx, patch, gac, 1);
-                new_dw->get(stressY_CC, MIlb->stressY_CCLabel, indx, patch, gac, 1);
-                new_dw->get(stressZ_CC, MIlb->stressZ_CCLabel, indx, patch, gac, 1);
-            }
-            SFCXVariable<double> uvel_FC, grad_stress_XFC, grad_P_XFC;
-            SFCYVariable<double> vvel_FC, grad_stress_YFC, grad_P_YFC;
-            SFCZVariable<double> wvel_FC, grad_stress_ZFC, grad_P_ZFC;
-            new_dw->allocateAndPut(uvel_FC, Ilb->uvel_FCLabel, indx, patch);
-            new_dw->allocateAndPut(vvel_FC, Ilb->vvel_FCLabel, indx, patch);
-            new_dw->allocateAndPut(wvel_FC, Ilb->wvel_FCLabel, indx, patch);
-            // debugging variables
-            new_dw->allocateAndPut(grad_P_XFC, Ilb->grad_P_XFCLabel, indx, patch);
-            new_dw->allocateAndPut(grad_P_YFC, Ilb->grad_P_YFCLabel, indx, patch);
-            new_dw->allocateAndPut(grad_P_ZFC, Ilb->grad_P_ZFCLabel, indx, patch);
-            new_dw->allocateAndPut(grad_stress_XFC, MIlb->grad_stress_XFCLabel, indx, patch);
-            new_dw->allocateAndPut(grad_stress_YFC, MIlb->grad_stress_YFCLabel, indx, patch);
-            new_dw->allocateAndPut(grad_stress_ZFC, MIlb->grad_stress_ZFCLabel, indx, patch);
-            IntVector lowIndex(patch->getExtraSFCXLowIndex());
-            uvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCXHighIndex());
-            vvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCYHighIndex());
-            wvel_FC.initialize(0.0, lowIndex, patch->getExtraSFCZHighIndex());
-            grad_P_XFC.initialize(0.0);
-            grad_P_YFC.initialize(0.0);
-            grad_P_ZFC.initialize(0.0);
-            grad_stress_XFC.initialize(0.0);
-            grad_stress_YFC.initialize(0.0);
-            grad_stress_ZFC.initialize(0.0);
-            vector<IntVector> adj_offset(3);
-            adj_offset[0] = IntVector(-1, 0, 0);    // X faces
-            adj_offset[1] = IntVector(0, -1, 0);    // Y faces
-            adj_offset[2] = IntVector(0, 0, -1);   // Z faces
-            CellIterator XFC_iterator = patch->getSFCXIterator();
-            CellIterator YFC_iterator = patch->getSFCYIterator();
-            CellIterator ZFC_iterator = patch->getSFCZIterator();
-            if (ice_matl) {
-                //__________________________________
-                //  Compute velICE_FC for each face
-                computeVelICEFace<SFCXVariable<double> >(0, XFC_iterator,
-                    adj_offset[0], dx[0], delT, gravity[0],
-                    rho1_CC, sp_vol_CC, vel_CC, press_CC,
-                    uvel_FC, grad_P_XFC);
-                computeVelICEFace<SFCYVariable<double> >(1, YFC_iterator,
-                    adj_offset[1], dx[1], delT, gravity[1],
-                    rho1_CC, sp_vol_CC, vel_CC, press_CC,
-                    vvel_FC, grad_P_YFC);
-                computeVelICEFace<SFCZVariable<double> >(2, ZFC_iterator,
-                    adj_offset[2], dx[2], delT, gravity[2],
-                    rho1_CC, sp_vol_CC, vel_CC, press_CC,
-                    wvel_FC, grad_P_ZFC);
-            }
-            else {
-                //__________________________________
-                //  Compute velMPM_FC for each face
-                computeVelMPMFace<SFCXVariable<double> >(0, XFC_iterator,
-                    adj_offset[0], dx[0], delT, gravity[0], rho_init,
-                    rho_CC, stressX_CC, sp_vol_CC, vel_CC, press_CC,
-                    uvel_FC, grad_P_XFC, grad_stress_XFC);
-                computeVelMPMFace<SFCYVariable<double> >(1, YFC_iterator,
-                    adj_offset[1], dx[1], delT, gravity[1], rho_init,
-                    rho_CC, stressY_CC, sp_vol_CC, vel_CC, press_CC,
-                    vvel_FC, grad_P_YFC, grad_stress_YFC);
-                computeVelMPMFace<SFCZVariable<double> >(2, ZFC_iterator,
-                    adj_offset[2], dx[2], delT, gravity[2], rho_init,
-                    rho_CC, stressZ_CC, sp_vol_CC, vel_CC, press_CC,
-                    wvel_FC, grad_P_ZFC, grad_stress_ZFC);
-            }
-            //__________________________________
-            // (*)vel_FC BC are updated in
-            // ICE::addExchangeContributionToFCVel()
-        } // matls loop
-    }  // patch loop
-}
-*/
 
 void MPMICE2::scheduleComputeVelICE_FC(SchedulerP& sched,
     const PatchSet* patches,
@@ -1897,7 +1656,7 @@ void MPMICE2::computeVelICE_FC(const ProcessorGroup*,
             constCCVariable<double> rho1_CC, sp_vol_CC;
             constCCVariable<Vector> vel_CC;
 
-            old_dw->get(rho1_CC, Ilb->rho1_CCLabel, indx, patch, gac, 1);
+            new_dw->get(rho1_CC, Ilb->rho1_CCLabel, indx, patch, gac, 1);
             old_dw->get(vel_CC, Ilb->vel_CCLabel, indx, patch, gac, 1);
             new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gac, 1);
 
@@ -2474,6 +2233,10 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
 
                 // Add pore water pressure term  (1-n) * gradP
                 cmomentum_mpm += mom_source2[c];
+                cmomentum[c] = cmomentum_mpm;
+                int_eng_L[c] = int_eng_L_mpm;
+                //cerr << "cmomentum" << cmomentum[c] << endl;
+                //cerr << "int_eng_L" << int_eng_L[c] << endl;
             }
             //__________________________________
             //  NO REACTION
@@ -2482,6 +2245,7 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
                     iter++) {
                     IntVector c = *iter;
                     mass_L[c] = cmass[c];
+                    //cerr << "mass_L" << mass_L[c] << endl;
                 }
             }
             //__________________________________
@@ -2580,7 +2344,6 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
     t->requires(Task::NewDW, Ilb->uvel_FCMELabel, gac, 2);
     t->requires(Task::NewDW, Ilb->vvel_FCMELabel, gac, 2);
     t->requires(Task::NewDW, Ilb->wvel_FCMELabel, gac, 2);
-    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, gac, 1);
 
     t->requires(Task::OldDW, Mlb->delTLabel, getLevel(patches));
     t->requires(Task::NewDW, Ilb->rho_CCLabel, gn);
@@ -2593,11 +2356,14 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
 
     t->requires(Task::OldDW, Ilb->temp_CCLabel, ice_matls, gn);
     t->requires(Task::NewDW, Ilb->specific_heatLabel, ice_matls, gn);
-    if (mpm_matls)
+    if (mpm_matls){
         t->requires(Task::NewDW, Ilb->temp_CCLabel, mpm_matls, gn);
+        t->requires(Task::NewDW, Ilb->VolumeFraction_CCLabel, mpm_matls, gn);
+    }
 
     t->requires(Task::NewDW, Ilb->delP_DilatateLabel, press_matl, oims, gn);
     t->requires(Task::NewDW, Ilb->press_CCLabel, press_matl, oims, gn);
+    t->requires(Task::NewDW, Ilb->Porosity_CCLabel, press_matl, oims, gn);
 
     if (d_ice->d_models.size() > 0) {
         t->requires(Task::NewDW, Ilb->modelVol_srcLabel, gn);
@@ -2645,6 +2411,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         std::vector<constCCVariable<double> > Tdot(numALLMatls);
         std::vector<constCCVariable<double> > vol_frac(numALLMatls);
         std::vector<constCCVariable<double> > Temp_CC(numALLMatls);
+        std::vector<constCCVariable<double> > VolumeFraction_CC(numALLMatls);
         std::vector<CCVariable<double> > alpha(numALLMatls);
         constCCVariable<double> rho_CC, f_theta, sp_vol_CC, cv;
         constCCVariable<double> P, Porosity_CC;
@@ -2652,22 +2419,21 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
         new_dw->allocateTemporary(sum_therm_exp, patch);
         new_dw->get(P, Ilb->press_CCLabel, 0, patch, gn, 0);
+        new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch, gn, 0);
         sum_therm_exp.initialize(0.);
 
         // Aditional line
-        CCVariable<double> termICE, termMPM, q_advectedICE, q_advectedMPM, vol_fracICE, vol_fracMPM;
+        CCVariable<double> termICE, termMPM, q_advectedICE, q_advectedMPM, vol_fracICE;
         new_dw->allocateTemporary(termICE, patch);
         new_dw->allocateTemporary(termMPM, patch);
         new_dw->allocateTemporary(q_advectedICE, patch);
         new_dw->allocateTemporary(q_advectedMPM, patch);
         new_dw->allocateTemporary(vol_fracICE, patch);
-        new_dw->allocateTemporary(vol_fracMPM, patch);
         termICE.initialize(0.);
         termMPM.initialize(0.);
         q_advectedICE.initialize(0.);
         q_advectedMPM.initialize(0.);
         vol_fracICE.initialize(0.);
-        vol_fracMPM.initialize(0.);
 
         for (unsigned int m = 0; m < numALLMatls; m++) {
             Material* matl = m_materialManager->getMaterial(m);
@@ -2683,6 +2449,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             }
             if (mpm_matl) {
                 new_dw->get(Temp_CC[m], Ilb->temp_CCLabel, indx, patch, gn, 0);
+                new_dw->get(VolumeFraction_CC[m], Ilb->VolumeFraction_CCLabel, indx, patch, gn, 0);
             }
         }
         
@@ -2705,7 +2472,6 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             new_dw->get(vvel_FC, Ilb->vvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(wvel_FC, Ilb->wvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(mass_L, Ilb->mass_L_CCLabel, indx, patch, gac, 2);
-            new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch, gn, 0);
 
             if (ice_matl) {
                 new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);             
@@ -2720,8 +2486,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             }
 
             // Calculate the divergence of velocity
-            //__________________________________
-            
+            //__________________________________            
             // Advection preprocessing
             bool bulletProof_test = true;
             advectVarBasket* varBasket = scinew advectVarBasket();
@@ -2752,14 +2517,10 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 advector->advectQ(vol_fracICE, mass_L, q_advectedICE, varBasket);
             }
 
-            if (mpm_matl) {
-                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
-                    IntVector c = *iter;
-                    vol_fracMPM[c] = 1 - Porosity_CC[c];
-                }           
+            if (mpm_matl) {         
                 //advector->advectQ(vol_fracMPM, patch, q_advectedMPM, varBasket,
                  //   vol_fracX_FC, vol_fracY_FC, vol_fracZ_FC, new_dw);
-                advector->advectQ(vol_fracMPM, mass_L, q_advectedMPM, varBasket);
+                advector->advectQ(VolumeFraction_CC[m], mass_L, q_advectedMPM, varBasket);
             }
 
             delete varBasket;
@@ -2827,6 +2588,9 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 double src = term1 + term2;
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (rho_CC[c] * vol);
+
+                cerr << "sp_vol_L " << sp_vol_L[c] << endl;
+                cerr << "sp_vol_src " << sp_vol_src[c] << endl;
             }
 
             if (d_ice->d_clampSpecificVolume) {

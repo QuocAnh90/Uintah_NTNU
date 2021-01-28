@@ -341,10 +341,10 @@ void SpecifiedBodyContact::exMomIntegrated(const ProcessorGroup*,
 
         if (!compare(gmass[d_material][c], 0.)
         && (totalNodalVol/cell_vol) > d_vol_const){
-          Vector old_vel = gvelocity_star[n][c];
+          //Vector old_vel = gvelocity_star[n][c];
           gvelocity_star[n][c] =  new_vel;
-          reaction_force += gmass[n][c]*(new_vel-old_vel)/delT;
-          //reaction_force -= ginternalForce[n][c];
+          //reaction_force += gmass[n][c]*(new_vel-old_vel)/delT;
+          reaction_force -= ginternalForce[n][c];
         }  // if
       }    // for matls
     }      // for Node Iterator

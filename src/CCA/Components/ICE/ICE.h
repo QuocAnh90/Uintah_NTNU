@@ -187,6 +187,7 @@ using namespace ExchangeModels;
 
       void scheduleComputeLagrangianValues(SchedulerP&,
                                            const PatchSet*,
+                                           const MaterialSubset*,
                                            const MaterialSet*);
 
       void scheduleComputeLagrangianSpecificVolume(SchedulerP&,

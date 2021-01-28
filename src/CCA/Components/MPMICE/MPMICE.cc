@@ -580,7 +580,7 @@ MPMICE::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     const LevelP& ice_level = inlevel->getGrid()->getLevel(l);
     const PatchSet* ice_patches = ice_level->eachPatch();
 
-    d_ice->scheduleComputeLagrangianValues(   sched, ice_patches, ice_matls);
+    d_ice->scheduleComputeLagrangianValues(   sched, ice_patches, press_matl, ice_matls);
                                                                   
     d_ice->d_exchModel->sched_AddExch_Vel_Temp_CC(   
                                               sched, ice_patches, ice_matls_sub,

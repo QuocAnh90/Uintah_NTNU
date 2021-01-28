@@ -154,6 +154,7 @@
                                          attribute1="name OPTIONAL STRING" >
         <density                         spec="REQUIRED DOUBLE" />
 		<Porosity                        spec="OPTIONAL DOUBLE" />
+		<VolumeFraction                  spec="OPTIONAL DOUBLE" />
 		<Permeability                    spec="OPTIONAL DOUBLE" />
 
         <include href="constitutive_models.xml" />

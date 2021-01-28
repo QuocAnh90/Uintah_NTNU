@@ -209,7 +209,7 @@ impAMRICE::scheduleTimeAdvance( const LevelP& level, SchedulerP& sched)
                                                             d_press_matl,
                                                             all_matls);
 
-    scheduleComputeLagrangianValues(        sched, patches, all_matls);
+    scheduleComputeLagrangianValues(        sched, patches, d_press_matl, all_matls);
 
     d_exchModel->sched_AddExch_Vel_Temp_CC( sched, patches, ice_matls_sub,
                                                             mpm_matls_sub,
