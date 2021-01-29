@@ -131,6 +131,7 @@ MPMMaterial::standardInitialization(ProblemSpecP& ps,
   ps->getWithDefault("Porosity", d_Porosity, 0);
   ps->getWithDefault("VolumeFraction", d_VolumeFraction, 1);
   ps->getWithDefault("Permeability", d_Permeability, 1);
+  ps->getWithDefault("VolumeFraction", d_VolumeFraction, 1);
 
   // Assume the the centered specific heat is C_v
   d_Cv = d_specificHeat;
