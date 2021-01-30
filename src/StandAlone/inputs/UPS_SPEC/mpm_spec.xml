@@ -21,6 +21,7 @@
       <DoExplicitHeatConduction           spec="OPTIONAL BOOLEAN" />
       <DeleteGeometryObjects              spec="OPTIONAL BOOLEAN" />
       <DoPressureStabilization            spec="OPTIONAL BOOLEAN" />
+	  <DoCapDensity                       spec="OPTIONAL BOOLEAN" />
       <DoDefGradAveraging                 spec="OPTIONAL BOOLEAN" /> 
       <DoThermalExpansion                 spec="OPTIONAL BOOLEAN" />  <!-- FIXME: default is? -->
       <computeNodalHeatFlux               spec="OPTIONAL BOOLEAN" />

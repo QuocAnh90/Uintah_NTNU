@@ -4207,7 +4207,8 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
 
       // critical density and volume
       double rho_0 = mpm_matl->getInitialDensity();
-      double rho_critical = 0.9 * rho_0;
+      double rho_critical_lowerbound = 0.9 * rho_0;
+      double rho_critical_upperbound = 1.1 * rho_0;
 
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
@@ -4276,26 +4277,32 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
               double Jtest = pFNew[idx].Determinant();
               double JOldtest = pFOld[idx].Determinant();
               double pvolume_trial = pVolumeOld[idx] * (Jtest / JOldtest) * (pmassNew[idx] / pmass[idx]);
-              double pvolume_critical = pmass[idx] / rho_critical;
+              double pvolume_critical_upperbound = pmass[idx] / rho_critical_lowerbound;
+              double pvolume_critical_lowerbound = pmass[idx] / rho_critical_upperbound;
               //double rho_cur = rho_0 / J; //current density
               //partvoldef += pvolume[idx];
 
-              if (pvolume_trial < pvolume_critical) {
-                  // Deformation gradient
-                  //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
-                  //pFNew[idx] = Finc * pFOld[idx];
-                  pvolume[idx] = pvolume_trial;
-                  partvoldef += pvolume[idx];
-                  //double J = pFNew[idx].Determinant();
-                  //double JOld = pFOld[idx].Determinant();
-                  //pvolume[idx] = pVolumeOld[idx] * (J / JOld);
+              if (flags->d_doCapDensity) {
+                  if (pvolume_trial < pvolume_critical_upperbound || pvolume_trial > rho_critical_lowerbound) {
+                      // Deformation gradient
+                      //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
+                      //pFNew[idx] = Finc * pFOld[idx];
+                      pvolume[idx] = pvolume_trial;
+                      partvoldef += pvolume[idx];
+                      //double J = pFNew[idx].Determinant();
+                      //double JOld = pFOld[idx].Determinant();
+                      //pvolume[idx] = pVolumeOld[idx] * (J / JOld);
+                  }
+                  else {
+                      pvolume[idx] = pVolumeOld[idx];
+                      pFNew[idx] = pFOld[idx];
+                      partvoldef += pvolume[idx];
+                  }
               }
               else {
-                  pvolume[idx] = pVolumeOld[idx];
-                  pFNew[idx] = pFOld[idx];
+                  pvolume[idx] = pvolume_trial;
                   partvoldef += pvolume[idx];
-              }       
-          
+              }
         }
         else{
           Matrix3 Amat = tensorL*delT;

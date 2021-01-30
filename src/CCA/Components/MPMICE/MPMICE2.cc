@@ -1609,7 +1609,7 @@ void MPMICE2::scheduleComputeVelICE_FC(SchedulerP& sched,
     Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
     t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
     t->requires(Task::NewDW, Ilb->press_equil_CCLabel, press_matl, oims, gac, 1);
-    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, gac, 1);
+    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, ice_matls, gac, 1);
     t->requires(Task::OldDW, Ilb->rho1_CCLabel, ice_matls, gac, 1);
     t->requires(Task::OldDW, Ilb->vel_CCLabel, ice_matls, gac, 1);
 
@@ -1790,11 +1790,10 @@ void MPMICE2::scheduleComputeVelMPM_FC(SchedulerP& sched,
 
     t->requires(Task::OldDW, Ilb->delTLabel, getLevel(patches));
     t->requires(Task::NewDW, Ilb->press_equil_CCLabel, press_matl, oims, gac, 1);
-    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, gac, 1);
-    t->requires(Task::NewDW, Ilb->rho_CCLabel, gac, 1);
+    t->requires(Task::NewDW, Ilb->sp_vol_CCLabel, mpm_matls, gac, 1);
+    t->requires(Task::NewDW, Ilb->rho_CCLabel, mpm_matls, gac, 1);
     t->requires(Task::NewDW, MIlb->vel_CCLabel, mpm_matls, gac, 1);
     //t->requires(Task::NewDW, MIlb->stress_CCLabel, mpm_matls, gac, 1);
-    t->requires(Task::NewDW, Ilb->rho_CCLabel, gac, 1);
 
     // Hacking
     t->requires(Task::NewDW, MIlb->stressX_CCLabel, mpm_matls, gac, 1);
@@ -2352,7 +2351,7 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
 
     t->requires(Task::NewDW, Ilb->f_theta_CCLabel, ice_matls, gn);
     t->requires(Task::NewDW, Ilb->compressibilityLabel, ice_matls, gn);
-    t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, ice_matls, gac, 1);
+    t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, gac, 1);
 
     t->requires(Task::OldDW, Ilb->temp_CCLabel, ice_matls, gn);
     t->requires(Task::NewDW, Ilb->specific_heatLabel, ice_matls, gn);
@@ -2588,9 +2587,6 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 double src = term1 + term2;
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (rho_CC[c] * vol);
-
-                cerr << "sp_vol_L " << sp_vol_L[c] << endl;
-                cerr << "sp_vol_src " << sp_vol_src[c] << endl;
             }
 
             if (d_ice->d_clampSpecificVolume) {

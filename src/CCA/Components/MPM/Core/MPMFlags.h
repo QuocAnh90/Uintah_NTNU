@@ -99,6 +99,7 @@ class Output;
     bool        d_doExplicitHeatConduction;
     bool        d_deleteGeometryObjects;
     bool        d_doPressureStabilization;
+    bool        d_doCapDensity;
     bool        d_computeNormals;
     bool        d_useLogisticRegression;
     bool        d_computeColinearNormals;
