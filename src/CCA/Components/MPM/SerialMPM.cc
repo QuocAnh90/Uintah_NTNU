@@ -2533,6 +2533,17 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
           gSp_vol[c] /= gmass[c];
       }
 
+      for (NodeIterator iter = patch->getNodeIterator();
+          !iter.done(); iter++) {
+          IntVector c = *iter;
+          //Debug
+          cerr << "gmass " << gmass[c] << endl;
+          cerr << "gVolumeFraction " << gVolumeFraction[c] << endl;
+          cerr << "gvolume " << gvolume[c] << endl;
+          cerr << "gvelocity " << gvelocity[c] << endl;
+          cerr << "gTemperature " << gTemperature[c] << endl;
+      }
+
       if (flags->d_doScalarDiffusion) {
         for (NodeIterator iter=patch->getExtraNodeIterator();
              !iter.done(); ++iter) {
@@ -3118,6 +3129,9 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         IntVector c = *iter;
         gstressglobal[c] += gstress[c];
         gstress[c] /= gvolume[c];
+
+        cerr << "internalforce " << internalforce[c] << endl;
+        cerr << "gstress " << gstress[c] << endl;
       }
 
       // save boundary forces before apply symmetry boundary condition.
@@ -3317,6 +3331,14 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
         }
         acceleration[c]  = acc +  gravity;
         velocity_star[c] = velocity[c] + acceleration[c] * delT;
+      }
+
+      for (NodeIterator iter = patch->getNodeIterator();
+          !iter.done(); iter++) {
+          IntVector c = *iter;
+          
+          cerr << "accerleration " << acceleration[c] << endl;
+          cerr << "velocity_star " << velocity_star[c] << endl;
       }
 
       // Check the integrated nodal velocity and if the product of velocity
@@ -4067,7 +4089,11 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           CMX         = CMX + (pxnew[idx]*pmass[idx]).asVector();
           totalMom   += pvelnew[idx]*pmass[idx];
           totalmass  += pmass[idx];
-        }
+
+          cerr << "pxnew " << pxnew[idx] << endl;
+          cerr << "pvelnew " << pvelnew[idx] << endl;
+          cerr << "pTempNew " << pTempNew[idx] << endl;
+        } // particle loop
       } // use XPIC(2) or not
 
       // scale back huge particle velocities.
@@ -4283,7 +4309,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
               //partvoldef += pvolume[idx];
 
               if (flags->d_doCapDensity) {
-                  if (pvolume_trial < pvolume_critical_upperbound || pvolume_trial > rho_critical_lowerbound) {
+                  if (pvolume_trial < pvolume_critical_upperbound || pvolume_trial > pvolume_critical_lowerbound) {
                       // Deformation gradient
                       //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
                       //pFNew[idx] = Finc * pFOld[idx];
@@ -4302,6 +4328,9 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
               else {
                   pvolume[idx] = pvolume_trial;
                   partvoldef += pvolume[idx];
+
+                  cerr << "pvolume " << pvolume[idx] << endl;
+                  cerr << "pFNew " << pFNew[idx] << endl;
               }
         }
         else{
@@ -4438,6 +4467,8 @@ void SerialMPM::finalParticleUpdate(const ProcessorGroup*,
           iter != pset->end(); iter++){
         particleIndex idx = *iter;
         pTempNew[idx] += pdTdt[idx]*delT;
+
+        cerr << "pTempNew " << pTempNew[idx] << endl;
 
         // Delete particles whose mass is too small (due to combustion),
         // whose pLocalized flag has been set to -999 or who have 

@@ -3571,6 +3571,8 @@ template <class T> void ICE::computePressFace(CellIterator iter,
 
     press_FC[R] = (press_CC[R] * sum_rho[L] + press_CC[L] * sum_rho[R])/
       (sum_rho[R] + sum_rho[L]);
+
+    cerr << "ICE press_FC" << press_FC[R]  << endl;
   }
 }
  
@@ -3760,6 +3762,8 @@ void ICE::computeVelTau_CCFace( const Patch* patch,
     IntVector in = c - oneCell; // interior cell index
     
     velTau_CC[c] = 2. * vel_CC[c] - vel_CC[in];
+
+    cerr << "velTau_CC" << velTau_CC[c] << endl;
   }
 }
 
@@ -3854,8 +3858,6 @@ void ICE::VelTau_CC(const ProcessorGroup*,
     }  // matl loop
   }  // patch loop
 }
-
-
 
 //______________________________________________________________________
 //
@@ -3990,6 +3992,8 @@ void ICE::viscousShearStress(const ProcessorGroup*,
                   tau_X_FC.copyPatch(Ttau_X_FC, tau_X_FC.getLowIndex(), tau_X_FC.getHighIndex());
                   tau_Y_FC.copyPatch(Ttau_Y_FC, tau_Y_FC.getLowIndex(), tau_Y_FC.getHighIndex());
                   tau_Z_FC.copyPatch(Ttau_Z_FC, tau_Z_FC.getLowIndex(), tau_Z_FC.getHighIndex());
+
+                  cerr << "viscous_src" << viscous_src[c] << endl;
               
           }
         }  // hasViscosity
@@ -4129,7 +4133,7 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
               viscous_source = viscous_src[c];
           }
 
-          mom_source[c] = (mom_source[c] + viscous_source + mass * gravity );
+          mom_source[c] = (mom_source[c] + viscous_source + mass * gravity);
         }
        
       }  //ice_matl
@@ -4140,6 +4144,10 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
         IntVector c = *iter;
         mom_source[c] *= delT; 
         mom_source2[c] *= delT;
+
+
+        cerr << "mom_source" << mom_source[c] << endl;
+        cerr << "mom_source2" << mom_source2[c] << endl;
       }
       
     }  // matls loop
@@ -4246,6 +4254,9 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
             //double A = TMV_CC[c] * vol_frac[c] * kappa[c] * press_CC[c];
             double A = TMV_CC[c] * vol_frac[c] * kappa[c] * Porosity_CC[c] * press_CC[c];
             int_eng_source[c] += A * delP_Dilatate[c] + heatCond_src[c];
+
+            cerr << "int_eng_source" << int_eng_source[c] << endl;
+            cerr << "heatCond_src" << heatCond_src[c] << endl;
           }
         }
       }
@@ -4366,6 +4377,8 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
 
           mass_L[c] = std::max( (mass + modelMass_src[c] ), min_mass);
 
+          cerr << "ICE mass_L" << mass_L[c] << endl;
+
           //  must have a minimum momentum   
           for (int dir = 0; dir <3; dir++) {  //loop over all three directons
             double min_mom_L = vel_CC[c][dir] * min_mass;
@@ -4378,6 +4391,8 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
             
             mom_L[c][dir] = mom_source[c][dir] +
                   plus_minus_one * std::max( fabs(mom_L_tmp), min_mom_L );
+
+            cerr << "ICE mom_L" << mom_L[c] << endl;
           }
           // must have a minimum int_eng  
           double min_int_eng = min_mass * cv[c] * temp_CC[c];
@@ -4400,7 +4415,8 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
                              modelEng_src[c];
 
           int_eng_L[c] = std::max(int_eng_L[c], min_int_eng);
-          
+
+          cerr << "ICE int_eng_L" << int_eng_L[c] << endl;
          }
 #if 0
          if(massGain > 0.0){
@@ -4872,6 +4888,8 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
       for(CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
         IntVector c = *iter;
         mass_adv[c]  = (mass_L[c] + q_advected[c]);
+
+        cerr << "ICE mass_adv" << mass_adv[c] << endl;
       }   
       //__________________________________
       // momentum
@@ -4881,7 +4899,9 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
 
       for(CellIterator iter = patch->getCellIterator(); !iter.done();  iter++){
         IntVector c = *iter;
-        mom_adv[c] = (mom_L_ME[c] + qV_advected[c]) ;
+        mom_adv[c] = (mom_L_ME[c] + qV_advected[c]);
+
+        cerr << "ICE mom_adv" << mom_adv[c] << endl;
       }
       //__________________________________
       // internal energy
@@ -4891,7 +4911,9 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
 
       for(CellIterator iter = patch->getCellIterator(); !iter.done();  iter++){
         IntVector c = *iter;
-        int_eng_adv[c] = (int_eng_L_ME[c] + q_advected[c]) ;
+        int_eng_adv[c] = (int_eng_L_ME[c] + q_advected[c]);
+
+        cerr << "ICE int_eng_adv" << int_eng_adv[c] << endl;
       }            
       //__________________________________
       // sp_vol[m] * mass
@@ -4901,7 +4923,9 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
 
       for(CellIterator iter = patch->getCellIterator(); !iter.done();  iter++){
         IntVector c = *iter;
-        sp_vol_adv[c] = (sp_vol_L[c] + q_advected[c]) ;
+        sp_vol_adv[c] = (sp_vol_L[c] + q_advected[c]);
+
+        cerr << "ICE sp_vol_adv" << sp_vol_adv[c] << endl;
       }
       //__________________________________
       // Model with transported variables.
@@ -5011,6 +5035,10 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
         rho_CC[c]    = mass_adv[c] * invvol;
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
+
+        cerr << "ICE rho_CC" << rho_CC[c] << endl;
+        cerr << "ICE vel_CC" << vel_CC[c] << endl;
+        cerr << "ICE sp_vol_CC" << sp_vol_CC[c] << endl;
       }
 
       //__________________________________
@@ -5071,6 +5099,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       for(CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
         IntVector c = *iter;
         temp_CC[c] = int_eng_adv[c]/ (mass_adv[c]*cv_new[c]);
+
+        cerr << "ICE temp_CC" << temp_CC[c] << endl;
       }
       
       //__________________________________
@@ -5096,6 +5126,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
                                                         !iter.done(); iter++){
         IntVector c = *iter;
         mach[c]  = vel_CC[c].length()/speedSound[c];
+
+        cerr << "ICE mach" << mach[c] << endl;
       }
 
       //____ B U L L E T   P R O O F I N G----

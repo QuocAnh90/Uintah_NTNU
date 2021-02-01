@@ -980,20 +980,20 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 Permeability_CC[c] = IniPermeability;
             } // cell
 
-            /*
+            
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
+
+                cerr << "interpolateNCToCC_0 " << endl;
                 cerr << "cmass " << cmass[c] << endl;
                 cerr << "vel_CC " << vel_CC[c] << endl;
                 cerr << "stress_CC " << stress_CC[c] << endl;
                 cerr << "Temp_CC " << Temp_CC[c] << endl;
-                cerr << "sp_vol_CC " << sp_vol_CC[c] << endl;
                 cerr << "Porosity_CC " << Porosity_CC[c] << endl;
                 cerr << "rho_CC " << rho_CC[c] << endl;
-
+                cerr << "rho_CC " << rho_CC[c] << endl;
             }
-            */
-
+            
             //  Set BC's
             setBC(Temp_CC, "Temperature", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(rho_CC, "Density", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
@@ -1049,7 +1049,6 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
     }  //patches
 }
 
-
 /*_____________________________________________________________________
  Function~  MPMICE2::scheduleComputePressure--
  Note:  Handles both Rate and Equilibration form of solution technique
@@ -1067,6 +1066,17 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     Task* t = nullptr;
 
     printSchedule(patches, cout_doing, "MPMICE2::scheduleComputeEquilibrationPressure");
+
+    /*
+    if (m_materialManager->getNumMatls() == 1) {
+        t = scinew Task("MPMICE2::computeEquilPressure_1_matl",
+            this, &MPMICE2::computeEquilPressure_1_matl);
+    }
+    else {
+        t = scinew Task("MPMICE2::computeEquilibrationPressure",
+            this, &MPMICE2::computeEquilibrationPressure);
+    }
+    */
 
     t = scinew Task("MPMICE2::computeEquilibrationPressure",
         this, &MPMICE2::computeEquilibrationPressure, press_matl);
@@ -1486,14 +1496,19 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
              
                 if (ice_matl[m]) {
                     rho1_CC[m][c] = rho_CC_new[m][c] * Porosity_CC[c];
+                    cerr << "ComputePressure " << endl;
+                    cerr << "ICE rho_CC_new " << rho_CC_new[m][c] << endl;
+                    cerr << "ICE rho_micro " << rho_micro[m][c] << endl;
+                    cerr << "ICE rho1_CC " << rho1_CC[m][c] << endl;
                 }
                 if (mpm_matl[m]) {
                     rho1_CC[m][c] = rho_micro[m][c] * (1 - Porosity_CC[c]);
+                    cerr << "MPM rho_micro " << rho_micro[m][c] << endl;
+                    cerr << "MPM rho1_CC " << rho1_CC[m][c] << endl;
                 }               
             }
         }
     
-
         //__________________________________
         // - update Boundary conditions
         customBC_localVars* BC_localVars = scinew customBC_localVars();
@@ -1515,7 +1530,9 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
-                    sp_vol_new[m][c] = 1.0 / rho_micro[m][c];                   
+                    sp_vol_new[m][c] = 1.0 / rho_micro[m][c];        
+                    cerr << "sp_vol_new " << sp_vol_new[m][c] << endl;
+                    cerr << "vol_frac " << vol_frac[m][c] << endl;
                 }
 
                 Material* matl = m_materialManager->getMaterial(m);
@@ -1534,11 +1551,14 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 if (ice_matl[m]) {
                     kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
                     sumKappa[c] += vol_frac[m][c] * kappa[m][c];
+                    cerr << "kappa " << kappa[m][c] << endl;
+                    cerr << "sumKappa " << sumKappa[c] << endl;
                 }
             }
             for (unsigned int m = 0; m < numALLMatls; m++) { // for ICE only
                 if (ice_matl[m]) {
                     f_theta[m][c] = vol_frac[m][c] * kappa[m][c] / sumKappa[c];
+                    cerr << "ICE f_theta " << f_theta[m][c] << endl;
                 }
             }
         }
@@ -1765,6 +1785,10 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
         double term3 = delT * gravity;
 
         vel_FC[R] = term1 - term2 + term3;
+
+        cerr << "ICE term 1 " << term1 << endl;
+        cerr << "ICE term 2 " << term2 << endl;
+        cerr << "ICE term 3 " << term3 << endl;
     }
 }
 
@@ -1977,6 +2001,11 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
         double term4 = delT * gravity;
 
         vel_FC[R] = term1 + term2 - term3 + term4;
+
+        cerr << "MPM term 1 " << term1 << endl;
+        cerr << "MPM term 2 " << term2 << endl;
+        cerr << "MPM term 3 " << term3 << endl;
+        cerr << "MPM term 4 " << term4 << endl;
     }
 }
 
@@ -2234,8 +2263,8 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
                 cmomentum_mpm += mom_source2[c];
                 cmomentum[c] = cmomentum_mpm;
                 int_eng_L[c] = int_eng_L_mpm;
-                //cerr << "cmomentum" << cmomentum[c] << endl;
-                //cerr << "int_eng_L" << int_eng_L[c] << endl;
+                cerr << "MPM cmomentum" << cmomentum[c] << endl;
+                cerr << "MPM int_eng_L" << int_eng_L[c] << endl;
             }
             //__________________________________
             //  NO REACTION
@@ -2244,7 +2273,7 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
                     iter++) {
                     IntVector c = *iter;
                     mass_L[c] = cmass[c];
-                    //cerr << "mass_L" << mass_L[c] << endl;
+                    cerr << "MPM mass_L" << mass_L[c] << endl;
                 }
             }
             //__________________________________
@@ -2528,6 +2557,9 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 termICE[c] -= q_advectedICE[c];
                 termMPM[c] -= q_advectedMPM[c];
+
+                cerr << "ICE termICE" << termICE[c] << endl;
+                cerr << "ICE termMPM" << termMPM[c] << endl;
             }
         }
 
@@ -2587,6 +2619,9 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 double src = term1 + term2;
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (rho_CC[c] * vol);
+
+                cerr << "ICE sp_vol_L" << sp_vol_L[c] << endl;
+                cerr << "ICE sp_vol_src" << sp_vol_src[c] << endl;
             }
 
             if (d_ice->d_clampSpecificVolume) {
@@ -2729,6 +2764,10 @@ void MPMICE2::computeCCVelAndTempRates(const ProcessorGroup*,
                     / (mass_L_CC[c] * cv * delT);
                 double heatRte = (eng_L_ME_CC[c] - old_int_eng_L_CC[c]) / delT;
                 heatRate[c] = .05 * heatRte + .95 * old_heatRate[c];
+
+                cerr << "dTdt_CC " << dTdt_CC[c] << endl;
+                cerr << "dVdt_CC " << dVdt_CC[c] << endl;
+                cerr << "heatRate " << heatRate[c] << endl;
             }
             setBC(dTdt_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(dVdt_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
@@ -2737,7 +2776,6 @@ void MPMICE2::computeCCVelAndTempRates(const ProcessorGroup*,
 }
 
 //______________________________________________________________________
-
 //
 void MPMICE2::scheduleInterpolateCCToNC(SchedulerP& sched,
     const PatchSet* patches,
@@ -2824,6 +2862,14 @@ void MPMICE2::interpolateCCToNC(const ProcessorGroup*,
                     gacceleration[*iter] += dVdt_CC[cIdx[in]] * .125;
                     dTdt_NC[*iter] += dTdt_CC[cIdx[in]] * .125;
                 }
+
+                for (NodeIterator iter = patch->getNodeIterator();
+                    !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    cerr << "gvelocity " << gvelocity[c] << endl;
+                    cerr << "gacceleration " << gacceleration[c] << endl;
+                    cerr << "dTdt_NC " << dTdt_NC[c] << endl;
+                }
             }
             //__________________________________
             //  inter-material phase transformation
@@ -2845,7 +2891,6 @@ void MPMICE2::interpolateCCToNC(const ProcessorGroup*,
         }  // mpmMatls
     }  //patches
 }
-
 
 // Optional function //
 //______________________________________________________________________
