@@ -2537,11 +2537,11 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
           !iter.done(); iter++) {
           IntVector c = *iter;
           //Debug
-          cerr << "gmass " << gmass[c] << endl;
-          cerr << "gVolumeFraction " << gVolumeFraction[c] << endl;
-          cerr << "gvolume " << gvolume[c] << endl;
-          cerr << "gvelocity " << gvelocity[c] << endl;
-          cerr << "gTemperature " << gTemperature[c] << endl;
+          //cerr << "gmass " << gmass[c] << endl;
+          //cerr << "gVolumeFraction " << gVolumeFraction[c] << endl;
+          //cerr << "gvolume " << gvolume[c] << endl;
+          //cerr << "gvelocity " << gvelocity[c] << endl;
+          //cerr << "gTemperature " << gTemperature[c] << endl;
       }
 
       if (flags->d_doScalarDiffusion) {
@@ -3130,8 +3130,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         gstressglobal[c] += gstress[c];
         gstress[c] /= gvolume[c];
 
-        cerr << "internalforce " << internalforce[c] << endl;
-        cerr << "gstress " << gstress[c] << endl;
+        //cerr << "internalforce " << internalforce[c] << endl;
+        //cerr << "gstress " << gstress[c] << endl;
       }
 
       // save boundary forces before apply symmetry boundary condition.
@@ -3337,8 +3337,8 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
           !iter.done(); iter++) {
           IntVector c = *iter;
           
-          cerr << "accerleration " << acceleration[c] << endl;
-          cerr << "velocity_star " << velocity_star[c] << endl;
+          //cerr << "accerleration " << acceleration[c] << endl;
+          //cerr << "velocity_star " << velocity_star[c] << endl;
       }
 
       // Check the integrated nodal velocity and if the product of velocity
@@ -4090,9 +4090,9 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           totalMom   += pvelnew[idx]*pmass[idx];
           totalmass  += pmass[idx];
 
-          cerr << "pxnew " << pxnew[idx] << endl;
-          cerr << "pvelnew " << pvelnew[idx] << endl;
-          cerr << "pTempNew " << pTempNew[idx] << endl;
+          //cerr << "pxnew " << pxnew[idx] << endl;
+          //cerr << "pvelnew " << pvelnew[idx] << endl;
+          //cerr << "pTempNew " << pTempNew[idx] << endl;
         } // particle loop
       } // use XPIC(2) or not
 
@@ -4329,8 +4329,8 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
                   pvolume[idx] = pvolume_trial;
                   partvoldef += pvolume[idx];
 
-                  cerr << "pvolume " << pvolume[idx] << endl;
-                  cerr << "pFNew " << pFNew[idx] << endl;
+                  //cerr << "pvolume " << pvolume[idx] << endl;
+                  //cerr << "pFNew " << pFNew[idx] << endl;
               }
         }
         else{
@@ -4468,7 +4468,7 @@ void SerialMPM::finalParticleUpdate(const ProcessorGroup*,
         particleIndex idx = *iter;
         pTempNew[idx] += pdTdt[idx]*delT;
 
-        cerr << "pTempNew " << pTempNew[idx] << endl;
+        //cerr << "pTempNew " << pTempNew[idx] << endl;
 
         // Delete particles whose mass is too small (due to combustion),
         // whose pLocalized flag has been set to -999 or who have 

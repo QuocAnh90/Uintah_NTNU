@@ -979,6 +979,12 @@ void ICE::computeDel_P(const ProcessorGroup*,
       IntVector c = *iter;
       delP_MassX[c]    = massExchTerm[c]/sumKappa[c];
       delP_Dilatate[c] = sum_imp_delP[c] - delP_MassX[c];
+
+      //cerr << "massExchTerm" << massExchTerm[c] << endl;
+      //cerr << "sumKappa" << sumKappa[c] << endl;
+      //cerr << "sum_imp_delP" << sum_imp_delP[c] << endl;
+      //cerr << "delP_MassX" << delP_MassX[c] << endl;
+      //cerr << "delP_Dilatate" << delP_Dilatate[c] << endl;
       //initialGuess[c]  = delP_Dilatate[c];
     }    
 

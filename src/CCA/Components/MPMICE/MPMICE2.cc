@@ -979,21 +979,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 // Calculate cell centered permeability (temporary set constant but should be porosity dependent)
                 Permeability_CC[c] = IniPermeability;
             } // cell
-
-            
-            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
-                IntVector c = *iter;
-
-                cerr << "interpolateNCToCC_0 " << endl;
-                cerr << "cmass " << cmass[c] << endl;
-                cerr << "vel_CC " << vel_CC[c] << endl;
-                cerr << "stress_CC " << stress_CC[c] << endl;
-                cerr << "Temp_CC " << Temp_CC[c] << endl;
-                cerr << "Porosity_CC " << Porosity_CC[c] << endl;
-                cerr << "rho_CC " << rho_CC[c] << endl;
-                cerr << "rho_CC " << rho_CC[c] << endl;
-            }
-            
+                          
             //  Set BC's
             setBC(Temp_CC, "Temperature", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(rho_CC, "Density", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
@@ -1045,6 +1031,19 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                     << " cell " << neg_cell << " Permeability_CC " << Permeability_CC[neg_cell] << "\n ";
                 throw InvalidValue(warn.str(), __FILE__, __LINE__);
             }
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+
+                //cerr << "interpolateNCToCC_0 " << endl;
+                //cerr << "cmass " << cmass[c] << endl;
+                //cerr << "vel_CC " << vel_CC[c] << endl;
+                //cerr << "stress_CC " << stress_CC[c] << endl;
+                //cerr << "Temp_CC " << Temp_CC[c] << endl;
+                //cerr << "Porosity_CC " << Porosity_CC[c] << endl;
+                //cerr << "rho_CC " << rho_CC[c] << endl;
+            }
+
         }  //materials
     }  //patches
 }
@@ -1067,8 +1066,7 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
 
     printSchedule(patches, cout_doing, "MPMICE2::scheduleComputeEquilibrationPressure");
 
-    /*
-    if (m_materialManager->getNumMatls() == 1) {
+    if (m_materialManager->getNumMatls("ICE") == 1) {
         t = scinew Task("MPMICE2::computeEquilPressure_1_matl",
             this, &MPMICE2::computeEquilPressure_1_matl);
     }
@@ -1076,10 +1074,9 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
         t = scinew Task("MPMICE2::computeEquilibrationPressure",
             this, &MPMICE2::computeEquilibrationPressure);
     }
-    */
-
-    t = scinew Task("MPMICE2::computeEquilibrationPressure",
-        this, &MPMICE2::computeEquilibrationPressure, press_matl);
+    
+    //t = scinew Task("MPMICE2::computeEquilibrationPressure",
+      //  this, &MPMICE2::computeEquilibrationPressure, press_matl);
 
     Ghost::GhostType  gn = Ghost::None;
 
@@ -1132,6 +1129,153 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     sched->addTask(t, patches, all_matls);
 }
 
+
+/* _____________________________________________________________________
+ Function~  MPMICE2::computeEquilPressure_1_matl--
+ Purpose~   Simple EOS evaluation
+_____________________________________________________________________*/
+void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset* matls,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    timeStep_vartype timeStep;
+    old_dw->get(timeStep, Ilb->timeStepLabel);
+
+    bool isNotInitialTimeStep = (timeStep > 0);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing MPMICE2::computeEquilPressure_1_matl");
+
+        unsigned int numICEMatls = m_materialManager->getNumMatls("ICE");
+        unsigned int numMPMMatls = m_materialManager->getNumMatls("MPM");
+        unsigned int numALLMatls = numICEMatls + numMPMMatls;
+
+        //rho_micro also need MPM mateiral index
+        //std::vector<double> dp_drho(numALLMatls), dp_de(numALLMatls);
+        std::vector<CCVariable<double> > vol_frac(numALLMatls);
+        std::vector<CCVariable<double> > rho_micro(numALLMatls);
+        std::vector<CCVariable<double> > rho_CC_new(numALLMatls);
+        std::vector<CCVariable<double> > rho1_CC(numALLMatls);
+        std::vector<CCVariable<double> > sp_vol_new(numALLMatls);
+        std::vector<CCVariable<double> > speedSound(numALLMatls);
+        std::vector<CCVariable<double> > speedSound_new(numALLMatls);
+        std::vector<CCVariable<double> > f_theta(numALLMatls);
+        std::vector<CCVariable<double> > kappa(numALLMatls);
+        std::vector<constCCVariable<double> > Temp(numALLMatls);
+        std::vector<constCCVariable<double> > rho_CC(numALLMatls);
+        std::vector<constCCVariable<double> > sp_vol_CC(numALLMatls);
+        std::vector<constCCVariable<double> > cv(numALLMatls);
+        std::vector<constCCVariable<double> > gamma(numALLMatls);
+        std::vector<constCCVariable<double> > placeHolder(0);
+
+        std::vector<MPMMaterial*> mpm_matl(numALLMatls);
+        std::vector<ICEMaterial*> ice_matl(numALLMatls);
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            ice_matl[m] = dynamic_cast<ICEMaterial*>(matl);
+            mpm_matl[m] = dynamic_cast<MPMMaterial*>(matl);
+        }
+
+        //__________________________________ 
+        Ghost::GhostType  gn = Ghost::None;
+        constCCVariable<double> Porosity_CC;
+        new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch, gn, 0);
+        CCVariable<double> press_eq, sumKappa, sum_imp_delP;
+        new_dw->allocateAndPut(press_eq, Ilb->press_equil_CCLabel, 0, patch);
+        new_dw->allocateAndPut(sumKappa, Ilb->sumKappaLabel, 0, patch);
+        new_dw->allocateAndPut(sum_imp_delP, Ilb->sum_imp_delPLabel, 0, patch);
+        sum_imp_delP.initialize(0.0);
+
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            Ghost::GhostType  gn = Ghost::None;
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+            if (ice_matl[m]) {                    // I C E
+
+                old_dw->get(Temp[m], Ilb->temp_CCLabel, indx, patch, gn, 0);
+                old_dw->get(rho_CC[m], Ilb->rho_CCLabel, indx, patch, gn, 0);
+                old_dw->get(sp_vol_CC[m], Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
+                new_dw->get(cv[m], Ilb->specific_heatLabel, indx, patch, gn, 0);
+                new_dw->get(gamma[m], Ilb->gammaLabel, indx, patch, gn, 0);
+                new_dw->allocateAndPut(rho_CC_new[m], Ilb->rho_CCLabel, indx, patch);
+                new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
+                new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
+
+            }
+            if (mpm_matl[m]) {                    // M P M
+                new_dw->get(Temp[m], MIlb->temp_CCLabel, indx, patch, gn, 0);
+                new_dw->get(rho_CC[m], Ilb->rho_CCLabel, indx, patch, gn, 0);
+                //new_dw->get(sp_vol_CC[m], Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
+            }
+            new_dw->allocateAndPut(sp_vol_new[m], Ilb->sp_vol_CCLabel, indx, patch);
+            new_dw->allocateAndPut(speedSound_new[m], Ilb->speedSound_CCLabel,
+                indx, patch);
+            new_dw->allocateAndPut(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch);
+            new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
+            new_dw->allocateTemporary(rho_micro[m], patch);
+        }
+
+        //______________________________________________________________________
+        //  Main loop
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+
+                if (ice_matl[m]) {                // I C E
+                    vol_frac[m][c] = 1;
+                    rho_micro[m][c] = rho_CC_new[m][c] = rho_CC[m][c];
+                    rho1_CC[m][c] = rho_CC_new[m][c] * Porosity_CC[c];   
+                    sp_vol_new[m][c] = 1.0 / rho_CC[m][c];
+                    double dp_drho, dp_de, c_2;
+
+                    //__________________________________
+                    // evaluate EOS
+                    ice_matl[m]->getEOS()->computePressEOS(rho_micro[m][c], gamma[m][c],
+                        cv[m][c], Temp[m][c], press_eq[c],
+                        dp_drho, dp_de);
+
+                    c_2 = dp_drho + dp_de * press_eq[c] / (rho_micro[m][c] * rho_micro[m][c]);
+                    speedSound_new[m][c] = sqrt(c_2);
+                    
+                    //  compute f_theta  
+                    kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
+                    sumKappa[c] = kappa[m][c];
+                    f_theta[m][c] = 1.0;
+                    cerr << " speedSound_new " << speedSound_new[m][c] << endl;
+                }
+
+                else if (mpm_matl[m]) {                //  M P M  I need rho_micro index for setBC
+                    rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
+                    rho1_CC[m][c] = rho_micro[m][c] * (1 - Porosity_CC[c]);
+                    speedSound_new[m][c] = 30;
+                    vol_frac[m][c] = 0;
+                    sp_vol_new[m][c] = 1.0 / rho_CC[m][c];
+
+                }
+            }
+        }
+
+        //__________________________________
+        // - apply Boundary conditions
+        customBC_localVars* BC_localVars = scinew customBC_localVars();
+
+        preprocess_CustomBCs("EqPress", old_dw, new_dw, Ilb, patch,
+            999, d_ice->d_BC_globalVars, BC_localVars);
+
+        setBC(press_eq, rho_micro, placeHolder, d_ice->d_surroundingMatl_indx,
+            "rho_micro", "Pressure", patch, m_materialManager, 0, new_dw,
+            d_ice->d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
+
+        delete_CustomBCs(d_ice->d_BC_globalVars, BC_localVars);
+
+    }  // patch loop
+}
+
+
 /* _____________________________________________________________________
  Function~  MPMICE2::computeEquilibrationPressure--
  Purpose~   Find the equilibration pressure
@@ -1157,8 +1301,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
     const PatchSubset* patches,
     const MaterialSubset*,
     DataWarehouse* old_dw,
-    DataWarehouse* new_dw,
-    const MaterialSubset* press_matl)
+    DataWarehouse* new_dw)
 
 {
     timeStep_vartype timeStep;
@@ -1184,12 +1327,11 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
         //unsigned int       numMatls = m_materialManager->getNumMatls("ICE");
         static int n_passes;
         n_passes++;
-
+        
+        //rho_micro also need MPM mateiral index
         std::vector<double> press_eos(numALLMatls);
         std::vector<double> dp_drho(numALLMatls), dp_de(numALLMatls);
         std::vector<CCVariable<double> > vol_frac(numALLMatls);
-
-        //rho_micro also need MPM mateiral index
         std::vector<CCVariable<double> > rho_micro(numALLMatls);
         std::vector<CCVariable<double> > rho_CC_new(numALLMatls);
         std::vector<CCVariable<double> > rho1_CC(numALLMatls);
@@ -1496,15 +1638,16 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
              
                 if (ice_matl[m]) {
                     rho1_CC[m][c] = rho_CC_new[m][c] * Porosity_CC[c];
-                    cerr << "ComputePressure " << endl;
-                    cerr << "ICE rho_CC_new " << rho_CC_new[m][c] << endl;
-                    cerr << "ICE rho_micro " << rho_micro[m][c] << endl;
-                    cerr << "ICE rho1_CC " << rho1_CC[m][c] << endl;
+                    //cerr << "ComputePressure " << endl;
+                    //cerr << "ICE rho_CC_new " << rho_CC_new[m][c] << endl;
+                    //cerr << "ICE rho_micro " << rho_micro[m][c] << endl;
+                    //cerr << "ICE rho1_CC " << rho1_CC[m][c] << endl;
+                    //cerr << "Porosity_CC in Pressure " << Porosity_CC[c] << endl;
                 }
                 if (mpm_matl[m]) {
                     rho1_CC[m][c] = rho_micro[m][c] * (1 - Porosity_CC[c]);
-                    cerr << "MPM rho_micro " << rho_micro[m][c] << endl;
-                    cerr << "MPM rho1_CC " << rho1_CC[m][c] << endl;
+                    //cerr << "MPM rho_micro " << rho_micro[m][c] << endl;
+                    //cerr << "MPM rho1_CC " << rho1_CC[m][c] << endl;
                 }               
             }
         }
@@ -1514,7 +1657,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
         customBC_localVars* BC_localVars = scinew customBC_localVars();
 
         preprocess_CustomBCs("EqPress", old_dw, new_dw, Ilb, patch,
-            999, d_ice->d_BC_globalVars, BC_localVars);
+            999,d_ice->d_BC_globalVars, BC_localVars);
 
         setBC(press_new, rho_micro, placeHolder, d_ice->d_surroundingMatl_indx,
             "rho_micro", "Pressure", patch, m_materialManager, 0, new_dw,
@@ -1531,8 +1674,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     sp_vol_new[m][c] = 1.0 / rho_micro[m][c];        
-                    cerr << "sp_vol_new " << sp_vol_new[m][c] << endl;
-                    cerr << "vol_frac " << vol_frac[m][c] << endl;
+                    //cerr << "sp_vol_new " << sp_vol_new[m][c] << endl;
+                    //cerr << "vol_frac " << vol_frac[m][c] << endl;
                 }
 
                 Material* matl = m_materialManager->getMaterial(m);
@@ -1551,14 +1694,14 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 if (ice_matl[m]) {
                     kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
                     sumKappa[c] += vol_frac[m][c] * kappa[m][c];
-                    cerr << "kappa " << kappa[m][c] << endl;
-                    cerr << "sumKappa " << sumKappa[c] << endl;
+                    //cerr << "kappa " << kappa[m][c] << endl;
+                    //cerr << "sumKappa " << sumKappa[c] << endl;
                 }
             }
             for (unsigned int m = 0; m < numALLMatls; m++) { // for ICE only
                 if (ice_matl[m]) {
                     f_theta[m][c] = vol_frac[m][c] * kappa[m][c] / sumKappa[c];
-                    cerr << "ICE f_theta " << f_theta[m][c] << endl;
+                    //cerr << "ICE f_theta " << f_theta[m][c] << endl;
                 }
             }
         }
@@ -1786,9 +1929,9 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
 
         vel_FC[R] = term1 - term2 + term3;
 
-        cerr << "ICE term 1 " << term1 << endl;
-        cerr << "ICE term 2 " << term2 << endl;
-        cerr << "ICE term 3 " << term3 << endl;
+        //cerr << "ICE term 1 " << term1 << endl;
+        //cerr << "ICE term 2 " << term2 << endl;
+        //cerr << "ICE term 3 " << term3 << endl;
     }
 }
 
@@ -2002,10 +2145,10 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
 
         vel_FC[R] = term1 + term2 - term3 + term4;
 
-        cerr << "MPM term 1 " << term1 << endl;
-        cerr << "MPM term 2 " << term2 << endl;
-        cerr << "MPM term 3 " << term3 << endl;
-        cerr << "MPM term 4 " << term4 << endl;
+        //cerr << "MPM term 1 " << term1 << endl;
+        //cerr << "MPM term 2 " << term2 << endl;
+        //cerr << "MPM term 3 " << term3 << endl;
+        //cerr << "MPM term 4 " << term4 << endl;
     }
 }
 
@@ -2260,11 +2403,11 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
                 }
 
                 // Add pore water pressure term  (1-n) * gradP
-                cmomentum_mpm += mom_source2[c];
+                cmomentum_mpm -= mom_source2[c];
                 cmomentum[c] = cmomentum_mpm;
                 int_eng_L[c] = int_eng_L_mpm;
                 cerr << "MPM cmomentum" << cmomentum[c] << endl;
-                cerr << "MPM int_eng_L" << int_eng_L[c] << endl;
+                //cerr << "MPM int_eng_L" << int_eng_L[c] << endl;
             }
             //__________________________________
             //  NO REACTION
@@ -2273,7 +2416,7 @@ void MPMICE2::computeLagrangianValuesMPM(const ProcessorGroup*,
                     iter++) {
                     IntVector c = *iter;
                     mass_L[c] = cmass[c];
-                    cerr << "MPM mass_L" << mass_L[c] << endl;
+                    //cerr << "MPM mass_L" << mass_L[c] << endl;
                 }
             }
             //__________________________________
@@ -2557,9 +2700,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 termICE[c] -= q_advectedICE[c];
                 termMPM[c] -= q_advectedMPM[c];
-
-                cerr << "ICE termICE" << termICE[c] << endl;
-                cerr << "ICE termMPM" << termMPM[c] << endl;
+                cerr << "termICE " << termICE[c] << endl;
+                cerr << "termMPM " << termMPM[c] << endl;
             }
         }
 
@@ -2765,9 +2907,25 @@ void MPMICE2::computeCCVelAndTempRates(const ProcessorGroup*,
                 double heatRte = (eng_L_ME_CC[c] - old_int_eng_L_CC[c]) / delT;
                 heatRate[c] = .05 * heatRte + .95 * old_heatRate[c];
 
-                cerr << "dTdt_CC " << dTdt_CC[c] << endl;
+               // cerr << "dTdt_CC " << dTdt_CC[c] << endl;
                 cerr << "dVdt_CC " << dVdt_CC[c] << endl;
-                cerr << "heatRate " << heatRate[c] << endl;
+                //cerr << "heatRate " << heatRate[c] << endl;
+            }
+
+            for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                if (!d_rigidMPM) {
+                    dVdt_CC[c] = (mom_L_ME_CC[c] - (old_mom_L_CC[c] - mom_source[c]))
+                        / (mass_L_CC[c] * delT);
+                }
+                dTdt_CC[c] = (eng_L_ME_CC[c] - (old_int_eng_L_CC[c] - int_eng_src[c]))
+                    / (mass_L_CC[c] * cv * delT);
+                double heatRte = (eng_L_ME_CC[c] - old_int_eng_L_CC[c]) / delT;
+                heatRate[c] = .05 * heatRte + .95 * old_heatRate[c];
+
+                // cerr << "dTdt_CC " << dTdt_CC[c] << endl;
+                cerr << "dVdt_CC " << dVdt_CC[c] << endl;
+                //cerr << "heatRate " << heatRate[c] << endl;
             }
             setBC(dTdt_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
             setBC(dVdt_CC, "set_if_sym_BC", patch, m_materialManager, indx, new_dw, isNotInitialTimeStep);
@@ -2861,16 +3019,17 @@ void MPMICE2::interpolateCCToNC(const ProcessorGroup*,
                     gvelocity[*iter] += dVdt_CC[cIdx[in]] * delT * .125;
                     gacceleration[*iter] += dVdt_CC[cIdx[in]] * .125;
                     dTdt_NC[*iter] += dTdt_CC[cIdx[in]] * .125;
-                }
-
-                for (NodeIterator iter = patch->getNodeIterator();
-                    !iter.done(); iter++) {
-                    IntVector c = *iter;
-                    cerr << "gvelocity " << gvelocity[c] << endl;
-                    cerr << "gacceleration " << gacceleration[c] << endl;
-                    cerr << "dTdt_NC " << dTdt_NC[c] << endl;
-                }
+                }               
             }
+
+            for (NodeIterator iter = patch->getNodeIterator();
+                !iter.done(); iter++) {
+                IntVector c = *iter;
+                cerr << "gvelocity " << gvelocity[c] << endl;
+                cerr << "gacceleration " << gacceleration[c] << endl;
+                //cerr << "dTdt_NC " << dTdt_NC[c] << endl;
+            }
+
             //__________________________________
             //  inter-material phase transformation
             if (d_ice->d_models.size() > 0) {

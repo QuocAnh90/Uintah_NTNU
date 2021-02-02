@@ -150,8 +150,13 @@ namespace Uintah {
             const PatchSubset* patch,
             const MaterialSubset* matls,
             DataWarehouse*,
-            DataWarehouse*,
-            const MaterialSubset* press_matl);
+            DataWarehouse*);
+
+        void computeEquilPressure_1_matl(const ProcessorGroup*,
+            const PatchSubset* patch,
+            const MaterialSubset* matls,
+            DataWarehouse* old_dw,
+            DataWarehouse* new_dw);
 
 
         void scheduleComputeVelICE_FC(SchedulerP&,
