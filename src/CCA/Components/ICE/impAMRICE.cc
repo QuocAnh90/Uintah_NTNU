@@ -228,6 +228,7 @@ impAMRICE::scheduleTimeAdvance( const LevelP& level, SchedulerP& sched)
                                                             all_matls); 
                                                             
     scheduleConservedtoPrimitive_Vars(    sched, patches,   ice_matls_sub,
+                                                            d_press_matl,
                                                             all_matls,
                                                             "afterAdvection");                                         
   }

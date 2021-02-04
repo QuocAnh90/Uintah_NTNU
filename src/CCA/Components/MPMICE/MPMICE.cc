@@ -624,7 +624,7 @@ MPMICE::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
     d_ice->scheduleAdvectAndAdvanceInTime(   sched, ice_patches,ice_matls_sub,
                                                                 ice_matls);
                                                                 
-    d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches,ice_matls_sub,
+    d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches,ice_matls_sub, press_matl,
                                                     ice_matls,"afterAdvection");
   }
 } // end scheduleTimeAdvance()
@@ -648,8 +648,9 @@ MPMICE::scheduleFinalizeTimestep( const LevelP& level, SchedulerP& sched)
   const MaterialSet* all_matls = m_materialManager->allMaterials();
   const MaterialSet* mpm_matls = m_materialManager->allMaterials( "MPM" );
   const MaterialSubset* ice_matls_sub = ice_matls->getUnion();
-                                                          
-  d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches,ice_matls_sub,
+  const MaterialSubset* press_matl = d_ice->d_press_matl;
+
+  d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches,ice_matls_sub, press_matl,
                                                               ice_matls,
                                                               "finalizeTimestep");
 
