@@ -2537,7 +2537,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
           !iter.done(); iter++) {
           IntVector c = *iter;
           //Debug
-          cerr << "gmass " << gmass[c] << endl;
+          //cerr << "gmass " << gmass[c] << endl;
           //cerr << "gVolumeFraction " << gVolumeFraction[c] << endl;
           //cerr << "gvolume " << gvolume[c] << endl;
           //cerr << "gvelocity " << gvelocity[c] << endl;
@@ -3364,7 +3364,7 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
            }
         }
        }
-     }
+      }
     }    // matls
   }
 }
@@ -3396,7 +3396,6 @@ void SerialMPM::setGridBoundaryConditions(const ProcessorGroup*,
       new_dw->getModifiable(gvelocity_star,lb->gVelocityStarLabel,  dwi,patch);
       new_dw->get(gvelocity,               lb->gVelocityLabel,      dwi,patch,
                                                                  Ghost::None,0);
-
       // Apply grid boundary conditions to the velocity_star and
       // acceleration before interpolating back to the particles
       MPMBoundCond bc;
