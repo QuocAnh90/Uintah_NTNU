@@ -218,7 +218,6 @@ namespace Uintah {
             double rho_init,
             constCCVariable<double>& rho_CC,
             constCCVariable<double>& stress_CC,
-            constCCVariable<double>& sp_vol_CC,
             constCCVariable<Vector>& vel_CC,
             constCCVariable<double>& press_CC,
             T& vel_FC,

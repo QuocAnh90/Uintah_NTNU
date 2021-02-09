@@ -3364,7 +3364,7 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
            }
         }
        }
-      }
+     }
     }    // matls
   }
 }
@@ -3396,6 +3396,7 @@ void SerialMPM::setGridBoundaryConditions(const ProcessorGroup*,
       new_dw->getModifiable(gvelocity_star,lb->gVelocityStarLabel,  dwi,patch);
       new_dw->get(gvelocity,               lb->gVelocityLabel,      dwi,patch,
                                                                  Ghost::None,0);
+
       // Apply grid boundary conditions to the velocity_star and
       // acceleration before interpolating back to the particles
       MPMBoundCond bc;
@@ -4308,7 +4309,7 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
               //partvoldef += pvolume[idx];
 
               if (flags->d_doCapDensity) {
-                  if (pvolume_trial < pvolume_critical_upperbound || pvolume_trial > pvolume_critical_lowerbound) {
+                  if (pvolume_trial < pvolume_critical_upperbound && pvolume_trial > pvolume_critical_lowerbound) {
                       // Deformation gradient
                       //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
                       //pFNew[idx] = Finc * pFOld[idx];

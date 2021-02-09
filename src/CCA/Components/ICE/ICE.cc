@@ -994,7 +994,7 @@ ICE::scheduleTimeAdvance( const LevelP& level, SchedulerP& sched)
   scheduleAdvectAndAdvanceInTime(         sched, patches, ice_matls_sub,
                                                           all_matls);
                                                           
-  scheduleConservedtoPrimitive_Vars(      sched, patches, ice_matls_sub, d_press_matl,
+  scheduleConservedtoPrimitive_Vars(      sched, patches, ice_matls_sub,
                                                           all_matls,
                                                           "afterAdvection");
 #if 0                                                          
@@ -1016,7 +1016,7 @@ ICE::scheduleFinalizeTimestep( const LevelP& level, SchedulerP& sched)
   const MaterialSubset* ice_matls_sub = ice_matls->getUnion();
 
 
-  scheduleConservedtoPrimitive_Vars( sched, patches, ice_matls_sub, d_press_matl,
+  scheduleConservedtoPrimitive_Vars( sched, patches, ice_matls_sub,
                                      all_matls, "finalizeTimestep");
 
   cout_doing << "---------------------------------------------------------"<<endl;
@@ -1494,7 +1494,7 @@ ICE::scheduleAccumulateMomentumSourceSinks(SchedulerP& sched,
   t->computes(lb->mom_source_CCLabel);
 
   // This is for MPMICE2 to add this mom_source to solid momentum balance eqs
-  t->computes(lb->mom_source2_CCLabel, press_matl, oims);
+  t->computes(lb->mom_source2_CCLabel);
 
   sched->addTask(t, patches, matls);
 }
@@ -1851,7 +1851,6 @@ _____________________________________________________________________*/
 void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
                                     const PatchSet* patch_set,
                                     const MaterialSubset* ice_matlsub,
-                                    const MaterialSubset* press_matl,
                                     const MaterialSet* ice_matls,
                                     const string& where)
 {
@@ -1881,15 +1880,10 @@ void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
   string name = "ICE::conservedtoPrimitive_Vars:" + where;
 
   Task* task = scinew Task(name, this, &ICE::conservedtoPrimitive_Vars);
-  Ghost::GhostType  gn = Ghost::None;
-  Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
-
-  task->requires(Task::NewDW, lb->Porosity_CCLabel, press_matl, oims, gn);
-
   task->requires(Task::OldDW, lb->timeStepLabel);
   task->requires(Task::OldDW, lb->simulationTimeLabel);
   task->requires(Task::OldDW, lb->delTLabel,getLevel(patch_set));     
-
+  Ghost::GhostType  gn   = Ghost::None;
   task->requires(Task::NewDW, lb->mass_advLabel,      gn,0);
   task->requires(Task::NewDW, lb->mom_advLabel,       gn,0);
   task->requires(Task::NewDW, lb->eng_advLabel,       gn,0);
@@ -3766,8 +3760,6 @@ void ICE::computeVelTau_CCFace( const Patch* patch,
     IntVector in = c - oneCell; // interior cell index
     
     velTau_CC[c] = 2. * vel_CC[c] - vel_CC[in];
-
-    //cerr << "velTau_CC" << velTau_CC[c] << endl;
   }
 }
 
@@ -4044,9 +4036,7 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
 
     constCCVariable<double>  Porosity_CC;
     new_dw->get(Porosity_CC, lb->Porosity_CCLabel, 0, patch, gn, 0);
-    CCVariable<Vector>   mom_source2;
-    new_dw->allocateAndPut(mom_source2, lb->mom_source2_CCLabel, 0, patch);
-    mom_source2.initialize(Vector(0., 0., 0.));
+
 
     //__________________________________
     //  Matl loop 
@@ -4058,13 +4048,16 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
   
       constCCVariable<double>  vol_frac;
       constCCVariable<double>  rho_CC;
-      CCVariable<Vector>   mom_source;
+      CCVariable<Vector>   mom_source, mom_source2;
       new_dw->get(vol_frac,  lb->vol_frac_CCLabel, indx,patch,gn,0);
       new_dw->get(rho_CC,    lb->rho_CCLabel,      indx,patch,gn,0);
 
       new_dw->allocateAndPut(mom_source,  lb->mom_source_CCLabel,  indx, patch);
-      mom_source.initialize( Vector(0.,0.,0.) );   
+      mom_source.initialize( Vector(0.,0.,0.) );
 
+      new_dw->allocateAndPut(mom_source2, lb->mom_source2_CCLabel, indx, patch);
+      mom_source2.initialize(Vector(0., 0., 0.));
+      
       //__________________________________
       //  accumulate sources MPM and ICE matls
       for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
@@ -4087,13 +4080,9 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
         double press2_src_Y = (1 - Porosity_CC[c]) * (pressY_FC[top] - pressY_FC[bottom]) * vol_frac[c];
         double press2_src_Z = (1 - Porosity_CC[c]) * (pressZ_FC[front] - pressZ_FC[back]) * vol_frac[c];
 
-        Vector mom_source_1malt = Vector(0., 0., 0.);
-
-        mom_source_1malt.x(-press2_src_X * areaX);
-        mom_source_1malt.y(-press2_src_Y * areaY);
-        mom_source_1malt.z(-press2_src_Z * areaZ);
-
-        mom_source2[c] -= mom_source_1malt;
+        mom_source2[c].x(-press2_src_X * areaX);
+        mom_source2[c].y(-press2_src_Y * areaY);
+        mom_source2[c].z(-press2_src_Z * areaZ);
       }
       
       //__________________________________
@@ -4138,26 +4127,20 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
               viscous_source = viscous_src[c];
           //}
 
-          //cerr << "mom_source pressure " << mom_source[c] << endl;
           mom_source[c] = (mom_source[c] + viscous_source + mass * gravity);
-          //cerr << "mass * gravity " << mass * gravity << endl;
         }
        
-        //__________________________________
-        for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
-            IntVector c = *iter;
-            mom_source[c] *= delT;
-        }
-      }  //ice_matl     
-    }  // matls loop
-
-    //__________________________________
-    for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
-        IntVector c = *iter;    
+      }  //ice_matl
+      
+      //__________________________________
+      //  All Matls
+      for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
+        IntVector c = *iter;
+        mom_source[c] *= delT; 
         mom_source2[c] *= delT;
-        //cerr << "mom_source2 " << mom_source2[c] << endl;
-    }
-
+      }
+      
+    }  // matls loop
   }  //patches
 }
 
@@ -4262,8 +4245,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
             double A = TMV_CC[c] * vol_frac[c] * kappa[c] * Porosity_CC[c] * press_CC[c];
             int_eng_source[c] += A * delP_Dilatate[c] + heatCond_src[c];
 
-            //cerr << "A" << A << endl;
-            //cerr << "delP_Dilatate" << delP_Dilatate[c] << endl;
+            //cerr << "int_eng_source" << int_eng_source[c] << endl;
             //cerr << "heatCond_src" << heatCond_src[c] << endl;
           }
         }
@@ -4353,7 +4335,6 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
           mass_L[c] = mass;
           mom_L[c] = vel_CC[c] * mass + mom_source[c];
           int_eng_L[c] = mass*cv[c] * temp_CC[c] + int_eng_source[c];
-          //cerr << "int_eng_source[c];" << int_eng_source[c] << endl;
         }
       }
 
@@ -4381,7 +4362,7 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
            iter++) {
          IntVector c = *iter;
            //  must have a minimum mass
-          double mass = rho_CC[c] * vol;
+          double mass = Porosity_CC[c] * rho_CC[c] * vol;
           double min_mass = tiny_rho * vol;
 
           mass_L[c] = std::max( (mass + modelMass_src[c] ), min_mass);
@@ -4801,6 +4782,7 @@ void ICE::maxMach_on_Lodi_BC_Faces(const ProcessorGroup*,
     }  // boundaryFaces
   }  // patches
 }
+
  
 /* _____________________________________________________________________ 
  Function~  ICE::advectAndAdvanceInTime--
@@ -5004,9 +4986,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
     Ghost::GhostType  gn  = Ghost::None;
     unsigned int numMatls = m_materialManager->getNumMatls( "ICE" );
 
-    constCCVariable<double> Porosity_CC;
-    new_dw->get(Porosity_CC, lb->Porosity_CCLabel, 0, patch, gn, 0);
-
     for (unsigned int m = 0; m < numMatls; m++ ) {
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
@@ -5016,7 +4995,7 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       constCCVariable<double> int_eng_adv, mass_adv,sp_vol_adv,speedSound, cv;
       constCCVariable<double> gamma, placeHolder, vol_frac;
       constCCVariable<Vector> mom_adv;
-     
+
       new_dw->get(gamma,       lb->gammaLabel,         indx,patch,gn,0);
       new_dw->get(speedSound,  lb->speedSound_CCLabel, indx,patch,gn,0);
       new_dw->get(vol_frac,    lb->vol_frac_CCLabel,   indx,patch,gn,0);
@@ -5043,13 +5022,13 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       for(CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
         IntVector c = *iter;
         double inv_mass_adv = 1.0/mass_adv[c];
-        rho_CC[c]    = mass_adv[c] * invvol / Porosity_CC[c];
+        rho_CC[c]    = mass_adv[c] * invvol;
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
 
-        cerr << "ICE rho_CC advection of m " << m << " " << rho_CC[c] << endl;
+        //cerr << "ICE rho_CC" << rho_CC[c] << endl;
         //cerr << "ICE vel_CC" << vel_CC[c] << endl;
-        cerr << "ICE sp_vol_CC advection of m " << m << " " << sp_vol_CC[c] << endl;
+        //cerr << "ICE sp_vol_CC" << sp_vol_CC[c] << endl;
       }
 
       //__________________________________
