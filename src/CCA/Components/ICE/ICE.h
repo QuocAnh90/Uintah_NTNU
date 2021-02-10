@@ -209,11 +209,12 @@ using namespace ExchangeModels;
                                           const MaterialSubset*,
                                           const MaterialSet*);
 
-      void scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
-                                             const PatchSet* patch_set,
-                                             const MaterialSubset* ice_matlsub,
-                                             const MaterialSet* ice_matls,
-                                             const std::string& where);
+      void scheduleConservedtoPrimitive_Vars(SchedulerP& ,
+                                             const PatchSet* ,
+                                             const MaterialSubset* ,
+                                             const MaterialSubset* ,
+                                             const MaterialSet* ,
+                                             const std::string& );
 
       void scheduleTestConservation(SchedulerP&,
                                     const PatchSet*,

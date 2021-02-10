@@ -758,7 +758,7 @@ MPMICE2::scheduleTimeAdvance(const LevelP& inlevel, SchedulerP& sched)
         d_ice->scheduleAdvectAndAdvanceInTime(sched, ice_patches, ice_matls_sub,
             ice_matls);
 
-        d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub,
+        d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub, press_matl,
             ice_matls, "afterAdvection");
     }
 } // end scheduleTimeAdvance()
@@ -1245,7 +1245,6 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                     kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
                     sumKappa[c] = kappa[m][c];
                     f_theta[m][c] = 1.0;
-                    cerr << " speedSound_new " << speedSound_new[m][c] << endl;
                 }
 
                 else if (mpm_matl[m]) {                //  M P M  I need rho_micro index for setBC
@@ -1476,6 +1475,13 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                         rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
                         vol_frac[m][c] = 0;                       
                     }               
+
+                    for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                        IntVector c = *iter;
+                        if (ice_matl[m]) {
+                            //cerr << "vol_frac of m " << m << " "  << vol_frac[m][c] << endl;
+                        }
+                    }
                 }
                               
                 //__________________________________
@@ -2666,8 +2672,12 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             varBasket->useCompatibleFluxes = d_ice->d_useCompatibleFluxes;
             varBasket->AMR_subCycleProgressVar = 0;       // for lockstep it's always 0
 
+            //cerr << "is here1" << endl;
+
             advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
                 bulletProof_test, new_dw, varBasket);
+
+            //cerr << "is here2" << endl;
 
             //__________________________________
             //   advect vol_frac * Porosity
@@ -3706,8 +3716,9 @@ MPMICE2::scheduleFinalizeTimestep(const LevelP& level, SchedulerP& sched)
     const MaterialSet* all_matls = m_materialManager->allMaterials();
     const MaterialSet* mpm_matls = m_materialManager->allMaterials("MPM");
     const MaterialSubset* ice_matls_sub = ice_matls->getUnion();
+    const MaterialSubset* press_matl = d_ice->d_press_matl;
 
-    d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub,
+    d_ice->scheduleConservedtoPrimitive_Vars(sched, ice_patches, ice_matls_sub, press_matl,
         ice_matls,
         "finalizeTimestep");
 
