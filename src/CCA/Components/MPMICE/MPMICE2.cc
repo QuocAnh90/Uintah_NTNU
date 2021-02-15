@@ -1407,11 +1407,28 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 if (ice_matl[m]) {                // I C E
                     rho_micro[m][c] = 1.0 / sp_vol_CC[m][c];
                     vol_frac[m][c] = rho_CC[m][c] * sp_vol_CC[m][c];
+
+                    //cerr << "vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
+                    //cerr << "rho_CC of m " << m << " of cell " << c << " " << rho_CC[m][c] << endl;
+                    //cerr << "sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
+                    //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
                 }
             
                 else if (mpm_matl[m]) {                //  M P M  I need rho_micro index for setBC
                     rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
                     vol_frac[m][c] = 0;
+                }
+            }
+        }
+
+        for (unsigned int m = 0; m < numALLMatls; m++) {
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+
+                if (ice_matl[m]) {                // I C E
+                   // cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
+                   // cerr << "Cell rho_CC of m " << m << " of cell " << c << " " << rho_CC[m][c] << endl;
+                   // cerr << "Cell sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
                 }
             }
         }
@@ -1465,6 +1482,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                         ice_matl[m]->getEOS()->computeRhoMicro(press_new[c], gamma[m][c],
                             cv[m][c], Temp[m][c], rho_micro[m][c]);
 
+                    //cerr << "rho_micro computed of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+
                     double div = 1. / rho_micro[m][c];
 
                     // - updated volume fractions
@@ -1493,8 +1512,13 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                         sum += vol_frac[m][c];                      
                     }
                 }
+                
+                //cerr << "sum" << sum << endl;
 
                 if (fabs(sum - 1.0) < convergence_crit) {
+
+                    //cerr << "is here" << endl;
+
                     converged = true;
                     //__________________________________
                     // Find the speed of sound based on converged solution
@@ -1682,6 +1706,10 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                     sp_vol_new[m][c] = 1.0 / rho_micro[m][c];        
                     //cerr << "sp_vol_new " << sp_vol_new[m][c] << endl;
                     //cerr << "vol_frac " << vol_frac[m][c] << endl;
+
+                    if (ice_matl[m]) {
+                        //cerr << "sp_vol_new of m " << m << " of cell " << c << " " << sp_vol_new[m][c] << endl;
+                    }
                 }
 
                 Material* matl = m_materialManager->getMaterial(m);
@@ -2672,12 +2700,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             varBasket->useCompatibleFluxes = d_ice->d_useCompatibleFluxes;
             varBasket->AMR_subCycleProgressVar = 0;       // for lockstep it's always 0
 
-            //cerr << "is here1" << endl;
-
             advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
                 bulletProof_test, new_dw, varBasket);
-
-            //cerr << "is here2" << endl;
 
             //__________________________________
             //   advect vol_frac * Porosity
@@ -2720,7 +2744,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             new_dw->allocateAndPut(sp_vol_L, Ilb->sp_vol_L_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_src, Ilb->sp_vol_src_CCLabel, indx, patch);
             sp_vol_src.initialize(0.);
-            double tiny_rho = 1.e-12;
+            double tiny_rho = 1.e-15;
             tiny_rho = ice_matl->getTinyRho();
 
             new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
@@ -2732,7 +2756,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             //  compute sp_vol_L * mass
             for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
-                sp_vol_L[c] = (rho_CC[c] * vol) * sp_vol_CC[c];
+                sp_vol_L[c] = (Porosity_CC[c] * rho_CC[c] * vol) * sp_vol_CC[c]; // mass * sp_vol_CC
             }
 
             //__________________________________
@@ -2764,7 +2788,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (rho_CC[c] * vol);
 
-                //cerr << "ICE sp_vol_L" << sp_vol_L[c] << endl;
+                //cerr << "ICE sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
                 //cerr << "ICE sp_vol_src" << sp_vol_src[c] << endl;
             }
 

@@ -4998,6 +4998,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
 
     unsigned int numMatls = m_materialManager->getNumMatls( "ICE" );
 
+    cerr << numMatls << endl;
+
     for (unsigned int m = 0; m < numMatls; m++ ) {
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
@@ -5040,7 +5042,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
 
         //cerr << "ICE rho_CC" << rho_CC[c] << endl;
         //cerr << "ICE vel_CC" << vel_CC[c] << endl;
-        //cerr << "ICE sp_vol_CC" << sp_vol_CC[c] << endl;
+        //cerr << "conservedtoPrimitive_Vars  sp_vol_CC of m " << indx << " "  << sp_vol_CC[c] << endl;
+        //cerr << "conservedtoPrimitive_Vars  Porosity_CC of m " << indx << " " << Porosity_CC[c] << endl;
       }
 
       //__________________________________
@@ -5101,8 +5104,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
       for(CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
         IntVector c = *iter;
         temp_CC[c] = int_eng_adv[c]/ (mass_adv[c]*cv_new[c]);
-
-        //cerr << "ICE temp_CC" << temp_CC[c] << endl;
       }
       
       //__________________________________
@@ -5128,8 +5129,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
                                                         !iter.done(); iter++){
         IntVector c = *iter;
         mach[c]  = vel_CC[c].length()/speedSound[c];
-
-        //cerr << "ICE mach" << mach[c] << endl;
       }
 
       //____ B U L L E T   P R O O F I N G----
