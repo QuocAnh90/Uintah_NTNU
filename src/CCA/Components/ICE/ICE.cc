@@ -4922,7 +4922,8 @@ void ICE::advectAndAdvanceInTime(const ProcessorGroup* /*pg*/,
         IntVector c = *iter;
         sp_vol_adv[c] = (sp_vol_L[c] + q_advected[c]);
 
-        //cerr << "ICE sp_vol_adv" << sp_vol_adv[c] << endl;
+        //cerr << "ICE sp_vol_L of m " << indx  << " " << sp_vol_L[c] << endl;
+        //cerr << "ICE sp_vol_adv of m " << indx << " " << sp_vol_adv[c] << endl;
       }
       //__________________________________
       // Model with transported variables.
@@ -4998,8 +4999,6 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
 
     unsigned int numMatls = m_materialManager->getNumMatls( "ICE" );
 
-    cerr << numMatls << endl;
-
     for (unsigned int m = 0; m < numMatls; m++ ) {
       Material* matl = (ICEMaterial*) m_materialManager->getMaterial( "ICE",  m );
       int indx = matl->getDWIndex();
@@ -5042,6 +5041,8 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
 
         //cerr << "ICE rho_CC" << rho_CC[c] << endl;
         //cerr << "ICE vel_CC" << vel_CC[c] << endl;
+        //cerr << "conservedtoPrimitive_Vars  sp_vol_adv of m " << indx << " " << sp_vol_adv[c] << endl;
+        //cerr << "inv_mass_adv of m " << indx << " " << inv_mass_adv << endl;
         //cerr << "conservedtoPrimitive_Vars  sp_vol_CC of m " << indx << " "  << sp_vol_CC[c] << endl;
         //cerr << "conservedtoPrimitive_Vars  Porosity_CC of m " << indx << " " << Porosity_CC[c] << endl;
       }

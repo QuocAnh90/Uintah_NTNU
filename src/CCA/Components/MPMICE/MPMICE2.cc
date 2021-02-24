@@ -813,10 +813,6 @@ void MPMICE2::scheduleInterpolateNCToCC_0(SchedulerP& sched,
         t->computes(MIlb->stressY_CCLabel);
         t->computes(MIlb->stressZ_CCLabel);
 
-        // Unused variables
-        t->computes(Ilb->compressibilityLabel);
-        //t->computes(Ilb->int_eng_source_CCLabel);
-
         sched->addTask(t, patches, mpm_matls);
     }
 }
@@ -877,10 +873,6 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             new_dw->allocateAndPut(rho_CC, Ilb->rho_CCLabel, indx, patch);
             //new_dw->allocateAndPut(vol_frac_CC, Ilb->vol_frac_CCLabel, indx, patch);
             new_dw->allocateAndPut(stress_CC, MIlb->stress_CCLabel, indx, patch);
-
-            CCVariable<double> kappa;
-            //new_dw->allocateAndPut(int_eng_source, Ilb->int_eng_source_CCLabel, indx, patch);
-            new_dw->allocateAndPut(kappa, Ilb->compressibilityLabel, indx, patch);
 
             // Hacking
             CCVariable<double> stressX_CC, stressY_CC, stressZ_CC;
@@ -965,11 +957,6 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 }
 
                 rho_CC[c] = cmass[c] / cell_vol;
-
-                // Unused variables
-                //vol_frac_CC[c] = 1;
-                //int_eng_source[c] = 0;
-                kappa[c] = 0.0000001;
 
                 // Hacking here because stuggling to deal with stress_CC when computing face centered velocity
                 stressX_CC[c] = stress_CC[c](0, 0);
@@ -1107,8 +1094,7 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     //  A L L _ M A T L S
     //t->computes(Ilb->f_theta_CCLabel);
     t->computes(Ilb->f_theta_CCLabel, ice_matls);
-    t->computes(Ilb->compressibilityLabel, ice_matls);
-    //t->computes(Ilb->compressibilityLabel, mpm_matls);
+    t->computes(Ilb->compressibilityLabel);
 
     t->computes(Ilb->speedSound_CCLabel);  // Value of MPM will not be used !!
     t->computes(Ilb->vol_frac_CCLabel);    // Value of MPM will not be used !!
@@ -1123,6 +1109,7 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
     //t->modifies(Ilb->sp_vol_CCLabel, mpm_matls);
     //t->computes(Ilb->sp_vol_CCLabel, ice_matls);
     t->computes(Ilb->sp_vol_CCLabel);
+    t->computes(Ilb->rho_micro_CCLabel);
     t->computes(Ilb->rho_CCLabel, ice_matls);
     t->computes(Ilb->rho1_CCLabel);
 
@@ -1202,21 +1189,21 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                 new_dw->get(cv[m], Ilb->specific_heatLabel, indx, patch, gn, 0);
                 new_dw->get(gamma[m], Ilb->gammaLabel, indx, patch, gn, 0);
                 new_dw->allocateAndPut(rho_CC_new[m], Ilb->rho_CCLabel, indx, patch);
-                new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
-                new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
-
+                new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);             
             }
             if (mpm_matl[m]) {                    // M P M
                 new_dw->get(Temp[m], MIlb->temp_CCLabel, indx, patch, gn, 0);
                 new_dw->get(rho_CC[m], Ilb->rho_CCLabel, indx, patch, gn, 0);
                 //new_dw->get(sp_vol_CC[m], Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
             }
+            new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_new[m], Ilb->sp_vol_CCLabel, indx, patch);
             new_dw->allocateAndPut(speedSound_new[m], Ilb->speedSound_CCLabel,
                 indx, patch);
             new_dw->allocateAndPut(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
-            new_dw->allocateTemporary(rho_micro[m], patch);
+            new_dw->allocateAndPut(rho_micro[m], Ilb->rho_micro_CCLabel, indx, patch);
+            //new_dw->allocateTemporary(rho_micro[m], patch);
         }
 
         //______________________________________________________________________
@@ -1253,7 +1240,7 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                     speedSound_new[m][c] = 30;
                     vol_frac[m][c] = 0;
                     sp_vol_new[m][c] = 1.0 / rho_CC[m][c];
-
+                    kappa[m][c] = 0.00001;
                 }
             }
         }
@@ -1381,7 +1368,6 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 new_dw->get(gamma[m], Ilb->gammaLabel, indx, patch, gn, 0);               
                 new_dw->allocateAndPut(rho_CC_new[m], Ilb->rho_CCLabel, indx, patch);              
                 new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
-                new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
                 
             }
             if (mpm_matl[m]) {                    // M P M
@@ -1394,7 +1380,10 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 indx, patch);
             new_dw->allocateAndPut(vol_frac[m], Ilb->vol_frac_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
-            new_dw->allocateTemporary(rho_micro[m], patch);           
+            new_dw->allocateAndPut(rho_micro[m], Ilb->rho_micro_CCLabel, indx, patch);
+            new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
+
+            //new_dw->allocateTemporary(rho_micro[m], patch);           
         }       
         press_new.copyData(press);
     
@@ -1410,8 +1399,12 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
                     //cerr << "vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
                     //cerr << "rho_CC of m " << m << " of cell " << c << " " << rho_CC[m][c] << endl;
-                    //cerr << "sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
-                    //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                    if (m == 2)
+                    {
+                        //cerr << "sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
+                        //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                        //cerr << " " << endl;
+                    }
                 }
             
                 else if (mpm_matl[m]) {                //  M P M  I need rho_micro index for setBC
@@ -1513,11 +1506,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                     }
                 }
                 
-                //cerr << "sum" << sum << endl;
-
                 if (fabs(sum - 1.0) < convergence_crit) {
-
-                    //cerr << "is here" << endl;
 
                     converged = true;
                     //__________________________________
@@ -1704,11 +1693,23 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     sp_vol_new[m][c] = 1.0 / rho_micro[m][c];        
-                    //cerr << "sp_vol_new " << sp_vol_new[m][c] << endl;
-                    //cerr << "vol_frac " << vol_frac[m][c] << endl;
 
                     if (ice_matl[m]) {
                         //cerr << "sp_vol_new of m " << m << " of cell " << c << " " << sp_vol_new[m][c] << endl;
+                        //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                    }
+                }
+                
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    sp_vol_new[m][c] = 1.0 / rho_micro[m][c];
+
+                    if (ice_matl[m]) {
+                        if (m == 2)
+                        {
+                            //cerr << "sp_vol_new of m " << m << " of cell " << c << " " << sp_vol_new[m][c] << endl;
+                            //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                        }
                     }
                 }
 
@@ -1730,6 +1731,10 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                     sumKappa[c] += vol_frac[m][c] * kappa[m][c];
                     //cerr << "kappa " << kappa[m][c] << endl;
                     //cerr << "sumKappa " << sumKappa[c] << endl;
+                }
+
+                if (mpm_matl[m]) {
+                    kappa[m][c] = 0.000001;
                 }
             }
             for (unsigned int m = 0; m < numALLMatls; m++) { // for ICE only
@@ -2550,7 +2555,7 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
     t->requires(Task::NewDW, Ilb->Tdot_CCLabel, gn);
 
     t->requires(Task::NewDW, Ilb->f_theta_CCLabel, ice_matls, gn);
-    t->requires(Task::NewDW, Ilb->compressibilityLabel, ice_matls, gn);
+    t->requires(Task::NewDW, Ilb->compressibilityLabel, gn);
     t->requires(Task::NewDW, Ilb->vol_frac_CCLabel, gac, 1);
 
     t->requires(Task::OldDW, Ilb->temp_CCLabel, ice_matls, gn);
@@ -2562,6 +2567,7 @@ void MPMICE2::scheduleComputeLagrangianSpecificVolume(SchedulerP& sched,
 
     t->requires(Task::NewDW, Ilb->delP_DilatateLabel, press_matl, oims, gn);
     t->requires(Task::NewDW, Ilb->press_CCLabel, press_matl, oims, gn);
+    t->requires(Task::NewDW, Ilb->sumKappaLabel, press_matl, oims, gn);
     t->requires(Task::NewDW, Ilb->Porosity_CCLabel, press_matl, oims, gn);
 
     if (d_ice->d_models.size() > 0) {
@@ -2615,11 +2621,13 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         constCCVariable<double> rho_CC, f_theta, sp_vol_CC, cv;
         constCCVariable<double> P, Porosity_CC;
         CCVariable<double> sum_therm_exp;
-
+        constCCVariable<double>sumKappa;
+        
         new_dw->allocateTemporary(sum_therm_exp, patch);
         new_dw->get(P, Ilb->press_CCLabel, 0, patch, gn, 0);
         new_dw->get(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch, gn, 0);
         sum_therm_exp.initialize(0.);
+        new_dw->get(sumKappa, Ilb->sumKappaLabel, 0, patch, gn, 0);
 
         // Aditional line
         CCVariable<double> termICE, termMPM, q_advectedICE, q_advectedMPM, vol_fracICE;
@@ -2665,12 +2673,14 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             constSFCYVariable<double> vvel_FC;
             constSFCZVariable<double> wvel_FC;
             constCCVariable<double> mass_L;
+            constCCVariable<double> kappa;
 
             Ghost::GhostType  gac = Ghost::AroundCells;
             new_dw->get(uvel_FC, Ilb->uvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(vvel_FC, Ilb->vvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(wvel_FC, Ilb->wvel_FCMELabel, indx, patch, gac, 2);
             new_dw->get(mass_L, Ilb->mass_L_CCLabel, indx, patch, gac, 2);
+            new_dw->get(kappa, Ilb->compressibilityLabel, indx, patch, gac, 2);
 
             if (ice_matl) {
                 new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);             
@@ -2726,7 +2736,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
             for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
-                termICE[c] -= q_advectedICE[c];
+                termICE[c] -= q_advectedICE[c] * vol_frac[m][c] * kappa[c];
                 termMPM[c] -= q_advectedMPM[c];
             }
         }
@@ -2740,7 +2750,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             int indx = ice_matl->getDWIndex();
 
             CCVariable<double> sp_vol_L, sp_vol_src;
-            constCCVariable<double> kappa;
+            
             new_dw->allocateAndPut(sp_vol_L, Ilb->sp_vol_L_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_src, Ilb->sp_vol_src_CCLabel, indx, patch);
             sp_vol_src.initialize(0.);
@@ -2750,13 +2760,14 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
             new_dw->get(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch, gn, 0);
             new_dw->get(rho_CC, Ilb->rho_CCLabel, indx, patch, gn, 0);
             new_dw->get(f_theta, Ilb->f_theta_CCLabel, indx, patch, gn, 0);
-            new_dw->get(kappa, Ilb->compressibilityLabel, indx, patch, gn, 0);
+            
+           
 
             //__________________________________
             //  compute sp_vol_L * mass
             for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                 IntVector c = *iter;
-                sp_vol_L[c] = (Porosity_CC[c] * rho_CC[c] * vol) * sp_vol_CC[c]; // mass * sp_vol_CC
+                 sp_vol_L[c] = (Porosity_CC[c] * rho_CC[c] * vol) * sp_vol_CC[c]; // mass * sp_vol_CC
             }
 
             //__________________________________
@@ -2776,7 +2787,12 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 IntVector c = *iter;
                 //__________________________________
                 //  term1
-                double term1 = vol * (termICE[c] + termMPM[c]);
+                //double term1 = vol * (termICE[c] + termMPM[c]);
+                //double term1 = vol * (termMPM[c]);
+                //double term1 = 0;
+                double inv_sumKappa = 1.0 / sumKappa[c];
+                double termICEtotal = -termICE[c] * inv_sumKappa;
+                double term1 = vol * (termICEtotal + termMPM[c]);
 
                 //  term2
                 double term2 = delT * vol *
@@ -2786,9 +2802,9 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 // This is actually mass * sp_vol
                 double src = term1 + term2;
                 sp_vol_L[c] += src;
-                sp_vol_src[c] = src / (rho_CC[c] * vol);
+                sp_vol_src[c] = src / (Porosity_CC[c] * rho_CC[c] * vol);
 
-                //cerr << "ICE sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
+                //cerr << "ICE before sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
                 //cerr << "ICE sp_vol_src" << sp_vol_src[c] << endl;
             }
 
@@ -2796,9 +2812,15 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     /*`==========TESTING==========*/
-                    sp_vol_L[c] = max(sp_vol_L[c], tiny_rho * vol * sp_vol_CC[c]);
+                    sp_vol_L[c] = max(sp_vol_L[c], Porosity_CC[c] * tiny_rho * vol * sp_vol_CC[c]);
                     /*==========TESTING==========`*/
                 }
+            }
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                //cerr << "ICE after sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
+                //cerr << "ICE sp_vol_src" << sp_vol_src[c] << endl;
             }
 
             //__________________________________
@@ -2834,7 +2856,6 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
         }  // end numALLMatl loop
     }  // patch loop
 }
-
 
 //______________________________________________________________________
 // Exact the same with MPMICE
