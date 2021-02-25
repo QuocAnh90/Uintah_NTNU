@@ -866,6 +866,7 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
             //new_dw->allocateAndPut(Volume_CC, MIlb->cVolumeLabel, indx, patch);
             //new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, indx, patch);    
             new_dw->allocateAndPut(VolumeFraction_CC, Ilb->VolumeFraction_CCLabel, indx, patch);
+            VolumeFraction_CC.initialize(0.0);
             new_dw->allocateAndPut(Permeability_CC, MIlb->cPermeabilityLabel, indx, patch);
             new_dw->allocateAndPut(vel_CC, MIlb->vel_CCLabel, indx, patch);
             new_dw->allocateAndPut(Temp_CC, MIlb->temp_CCLabel, indx, patch);
@@ -921,36 +922,34 @@ void MPMICE2::interpolateNCToCC_0(const ProcessorGroup*,
                 for (int in = 0; in < 8; in++) {
                     double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
                     cmass[c] += NC_CCw_mass;
-                    //Vol_CC_mpm += gvolume[nodeIdx[in]] * NC_CCw_mass;
-                    //Porosity_CC_mpm += gPorosity[nodeIdx[in]] * NC_CCw_mass;
-                    Volumefraction_CC_mpm += gVolumeFraction[nodeIdx[in]] * NC_CCw_mass;
-                    //sp_vol_mpm += gSp_vol[nodeIdx[in]] * NC_CCw_mass;
-                    vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
-                    Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
-                    stress_CC_mpm += gstress[nodeIdx[in]] * NC_CCw_mass;
+                  
+                    //Volumefraction_CC_mpm += gVolumeFraction[nodeIdx[in]] * NC_CCw_mass;
+                    //vel_CC_mpm += gvelocity[nodeIdx[in]] * NC_CCw_mass;
+                    //Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
+                    //stress_CC_mpm += gstress[nodeIdx[in]] * NC_CCw_mass;
+
+                    Volumefraction_CC_mpm += gVolumeFraction[nodeIdx[in]] * 0.125;
+                    vel_CC_mpm += gvelocity[nodeIdx[in]] * 0.125;
+                    Temp_CC_mpm += gtemperature[nodeIdx[in]] * 0.125;
+                    stress_CC_mpm += gstress[nodeIdx[in]] * 0.125;
                 }
-
-                double inv_cmass = 1.0 / cmass[c];
-                vel_CC_mpm *= inv_cmass;
-                Temp_CC_mpm *= inv_cmass;
-                //sp_vol_mpm *= inv_cmass;
-                //Vol_CC_mpm *= inv_cmass;
-                //Porosity_CC_mpm *= inv_cmass
-                Volumefraction_CC_mpm *= inv_cmass;
-                stress_CC_mpm *= inv_cmass;
-
+                           
+                //double inv_cmass = 1.0 / cmass[c];
+                //vel_CC_mpm *= inv_cmass;
+                //Temp_CC_mpm *= inv_cmass;
+                //Volumefraction_CC_mpm *= inv_cmass;
+                //stress_CC_mpm *= inv_cmass;
+                
                 // Locate on cell
                 vel_CC[c] = vel_CC_mpm;
                 stress_CC[c] = stress_CC_mpm;
                 Temp_CC[c] = Temp_CC_mpm;
-                //sp_vol_CC[c] = sp_vol_mpm;
-                //Volume_CC[c] = Vol_CC_mpm;
                 VolumeFraction_CC[c] = Volumefraction_CC_mpm;
 
                 // Global porosity variable (press_matl) 1 - sum(volumrfractionMPM)
                 if (cmass[c] > very_small_mass) { // For cell with particles (only MPM material)
-                    Porosity_CC[c] -= Volumefraction_CC_mpm;
-                }
+                    Porosity_CC[c] = 1 - Volumefraction_CC_mpm;
+                }            
 
                 if (Porosity_CC[c] > 1) { // Cap the porosity
                     Porosity_CC[c] = 1;
@@ -2801,11 +2800,18 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
                 // This is actually mass * sp_vol
                 double src = term1 + term2;
+                //cerr << "material " << m << endl;
+                //cerr << "termICEtotal " << termICEtotal << endl;
+                //cerr << "termMPM[c] " << termMPM[c] << endl;
+                //cerr << "term1 " << term1 << endl;
+                //cerr << "ICE before sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
+
                 sp_vol_L[c] += src;
                 sp_vol_src[c] = src / (Porosity_CC[c] * rho_CC[c] * vol);
-
-                //cerr << "ICE before sp_vol_L of m " << m << " " << sp_vol_L[c] << endl;
-                //cerr << "ICE sp_vol_src" << sp_vol_src[c] << endl;
+                
+                //cerr << "ICE src at cell "  << c << " " << src << endl;
+                //cerr << "ICE sp_vol_src[c] at cell " << c << " " << sp_vol_src[c] << endl;
+                //cerr << " "  << endl;
             }
 
             if (d_ice->d_clampSpecificVolume) {
