@@ -110,7 +110,7 @@ void KnaussSeaWater::computePressEOS(double rhoM, double gamma,
                             double& press, double& dp_drho, double& dp_de)
 {
   // Pointwise computation of thermodynamic quantities
-  press   = d_P0 + (1./d_k)*(rhoM-d_rho0) - d_a*(Temp-d_T0) - d_b*(d_S-d_S0);
+  press   = d_P0 + (1./d_k)*((rhoM-d_rho0) - d_a*(Temp-d_T0) - d_b*(d_S-d_S0));
    
   double term1 = (1. / d_k) * (rhoM - d_rho0);
   double term2 = d_a * (Temp - d_T0);
