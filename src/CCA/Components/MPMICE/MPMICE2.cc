@@ -2764,9 +2764,10 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 {
                 double src = term1 + term2;
                 }
-                cerr << "material " << m << endl;
-                cerr << "mass_L[c] " << mass_L[c] << endl;
-                cerr << "very_small_mass " << very_small_mass << endl;
+
+                //cerr << "material " << m << endl;
+                //cerr << "mass_L[c] " << mass_L[c] << endl;
+                //cerr << "very_small_mass " << very_small_mass << endl;
                 //cerr << "termICEtotal " << termICEtotal << endl;
                 //cerr << "termMPM[c] " << termMPM[c] << endl;
                 //cerr << "term1 " << term1 << endl;
@@ -3045,7 +3046,7 @@ void MPMICE2::interpolateCCToNC(const ProcessorGroup*,
                 !iter.done(); iter++) {
                 IntVector c = *iter;
                 //cerr << "gvelocity " << gvelocity[c] << endl;
-                //cerr << "gacceleration " << gacceleration[c] << endl;
+                //cerr << "gacceleration of material " << indx  << " at node " << c <<  " is " << gacceleration[c] << endl;
                 //cerr << "dTdt_NC " << dTdt_NC[c] << endl;
             }
 

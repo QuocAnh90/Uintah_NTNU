@@ -3084,6 +3084,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
           stressvol  = pstress[idx]*pvol[idx];
           stresspress = pstress[idx] + Id*(p_pressure[idx] - p_q[idx]);
 
+          //cerr << pstress[idx] << endl;
+
           for (int k = 0; k < NN; k++){
             if(patch->containsNode(ni[k])){
               Vector div(d_S[k].x()*oodx[0],d_S[k].y()*oodx[1],
@@ -3337,7 +3339,7 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
           !iter.done(); iter++) {
           IntVector c = *iter;
           
-          //cerr << "accerleration " << acceleration[c] << endl;
+          //cerr << "accerleration in integration " << acceleration[c] << endl;
           //cerr << "velocity_star " << velocity_star[c] << endl;
       }
 
@@ -4040,6 +4042,8 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
             IntVector node = ni[k];
             vel      += gvelocity_star[node]  * S[k];
             acc      += gacceleration[node]   * S[k];
+
+            //cerr << "gacceleration in SerialMPM of material " << dwi << " at node " << node << " is " << gacceleration[node] << endl;
 
             fricTempRate = frictionTempRate[node]*flags->d_addFrictionWork;
             tempRate += (gTemperatureRate[node] + dTdt[node] +

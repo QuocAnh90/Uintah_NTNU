@@ -2642,6 +2642,16 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                 rho_micro[m][c] = 1.0 / sp_vol_CC[m][c];
                 vol_frac[m][c] = rho_CC[m][c] * sp_vol_CC[m][c];
             }
+
+            for (unsigned int m = 0; m < numMatls; m++) {
+                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                       //cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
+                       //cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                       //cerr << "Cell rho_CC of m " << m << " of cell " << c << " " << rho_CC[m][c] << endl;
+                       //cerr << "Cell sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
+                }
+            }
         }
 
         //______________________________________________________________________
@@ -2664,8 +2674,11 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                     ice_matl->getEOS()->computePressEOS(rho_micro[m][c], gamma[m][c],
                         cv[m][c], Temp[m][c], press_eos[m],
                         dp_drho[m], dp_de[m]);
-                }
 
+                    cerr << "before rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                    cerr << "before press_eos of m " << m << " of cell " << c << " " << press_eos[m] << endl;
+                }
+             
                 //__________________________________
                 // - compute delPress
                 // - update press_CC     
@@ -2695,6 +2708,9 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
 
                     // - updated volume fractions
                     vol_frac[m][c] = rho_CC[m][c] * div;
+
+                    cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
+                    cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
                 }
                 //__________________________________
                 // - Test for convergence
@@ -2703,6 +2719,9 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                 for (unsigned int m = 0; m < numMatls; m++) {
                     sum += vol_frac[m][c];
                 }
+
+                cerr << "sum " << sum << endl;
+
                 if (fabs(sum - 1.0) < convergence_crit) {
                     converged = true;
                     //__________________________________
@@ -2755,11 +2774,13 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                 message += "Max. iterations reached ";
             }
 
+            /*
             for (unsigned int m = 0; m < numMatls; m++) {
                 if ((vol_frac[m][c] > 0.0) || (vol_frac[m][c] < 1.0)) {
                     message += " ( vol_frac[m][c] > 0.0 ) ||( vol_frac[m][c] < 1.0) ";
                 }
             }
+            */
 
             if (fabs(sum - 1.0) > convergence_crit && !rts) {
                 allTestsPassed = false;
@@ -2774,6 +2795,7 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
             for (unsigned int m = 0; m < numMatls; m++) {
                 if ((rho_micro[m][c] < 0.0 || vol_frac[m][c] < 0.0) && !rts) {
                     allTestsPassed = false;
+
                     message += " rho_micro < 0 || vol_frac < 0";
                 }
             }

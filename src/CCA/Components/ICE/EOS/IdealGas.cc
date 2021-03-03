@@ -92,8 +92,6 @@ void IdealGas::computePressEOS(double rhoM, double gamma,
   press   = (gamma - 1.0)*rhoM*cv*Temp;
   dp_drho = (gamma - 1.0)*cv*Temp;
   dp_de   = (gamma - 1.0)*rhoM;
-
-  //cerr << "gamma " << gamma << ", rhoM " << rhoM << ", cv " << cv << " Temp " << Temp << endl;
 }
 //__________________________________
 // Return (1/v)*(dv/dT)  (constant pressure thermal expansivity)
