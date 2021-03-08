@@ -33,8 +33,10 @@ SRCDIR   := CCA/Components/ICE
 
 SRCS += \
        $(SRCDIR)/ICE.cc \
+       $(SRCDIR)/ICE2.cc \
        $(SRCDIR)/AMRICE.cc \
        $(SRCDIR)/impICE.cc \
+       $(SRCDIR)/impICE2.cc \
        $(SRCDIR)/impAMRICE.cc \
        $(SRCDIR)/customInitialize.cc
 

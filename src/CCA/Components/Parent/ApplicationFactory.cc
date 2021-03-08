@@ -69,6 +69,7 @@
 #ifndef NO_ICE
 #include <CCA/Components/ICE/AMRICE.h>
 #include <CCA/Components/ICE/ICE.h>
+#include <CCA/Components/ICE/ICE2.h>
 #include <CCA/Components/ICE/impAMRICE.h>
 #endif
 
@@ -211,6 +212,29 @@ ApplicationFactory::create(       ProblemSpecP     & prob_spec
   else {
     turned_on_options += "ice ";
   }
+
+  if (sim_comp == "ice2" || sim_comp == "ICE2") {
+      ProblemSpecP cfd_ps = prob_spec->findBlock("CFD");
+      ProblemSpecP ice_ps = cfd_ps->findBlock("ICE");
+      ProblemSpecP imp_ps = ice_ps->findBlock("ImplicitSolver");
+      bool doImplicitSolver = (imp_ps);
+
+      if (doAMR) {
+          if (doImplicitSolver) {
+              return scinew impAMRICE(myworld, materialManager);
+          }
+          else {
+              return scinew AMRICE(myworld, materialManager);
+          }
+      }
+      else {
+          return scinew ICE2(myworld, materialManager);
+      }
+  }
+  else {
+      turned_on_options += "ice2 ";
+  }
+
 #endif
 
   //----------------------------
