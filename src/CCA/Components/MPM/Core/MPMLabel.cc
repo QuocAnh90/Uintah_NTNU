@@ -605,6 +605,11 @@ MPMLabel::MPMLabel()
   RigidReactionForceLabel = VarLabel::create( "RigidReactionForce",
                                  sumvec_vartype::getTypeDescription() );
 
+  reaction_force1Label = VarLabel::create(" reaction_force1",
+      sumvec_vartype::getTypeDescription());
+  reaction_force2Label = VarLabel::create(" reaction_force2",
+      sumvec_vartype::getTypeDescription());
+
   TotalLocalizedParticleLabel = VarLabel::create("TotalLocalizedParticle",
                                    sumlong_vartype::getTypeDescription());
 
@@ -1070,6 +1075,8 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(CenterOfMassPositionLabel);
   VarLabel::destroy(TotalMomentumLabel);
   VarLabel::destroy(RigidReactionForceLabel);
+  VarLabel::destroy(reaction_force1Label);
+  VarLabel::destroy(reaction_force2Label);
   VarLabel::destroy(TotalLocalizedParticleLabel);
   VarLabel::destroy(pCellNAPIDLabel);
   VarLabel::destroy(pCellNACZIDLabel);

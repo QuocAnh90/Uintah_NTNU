@@ -3011,6 +3011,11 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
     new_dw->allocateAndPut(gstressglobal, lb->gStressForSavingLabel,
                            m_materialManager->getAllInOneMatls()->get(0), patch);
 
+    // Hacking to get tension force for cable for Herve
+    Vector reaction_force1(0.0, 0.0, 0.0);
+    Vector reaction_force2(0.0, 0.0, 0.0);
+    
+
     for(unsigned int m = 0; m < numMPMMatls; m++){
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int dwi = mpm_matl->getDWIndex();
@@ -3040,6 +3045,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
 
       new_dw->allocateAndPut(gstress,      lb->gStressForSavingLabel,dwi,patch);
       new_dw->allocateAndPut(internalforce,lb->gInternalForceLabel,  dwi,patch);
+
 
       if(flags->d_with_mpmice){
         new_dw->get(p_pressure,lb->pPressureLabel, pset);
@@ -3132,8 +3138,13 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         gstressglobal[c] += gstress[c];
         gstress[c] /= gvolume[c];
 
-        //cerr << "internalforce " << internalforce[c] << endl;
-        //cerr << "gstress " << gstress[c] << endl;
+        if (m == 0) {
+            reaction_force1 += internalforce[c];
+        }
+
+        if (m == 1) {
+            reaction_force2 += internalforce[c];
+        }
       }
 
       // save boundary forces before apply symmetry boundary condition.
@@ -3179,6 +3190,9 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
       MPMBoundCond bc;
       bc.setBoundaryCondition(patch,dwi,"Symmetric",internalforce,interp_type);
     }
+
+    new_dw->put(sumvec_vartype(reaction_force1), lb->reaction_force1Label);
+    new_dw->put(sumvec_vartype(reaction_force2), lb->reaction_force2Label);
 
     for(NodeIterator iter = patch->getNodeIterator();!iter.done();iter++){
       IntVector c = *iter;
