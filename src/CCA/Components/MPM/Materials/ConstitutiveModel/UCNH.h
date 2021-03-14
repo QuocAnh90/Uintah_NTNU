@@ -81,6 +81,12 @@ namespace Uintah {
       double FlowStress;
       double K;
       double Alpha;
+      // For Cable
+      double E1;
+      double E2;
+      double E3;
+      double d1;
+      double d2;
     };
 
     struct YieldDistribution {

@@ -160,6 +160,15 @@ void UCNH::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
       cm_ps->appendElement("yield_seed",           d_yield.seed);
     }
   }
+
+  if (flag->d_forCable) {
+      cm_ps->appendElement("E1", d_initialData.E1);
+      cm_ps->appendElement("E2", d_initialData.E2);
+      cm_ps->appendElement("E3", d_initialData.E3);
+      cm_ps->appendElement("d1", d_initialData.d1);
+      cm_ps->appendElement("d2", d_initialData.d2);
+  }
+
   cm_ps->appendElement("useInitialStress",         d_useInitialStress);
 
   if (d_useInitialStress) {
@@ -568,6 +577,12 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
   double flow     = 0.0;
   double K        = 0.0;
 
+
+  if (flag->d_forCable) {
+  }
+
+
+
   Ghost::GhostType  gan = Ghost::AroundNodes;
 
   // Normal patch loop
@@ -677,6 +692,17 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
 
       // Get the volume preserving part of the deformation gradient increment
       fBar = pDefGradInc/cbrt(Jinc);
+
+
+
+      // Do Cable here
+
+
+
+
+
+
+
 
       // Compute the trial elastic part of the volume preserving
       // part of the left Cauchy-Green deformation tensor
