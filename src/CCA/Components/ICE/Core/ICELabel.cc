@@ -70,6 +70,7 @@ ICELabel::ICELabel()
   TMV_CCLabel             = VarLabel::create("TMV_CC",        CC_double);
   press_CCLabel           = VarLabel::create("press_CC",      CC_double);
   press_equil_CCLabel     = VarLabel::create("press_equil_CC",CC_double);
+  press_mal_CCLabel       = VarLabel::create("press_mal_CC", CC_double);
   eq_press_itersLabel     = VarLabel::create("eq_press_iters",CC_int);
   delP_DilatateLabel      = VarLabel::create("delP_Dilatate", CC_double);
   delP_MassXLabel         = VarLabel::create("delP_MassX",    CC_double); 
@@ -286,6 +287,7 @@ ICELabel::~ICELabel()
     VarLabel::destroy(press_CCLabel);
     VarLabel::destroy(TMV_CCLabel);
     VarLabel::destroy(press_equil_CCLabel);
+    VarLabel::destroy(press_mal_CCLabel);
     VarLabel::destroy(eq_press_itersLabel);
     VarLabel::destroy(delP_DilatateLabel);
     VarLabel::destroy(delP_MassXLabel);

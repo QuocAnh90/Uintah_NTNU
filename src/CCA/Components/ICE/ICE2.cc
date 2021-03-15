@@ -1125,6 +1125,7 @@ void ICE2::scheduleComputePressure(SchedulerP& sched,
 
     t->computes(lb->f_theta_CCLabel);
     t->computes(lb->speedSound_CCLabel);
+    t->computes(lb->press_mal_CCLabel);
     t->computes(lb->vol_frac_CCLabel);
     t->computes(lb->sp_vol_CCLabel);
     t->computes(lb->rho_CCLabel);
@@ -1194,6 +1195,7 @@ void ICE2::scheduleComputeVel_FC(SchedulerP& sched,
   t->requires(Task::OldDW, lb->delTLabel, getLevel(patches));  
   t->requires(Task::NewDW, lb->press_equil_CCLabel, press_matl, oims, gac,1);
   t->requires(Task::NewDW,lb->sp_vol_CCLabel,    /*all_matls*/ gac,1);
+  t->requires(Task::NewDW, lb->press_mal_CCLabel,    /*all_matls*/ gac, 1);
   t->requires(Task::NewDW,lb->rho_CCLabel,       /*all_matls*/ gac,1);
   t->requires(Task::OldDW,lb->vel_CCLabel,         ice_matls,  gac,1);
   if( mpm_matls )
@@ -2580,7 +2582,8 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
         static int n_passes;
         n_passes++;
 
-        std::vector<double> press_eos(numMatls);
+        std::vector<double>  press_eos(numMatls);
+        std::vector<CCVariable<double> > press_mal(numMatls);
         std::vector<double> dp_drho(numMatls), dp_de(numMatls);
         std::vector<CCVariable<double> > vol_frac(numMatls);
         std::vector<CCVariable<double> > rho_micro(numMatls);
@@ -2623,6 +2626,7 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
             new_dw->get(gamma[m], lb->gammaLabel, indx, patch, gn, 0);
 
             new_dw->allocateTemporary(rho_micro[m], patch);
+            new_dw->allocateAndPut(press_mal[m], lb->press_mal_CCLabel, indx, patch);
             new_dw->allocateAndPut(vol_frac[m], lb->vol_frac_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho_CC_new[m], lb->rho_CCLabel, indx, patch);
             new_dw->allocateAndPut(sp_vol_new[m], lb->sp_vol_CCLabel, indx, patch);
@@ -2642,16 +2646,6 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 rho_micro[m][c] = 1.0 / sp_vol_CC[m][c];
                 vol_frac[m][c] = rho_CC[m][c] * sp_vol_CC[m][c];
             }
-
-            for (unsigned int m = 0; m < numMatls; m++) {
-                for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
-                    IntVector c = *iter;
-                       //cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
-                       //cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
-                       //cerr << "Cell rho_CC of m " << m << " of cell " << c << " " << rho_CC[m][c] << endl;
-                       //cerr << "Cell sp_vol_CC of m " << m << " of cell " << c << " " << sp_vol_CC[m][c] << endl;
-                }
-            }
         }
 
         //______________________________________________________________________
@@ -2664,6 +2658,19 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
             count = 0;
             vector<EqPress_dbg> dbgEqPress;
 
+            //__________________________________
+               // evaluate press_eos at cell i,j,k
+            for (unsigned int m = 0; m < numMatls; m++) {
+                ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+                ice_matl->getEOS()->computePressEOS(rho_micro[m][c], gamma[m][c],
+                    cv[m][c], Temp[m][c], press_eos[m],
+                    dp_drho[m], dp_de[m]);
+
+                press_mal[m][c] = press_eos[m];
+
+                //cerr << "before press_eos of m " << m << " of cell " << c << " " << press_eos[m] << endl;
+            }
+
             while (count < d_max_iter_equilibration && converged == false) {
                 count++;
 
@@ -2675,8 +2682,7 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
                         cv[m][c], Temp[m][c], press_eos[m],
                         dp_drho[m], dp_de[m]);
 
-                  //  cerr << "before rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
-                 //   cerr << "before press_eos of m " << m << " of cell " << c << " " << press_eos[m] << endl;
+                    press_mal[m][c] = press_eos[m];
                 }
              
                 //__________________________________
@@ -2694,7 +2700,7 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 double vol_frac_not_close_packed = 1.0;
                 delPress = (A - vol_frac_not_close_packed - B) / C;
 
-                press_new[c] += delPress;
+                press_new[c] += delPress;              
 
                 //__________________________________
                 // backout rho_micro_CC at this new pressure
@@ -2708,9 +2714,6 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
                     // - updated volume fractions
                     vol_frac[m][c] = rho_CC[m][c] * div;
-
-                   // cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
-                   // cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
                 }
                 //__________________________________
                 // - Test for convergence
@@ -2719,8 +2722,6 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 for (unsigned int m = 0; m < numMatls; m++) {
                     sum += vol_frac[m][c];
                 }
-
-                //cerr << "sum " << sum << endl;
 
                 if (fabs(sum - 1.0) < convergence_crit) {
                     converged = true;
@@ -2759,6 +2760,8 @@ void ICE2::computeEquilibrationPressure(const ProcessorGroup*,
                     dbgEqPress.push_back(dbg);
                 }
             }   // end of converged
+
+            //cerr << "press_new[c] " << press_new[c] << endl;
 
             test_max_iter = std::max(test_max_iter, count);
 
@@ -3186,6 +3189,10 @@ void ICE2::computeVel_FC(const ProcessorGroup*,
       MPMMaterial* mpm_matl = dynamic_cast<MPMMaterial*>(matl); 
       constCCVariable<double> rho_CC, sp_vol_CC;
       constCCVariable<Vector> vel_CC;
+
+      constCCVariable<double> press_mal_CC;
+      new_dw->get(press_mal_CC, lb->press_mal_CCLabel, indx, patch, gac, 1);
+
       if(ice_matl){
         new_dw->get(rho_CC, lb->rho_CCLabel, indx, patch, gac, 1);
         old_dw->get(vel_CC, lb->vel_CCLabel, indx, patch, gac, 1); 
@@ -3232,6 +3239,7 @@ void ICE2::computeVel_FC(const ProcessorGroup*,
 
       //__________________________________
       //  Compute vel_FC for each face
+      /*
       computeVelFace<SFCXVariable<double> >(0, XFC_iterator,
                                        adj_offset[0],dx[0],delT,gravity[0],
                                        rho_CC,sp_vol_CC,vel_CC,press_CC,
@@ -3246,6 +3254,24 @@ void ICE2::computeVel_FC(const ProcessorGroup*,
                                        adj_offset[2],dx[2],delT,gravity[2],
                                        rho_CC,sp_vol_CC,vel_CC,press_CC,
                                        wvel_FC, grad_P_ZFC, include_acc);
+      */
+
+      
+      computeVelFace<SFCXVariable<double> >(0, XFC_iterator,
+                                       adj_offset[0],dx[0],delT,gravity[0],
+                                       rho_CC,sp_vol_CC,vel_CC, press_mal_CC,
+                                       uvel_FC, grad_P_XFC, include_acc);
+
+      computeVelFace<SFCYVariable<double> >(1, YFC_iterator,
+                                       adj_offset[1],dx[1],delT,gravity[1],
+                                       rho_CC,sp_vol_CC,vel_CC, press_mal_CC,
+                                       vvel_FC, grad_P_YFC, include_acc);
+
+      computeVelFace<SFCZVariable<double> >(2, ZFC_iterator,
+                                       adj_offset[2],dx[2],delT,gravity[2],
+                                       rho_CC,sp_vol_CC,vel_CC, press_mal_CC,
+                                       wvel_FC, grad_P_ZFC, include_acc);
+      
 
       //__________________________________
       // (*)vel_FC BC are updated in 

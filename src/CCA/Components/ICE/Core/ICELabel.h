@@ -44,6 +44,7 @@ namespace Uintah {
     const VarLabel* TMV_CCLabel;
     const VarLabel* press_CCLabel;
     const VarLabel* press_equil_CCLabel;
+    const VarLabel* press_mal_CCLabel;
     const VarLabel* eq_press_itersLabel;
     const VarLabel* delP_DilatateLabel;
     const VarLabel* delP_MassXLabel;

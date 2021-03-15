@@ -591,13 +591,6 @@ void ICE2::setupRHS(const ProcessorGroup*,
            
     int numMatls  = m_materialManager->getNumMatls();
 
-    /*
-    // MPMICE2 only compute the pressure for ICE materials
-    if (d_with_mpmice2) {
-        numMatls = m_materialManager->getNumMatls("ICE");
-    }
-    */
-
     delt_vartype delT;
     pOldDW->get(delT, lb->delTLabel, level);
     
@@ -633,14 +626,6 @@ void ICE2::setupRHS(const ProcessorGroup*,
 
         Material* matl = m_materialManager->getMaterial(m);
         int indx = matl->getDWIndex();
-
-        /*
-        // MPMICE2 only compute the pressure for ICE materials
-        if (d_with_mpmice2) {
-            ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
-            indx = ice_matl->getDWIndex();
-        }
-        */
 
       constSFCXVariable<double> uvel_FC;
       constSFCYVariable<double> vvel_FC;
@@ -759,8 +744,6 @@ void ICE2::setupRHS(const ProcessorGroup*,
       rhs.initialize(0.0, l, h);
     }     
   }  // patches loop
-//  cout << " Level " << level->getIndex() << " rhs " 
-//       << rhs_max << " rhs * vol " << rhs_max * vol <<  endl;
 }
 
 /*___________________________________________________________________
@@ -1014,17 +997,10 @@ void ICE2::implicitPressureSolve(const ProcessorGroup* pg,
   const MaterialSet* all_matls = m_materialManager->allMaterials();
 
   const MaterialSubset* matls_sub;
-  //const MaterialSubset* ice_matls_sub = ice_matls->getUnion();  // Not need as it is in input
   const MaterialSubset* all_matls_sub = all_matls->getUnion();
   
-  //if (d_with_mpmice2) {
-   //   matls = ice_matls;
-   //   matls_sub = ice_matls_sub;
-  //}
-  //else {
       matls = all_matls;
       matls_sub = all_matls_sub;
-  //}
 
   // Only require ice_matls during initialization, we don't have *_CC
   // variables for mpm_matls_sub at this point
