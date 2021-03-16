@@ -107,6 +107,7 @@ ICELabel::ICELabel()
   sp_vol_advLabel         = VarLabel::create("sp_vol_adv",    CC_double);
 
   term2Label              = VarLabel::create("term2",         CC_double);
+  term2_malLabel          = VarLabel::create("term2_mal", CC_double);
   term3Label              = VarLabel::create("term3",         CC_double);
   f_theta_CCLabel         = VarLabel::create("f_theta",       CC_double);
   Tdot_CCLabel            = VarLabel::create("Tdot",          CC_double);
@@ -124,10 +125,14 @@ ICELabel::ICELabel()
   //__________________________________
   // Implicit Labels
   matrixLabel = 
-    VarLabel::create("matrix",CCVariable<Stencil7>::getTypeDescription());      
-  rhsLabel                = VarLabel::create("rhs",         CC_double);        
+    VarLabel::create("matrix",CCVariable<Stencil7>::getTypeDescription()); 
+  matrix_malLabel =
+      VarLabel::create("matrix_mal", CCVariable<Stencil7>::getTypeDescription());
+  rhsLabel                = VarLabel::create("rhs",         CC_double);       
+  rhs_malLabel            = VarLabel::create("rhs_mal", CC_double);
   initialGuessLabel       = VarLabel::create("initialGuess",CC_double);     
   imp_delPLabel           = VarLabel::create("imp_delP",    CC_double);       
+  imp_delP_malLabel       = VarLabel::create("imp_delP_mal", CC_double);
   sum_imp_delPLabel       = VarLabel::create("sum_imp_delP",CC_double);       
   betaLabel               = VarLabel::create("beta",        CC_double);
   sp_volX_FCLabel         = VarLabel::create("sp_volX_FC",  SFCX_double);
@@ -196,6 +201,7 @@ ICELabel::ICELabel()
   TotalIntEngLabel    = VarLabel::create( "TotalIntEng",      sum_variable);
   eng_exch_errorLabel = VarLabel::create( "eng_exch_error",   sum_variable);
   max_RHSLabel        = VarLabel::create( "max_RHS",          max_variable);
+  max_RHS_malLabel    = VarLabel::create("max_RHS_mal",       max_variable);
 
   maxMach_xminusLabel = VarLabel::create( "maxMach_xminus",   max_variable);
   maxMach_xplusLabel  = VarLabel::create( "maxMach_xplus",    max_variable);
@@ -326,6 +332,7 @@ ICELabel::~ICELabel()
     VarLabel::destroy(sp_vol_advLabel);    
     
     VarLabel::destroy(term2Label);
+    VarLabel::destroy(term2_malLabel);
     VarLabel::destroy(term3Label);
     VarLabel::destroy(f_theta_CCLabel);
     VarLabel::destroy(Tdot_CCLabel);
@@ -340,10 +347,13 @@ ICELabel::~ICELabel()
     
     // Implicit Labels
     VarLabel::destroy(matrixLabel);
+    VarLabel::destroy(matrix_malLabel);
     VarLabel::destroy(rhsLabel); 
+    VarLabel::destroy(rhs_malLabel);
     VarLabel::destroy(initialGuessLabel);
     VarLabel::destroy(betaLabel);
     VarLabel::destroy(imp_delPLabel);  
+    VarLabel::destroy(imp_delP_malLabel);
     VarLabel::destroy(sum_imp_delPLabel);  
     VarLabel::destroy(sp_volX_FCLabel); 
     VarLabel::destroy(sp_volY_FCLabel);
@@ -408,7 +418,8 @@ ICELabel::~ICELabel()
     VarLabel::destroy(eng_exch_errorLabel);   
     VarLabel::destroy(mom_exch_errorLabel);  
     VarLabel::destroy(max_RHSLabel);
-    
+    VarLabel::destroy(max_RHS_malLabel);
+
     //   --- max Mach Number
     VarLabel::destroy(maxMach_xminusLabel);
     VarLabel::destroy(maxMach_xplusLabel);

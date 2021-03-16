@@ -83,6 +83,7 @@ namespace Uintah {
     const VarLabel* sp_vol_advLabel;
     const VarLabel* created_vol_CCLabel;
     const VarLabel* term2Label;
+    const VarLabel* term2_malLabel;
     const VarLabel* term3Label;
     const VarLabel* f_theta_CCLabel;
     const VarLabel* Tdot_CCLabel;
@@ -97,10 +98,13 @@ namespace Uintah {
 //__________________________________
 //    IMPLICIT      
     const VarLabel* matrixLabel;
+    const VarLabel* matrix_malLabel;
     const VarLabel* rhsLabel;
+    const VarLabel* rhs_malLabel;
     const VarLabel* initialGuessLabel;
     const VarLabel* betaLabel;
     const VarLabel* imp_delPLabel;
+    const VarLabel* imp_delP_malLabel;
     const VarLabel* sum_imp_delPLabel;
     const VarLabel* sp_volX_FCLabel;
     const VarLabel* sp_volY_FCLabel;    
@@ -172,7 +176,8 @@ namespace Uintah {
     const VarLabel*  eng_exch_errorLabel;
     const VarLabel*  mom_exch_errorLabel;
     const VarLabel*  max_RHSLabel;
-    
+    const VarLabel*  max_RHS_malLabel;
+
     const VarLabel*  maxMach_xminusLabel;
     const VarLabel*  maxMach_xplusLabel;
     const VarLabel*  maxMach_yminusLabel;

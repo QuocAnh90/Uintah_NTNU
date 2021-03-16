@@ -3476,7 +3476,7 @@ void ICE2::computeDelPressAndUpdatePressCC(const ProcessorGroup*,
     Ghost::GhostType  gac = Ghost::AroundCells;
     new_dw->get(sumKappa,                lb->sumKappaLabel,      0,patch,gn,0);
     new_dw->get(press_equil,             lb->press_equil_CCLabel,0,patch,gn,0);
-    new_dw->allocateAndPut( press_CC,    lb->press_CCLabel,      0, patch);   
+    new_dw->allocateAndPut(press_CC,    lb->press_CCLabel,      0, patch);   
     new_dw->allocateAndPut(delP_Dilatate,lb->delP_DilatateLabel, 0, patch);   
     new_dw->allocateAndPut(delP_MassX,   lb->delP_MassXLabel,    0, patch);
     new_dw->allocateAndPut(term2,        lb->term2Label,         0, patch);
@@ -3485,6 +3485,8 @@ void ICE2::computeDelPressAndUpdatePressCC(const ProcessorGroup*,
     new_dw->allocateTemporary(q_advected, patch);
     new_dw->allocateTemporary(term1,      patch);
     
+    cerr << "here" << endl;
+
     term1.initialize(0.);
     term2.initialize(0.);
     sum_rho_CC.initialize(0.0); 

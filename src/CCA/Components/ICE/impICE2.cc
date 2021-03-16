@@ -90,12 +90,197 @@ void ICE2::scheduleSetupMatrix(  SchedulerP& sched,
   t->requires( whichDW,   lb->vol_fracY_FCLabel,  gaf,1);        
   t->requires( whichDW,   lb->vol_fracZ_FCLabel,  gaf,1);        
   t->requires( Task::ParentNewDW,   
-                          lb->sumKappaLabel, one_matl,oims,gn,0);      
+                          lb->sumKappaLabel, one_matl,oims,gn,0);   
+
+  t->requires(whichDW, lb->compressibilityLabel, gaf, 1);
 
   t->computes(lb->matrixLabel,   one_matl,   oims);
   t->computes(lb->imp_delPLabel, press_matl, oims);
+
+  t->computes(lb->matrix_malLabel);
+  t->computes(lb->imp_delP_malLabel);
+
   sched->addTask(t, patches, all_matls);                     
 }
+
+
+/*___________________________________________________________________
+ Function~  ICE2::setupMatrix--
+_____________________________________________________________________*/
+void
+ICE2::setupMatrix(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    const Level* level = getLevel(patches);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing ICE2::setupMatrix");
+
+        DataWarehouse* whichDW = old_dw;
+
+        DataWarehouse* parent_old_dw = new_dw->getOtherDataWarehouse(Task::ParentOldDW);
+        DataWarehouse* parent_new_dw = new_dw->getOtherDataWarehouse(Task::ParentNewDW);
+
+        delt_vartype delT;
+        parent_old_dw->get(delT, lb->delTLabel, level);
+        Vector dx = patch->dCell();
+        int numMatls = m_materialManager->getNumMatls();
+
+
+        // MPMICE2 only compute the pressure for ICE materials
+        if (d_with_mpmice2) {
+            numMatls = m_materialManager->getNumMatls("ICE");
+        }
+
+        CCVariable<Stencil7> A;
+        CCVariable<double> imp_delP;
+        constCCVariable<double> sumKappa;
+
+        Ghost::GhostType  gn = Ghost::None;
+        Ghost::GhostType  gaf = Ghost::AroundFaces;
+        new_dw->allocateAndPut(A, lb->matrixLabel, 0, patch, gn, 0);
+        new_dw->allocateAndPut(imp_delP, lb->imp_delPLabel, 0, patch, gn, 0);
+        parent_new_dw->get(sumKappa, lb->sumKappaLabel, 0, patch, gn, 0);
+        imp_delP.initialize(0.0); // you need to intialize the extra cells
+
+        IntVector right, left, top, bottom, front, back;
+        IntVector R_CC, L_CC, T_CC, B_CC, F_CC, BK_CC;
+
+        //__________________________________
+        //  Initialize A
+        for (CellIterator iter(patch->getExtraCellIterator()); !iter.done(); iter++) {
+            IntVector c = *iter;
+            Stencil7& A_tmp = A[c];
+            A_tmp.p = 0.0;
+            A_tmp.n = 0.0;   A_tmp.s = 0.0;
+            A_tmp.e = 0.0;   A_tmp.w = 0.0;
+            A_tmp.t = 0.0;   A_tmp.b = 0.0;
+        }
+
+        //__________________________________
+        //  Multiple stencil by delT^2 * area/dx
+        double delT_2 = delT * delT;
+
+        double vol = dx.x() * dx.y() * dx.z();
+        double tmp_e_w = dx.y() * dx.z() * delT_2 / dx.x();
+        double tmp_n_s = dx.x() * dx.z() * delT_2 / dx.y();
+        double tmp_t_b = dx.x() * dx.y() * delT_2 / dx.z();
+
+        for (int m = 0; m < numMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+
+            // MPMICE2 only compute the pressure for ICE materials
+            if (d_with_mpmice2) {
+                ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+                indx = ice_matl->getDWIndex();
+            }
+
+            constSFCXVariable<double> sp_volX_FC, vol_fracX_FC;
+            constSFCYVariable<double> sp_volY_FC, vol_fracY_FC;
+            constSFCZVariable<double> sp_volZ_FC, vol_fracZ_FC;
+
+            whichDW->get(sp_volX_FC, lb->sp_volX_FCLabel, indx, patch, gaf, 1);
+            whichDW->get(sp_volY_FC, lb->sp_volY_FCLabel, indx, patch, gaf, 1);
+            whichDW->get(sp_volZ_FC, lb->sp_volZ_FCLabel, indx, patch, gaf, 1);
+
+            whichDW->get(vol_fracX_FC, lb->vol_fracX_FCLabel, indx, patch, gaf, 1);
+            whichDW->get(vol_fracY_FC, lb->vol_fracY_FCLabel, indx, patch, gaf, 1);
+            whichDW->get(vol_fracZ_FC, lb->vol_fracZ_FCLabel, indx, patch, gaf, 1);
+
+            //__________________________________
+            // Sum (<upwinded volfrac> * sp_vol on faces)
+            // +x -x +y -y +z -z
+            //  e, w, n, s, t, b
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                Stencil7& A_tmp = A[c];
+                right = c + IntVector(1, 0, 0);      left = c;
+                top = c + IntVector(0, 1, 0);      bottom = c;
+                front = c + IntVector(0, 0, 1);      back = c;
+
+                //  use the upwinded vol_frac    
+                A_tmp.e += vol_fracX_FC[right] * sp_volX_FC[right];
+                A_tmp.w += vol_fracX_FC[left] * sp_volX_FC[left];
+                A_tmp.n += vol_fracY_FC[top] * sp_volY_FC[top];
+                A_tmp.s += vol_fracY_FC[bottom] * sp_volY_FC[bottom];
+                A_tmp.t += vol_fracZ_FC[front] * sp_volZ_FC[front];
+                A_tmp.b += vol_fracZ_FC[back] * sp_volZ_FC[back];
+            }
+
+            // Material
+            CCVariable<Stencil7> A_mal;
+            CCVariable<double> imp_delP_mal;
+            new_dw->allocateAndPut(A_mal, lb->matrix_malLabel, indx, patch, gn, 0);
+            new_dw->allocateAndPut(imp_delP_mal, lb->imp_delP_malLabel, indx, patch, gn, 0);
+            imp_delP.initialize(0.0); // you need to intialize the extra cells
+
+            constCCVariable<double> kappa;
+            new_dw->get(kappa, lb->compressibilityLabel, indx, patch, gn, 0);
+
+            //__________________________________
+            //  Calculate A_mal
+            for (CellIterator iter(patch->getExtraCellIterator()); !iter.done(); iter++) {
+                IntVector c = *iter;
+                Stencil7& A_mal_tmp = A_mal[c];
+                A_mal_tmp.p = 0.0;
+                A_mal_tmp.n = vol_fracY_FC[top] * sp_volY_FC[top];
+                A_mal_tmp.e = (vol_fracX_FC[right] * sp_volX_FC[right]);
+                A_mal_tmp.t = vol_fracZ_FC[front] * sp_volZ_FC[front];
+                A_mal_tmp.s = vol_fracY_FC[bottom] * sp_volY_FC[bottom];
+                A_mal_tmp.b = vol_fracZ_FC[back] * sp_volZ_FC[back];
+                A_mal_tmp.w = vol_fracX_FC[left] * sp_volX_FC[left];
+            }
+
+            for (CellIterator iter(patch->getCellIterator()); !iter.done(); iter++) {
+                IntVector c = *iter;
+                Stencil7& A_mal_tmp = A_mal[c];
+                A_mal_tmp.e *= -tmp_e_w;
+                A_mal_tmp.w *= -tmp_e_w;
+
+                A_mal_tmp.n *= -tmp_n_s;
+                A_mal_tmp.s *= -tmp_n_s;
+
+                A_mal_tmp.t *= -tmp_t_b;
+                A_mal_tmp.b *= -tmp_t_b;
+
+                A_mal_tmp.p = vol * kappa[c] -
+                    (A_mal_tmp.n + A_mal_tmp.s + A_mal_tmp.e + A_mal_tmp.w + A_mal_tmp.t + A_mal_tmp.b);
+            }
+
+            //__________________________________
+            //  Boundary conditons on  A_mal.e,  A_mal.w,  A_mal.n,  A_mal.s,  A_mal.t,  A_mal.b
+            ImplicitMatrixBC(A_mal, patch);
+
+        }  //matl loop     
+
+        for (CellIterator iter(patch->getCellIterator()); !iter.done(); iter++) {
+            IntVector c = *iter;
+            Stencil7& A_tmp = A[c];
+            A_tmp.e *= -tmp_e_w;
+            A_tmp.w *= -tmp_e_w;
+
+            A_tmp.n *= -tmp_n_s;
+            A_tmp.s *= -tmp_n_s;
+
+            A_tmp.t *= -tmp_t_b;
+            A_tmp.b *= -tmp_t_b;
+
+            A_tmp.p = vol * sumKappa[c] -
+                (A_tmp.n + A_tmp.s + A_tmp.e + A_tmp.w + A_tmp.t + A_tmp.b);
+        }
+        //__________________________________
+        //  Boundary conditons on A.e, A.w, A.n, A.s, A.t, A.b
+        ImplicitMatrixBC(A, patch);
+    }
+}
+
 
 /*___________________________________________________________________
  Function~  ICE2::scheduleSetupRHS--
@@ -135,6 +320,7 @@ void ICE2::scheduleSetupRHS(  SchedulerP& sched,
   } 
  
   t->requires( pNewDW,      lb->sumKappaLabel,      press_matl,oims,gn,0);
+  t->requires( pNewDW,      lb->compressibilityLabel,          gn,0);
   t->requires( pNewDW,      lb->sp_vol_CCLabel,                gn,0);
   t->requires( pNewDW,      lb->speedSound_CCLabel,            gn,0);
   t->requires( pNewDW,      lb->vol_frac_CCLabel,              gac,2);
@@ -168,6 +354,221 @@ void ICE2::scheduleSetupRHS(  SchedulerP& sched,
 }
 
 /*___________________________________________________________________
+ Function~  ICE2::setupRHS--
+_____________________________________________________________________*/
+void ICE2::setupRHS(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw,
+    bool insideOuterIterLoop,
+    string computes_or_modifies)
+{
+    const Level* level = getLevel(patches);
+    Vector dx = level->dCell();
+    double vol = dx.x() * dx.y() * dx.z();
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing ICE2::setupRHS");
+        // define parent_new/old_dw 
+
+        DataWarehouse* pNewDW;
+        DataWarehouse* pOldDW;
+        if (insideOuterIterLoop) {
+            pNewDW = new_dw->getOtherDataWarehouse(Task::ParentNewDW);
+            pOldDW = new_dw->getOtherDataWarehouse(Task::ParentOldDW);
+        }
+        else {
+            pNewDW = new_dw;
+            pOldDW = old_dw;
+        }
+
+        int numMatls = m_materialManager->getNumMatls();
+
+        delt_vartype delT;
+        pOldDW->get(delT, lb->delTLabel, level);
+
+        Advector* advector = d_advector->clone(new_dw, patch, isRegridTimeStep());
+
+        CCVariable<double> q_advected, rhs;
+        CCVariable<double> sumAdvection, massExchTerm;
+        constCCVariable<double> press_CC, oldPressure, speedSound, sumKappa;
+        constCCVariable<double> sum_imp_delP;
+        const IntVector gc(1, 1, 1);
+        Ghost::GhostType  gn = Ghost::None;
+        Ghost::GhostType  gac = Ghost::AroundCells;
+
+        new_dw->get(sum_imp_delP, lb->sum_imp_delPLabel, 0, patch, gn, 0);
+        pNewDW->get(sumKappa, lb->sumKappaLabel, 0, patch, gn, 0);
+
+        new_dw->allocateAndPut(massExchTerm, lb->term2Label, 0, patch);
+        new_dw->allocateTemporary(q_advected, patch);
+        new_dw->allocateTemporary(sumAdvection, patch);
+
+        if (computes_or_modifies == "computes") {
+            new_dw->allocateAndPut(rhs, lb->rhsLabel, 0, patch);
+        }
+        if (computes_or_modifies == "modifies") {
+            new_dw->getModifiable(rhs, lb->rhsLabel, 0, patch);
+        }
+
+        rhs.initialize(0.0);
+        sumAdvection.initialize(0.0);
+        massExchTerm.initialize(0.0);
+
+        for (int m = 0; m < numMatls; m++) {
+
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+
+            constSFCXVariable<double> uvel_FC;
+            constSFCYVariable<double> vvel_FC;
+            constSFCZVariable<double> wvel_FC;
+            SFCXVariable<double> vol_fracX_FC;
+            SFCYVariable<double> vol_fracY_FC;
+            SFCZVariable<double> vol_fracZ_FC;
+            constCCVariable<double> vol_frac, burnedMass, sp_vol_CC, speedSound;
+
+            new_dw->allocateAndPut(vol_fracX_FC, lb->vol_fracX_FCLabel, indx, patch);
+            new_dw->allocateAndPut(vol_fracY_FC, lb->vol_fracY_FCLabel, indx, patch);
+            new_dw->allocateAndPut(vol_fracZ_FC, lb->vol_fracZ_FCLabel, indx, patch);
+
+            // Material variables
+            constCCVariable<double> imp_delP_mal;
+            constCCVariable<double> kappa;
+            new_dw->get(kappa, lb->compressibilityLabel, indx, patch, gn, 0);
+            new_dw->get(imp_delP_mal, lb->imp_delP_malLabel, indx, patch, gn, 0);
+
+            CCVariable<double> rhs_mal, massExchTerm_mal; 
+            CCVariable<double> term1_mal;
+            new_dw->allocateAndPut(massExchTerm_mal, lb->term2_malLabel, indx, patch);
+            if (computes_or_modifies == "computes") {
+                new_dw->allocateAndPut(rhs_mal, lb->rhs_malLabel, indx, patch);
+            }
+            if (computes_or_modifies == "modifies") {
+                new_dw->getModifiable(rhs_mal, lb->rhs_malLabel, indx, patch);
+            }
+            rhs_mal.initialize(0.0);
+            massExchTerm_mal.initialize(0.0);
+
+            // lowIndex is the same for all vel_FC
+            IntVector lowIndex(patch->getExtraSFCXLowIndex());
+            double nan = getNan();
+            vol_fracX_FC.initialize(nan, lowIndex, patch->getExtraSFCXHighIndex());
+            vol_fracY_FC.initialize(nan, lowIndex, patch->getExtraSFCYHighIndex());
+            vol_fracZ_FC.initialize(nan, lowIndex, patch->getExtraSFCZHighIndex());
+            new_dw->get(uvel_FC, lb->uvel_FCMELabel, indx, patch, gac, 2);
+            new_dw->get(vvel_FC, lb->vvel_FCMELabel, indx, patch, gac, 2);
+            new_dw->get(wvel_FC, lb->wvel_FCMELabel, indx, patch, gac, 2);
+            pNewDW->get(vol_frac, lb->vol_frac_CCLabel, indx, patch, gac, 2);
+            pNewDW->get(sp_vol_CC, lb->sp_vol_CCLabel, indx, patch, gn, 0);
+            pNewDW->get(speedSound, lb->speedSound_CCLabel, indx, patch, gn, 0);
+
+            //__________________________________
+            // Advection preprocessing
+            bool bulletProof_test = false;
+
+            //__________________________________
+            // common variables that get passed into the advection operators
+            advectVarBasket* varBasket = scinew advectVarBasket();
+            varBasket->new_dw = new_dw;
+            varBasket->old_dw = old_dw;
+            varBasket->indx = indx;
+            varBasket->patch = patch;
+            varBasket->level = level;
+            varBasket->lb = lb;
+            varBasket->doRefluxing = isAMR(); // always reflux with amr
+            varBasket->is_Q_massSpecific = false;
+            varBasket->useCompatibleFluxes = d_useCompatibleFluxes;
+            varBasket->AMR_subCycleProgressVar = 0;       // for lockstep it's always 0
+
+            advector->inFluxOutFluxVolume(uvel_FC, vvel_FC, wvel_FC, delT, patch, indx,
+                bulletProof_test, pNewDW, varBasket);
+
+            advector->advectQ(vol_frac, patch, q_advected, varBasket,
+                vol_fracX_FC, vol_fracY_FC, vol_fracZ_FC, new_dw);
+
+            delete varBasket;
+
+            //__________________________________
+            //  sum Advecton (<vol_frac> vel_FC )
+            //  you need to multiply by vol
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                sumAdvection[c] += q_advected[c] * vol;
+
+                // Material
+                term1_mal[c] = vol * kappa[c] * imp_delP_mal[c];
+                rhs_mal[c] = q_advected[c] * vol;
+            }
+            //__________________________________
+            //  sum mass Exchange term
+            if (d_models.size() > 0) {
+                pNewDW->get(burnedMass, lb->modelMass_srcLabel, indx, patch, gn, 0);
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    massExchTerm[c] += burnedMass[c] * sp_vol_CC[c];
+
+                    // Material
+                    massExchTerm_mal[c] = burnedMass[c] * sp_vol_CC[c];
+                    rhs_mal[c] += massExchTerm_mal[c];
+                }
+            }
+        }  //matl loop
+        delete advector;
+
+        //__________________________________
+        // form the pressure difference term
+        CCVariable<double> term1;
+        new_dw->allocateTemporary(term1, patch);
+
+        for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+            IntVector c = *iter;
+            term1[c] = vol * sumKappa[c] * sum_imp_delP[c];
+        }
+
+        //__________________________________
+        //  Form RHS
+        // note:  massExchangeTerm has delT incorporated inside of it
+        // We need to include the cell volume in rhs for AMR to be properly scaled
+        for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+            IntVector c = *iter;
+            rhs[c] = -term1[c] + massExchTerm[c] + sumAdvection[c];
+        }
+
+        // Renormalize massExchangeTerm to be consistent with the rest of ICE2
+        if (d_models.size() > 0) {
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                massExchTerm[c] /= vol;
+            }
+        }
+        //__________________________________
+        // set rhs = 0 under all fine patches
+        // For a composite grid we ignore what's happening
+        // on the coarse grid 
+        Level::selectType finePatches;
+        if (level->hasFinerLevel()) {
+            patch->getFineLevelPatches(finePatches);
+        }
+
+        for (size_t i = 0; i < finePatches.size(); i++) {
+            const Patch* finePatch = finePatches[i];
+
+            IntVector l, h, fl, fh;
+            getFineLevelRange(patch, finePatch, l, h, fl, fh);
+
+            if (fh.x() <= fl.x() || fh.y() <= fl.y() || fh.z() <= fl.z()) {
+                continue;
+            }
+            rhs.initialize(0.0, l, h);
+        }
+    }  // patches loop
+}
+
+/*___________________________________________________________________
  Function~  ICE2::scheduleCompute_maxRHS--
 _____________________________________________________________________*/
 void ICE2::scheduleCompute_maxRHS(SchedulerP& sched,
@@ -183,9 +584,94 @@ void ICE2::scheduleCompute_maxRHS(SchedulerP& sched,
   Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ICE2 matlSet.
   t->requires( Task::NewDW, lb->rhsLabel,  one_matl,oims,Ghost::None,0);
   t->computes(lb->max_RHSLabel);
+
+  t->requires(Task::NewDW, lb->rhs_malLabel,  Ghost::None);
+  t->computes(lb->max_RHS_malLabel);
   
   sched->addTask(t, level->eachPatch(), allMatls);
 }
+
+/*___________________________________________________________________
+ Function~  ICE2::compute_maxRHS--
+_____________________________________________________________________*/
+void ICE2::compute_maxRHS(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse*,
+    DataWarehouse* new_dw)
+{
+    const Level* level = getLevel(patches);
+    double rhs_max = 0.0;
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing ICE2::compute_maxRHS");
+
+        Vector dx = patch->dCell();
+        double vol = dx.x() * dx.y() * dx.z();
+        int numMatls = m_materialManager->getNumMatls();
+
+        constCCVariable<double> rhs;
+        new_dw->get(rhs, lb->rhsLabel, 0, patch, Ghost::None, 0);
+
+        for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+            IntVector c = *iter;
+            rhs_max = Max(rhs_max, Abs(rhs[c] / vol));
+        }
+        new_dw->put(max_vartype(rhs_max), lb->max_RHSLabel);
+
+        //__________________________________
+        // debugging output
+        if (cout_dbg.active()) {
+            rhs_max = 0.0;
+            IntVector maxCell(0, 0, 0);
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                if (Abs(rhs[c] / vol) > rhs_max) {
+                    maxCell = c;
+                }
+                rhs_max = Max(rhs_max, Abs(rhs[c] / vol));
+            }
+            cout << " maxRHS: " << maxCell << " " << rhs_max << " \t L-" << level->getIndex() << endl;
+        }
+
+        for (int m = 0; m < numMatls; m++) {
+
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+
+            double rhs_max_mal = 0.0;
+
+            constCCVariable<double> rhs_mal;
+            new_dw->get(rhs_mal, lb->rhs_malLabel, indx, patch, Ghost::None, 0);
+
+            for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                IntVector c = *iter;
+                rhs_max_mal = Max(rhs_max_mal, Abs(rhs_mal[c] / vol));
+            }
+            new_dw->put(max_vartype(rhs_max_mal), lb->max_RHS_malLabel);
+
+            //__________________________________
+            // debugging output
+            if (cout_dbg.active()) {
+                rhs_max_mal = 0.0;
+                IntVector maxCell(0, 0, 0);
+                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                    IntVector c = *iter;
+                    if (Abs(rhs_mal[c] / vol) > rhs_max_mal) {
+                        maxCell = c;
+                    }
+                    rhs_max_mal = Max(rhs_max_mal, Abs(rhs_mal[c] / vol));
+                }
+                cout << " maxRHS: " << maxCell << " " << rhs_max_mal << " \t L-" << level->getIndex() << endl;
+            }
+
+        }
+
+    } // patch loop
+}
+
 
 /*___________________________________________________________________
  Function~  ICE2::scheduleUpdatePressure--
@@ -214,6 +700,8 @@ void ICE2::scheduleUpdatePressure(  SchedulerP& sched,
   t->requires(Task::ParentNewDW, lb->sp_vol_CCLabel                     ,gn);
   t->requires(Task::OldDW,       lb->sum_imp_delPLabel,  press_matl,oims,gn);
   
+  t->requires(Task::ParentNewDW, lb->press_mal_CCLabel, gn);
+
   // for setting the boundary conditions
   // you need gac,1 for funky multilevel patch configurations
   t->modifies(lb->imp_delPLabel,     press_matl, oims);
@@ -223,12 +711,112 @@ void ICE2::scheduleUpdatePressure(  SchedulerP& sched,
 
   t->computes(lb->sum_imp_delPLabel, press_matl, oims);
  
+  t->computes(lb->imp_delPLabel, press_matl, oims);
+
   computesRequires_CustomBCs(t, "imp_update_press_CC", lb, ice_matls,
                               d_BC_globalVars);
   
   t->computes(lb->press_CCLabel,      press_matl,oims); 
   sched->addTask(t, patches, all_matls);                 
 } 
+
+
+/*___________________________________________________________________
+ Function~  ICE2::updatePressure--
+  add sum_imp_delP to press_equil
+  - set boundary condtions on
+_____________________________________________________________________*/
+void ICE2::updatePressure(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    // define parent_dw
+    DataWarehouse* parent_new_dw =
+        new_dw->getOtherDataWarehouse(Task::ParentNewDW);
+    DataWarehouse* parent_old_dw =
+        new_dw->getOtherDataWarehouse(Task::ParentOldDW);
+
+    timeStep_vartype timeStep;
+    parent_old_dw->get(timeStep, lb->timeStepLabel);
+
+    bool isNotInitialTimeStep = (timeStep > 0);
+
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing, "Doing ICE2::updatePressure");
+
+        int numMatls = m_materialManager->getNumMatls();
+
+        // MPMICE2 only compute the pressure for ICE materials
+        //if (d_with_mpmice2) {
+        //    numMatls = m_materialManager->getNumMatls("ICE");
+        //}
+
+        Ghost::GhostType  gn = Ghost::None;
+        CCVariable<double> press_CC;
+        CCVariable<double> imp_delP;
+        CCVariable<double> sum_imp_delP;
+        constCCVariable<double> press_equil;
+        constCCVariable<double> sum_imp_delP_old;
+        std::vector<CCVariable<double> > placeHolder(0);
+        std::vector<constCCVariable<double> > sp_vol_CC(numMatls);
+
+        old_dw->get(sum_imp_delP_old, lb->sum_imp_delPLabel, 0, patch, gn, 0);
+        parent_new_dw->get(press_equil, lb->press_equil_CCLabel, 0, patch, gn, 0);
+        new_dw->getModifiable(imp_delP, lb->imp_delPLabel, 0, patch);
+        new_dw->allocateAndPut(press_CC, lb->press_CCLabel, 0, patch);
+        new_dw->allocateAndPut(sum_imp_delP, lb->sum_imp_delPLabel, 0, patch);
+        press_CC.initialize(d_EVIL_NUM);
+
+        for (int m = 0; m < numMatls; m++) {
+            Material* matl = m_materialManager->getMaterial(m);
+            int indx = matl->getDWIndex();
+
+            parent_new_dw->get(sp_vol_CC[m], lb->sp_vol_CCLabel, indx, patch, gn, 0);
+        }
+
+        // set boundary conditions on imp_delP
+        set_imp_DelP_BC(imp_delP, patch, lb->imp_delPLabel, new_dw);
+
+        //__________________________________
+        //  add delP to press_equil
+        //  AMR:  hit the extra cells, you need to update the pressure in these cells
+        for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
+            IntVector c = *iter;
+            sum_imp_delP[c] = sum_imp_delP_old[c] + imp_delP[c];
+            press_CC[c] = press_equil[c] + sum_imp_delP[c];
+            press_CC[c] = max(1.0e-12, press_CC[c]);   // C L A M P
+        }
+
+        //__________________________________
+        //  set boundary conditions   
+        customBC_localVars* BC_localVars = scinew customBC_localVars();
+
+        preprocess_CustomBCs("imp_update_press_CC", parent_old_dw, parent_new_dw,
+            lb, patch, 999, d_BC_globalVars, BC_localVars);
+        setBC(press_CC, placeHolder, sp_vol_CC, d_surroundingMatl_indx,
+            "sp_vol", "Pressure", patch, m_materialManager, 0, new_dw,
+            d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
+        delete_CustomBCs(d_BC_globalVars, BC_localVars);
+
+
+        //____ B U L L E T   P R O O F I N G----
+        // ignore BP if a recompute time step has already been requested
+        IntVector neg_cell;
+        bool rts = new_dw->recomputeTimeStep();
+
+        if (!areAllValuesPositive(press_CC, neg_cell) && !rts) {
+            ostringstream warn;
+            warn << "ERROR ICE2::updatePressure cell "
+                << neg_cell << " negative pressure\n ";
+            throw InvalidValue(warn.str(), __FILE__, __LINE__);
+        }
+    } // patch loop
+}
+
 
 /*___________________________________________________________________
  Function~  ICE2::--scheduleRecomputeVel_FC
@@ -426,474 +1014,6 @@ void ICE2::scheduleImplicitPressureSolve(  SchedulerP& sched,
   sched->addTask( t, perproc_patches, all_matls );
 }
 
-/*___________________________________________________________________
- Function~  ICE2::setupMatrix-- 
-_____________________________________________________________________*/
-void
-ICE2::setupMatrix( const ProcessorGroup *,
-                  const PatchSubset    * patches,
-                  const MaterialSubset *,
-                  DataWarehouse        * old_dw,
-                  DataWarehouse        * new_dw )
-{
-  const Level* level = getLevel( patches );
-  
-  for( int p = 0; p < patches->size(); p++ ){
-    const Patch* patch = patches->get(p);
-
-    printTask(patches, patch, cout_doing, "Doing ICE2::setupMatrix" );
-              
-    DataWarehouse* whichDW = old_dw;
-
-    DataWarehouse* parent_old_dw = new_dw->getOtherDataWarehouse(Task::ParentOldDW); 
-    DataWarehouse* parent_new_dw = new_dw->getOtherDataWarehouse(Task::ParentNewDW);
-            
-    delt_vartype delT;
-    parent_old_dw->get(delT, lb->delTLabel,level);
-    Vector dx     = patch->dCell();
-    int numMatls  = m_materialManager->getNumMatls();
-
-    // MPMICE2 only compute the pressure for ICE materials
-    if (d_with_mpmice2) {
-        numMatls = m_materialManager->getNumMatls("ICE");
-    }
-
-    CCVariable<Stencil7> A; 
-    CCVariable<double> imp_delP;
-    constCCVariable<double> sumKappa;
-   
-    Ghost::GhostType  gn  = Ghost::None;
-    Ghost::GhostType  gaf = Ghost::AroundFaces;
-    new_dw->allocateAndPut(A,       lb->matrixLabel,    0, patch, gn, 0);
-    new_dw->allocateAndPut(imp_delP,lb->imp_delPLabel,  0, patch, gn, 0);
-    parent_new_dw->get(sumKappa,    lb->sumKappaLabel,  0, patch, gn, 0);
-    imp_delP.initialize(0.0); // you need to intialize the extra cells
-    
-    IntVector right, left, top, bottom, front, back;
-    IntVector R_CC, L_CC, T_CC, B_CC, F_CC, BK_CC;
-
-    //__________________________________
-    //  Initialize A
-    for(CellIterator iter(patch->getExtraCellIterator()); !iter.done(); iter++){
-      IntVector c = *iter;
-      Stencil7&  A_tmp=A[c];
-      A_tmp.p = 0.0; 
-      A_tmp.n = 0.0;   A_tmp.s = 0.0;
-      A_tmp.e = 0.0;   A_tmp.w = 0.0; 
-      A_tmp.t = 0.0;   A_tmp.b = 0.0;
-    } 
-  
-    for(int m = 0; m < numMatls; m++) {
-      Material* matl = m_materialManager->getMaterial( m );
-      int indx = matl->getDWIndex();
-
-      // MPMICE2 only compute the pressure for ICE materials
-      if (d_with_mpmice2) {
-          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
-          indx = ice_matl->getDWIndex();
-      }
-
-      constSFCXVariable<double> sp_volX_FC, vol_fracX_FC;
-      constSFCYVariable<double> sp_volY_FC, vol_fracY_FC;
-      constSFCZVariable<double> sp_volZ_FC, vol_fracZ_FC;
-      
-      whichDW->get(sp_volX_FC,   lb->sp_volX_FCLabel,    indx,patch,gaf, 1);     
-      whichDW->get(sp_volY_FC,   lb->sp_volY_FCLabel,    indx,patch,gaf, 1);     
-      whichDW->get(sp_volZ_FC,   lb->sp_volZ_FCLabel,    indx,patch,gaf, 1);     
-
-      whichDW->get(vol_fracX_FC, lb->vol_fracX_FCLabel,  indx,patch,gaf, 1);        
-      whichDW->get(vol_fracY_FC, lb->vol_fracY_FCLabel,  indx,patch,gaf, 1);        
-      whichDW->get(vol_fracZ_FC, lb->vol_fracZ_FCLabel,  indx,patch,gaf, 1);        
-            
-      //__________________________________
-      // Sum (<upwinded volfrac> * sp_vol on faces)
-      // +x -x +y -y +z -z
-      //  e, w, n, s, t, b
-      
-      for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) { 
-        IntVector c = *iter;
-        Stencil7&  A_tmp=A[c];
-        right  = c + IntVector(1,0,0);      left   = c;  
-        top    = c + IntVector(0,1,0);      bottom = c;  
-        front  = c + IntVector(0,0,1);      back   = c;  
-
-        //  use the upwinded vol_frac    
-        A_tmp.e += vol_fracX_FC[right]  * sp_volX_FC[right];               
-        A_tmp.w += vol_fracX_FC[left]   * sp_volX_FC[left];                   
-        A_tmp.n += vol_fracY_FC[top]    * sp_volY_FC[top];               
-        A_tmp.s += vol_fracY_FC[bottom] * sp_volY_FC[bottom];
-        A_tmp.t += vol_fracZ_FC[front]  * sp_volZ_FC[front];
-        A_tmp.b += vol_fracZ_FC[back]   * sp_volZ_FC[back];
-      }    
-    }  //matl loop
-        
-    //__________________________________
-    //  Multiple stencil by delT^2 * area/dx
-    double delT_2 = delT * delT;
-    
-    double vol     = dx.x()*dx.y()*dx.z();
-    double tmp_e_w = dx.y()*dx.z() * delT_2/dx.x();
-    double tmp_n_s = dx.x()*dx.z() * delT_2/dx.y();
-    double tmp_t_b = dx.x()*dx.y() * delT_2/dx.z();
-
-        
-   for(CellIterator iter(patch->getCellIterator()); !iter.done(); iter++){ 
-      IntVector c = *iter;
-      Stencil7&  A_tmp=A[c];
-      A_tmp.e *= -tmp_e_w;
-      A_tmp.w *= -tmp_e_w;
-      
-      A_tmp.n *= -tmp_n_s;
-      A_tmp.s *= -tmp_n_s;
-
-      A_tmp.t *= -tmp_t_b;
-      A_tmp.b *= -tmp_t_b;
-
-      A_tmp.p = vol * sumKappa[c] -
-          (A_tmp.n + A_tmp.s + A_tmp.e + A_tmp.w + A_tmp.t + A_tmp.b);
-    }  
-    //__________________________________
-    //  Boundary conditons on A.e, A.w, A.n, A.s, A.t, A.b
-    ImplicitMatrixBC( A, patch);         
-  }
-}
-
-/*___________________________________________________________________
- Function~  ICE2::setupRHS-- 
-_____________________________________________________________________*/
-void ICE2::setupRHS(const ProcessorGroup*,
-                   const PatchSubset* patches,
-                   const MaterialSubset* ,
-                   DataWarehouse* old_dw,
-                   DataWarehouse* new_dw,
-                   bool insideOuterIterLoop,
-                   string computes_or_modifies)
-{
-  const Level* level = getLevel(patches);
-  Vector dx     = level->dCell();
-  double vol    = dx.x()*dx.y()*dx.z();
-      
-  for(int p=0;p<patches->size();p++){
-    const Patch* patch = patches->get(p);
-    
-    printTask(patches, patch, cout_doing, "Doing ICE2::setupRHS" );
-    // define parent_new/old_dw 
-    
-    DataWarehouse* pNewDW;
-    DataWarehouse* pOldDW;
-    if(insideOuterIterLoop) {
-      pNewDW  = new_dw->getOtherDataWarehouse(Task::ParentNewDW);
-      pOldDW  = new_dw->getOtherDataWarehouse(Task::ParentOldDW); 
-    } else {
-      pNewDW  = new_dw;
-      pOldDW  = old_dw;
-    }
-           
-    int numMatls  = m_materialManager->getNumMatls();
-
-    delt_vartype delT;
-    pOldDW->get(delT, lb->delTLabel, level);
-    
-    Advector* advector = d_advector->clone(new_dw,patch,isRegridTimeStep());
-    
-    CCVariable<double> q_advected, rhs;
-    CCVariable<double> sumAdvection, massExchTerm;
-    constCCVariable<double> press_CC, oldPressure, speedSound, sumKappa;
-    constCCVariable<double> sum_imp_delP;    
-    const IntVector gc(1,1,1);
-    Ghost::GhostType  gn  = Ghost::None;
-    Ghost::GhostType  gac = Ghost::AroundCells;   
-
-    new_dw->get(sum_imp_delP,  lb->sum_imp_delPLabel,  0,patch,gn,0);
-    pNewDW->get(sumKappa,      lb->sumKappaLabel,      0,patch,gn,0);
-    
-    new_dw->allocateAndPut(massExchTerm,lb->term2Label,         0,patch);
-    new_dw->allocateTemporary(q_advected,       patch);
-    new_dw->allocateTemporary(sumAdvection,     patch);  
- 
-    if(computes_or_modifies == "computes"){
-      new_dw->allocateAndPut(rhs, lb->rhsLabel, 0,patch);
-    }
-    if(computes_or_modifies == "modifies"){
-      new_dw->getModifiable(rhs, lb->rhsLabel, 0,patch);
-    }
-        
-    rhs.initialize(0.0);
-    sumAdvection.initialize(0.0);
-    massExchTerm.initialize(0.0);
-    
-    for(int m = 0; m < numMatls; m++) {
-
-        Material* matl = m_materialManager->getMaterial(m);
-        int indx = matl->getDWIndex();
-
-      constSFCXVariable<double> uvel_FC;
-      constSFCYVariable<double> vvel_FC;
-      constSFCZVariable<double> wvel_FC;
-      SFCXVariable<double> vol_fracX_FC;
-      SFCYVariable<double> vol_fracY_FC;
-      SFCZVariable<double> vol_fracZ_FC;
-      constCCVariable<double> vol_frac, burnedMass, sp_vol_CC, speedSound;
-
-      new_dw->allocateAndPut(vol_fracX_FC, lb->vol_fracX_FCLabel,  indx,patch);
-      new_dw->allocateAndPut(vol_fracY_FC, lb->vol_fracY_FCLabel,  indx,patch);
-      new_dw->allocateAndPut(vol_fracZ_FC, lb->vol_fracZ_FCLabel,  indx,patch);
-      
-      // lowIndex is the same for all vel_FC
-      IntVector lowIndex(patch->getExtraSFCXLowIndex());
-      double nan= getNan();
-      vol_fracX_FC.initialize(nan, lowIndex,patch->getExtraSFCXHighIndex());
-      vol_fracY_FC.initialize(nan, lowIndex,patch->getExtraSFCYHighIndex());
-      vol_fracZ_FC.initialize(nan, lowIndex,patch->getExtraSFCZHighIndex());     
-      new_dw->get(uvel_FC,    lb->uvel_FCMELabel,     indx,patch, gac, 2);       
-      new_dw->get(vvel_FC,    lb->vvel_FCMELabel,     indx,patch, gac, 2);       
-      new_dw->get(wvel_FC,    lb->wvel_FCMELabel,     indx,patch, gac, 2);       
-      pNewDW->get(vol_frac,   lb->vol_frac_CCLabel,   indx,patch, gac, 2);
-      pNewDW->get(sp_vol_CC,  lb->sp_vol_CCLabel,     indx,patch, gn, 0);
-      pNewDW->get(speedSound, lb->speedSound_CCLabel, indx,patch, gn, 0);
-        
-      //__________________________________
-      // Advection preprocessing
-      bool bulletProof_test=false;
-      
-      //__________________________________
-      // common variables that get passed into the advection operators
-      advectVarBasket* varBasket = scinew advectVarBasket();
-      varBasket->new_dw = new_dw;
-      varBasket->old_dw = old_dw;
-      varBasket->indx   = indx;
-      varBasket->patch  = patch;
-      varBasket->level  = level;
-      varBasket->lb     = lb;
-      varBasket->doRefluxing             = isAMR(); // always reflux with amr
-      varBasket->is_Q_massSpecific       = false;
-      varBasket->useCompatibleFluxes     = d_useCompatibleFluxes;
-      varBasket->AMR_subCycleProgressVar = 0;       // for lockstep it's always 0
-      
-      advector->inFluxOutFluxVolume(uvel_FC,vvel_FC,wvel_FC,delT,patch,indx, 
-                                    bulletProof_test, pNewDW, varBasket); 
-
-      advector->advectQ(vol_frac, patch, q_advected, varBasket, 
-                        vol_fracX_FC, vol_fracY_FC,  vol_fracZ_FC, new_dw); 
-                        
-      delete varBasket;                         
-    
-      //__________________________________
-      //  sum Advecton (<vol_frac> vel_FC )
-      //  you need to multiply by vol
-      for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-        IntVector c = *iter;
-        sumAdvection[c] += q_advected[c] * vol;
-      }
-      //__________________________________
-      //  sum mass Exchange term
-      if(d_models.size() > 0){
-        pNewDW->get(burnedMass,lb->modelMass_srcLabel,indx,patch,gn,0);
-        for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-          IntVector c = *iter;
-          massExchTerm[c] += burnedMass[c] * sp_vol_CC[c];
-        }
-      }     
-    }  //matl loop
-    delete advector;  
-      
-    //__________________________________
-    // form the pressure difference term
-    CCVariable<double> term1;
-    new_dw->allocateTemporary(term1, patch);
-    
-    for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-      IntVector c = *iter;
-      term1[c] = vol * sumKappa[c] * sum_imp_delP[c]; 
-    }    
-     
-    //__________________________________
-    //  Form RHS
-    // note:  massExchangeTerm has delT incorporated inside of it
-    // We need to include the cell volume in rhs for AMR to be properly scaled
-    for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-      IntVector c = *iter;
-      rhs[c] = -term1[c] + massExchTerm[c] + sumAdvection[c];
-    }
-
-    // Renormalize massExchangeTerm to be consistent with the rest of ICE2
-    if(d_models.size() > 0){
-      for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-        IntVector c = *iter;
-        massExchTerm[c] /= vol;
-      }
-    }
-    //__________________________________
-    // set rhs = 0 under all fine patches
-    // For a composite grid we ignore what's happening
-    // on the coarse grid 
-    Level::selectType finePatches;
-    if(level->hasFinerLevel()){
-      patch->getFineLevelPatches(finePatches);
-    }
-
-    for(size_t i=0;i<finePatches.size();i++){
-      const Patch* finePatch = finePatches[i];
-
-      IntVector l, h, fl, fh;
-      getFineLevelRange(patch, finePatch, l, h, fl, fh);
-      
-      if (fh.x() <= fl.x() || fh.y() <= fl.y() || fh.z() <= fl.z()) {
-        continue;
-      }
-      rhs.initialize(0.0, l, h);
-    }     
-  }  // patches loop
-}
-
-/*___________________________________________________________________
- Function~  ICE2::compute_maxRHS-- 
-_____________________________________________________________________*/
-void ICE2::compute_maxRHS(const ProcessorGroup*,
-                         const PatchSubset* patches,
-                         const MaterialSubset*,
-                         DataWarehouse*,
-                         DataWarehouse* new_dw)
-{
-  const Level* level = getLevel(patches);
-  double rhs_max = 0.0;
-      
-  for(int p=0;p<patches->size();p++){
-    const Patch* patch = patches->get(p);
-              
-    printTask(patches, patch, cout_doing, "Doing ICE2::compute_maxRHS" );
-    
-    Vector dx  = patch->dCell();
-    double vol = dx.x()*dx.y()*dx.z();
-    
-    constCCVariable<double> rhs;
-    new_dw->get(rhs,lb->rhsLabel, 0,patch,Ghost::None,0); 
-
-    for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-      IntVector c = *iter;
-      rhs_max = Max(rhs_max, Abs(rhs[c]/vol));
-    }
-    new_dw->put(max_vartype(rhs_max), lb->max_RHSLabel);
-
-    //__________________________________
-    // debugging output
-    if( cout_dbg.active() ) {
-      rhs_max = 0.0;
-      IntVector maxCell(0,0,0);
-      for(CellIterator iter=patch->getCellIterator(); !iter.done();iter++) {
-        IntVector c = *iter;
-        if(Abs(rhs[c]/vol) > rhs_max){
-          maxCell = c;
-        }
-        rhs_max = Max(rhs_max, Abs(rhs[c]/vol));
-      }  
-      cout << " maxRHS: " << maxCell << " " << rhs_max << " \t L-" << level->getIndex() << endl;
-    }
-  } // patch loop
-}
-
-
-/*___________________________________________________________________
- Function~  ICE2::updatePressure-- 
-  add sum_imp_delP to press_equil
-  - set boundary condtions on 
-_____________________________________________________________________*/
-void ICE2::updatePressure(const ProcessorGroup*,
-                         const PatchSubset* patches,                    
-                         const MaterialSubset* ,                        
-                         DataWarehouse* old_dw,                         
-                         DataWarehouse* new_dw)                         
-{ 
-  // define parent_dw
-  DataWarehouse* parent_new_dw = 
-    new_dw->getOtherDataWarehouse(Task::ParentNewDW); 
-  DataWarehouse* parent_old_dw = 
-    new_dw->getOtherDataWarehouse(Task::ParentOldDW);
-
-  timeStep_vartype timeStep;
-  parent_old_dw->get(timeStep, lb->timeStepLabel);
-
-  bool isNotInitialTimeStep = (timeStep > 0);
-
-  for(int p=0;p<patches->size();p++){
-    const Patch* patch = patches->get(p);
-    
-    printTask(patches, patch, cout_doing, "Doing ICE2::updatePressure" );
-                    
-    int numMatls  = m_materialManager->getNumMatls(); 
-
-    // MPMICE2 only compute the pressure for ICE materials
-    //if (d_with_mpmice2) {
-    //    numMatls = m_materialManager->getNumMatls("ICE");
-    //}
-
-    Ghost::GhostType  gn = Ghost::None;         
-    CCVariable<double> press_CC;     
-    CCVariable<double> imp_delP;
-    CCVariable<double> sum_imp_delP;
-    constCCVariable<double> press_equil;
-    constCCVariable<double> sum_imp_delP_old;
-    std::vector<CCVariable<double> > placeHolder(0);
-    std::vector<constCCVariable<double> > sp_vol_CC(numMatls);
-         
-    old_dw->get(sum_imp_delP_old,        lb->sum_imp_delPLabel,   0,patch,gn,0);
-    parent_new_dw->get(press_equil,      lb->press_equil_CCLabel, 0,patch,gn,0);      
-    new_dw->getModifiable(imp_delP,      lb->imp_delPLabel,       0,patch);        
-    new_dw->allocateAndPut(press_CC,     lb->press_CCLabel,       0,patch);        
-    new_dw->allocateAndPut(sum_imp_delP, lb->sum_imp_delPLabel,   0,patch);
-    press_CC.initialize(d_EVIL_NUM);
-    
-    for(int m = 0; m < numMatls; m++) {
-      Material* matl = m_materialManager->getMaterial( m );
-      int indx = matl->getDWIndex();
-
-      // MPMICE2 only compute the pressure for ICE materials
-      //if (d_with_mpmice2) {
-      //    ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
-       //   indx = ice_matl->getDWIndex();
-      //}    
-      parent_new_dw->get(sp_vol_CC[m],lb->sp_vol_CCLabel, indx,patch,gn,0);
-    }        
-
-    // set boundary conditions on imp_delP
-    set_imp_DelP_BC(imp_delP, patch, lb->imp_delPLabel, new_dw);
-
-    //__________________________________
-    //  add delP to press_equil
-    //  AMR:  hit the extra cells, you need to update the pressure in these cells
-    for(CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) { 
-      IntVector c = *iter;
-      sum_imp_delP[c] = sum_imp_delP_old[c] + imp_delP[c];
-      press_CC[c] = press_equil[c] + sum_imp_delP[c];
-      press_CC[c] = max(1.0e-12, press_CC[c]);   // C L A M P
-    }   
-
-    //__________________________________
-    //  set boundary conditions   
-    customBC_localVars* BC_localVars = scinew customBC_localVars();
-    
-    preprocess_CustomBCs("imp_update_press_CC",parent_old_dw,parent_new_dw, 
-                            lb,  patch, 999, d_BC_globalVars, BC_localVars );
-    setBC(press_CC, placeHolder, sp_vol_CC, d_surroundingMatl_indx,
-          "sp_vol", "Pressure", patch ,m_materialManager, 0, new_dw, 
-          d_BC_globalVars, BC_localVars, isNotInitialTimeStep/*, d_with_mpmice2*/);
-    delete_CustomBCs(d_BC_globalVars, BC_localVars);
-
-
-    //____ B U L L E T   P R O O F I N G----
-    // ignore BP if a recompute time step has already been requested
-    IntVector neg_cell;
-    bool rts = new_dw->recomputeTimeStep();
-    
-    if(!areAllValuesPositive(press_CC, neg_cell) && !rts) {
-      ostringstream warn;
-      warn <<"ERROR ICE2::updatePressure cell "
-           << neg_cell << " negative pressure\n ";        
-      throw InvalidValue(warn.str(), __FILE__, __LINE__);
-    }
-  } // patch loop
-}
- 
 /*___________________________________________________________________ 
  Function~  ICE2::computeDel_P-- 
 _____________________________________________________________________*/
@@ -962,13 +1082,6 @@ void ICE2::computeDel_P(const ProcessorGroup*,
       IntVector c = *iter;
       delP_MassX[c]    = massExchTerm[c]/sumKappa[c];
       delP_Dilatate[c] = sum_imp_delP[c] - delP_MassX[c];
-
-      //cerr << "massExchTerm" << massExchTerm[c] << endl;
-      //cerr << "sumKappa" << sumKappa[c] << endl;
-      //cerr << "sum_imp_delP" << sum_imp_delP[c] << endl;
-      //cerr << "delP_MassX" << delP_MassX[c] << endl;
-      //cerr << "delP_Dilatate" << delP_Dilatate[c] << endl;
-      //initialGuess[c]  = delP_Dilatate[c];
     }    
 
   } // patch loop
@@ -1095,13 +1208,21 @@ void ICE2::implicitPressureSolve(const ProcessorGroup* pg,
       scheduleSetupMatrix(    d_subsched, level,  patch_set,  one_matl, 
                               matls);
      
-      m_solver->scheduleSolve(level, d_subsched, d_press_matlSet,
-                              lb->matrixLabel,   Task::NewDW,
-                              lb->imp_delPLabel, modifies_X,
-                              lb->rhsLabel,      Task::OldDW,
-                              whichInitialGuess, Task::OldDW,
-                              true);
-                
+      int numMatls = m_materialManager->getNumMatls();
+
+      for (int m = 0; m < numMatls; m++) {
+
+          Material* matl = m_materialManager->getMaterial(m);
+          int indx = matl->getDWIndex();
+
+          m_solver->scheduleSolve(level, d_subsched, d_press_matlSet,
+              lb->matrixLabel, Task::NewDW,
+              lb->imp_delPLabel, modifies_X,
+              lb->rhsLabel, Task::OldDW,
+              whichInitialGuess, Task::OldDW,
+              true);
+      }
+
       scheduleUpdatePressure( d_subsched,  level, patch_set, ice_matls_sub,
                               mpm_matls_sub,
                               d_press_matl,  
