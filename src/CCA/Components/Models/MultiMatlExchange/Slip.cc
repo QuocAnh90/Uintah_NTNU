@@ -184,7 +184,7 @@ void SlipExch::sched_AddExch_VelFC(SchedulerP           & sched,
   }
 
   // All matls
-  t->requires( pNewDW,      Ilb->rho_CCLabel,     gac,   1);
+  //t->requires( pNewDW,      Ilb->rho_CCLabel,     gac,   1);
   t->requires( pNewDW,      Ilb->sp_vol_CCLabel,  gac,   1);
   t->requires( pNewDW,      Ilb->vol_frac_CCLabel,gac,   1);
   t->requires( Task::NewDW, Ilb->uvel_FCLabel,    gaf_X, 1);

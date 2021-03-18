@@ -2675,8 +2675,8 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                         cv[m][c], Temp[m][c], press_eos[m],
                         dp_drho[m], dp_de[m]);
 
-                    cerr << "before rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
-                    cerr << "before press_eos of m " << m << " of cell " << c << " " << press_eos[m] << endl;
+                    //cerr << "before rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                    //cerr << "before press_eos of m " << m << " of cell " << c << " " << press_eos[m] << endl;
                 }
              
                 //__________________________________
@@ -2709,8 +2709,8 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                     // - updated volume fractions
                     vol_frac[m][c] = rho_CC[m][c] * div;
 
-                    cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
-                    cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
+                    //cerr << "Cell vol frac of m " << m << " of cell " << c << " " << vol_frac[m][c] << endl;
+                   // cerr << "Cell rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
                 }
                 //__________________________________
                 // - Test for convergence
@@ -2720,7 +2720,7 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                     sum += vol_frac[m][c];
                 }
 
-                cerr << "sum " << sum << endl;
+                //cerr << "sum " << sum << endl;
 
                 if (fabs(sum - 1.0) < convergence_crit) {
                     converged = true;
@@ -4021,7 +4021,6 @@ void ICE::viscousShearStress(const ProcessorGroup*,
     }  // matl loop
   }  // patch loop
 }
-
 
 /* _____________________________________________________________________
  Purpose~   accumulate all of the sources/sinks of momentum

@@ -453,6 +453,7 @@ ICE::setupMatrix( const ProcessorGroup *,
     Vector dx     = patch->dCell();
     int numMatls  = m_materialManager->getNumMatls();
 
+
     // MPMICE2 only compute the pressure for ICE materials
     if (d_with_mpmice2) {
         numMatls = m_materialManager->getNumMatls("ICE");

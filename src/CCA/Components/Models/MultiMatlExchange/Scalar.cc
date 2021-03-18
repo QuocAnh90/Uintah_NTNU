@@ -225,6 +225,7 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
         b_sp_vol[m] = 2.0 * (sp_vol_CC[m][adj] * sp_vol_CC[m][c])/
                             (sp_vol_CC[m][adj] + sp_vol_CC[m][c]);
 
+        // fol_frac contains Porosity so do tmp
         tmp[m] = -0.5 * delT * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
         vel[m] = vel_FC[m][c];
       }
