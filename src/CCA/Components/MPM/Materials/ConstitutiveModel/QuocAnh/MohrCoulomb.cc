@@ -1370,7 +1370,7 @@ SpecVol=svarg[12];
 svarg[0]=G;
 svarg[1]=K;
 svarg[2]=c;
-
+svarg[3] = Phi;
 
 int Region;
 
