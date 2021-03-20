@@ -929,9 +929,9 @@ void ICE::computeDel_P(const ProcessorGroup*,
     int numMatls  = m_materialManager->getNumMatls(); 
       
     // MPMICE2 only compute the pressure for ICE materials
-    if (d_with_mpmice2) {
-        numMatls = m_materialManager->getNumMatls("ICE");
-    }
+    //if (d_with_mpmice2) {
+    //    numMatls = m_materialManager->getNumMatls("ICE");
+    //}
 
     CCVariable<double> delP_Dilatate;
     CCVariable<double> delP_MassX;
@@ -961,10 +961,10 @@ void ICE::computeDel_P(const ProcessorGroup*,
       int indx = matl->getDWIndex();
 
       // MPMICE2 only compute the pressure for ICE materials
-      if (d_with_mpmice2) {
-          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
-          indx = ice_matl->getDWIndex();
-      }
+      //if (d_with_mpmice2) {
+      //    ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+      //    indx = ice_matl->getDWIndex();
+      //}
 
       new_dw->get(rho_CC,      lb->rho_CCLabel,    indx,patch,gn,0);
       //__________________________________
