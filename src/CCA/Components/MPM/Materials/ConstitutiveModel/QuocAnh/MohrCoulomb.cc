@@ -1323,6 +1323,11 @@ double mu = 0;
 
 if (Use_friction > 0)
 {
+
+    if (shear_strain_nonlocal < strain1) {
+        mu = tan(Phi_P * 3.1415 / 180);
+    }
+
     if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
     {
         mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
