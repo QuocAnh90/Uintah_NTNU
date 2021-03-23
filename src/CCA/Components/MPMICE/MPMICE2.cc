@@ -161,6 +161,20 @@ void MPMICE2::problemSetup(const ProblemSpecP& prob_spec,
 {
     cout_doing << "Doing MPMICE2::problemSetup " << endl;
 
+    ProblemSpecP phys_cons_ps = prob_spec->findBlock("PhysicalConstants");
+    if (phys_cons_ps) {
+        phys_cons_ps->require("reference_pressure", d_ref_press);
+        phys_cons_ps->require("gravity", d_gravity);
+    }
+    else {
+        throw ProblemSetupException(
+            "\n Could not find the <PhysicalConstants> section in the input file.  This section contains <gravity> and <reference pressure> \n"
+            " This pressure is used during the problem intialization and when\n"
+            " the pressure gradient is interpolated to the MPM particles \n"
+            " you must have it for all MPMICE and multimaterial ICE problems\n",
+            __FILE__, __LINE__);
+    }
+
     //__________________________________
     //  M P M
     d_mpm->setComponents(this);
@@ -1609,7 +1623,6 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 IntVector c = *iter;
              
                 if (ice_matl[m]) {
-                    //rho1_CC[m][c] = rho_CC_new[m][c] * Porosity_CC[c];
                     //cerr << "ComputePressure " << endl;
                     //cerr << "ICE rho_CC_new " << rho_CC_new[m][c] << endl;
                     //cerr << "ICE rho_micro " << rho_micro[m][c] << endl;
@@ -1794,6 +1807,8 @@ void MPMICE2::computeVelICE_FC(const ProcessorGroup*,
         Vector dx = patch->dCell();
         Vector gravity = getGravity();
 
+        cerr << "gravity " << gravity << endl;
+
         constCCVariable<double> press_CC;
         Ghost::GhostType  gac = Ghost::AroundCells;
         new_dw->get(press_CC, Ilb->press_equil_CCLabel, 0, patch, gac, 1);
@@ -1919,6 +1934,13 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
         double term3 = delT * gravity;
 
         vel_FC[R] = term1 - term2 + term3;
+
+        cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
+        cerr << "term1 " << term1 << endl;
+        cerr << "term2 " << term2 << endl;
+        cerr << "term3 " << term3 << endl;
+        cerr << "delT " << delT << endl;
+        cerr << "gravity " << gravity << endl;
     }
 }
 
@@ -2129,10 +2151,10 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
 
         vel_FC[R] = term1 + term2 - term3 + term4;
 
-        //cerr << "MPM term 1 " << term1 << endl;
-        //cerr << "MPM term 2 " << term2 << endl;
-        //cerr << "MPM term 3 " << term3 << endl;
-        //cerr << "MPM term 4 " << term4 << endl;
+        cerr << "MPM term 1 " << term1 << endl;
+        cerr << "MPM term 2 " << term2 << endl;
+        cerr << "MPM term 3 " << term3 << endl;
+        cerr << "MPM term 4 " << term4 << endl;
     }
 }
 
@@ -2822,11 +2844,11 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 //double term1 = vol * (termICEtotal + termMPMtotal);
 
                 // term 1 
-                double term1 = -vol_frac[m][c] * kappa[c] * vol * delP[c];
+                double term1 = -vol_frac[indx][c] * kappa[c] * vol * delP[c];
 
                 //  term2
                 double term2 = delT * vol *
-                    (vol_frac[m][c] * alpha[m][c] * Tdot[m][c] -
+                    (vol_frac[indx][c] * alpha[indx][c] * Tdot[indx][c] -
                         f_theta[c] * sum_therm_exp[c]);
 
                 // This is actually mass * sp_vol              
@@ -2835,6 +2857,11 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                 //if (mass_L[c] > very_small_mass)
                 //{
                 double src = term1 + term2;
+
+               // cerr << "vol_frac[m][c] of m " << indx << "at cell " << c << " is " << vol_frac[indx][c] << endl;
+                //cerr << "kappa 1 of m " << indx << "at cell " << c << " is " << kappa[c] << endl;
+                //cerr << "term 1 of m " << indx << "at cell " << c << " is " << term1 << endl;
+                //cerr << "delP " << delP[c] << endl;
                 //}
 
                 //cerr << "material " << m << endl;

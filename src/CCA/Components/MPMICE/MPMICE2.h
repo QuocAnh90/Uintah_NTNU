@@ -451,6 +451,10 @@ namespace Uintah {
             return d_gravity;
         }
 
+        double getRefPress() const {
+            return d_ref_press;
+        }
+
     private:
 
         enum bctype {
@@ -490,6 +494,7 @@ namespace Uintah {
         double d_SMALL_NUM;
         double d_TINY_RHO;
         Vector d_gravity;
+        double d_ref_press;
     };
 
 } // End namespace Uintah

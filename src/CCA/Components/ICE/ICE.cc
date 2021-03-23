@@ -1560,7 +1560,7 @@ void ICE::scheduleComputeLagrangianValues(SchedulerP& sched,
   Task* t = scinew Task("ICE::computeLagrangianValues",
                       this,&ICE::computeLagrangianValues);
   Ghost::GhostType  gn  = Ghost::None;
-  Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
+  //Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
 
   //t->requires(Task::NewDW, lb->Porosity_CCLabel, press_matl, oims, gn);
 
@@ -1885,7 +1885,7 @@ void ICE::scheduleConservedtoPrimitive_Vars(SchedulerP& sched,
   task->requires(Task::OldDW, lb->simulationTimeLabel);
   task->requires(Task::OldDW, lb->delTLabel,getLevel(patch_set));     
   Ghost::GhostType  gn   = Ghost::None;
-  Ghost::GhostType  gac = Ghost::AroundCells;
+  //Ghost::GhostType  gac = Ghost::AroundCells;
 
   //Task::MaterialDomainSpec oims = Task::OutOfDomain;  //outside of ice matlSet.
   //task->requires(Task::NewDW, lb->Porosity_CCLabel, press_matl, oims, gac, 1);
@@ -2892,6 +2892,21 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                 f_theta[m][c] = vol_frac[m][c] * kappa[m][c] / sumKappa[c];
             }
         }
+
+       // for (unsigned int m = 0; m < numMatls; m++) {
+
+            //cerr << "ComputePressure at material " << m << endl;
+
+          //  for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+                //IntVector c = *iter;
+                //cerr << "ComputePressure at cell " << c << endl;
+                //cerr << "ICE rho_CC_new " << rho_CC_new[m][c] << endl;
+               /// cerr << "ICE rho_micro " << rho_micro[m][c] << endl;
+                //cerr << "ICE kappa " << kappa[m][c] << endl;
+                //cerr << "f_theta " << f_theta[m][c] << endl;
+           // }
+       // }
+
     }  // patch loop
 }
 
@@ -3148,6 +3163,11 @@ template<class T> void ICE::computeVelFace(int dir,
     double term3 =  delT * gravity;
     
     vel_FC[R] = term1 - one_or_zero*term2 + one_or_zero*term3;
+
+    //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
+    //cerr << "term1 " << term1 << endl;
+    //cerr << "term2 " << term2 << endl;
+    //cerr << "term3 " << term3 << endl;
   } 
 }
                   
@@ -3253,6 +3273,7 @@ void ICE::computeVel_FC(const ProcessorGroup*,
     } // matls loop
   }  // patch loop
 }
+
 /* _____________________________________________________________________
  Function~  ICE::updateVelFace--
  - tack on delP to the face centered velocity
@@ -3284,6 +3305,7 @@ template<class T> void ICE::updateVelFace(int dir, CellIterator it,
     vel_FC[R] -= term2;
   } 
 } 
+
 //______________________________________________________________________
 //                       
 void ICE::updateVel_FC(const ProcessorGroup*,  
@@ -4160,7 +4182,12 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
               viscous_source = viscous_src[c];
           //}
 
+             //cerr << "press term of cell " << c << " is " << mom_source[c] << endl;
+             // cerr << "mass * gravity term of cell " << c << " is " << mass * gravity << endl;
+
           mom_source[c] = (mom_source[c] + viscous_source + mass * gravity);
+
+
         }
        
       }  //ice_matl
@@ -4278,6 +4305,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
             //double A = TMV_CC[c] * vol_frac[c] * kappa[c] * Porosity_CC[c] * press_CC[c];
             int_eng_source[c] += A * delP_Dilatate[c] + heatCond_src[c];
 
+            //cerr << "delP_Dilatate of cell " << c << " is " << delP_Dilatate[c] << endl;
             //cerr << "int_eng_source" << int_eng_source[c] << endl;
             //cerr << "heatCond_src" << heatCond_src[c] << endl;
           }
@@ -4372,6 +4400,15 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
           mass_L[c] = mass;
           mom_L[c] = vel_CC[c] * mass + mom_source[c];
           int_eng_L[c] = mass*cv[c] * temp_CC[c] + int_eng_source[c];
+        }
+
+        for (CellIterator iter = patch->getCellIterator(); !iter.done();
+            iter++) {
+            IntVector c = *iter;
+
+            //cerr << " mass_L of cell " << c << " is " << mass_L[c] << endl;
+            //cerr << " mom_L of cell " << c << " is " << mom_L[c] << endl;
+            //cerr << " int_eng_L of cell " << c << " is " << int_eng_L[c] << endl;
         }
       }
 
@@ -4471,10 +4508,10 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
     }  // end numALLMatl loop
   }  // patch loop
 }
+
 /* _____________________________________________________________________
  Function~  ICE::computeLagrangianSpecificVolume--
  _____________________________________________________________________  */
-
 void ICE::computeLagrangianSpecificVolume(const ProcessorGroup*,  
                                           const PatchSubset* patches,
                                           const MaterialSubset* /*matls*/,
@@ -4592,6 +4629,13 @@ void ICE::computeLagrangianSpecificVolume(const ProcessorGroup*,
         sp_vol_L[c] = (rho_CC[c] * vol)*sp_vol_CC[c];
       }
 
+      //for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+        //  IntVector c = *iter;
+          //cerr << "sp_vol_L of m " << m << "at cell " << c << "is " << sp_vol_L[c] << endl;
+      //}
+
+      //cerr << " " << endl;
+
       //__________________________________
       //   Contributions from models
       constCCVariable<double> Modelsp_vol_src;
@@ -4621,12 +4665,10 @@ void ICE::computeLagrangianSpecificVolume(const ProcessorGroup*,
         sp_vol_L[c]  += src;
         sp_vol_src[c] = src/(rho_CC[c] * vol);
 
-        cerr << "term 1 of m " << m << "at cell " << c << "is " << term1 << endl;
-        cerr << "depP " << delP[c] << endl;
+        
+        //cerr << "term 1 of m " << m << "at cell " << c << "is " << term1 << endl;
+        //cerr << "sp_vol_src " << sp_vol_src[c] << endl;
       }
-
-      
-
 
       if(d_clampSpecificVolume){
         for(CellIterator iter=patch->getCellIterator();!iter.done();iter++){
@@ -5078,8 +5120,9 @@ void ICE::conservedtoPrimitive_Vars(const ProcessorGroup* /*pg*/,
         vel_CC[c]    = mom_adv[c]    * inv_mass_adv;
         sp_vol_CC[c] = sp_vol_adv[c] * inv_mass_adv;
 
+        //cerr << " " << endl;
         //cerr << "ICE rho_CC" << rho_CC[c] << endl;
-        //cerr << "ICE vel_CC" << vel_CC[c] << endl;
+        //cerr << "ICE vel_CC at cell " << c << " is " << vel_CC[c] << endl;
         //cerr << "conservedtoPrimitive_Vars  sp_vol_adv of m " << indx << " " << sp_vol_adv[c] << endl;
         //cerr << "inv_mass_adv of m " << indx << " " << inv_mass_adv << endl;
         //cerr << "conservedtoPrimitive_Vars  sp_vol_CC of m " << indx << " "  << sp_vol_CC[c] << endl;
