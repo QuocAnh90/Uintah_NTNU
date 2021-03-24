@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=54;
+  d_NBASICINPUTS=56;
   d_NMGDC=0;
 
 // Total number of properties
@@ -398,6 +398,9 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
     cm_ps->appendElement("critical_density", UI[52]);
     cm_ps->appendElement("no_collision", UI[53]);
 
+    cm_ps->appendElement("reset_shear_strain", UI[54]);
+    cm_ps->appendElement("time_reset", UI[55]);
+
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -485,6 +488,14 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 {
 
 double rho_orig = matl->getInitialDensity();
+
+// Get the current simulation time
+simTime_vartype simTimeVar;
+old_dw->get(simTimeVar, lb->simulationTimeLabel);
+double time = simTimeVar;
+double reset_shear_strain = UI[54];
+double time_reset = UI[55];
+
   for(int p=0;p<patches->size();p++){
     double se = 0.0;
     const Patch* patch = patches->get(p);
@@ -644,7 +655,6 @@ double rho_orig = matl->getInitialDensity();
 	  double e23 = Dlocal[4];
 	  double e13 = Dlocal[5];
 	  double shear_strain_rate = UI[20];
-
 	  double Use_regular = UI[42];
 	  double tFE = UI[43];
 	  double tShear = UI[44];
@@ -725,6 +735,15 @@ double rho_orig = matl->getInitialDensity();
 
   svarg[24] = shear_strain_local;
   svarg[20] = shear_strain_rate;
+
+  if (reset_shear_strain > 0)
+  {
+      if (time < time_reset) {
+          shear_strain_nonlocal = 0;
+      }
+  }
+
+
 
 // Calling the external model here
       CalculateStress (nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal);
@@ -1077,6 +1096,11 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
     ps->getWithDefault("critical_density", UI[52], 0.0);
     ps->getWithDefault("no_collision", UI[53], 0.0);
+
+    ps->getWithDefault("reset_shear_strain", UI[54], 0.0);
+    ps->getWithDefault("time_reset", UI[55], 0.0);
+
+    
 }
 
 void
@@ -1152,6 +1176,9 @@ MohrCoulomb::initializeLocalMPMLabels()
 
     ISVNames.push_back("critical_density");
     ISVNames.push_back("no_collision");
+
+    ISVNames.push_back("reset_shear_strain");
+    ISVNames.push_back("time_reset");
 	
 
   for(int i=0;i<d_NINSV;i++){

@@ -1089,9 +1089,10 @@
 
 	  <critical_density		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <no_collision		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	  
-	  
-	  
+
+
+	  <reset_shear_strain		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <time_reset		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  
 	  
 	  
