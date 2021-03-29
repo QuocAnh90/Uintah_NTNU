@@ -1362,7 +1362,7 @@ if (Use_friction > 0)
     {
         mu = tan(Phi_CS * 3.1415 / 180);
     }
-    Phi = tanh(mu) * 180 / 3.1415;
+    Phi = atan(mu) * 180 / 3.1415;
 }
 
 
