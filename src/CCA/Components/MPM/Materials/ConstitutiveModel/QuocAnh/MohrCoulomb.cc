@@ -333,9 +333,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("Psi",UI[4]);   // dilation angle (degrees, for non-associated flow rule)
   cm_ps->appendElement("Version",UI[5]);   // Version of the model
 
-   cm_ps->appendElement("suction",UI[6]);
+  cm_ps->appendElement("suction",UI[6]);
   cm_ps->appendElement("UseWaterRetention",UI[7]);
-
 
   cm_ps->appendElement("WR_Param1",UI[8]);
   cm_ps->appendElement("WR_Param2",UI[9]);
@@ -345,7 +344,7 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("SpecVol",UI[12]);  // meridional yld prof param
 
   cm_ps->appendElement("PhiB",UI[13]);  // Fredlund shear angle, c=c+suction*tan(phib)
-    cm_ps->appendElement("Usetransition",UI[14]); // undrained shear strength transition
+  cm_ps->appendElement("Usetransition",UI[14]); // undrained shear strength transition
   cm_ps->appendElement("A1",UI[15]);	// water influence parameter
   cm_ps->appendElement("B1",UI[16]);	// water influence parameter
   cm_ps->appendElement("W",UI[17]);	// water content
@@ -374,32 +373,32 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("St",UI[35]);
   cm_ps->appendElement("strain_95",UI[36]);
 
-    cm_ps->appendElement("y",UI[37]);
-    cm_ps->appendElement("n",UI[38]);
+  cm_ps->appendElement("y",UI[37]);
+  cm_ps->appendElement("n",UI[38]);
 
-    cm_ps->appendElement("s_xx",UI[39]);
-    cm_ps->appendElement("s_yy",UI[40]);
-    cm_ps->appendElement("Ko",UI[41]);
+  cm_ps->appendElement("s_xx",UI[39]);
+  cm_ps->appendElement("s_yy",UI[40]);
+  cm_ps->appendElement("Ko",UI[41]);
 
-    cm_ps->appendElement("Use_regular",UI[42]);
-    cm_ps->appendElement("tFE",UI[43]);
-    cm_ps->appendElement("tShear",UI[44]);
+  cm_ps->appendElement("Use_regular",UI[42]);
+  cm_ps->appendElement("tFE",UI[43]);
+  cm_ps->appendElement("tShear",UI[44]);
 
-    cm_ps->appendElement("s_xy",UI[45]);
+  cm_ps->appendElement("s_xy",UI[45]);
 
-	cm_ps->appendElement("n_nonlocalMC", UI[46]);
-	cm_ps->appendElement("l_nonlocal", UI[47]);
+  cm_ps->appendElement("n_nonlocalMC", UI[46]);
+  cm_ps->appendElement("l_nonlocal", UI[47]);
 
-    cm_ps->appendElement("Use_friction", UI[48]);
-    cm_ps->appendElement("strain1", UI[49]);
-    cm_ps->appendElement("strain2", UI[50]);
-    cm_ps->appendElement("Phi_CS", UI[51]);
+  cm_ps->appendElement("Use_friction", UI[48]);
+  cm_ps->appendElement("strain1", UI[49]);
+  cm_ps->appendElement("strain2", UI[50]);
+  cm_ps->appendElement("Phi_CS", UI[51]);
 
-    cm_ps->appendElement("critical_density", UI[52]);
-    cm_ps->appendElement("no_collision", UI[53]);
+  cm_ps->appendElement("critical_density", UI[52]);
+  cm_ps->appendElement("no_collision", UI[53]);
 
-    cm_ps->appendElement("reset_shear_strain", UI[54]);
-    cm_ps->appendElement("time_reset", UI[55]);
+  cm_ps->appendElement("reset_shear_strain", UI[54]);
+  cm_ps->appendElement("time_reset", UI[55]);
 
 }
 
@@ -1363,7 +1362,7 @@ if (Use_friction > 0)
     {
         mu = tan(Phi_CS * 3.1415 / 180);
     }
-    Phi = tanh(mu);
+    Phi = tanh(mu) * 180 / 3.1415;
 }
 
 
