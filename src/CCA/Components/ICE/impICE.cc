@@ -455,9 +455,9 @@ ICE::setupMatrix( const ProcessorGroup *,
 
 
     // MPMICE2 only compute the pressure for ICE materials
-    if (d_with_mpmice2) {
-        numMatls = m_materialManager->getNumMatls("ICE");
-    }
+    //if (d_with_mpmice2) {
+    //   numMatls = m_materialManager->getNumMatls("ICE");
+    //}
 
     CCVariable<Stencil7> A; 
     CCVariable<double> imp_delP;
@@ -489,10 +489,10 @@ ICE::setupMatrix( const ProcessorGroup *,
       int indx = matl->getDWIndex();
 
       // MPMICE2 only compute the pressure for ICE materials
-      if (d_with_mpmice2) {
-          ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
-          indx = ice_matl->getDWIndex();
-      }
+      //if (d_with_mpmice2) {
+       //  ICEMaterial* ice_matl = (ICEMaterial*)m_materialManager->getMaterial("ICE", m);
+       //   indx = ice_matl->getDWIndex();
+     // }
 
       constSFCXVariable<double> sp_volX_FC, vol_fracX_FC;
       constSFCYVariable<double> sp_volY_FC, vol_fracY_FC;
@@ -1011,7 +1011,7 @@ void ICE::implicitPressureSolve(const ProcessorGroup* pg,
   // define Matl sets and subsets
   // MPMICE2 only compute the pressure for ICE materials
   const MaterialSet* matls;
-  const MaterialSet* ice_matls = m_materialManager->allMaterials("ICE");
+  //const MaterialSet* ice_matls = m_materialManager->allMaterials("ICE");
   const MaterialSet* all_matls = m_materialManager->allMaterials();
 
   const MaterialSubset* matls_sub;

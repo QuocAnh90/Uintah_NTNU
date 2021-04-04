@@ -2757,7 +2757,7 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
                     }
                     dbgEqPress.push_back(dbg);
                 }
-            }   // end of converged
+            }   // end of converged           
 
             test_max_iter = std::max(test_max_iter, count);
 
@@ -2841,6 +2841,12 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
         cout_norm << "max. iterations in any cell " << test_max_iter <<
             " on patch " << patch->getID() << endl;
 
+
+        //for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+         //  IntVector c = *iter;
+          // cerr << "press_new[c]" << press_new[c] << endl;
+        //}
+
         //__________________________________
         // carry rho_cc forward 
         // MPMICE computes rho_CC_new
@@ -2886,6 +2892,9 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
             sumKappa[c] = 0.0;
             for (unsigned int m = 0; m < numMatls; m++) {
                 kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
+
+                cerr << "kappa " << kappa[m][c] << endl;
+
                 sumKappa[c] += vol_frac[m][c] * kappa[m][c];
             }
             for (unsigned int m = 0; m < numMatls; m++) {
@@ -3164,7 +3173,7 @@ template<class T> void ICE::computeVelFace(int dir,
     
     vel_FC[R] = term1 - one_or_zero*term2 + one_or_zero*term3;
 
-    //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
+   // cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
     //cerr << "term1 " << term1 << endl;
     //cerr << "term2 " << term2 << endl;
     //cerr << "term3 " << term3 << endl;
@@ -4183,7 +4192,7 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
           //}
 
              //cerr << "press term of cell " << c << " is " << mom_source[c] << endl;
-             // cerr << "mass * gravity term of cell " << c << " is " << mass * gravity << endl;
+              //cerr << "mass * gravity term of cell " << c << " is " << mass * gravity << endl;
 
           mom_source[c] = (mom_source[c] + viscous_source + mass * gravity);
 
@@ -4305,7 +4314,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
             //double A = TMV_CC[c] * vol_frac[c] * kappa[c] * Porosity_CC[c] * press_CC[c];
             int_eng_source[c] += A * delP_Dilatate[c] + heatCond_src[c];
 
-            //cerr << "delP_Dilatate of cell " << c << " is " << delP_Dilatate[c] << endl;
+            cerr << "delP_Dilatate of cell " << c << " is " << delP_Dilatate[c] << endl;
             //cerr << "int_eng_source" << int_eng_source[c] << endl;
             //cerr << "heatCond_src" << heatCond_src[c] << endl;
           }

@@ -1066,7 +1066,7 @@ void MPMICE2::scheduleComputePressure(SchedulerP& sched,
         d_ice->d_BC_globalVars);
 
     //  A L L _ M A T L S
-    t->computes(Ilb->f_theta_CCLabel, ice_matls);
+    t->computes(Ilb->f_theta_CCLabel);
     t->computes(Ilb->compressibilityLabel);
     t->computes(Ilb->speedSound_CCLabel);  // Value of MPM will not be used !!
     t->computes(Ilb->vol_frac_CCLabel);    
@@ -1154,7 +1154,7 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                 new_dw->get(cv[m], Ilb->specific_heatLabel, indx, patch, gn, 0);
                 new_dw->get(gamma[m], Ilb->gammaLabel, indx, patch, gn, 0);
                 new_dw->allocateAndPut(rho_CC_new[m], Ilb->rho_CCLabel, indx, patch);
-                new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);             
+                        
             }
             if (mpm_matl[m]) {                    // M P M
                 new_dw->get(Temp[m], MIlb->temp_CCLabel, indx, patch, gn, 0);
@@ -1168,6 +1168,7 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
             //new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho_micro[m], Ilb->rho_micro_CCLabel, indx, patch);
             //new_dw->allocateTemporary(rho_micro[m], patch);
+            new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
         }
 
         //______________________________________________________________________
@@ -1195,19 +1196,49 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                     
                     //  compute f_theta  
                     kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
-                    sumKappa[c] = kappa[m][c];
-                    f_theta[m][c] = 1.0;
+                    //sumKappa[c] = kappa[m][c];
+                    //f_theta[m][c] = 1.0;
                 }
 
                 else if (mpm_matl[m]) {                //  M P M  I need rho_micro index for setBC
                     rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
                     //rho1_CC[m][c] = rho_micro[m][c] * (1 - Porosity_CC[c]);
-                    speedSound_new[m][c] = 30;
+                    //speedSound_new[m][c] = 30;
                     //vol_frac[m][c] = 0;
                     vol_frac[m][c] = (1 - Porosity_CC[c]);
                     sp_vol_new[m][c] = 1.0 / rho_CC[m][c];
-                    kappa[m][c] = 0.00001;
+                    //kappa[m][c] = 0.00001;
+
+                    double dp_drho, c_2, press_eq_MPM;
+
+                    // Pointwise computation of thermodynamic quantities from Murnaghan
+                    // Parameter
+                    double P0 = 101325;
+                    double n = 7.4;
+                    double K = 39e-11;
+                    double rho0 = 2000;
+
+                    if (rho_micro[m][c] >= rho0) {
+                        //press_eq_MPM = P0 + (1. / (n * K)) * (pow(rho_micro[m][c] / rho0, n) - 1.);
+                        dp_drho = (1. / (K * rho0)) * pow((rho_micro[m][c] / rho0), n - 1.);
+                    }
+                    else {
+                        //press_eq_MPM = P0 * pow(rho_micro[m][c] / rho0, (1. / (K * P0)));
+                        dp_drho = (1. / (K * rho0)) * pow(rho_micro[m][c] / rho0, (1. / (K * P0) - 1.));
+                    }
+
+                    c_2 = dp_drho;
+                    speedSound[m][c] = sqrt(c_2);
+
+                    //  compute f_theta  
+                    kappa[m][c] = sp_vol_new[m][c] / (speedSound[m][c] * speedSound[m][c]);
+                    //sumKappa[c] = kappa[c];
+                    //f_theta[m][c] = 1.0;                
                 }
+
+                sumKappa[c] += vol_frac[m][c] * kappa[m][c];
+                f_theta[m][c] = vol_frac[m][c] * kappa[m][c] / sumKappa[c];
+                
             }
         }
 
@@ -1332,7 +1363,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 new_dw->get(cv[m], Ilb->specific_heatLabel, indx, patch, gn, 0);
                 new_dw->get(gamma[m], Ilb->gammaLabel, indx, patch, gn, 0);               
                 new_dw->allocateAndPut(rho_CC_new[m], Ilb->rho_CCLabel, indx, patch);              
-                new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
+                
                 
             }
             if (mpm_matl[m]) {                    // M P M
@@ -1347,7 +1378,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             //new_dw->allocateAndPut(rho1_CC[m], Ilb->rho1_CCLabel, indx, patch);
             new_dw->allocateAndPut(rho_micro[m], Ilb->rho_micro_CCLabel, indx, patch);
             new_dw->allocateAndPut(kappa[m], Ilb->compressibilityLabel, indx, patch);
-
+            new_dw->allocateAndPut(f_theta[m], Ilb->f_theta_CCLabel, indx, patch);
             //new_dw->allocateTemporary(rho_micro[m], patch);           
         }       
         press_new.copyData(press);
@@ -1489,9 +1520,30 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                             + dp_de[m] * press_eos[m] / (rho_micro[m][c] * rho_micro[m][c]);
                         speedSound_new[m][c] = sqrt(tmp);
                         }
+
                         if (mpm_matl[m]) {
-                            speedSound_new[m][c] = 30;
-                            // Random value, we dont need for calculation
+                            //speedSound_new[m][c] = 30;
+
+                            double dp_drho, c_2, press_eq_MPM;
+
+                            // Pointwise computation of thermodynamic quantities from Murnaghan
+                            // Parameter
+                            double P0 = 101325;
+                            double n = 7.4;
+                            double K = 39e-11;
+                            double rho0 = 2000;
+
+                            if (rho_micro[m][c] >= rho0) {
+                                press_eq_MPM = P0 + (1. / (n * K)) * (pow(rho_micro[m][c] / rho0, n) - 1.);
+                                dp_drho = (1. / (K * rho0)) * pow((rho_micro[m][c] / rho0), n - 1.);
+                            }
+                            else {
+                                press_eq_MPM = P0 * pow(rho_micro[m][c] / rho0, (1. / (K * P0)));
+                                dp_drho = (1. / (K * rho0)) * pow(rho_micro[m][c] / rho0, (1. / (K * P0) - 1.));
+                            }
+
+                            c_2 = dp_drho;
+                            speedSound[m][c] = sqrt(c_2);
                         }
                     }
                 }
@@ -1607,6 +1659,13 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             }
         } // end of cell interator
         
+
+        //for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
+            //IntVector c = *iter;
+            //cerr << "press_new[c]" << press_new[c] << endl;
+        //}
+
+
         cout_norm << "max. iterations in any cell " << test_max_iter <<
             " on patch " << patch->getID() << endl;
 
@@ -1659,27 +1718,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                 for (CellIterator iter = patch->getExtraCellIterator(); !iter.done(); iter++) {
                     IntVector c = *iter;
                     sp_vol_new[m][c] = 1.0 / rho_micro[m][c];        
-
-                    if (ice_matl[m]) {
-                        //cerr << "sp_vol_new of m " << m << " of cell " << c << " " << sp_vol_new[m][c] << endl;
-                        //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
-                    }
                 }
                 
-                // Debug
-                for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
-                    IntVector c = *iter;
-                    sp_vol_new[m][c] = 1.0 / rho_micro[m][c];
-
-                    if (ice_matl[m]) {
-                        if (m == 2)
-                        {
-                            //cerr << "sp_vol_new of m " << m << " of cell " << c << " " << sp_vol_new[m][c] << endl;
-                            //cerr << "rho_micro of m " << m << " of cell " << c << " " << rho_micro[m][c] << endl;
-                        }
-                    }
-                }
-
                 Material* matl = m_materialManager->getMaterial(m);
                 int indx = matl->getDWIndex();
 
@@ -1693,22 +1733,27 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
             IntVector c = *iter;
             sumKappa[c] = 0.0;
             for (unsigned int m = 0; m < numALLMatls; m++) { // for ICE only
-                if (ice_matl[m]) {
-                    kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
-                    sumKappa[c] += vol_frac[m][c] * kappa[m][c];
+                //if (ice_matl[m]) {
+                  //  kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
+                 //   sumKappa[c] += vol_frac[m][c] * kappa[m][c];
                     //cerr << "kappa " << kappa[m][c] << endl;
                     //cerr << "sumKappa " << sumKappa[c] << endl;
-                }
+               // }
 
-                if (mpm_matl[m]) {
-                    kappa[m][c] = 0.000001;
-                }
+               // if (mpm_matl[m]) {
+               //     kappa[m][c] = 0.000001;
+               // }
+
+                kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
+                sumKappa[c] += vol_frac[m][c] * kappa[m][c];
+
             }
+
             for (unsigned int m = 0; m < numALLMatls; m++) { // for ICE only
-                if (ice_matl[m]) {
+                //if (ice_matl[m]) {
                     f_theta[m][c] = vol_frac[m][c] * kappa[m][c] / sumKappa[c];
                     //cerr << "ICE f_theta " << f_theta[m][c] << endl;
-                }
+                //}
             }
         }
     }  // patch loop
@@ -1935,12 +1980,12 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
 
         vel_FC[R] = term1 - term2 + term3;
 
-        cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
-        cerr << "term1 " << term1 << endl;
-        cerr << "term2 " << term2 << endl;
-        cerr << "term3 " << term3 << endl;
-        cerr << "delT " << delT << endl;
-        cerr << "gravity " << gravity << endl;
+        //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
+        //cerr << "term1 " << term1 << endl;
+        //cerr << "term2 " << term2 << endl;
+       // cerr << "term3 " << term3 << endl;
+        //cerr << "delT " << delT << endl;
+       // cerr << "gravity " << gravity << endl;
     }
 }
 
@@ -2151,10 +2196,10 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
 
         vel_FC[R] = term1 + term2 - term3 + term4;
 
-        cerr << "MPM term 1 " << term1 << endl;
-        cerr << "MPM term 2 " << term2 << endl;
-        cerr << "MPM term 3 " << term3 << endl;
-        cerr << "MPM term 4 " << term4 << endl;
+        //cerr << "MPM term 1 " << term1 << endl;
+       // cerr << "MPM term 2 " << term2 << endl;
+        //cerr << "MPM term 3 " << term3 << endl;
+        //cerr << "MPM term 4 " << term4 << endl;
     }
 }
 
@@ -2861,7 +2906,7 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
                // cerr << "vol_frac[m][c] of m " << indx << "at cell " << c << " is " << vol_frac[indx][c] << endl;
                 //cerr << "kappa 1 of m " << indx << "at cell " << c << " is " << kappa[c] << endl;
                 //cerr << "term 1 of m " << indx << "at cell " << c << " is " << term1 << endl;
-                //cerr << "delP " << delP[c] << endl;
+                cerr << "delP " << delP[c] << endl;
                 //}
 
                 //cerr << "material " << m << endl;
