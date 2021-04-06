@@ -1545,7 +1545,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                             }
 
                             c_2 = dp_drho;
-                            speedSound[m][c] = sqrt(c_2);
+                            speedSound_new[m][c] = sqrt(c_2);
                         }
                     }
                 }
