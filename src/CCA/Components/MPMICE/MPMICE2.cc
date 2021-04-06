@@ -1209,7 +1209,8 @@ void MPMICE2::computeEquilPressure_1_matl(const ProcessorGroup*,
                     sp_vol_new[m][c] = 1.0 / rho_CC[m][c];
                     //kappa[m][c] = 0.00001;
 
-                    double dp_drho, c_2, press_eq_MPM;
+                    double dp_drho, c_2;
+                    //double press_eq_MPM;
 
                     // Pointwise computation of thermodynamic quantities from Murnaghan
                     // Parameter
@@ -1524,7 +1525,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                         if (mpm_matl[m]) {
                             //speedSound_new[m][c] = 30;
 
-                            double dp_drho, c_2, press_eq_MPM;
+                            double dp_drho, c_2;
+                            //double press_eq_MPM;  // not used
 
                             // Pointwise computation of thermodynamic quantities from Murnaghan
                             // Parameter
@@ -1534,11 +1536,11 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                             double rho0 = 2000;
 
                             if (rho_micro[m][c] >= rho0) {
-                                press_eq_MPM = P0 + (1. / (n * K)) * (pow(rho_micro[m][c] / rho0, n) - 1.);
+                                //press_eq_MPM = P0 + (1. / (n * K)) * (pow(rho_micro[m][c] / rho0, n) - 1.);
                                 dp_drho = (1. / (K * rho0)) * pow((rho_micro[m][c] / rho0), n - 1.);
                             }
                             else {
-                                press_eq_MPM = P0 * pow(rho_micro[m][c] / rho0, (1. / (K * P0)));
+                                //press_eq_MPM = P0 * pow(rho_micro[m][c] / rho0, (1. / (K * P0)));
                                 dp_drho = (1. / (K * rho0)) * pow(rho_micro[m][c] / rho0, (1. / (K * P0) - 1.));
                             }
 
@@ -1982,13 +1984,12 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
 
         //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
         //cerr << "term1 " << term1 << endl;
-        //cerr << "term2 " << term2 << endl;
+        cerr << "term2 ice " << term2 << endl;
        // cerr << "term3 " << term3 << endl;
         //cerr << "delT " << delT << endl;
        // cerr << "gravity " << gravity << endl;
     }
 }
-
 
 void MPMICE2::scheduleComputeVelMPM_FC(SchedulerP& sched,
     const PatchSet* patches,
@@ -2197,8 +2198,8 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
         vel_FC[R] = term1 + term2 - term3 + term4;
 
         //cerr << "MPM term 1 " << term1 << endl;
-       // cerr << "MPM term 2 " << term2 << endl;
-        //cerr << "MPM term 3 " << term3 << endl;
+        //cerr << "MPM term 2 " << term2 << endl;
+        cerr << "MPM term 3 " << term3 << endl;
         //cerr << "MPM term 4 " << term4 << endl;
     }
 }
