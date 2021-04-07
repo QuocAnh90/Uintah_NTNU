@@ -1533,7 +1533,7 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
                             double P0 = 101325;
                             double n = 7.4;
                             double K = 39e-11;
-                            double rho0 = 2000;
+                            double rho0 = 1000;
 
                             if (rho_micro[m][c] >= rho0) {
                                 //press_eq_MPM = P0 + (1. / (n * K)) * (pow(rho_micro[m][c] / rho0, n) - 1.);
@@ -1663,8 +1663,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
         
 
         //for (CellIterator iter = patch->getCellIterator(); !iter.done(); iter++) {
-            //IntVector c = *iter;
-            //cerr << "press_new[c]" << press_new[c] << endl;
+          //  IntVector c = *iter;
+          //  cerr << "press_new[c]" << press_new[c] << endl;
         //}
 
 
@@ -1748,6 +1748,8 @@ void MPMICE2::computeEquilibrationPressure(const ProcessorGroup*,
 
                 kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
                 sumKappa[c] += vol_frac[m][c] * kappa[m][c];
+
+                //cerr << "kappa " << kappa[m][c] << endl;
 
             }
 
@@ -1984,7 +1986,7 @@ template<class T> void MPMICE2::computeVelICEFace(int dir,
 
         //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
         //cerr << "term1 " << term1 << endl;
-        cerr << "term2 ice " << term2 << endl;
+        //cerr << "term2 ice " << term2 << endl;
        // cerr << "term3 " << term3 << endl;
         //cerr << "delT " << delT << endl;
        // cerr << "gravity " << gravity << endl;
@@ -2197,9 +2199,10 @@ template<class T> void MPMICE2::computeVelMPMFace(int dir,
 
         vel_FC[R] = term1 + term2 - term3 + term4;
 
+        //cerr << "vel_FC at " << R << " is " << vel_FC[R] << endl;
         //cerr << "MPM term 1 " << term1 << endl;
         //cerr << "MPM term 2 " << term2 << endl;
-        cerr << "MPM term 3 " << term3 << endl;
+        //cerr << "MPM term 3 " << term3 << endl;
         //cerr << "MPM term 4 " << term4 << endl;
     }
 }
@@ -2906,8 +2909,8 @@ void MPMICE2::computeLagrangianSpecificVolume(const ProcessorGroup*,
 
                // cerr << "vol_frac[m][c] of m " << indx << "at cell " << c << " is " << vol_frac[indx][c] << endl;
                 //cerr << "kappa 1 of m " << indx << "at cell " << c << " is " << kappa[c] << endl;
-                //cerr << "term 1 of m " << indx << "at cell " << c << " is " << term1 << endl;
-                cerr << "delP " << delP[c] << endl;
+                cerr << "term 1 of m " << indx << "at cell " << c << " is " << term1 << endl;
+                //cerr << "delP " << delP[c] << endl;
                 //}
 
                 //cerr << "material " << m << endl;

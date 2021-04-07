@@ -4314,7 +4314,7 @@ void ICE::accumulateEnergySourceSinks(const ProcessorGroup*,
             //double A = TMV_CC[c] * vol_frac[c] * kappa[c] * Porosity_CC[c] * press_CC[c];
             int_eng_source[c] += A * delP_Dilatate[c] + heatCond_src[c];
 
-            cerr << "delP_Dilatate of cell " << c << " is " << delP_Dilatate[c] << endl;
+            //cerr << "delP_Dilatate of cell " << c << " is " << delP_Dilatate[c] << endl;
             //cerr << "int_eng_source" << int_eng_source[c] << endl;
             //cerr << "heatCond_src" << heatCond_src[c] << endl;
           }
@@ -4415,7 +4415,7 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
             iter++) {
             IntVector c = *iter;
 
-            //cerr << " mass_L of cell " << c << " is " << mass_L[c] << endl;
+            //cerr << "material " << indx << " mass_L of cell " << c << " is " << mass_L[c] << endl;
             //cerr << " mom_L of cell " << c << " is " << mom_L[c] << endl;
             //cerr << " int_eng_L of cell " << c << " is " << int_eng_L[c] << endl;
         }
