@@ -2892,9 +2892,6 @@ void ICE::computeEquilibrationPressure(const ProcessorGroup*,
             sumKappa[c] = 0.0;
             for (unsigned int m = 0; m < numMatls; m++) {
                 kappa[m][c] = sp_vol_new[m][c] / (speedSound_new[m][c] * speedSound_new[m][c]);
-
-                cerr << "kappa " << kappa[m][c] << endl;
-
                 sumKappa[c] += vol_frac[m][c] * kappa[m][c];
             }
             for (unsigned int m = 0; m < numMatls; m++) {
@@ -4195,8 +4192,6 @@ void ICE::accumulateMomentumSourceSinks(const ProcessorGroup*,
               //cerr << "mass * gravity term of cell " << c << " is " << mass * gravity << endl;
 
           mom_source[c] = (mom_source[c] + viscous_source + mass * gravity);
-
-
         }
        
       }  //ice_matl
@@ -4411,6 +4406,7 @@ void ICE::computeLagrangianValues(const ProcessorGroup*,
           int_eng_L[c] = mass*cv[c] * temp_CC[c] + int_eng_source[c];
         }
 
+        // Debug
         for (CellIterator iter = patch->getCellIterator(); !iter.done();
             iter++) {
             IntVector c = *iter;
