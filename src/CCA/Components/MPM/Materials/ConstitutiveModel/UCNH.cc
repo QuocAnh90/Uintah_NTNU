@@ -81,6 +81,14 @@ UCNH::UCNH(ProblemSpecP& ps, MPMFlags* Mflag, bool plas, bool dam)
     createPlasticityLabels();
   }
 
+  if (flag->d_forCable) {
+      ps->getWithDefault("E1", d_initialData.E1, 0.0);
+      ps->getWithDefault("E2", d_initialData.E2, 0.0);
+      ps->getWithDefault("E3", d_initialData.E3, 0.0);
+      ps->getWithDefault("d1", d_initialData.d1, 0.0);
+      ps->getWithDefault("d2", d_initialData.d2, 0.0);
+  }
+
   // Initial stress
   // Fix: Need to make it more general.  Add gravity turn-on option and
   //      read from file option etc.
@@ -577,11 +585,13 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
   double flow     = 0.0;
   double K        = 0.0;
 
-
-  if (flag->d_forCable) {
-  }
-
-
+  double E = 0;
+  double E1 = 0;
+  double E2 = 0;
+  double E3 = 0;
+  double d1 = 0;
+  double d2 = 0;
+  double deflection = 0;
 
   Ghost::GhostType  gan = Ghost::AroundNodes;
 
@@ -659,6 +669,27 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
     new_dw->allocateAndPut(p_q,         lb->p_qLabel_preReloc,     pset);
 
     ParticleSubset::iterator iter = pset->begin();
+
+    // Find deflection of cable
+    if (flag->d_forCable) {
+
+        E1 = d_initialData.E1;
+        E2 = d_initialData.E2;
+        E3 = d_initialData.E3;
+        d1 = d_initialData.d1;
+        d2 = d_initialData.d2;
+
+        constParticleVariable<Vector>  pdis;
+        old_dw->get(pdis, lb->pDispLabel, pset);
+      
+        for (; iter != pset->end(); iter++) {
+            particleIndex idx = *iter;
+            double pDeflection = sqrt(pdis[idx].x() * pdis[idx].x() + pdis[idx].y() * pdis[idx].y());
+
+            deflection = max(deflection, pDeflection);
+        }
+    }
+
     for(; iter != pset->end(); iter++){
       particleIndex idx = *iter;
       // Assign zero internal heating by default - modify if necessary.
@@ -696,13 +727,22 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
 
 
       // Do Cable here
+      if (flag->d_forCable) {
+          if (deflection < d1) {
+              E = E1;
+          }
+          else if (deflection > d1 && deflection < d2) {
+              E = E2;
+          }
+          else if (deflection > d2) {
+              E = E3;
+          }
 
+          double Poisson = 0.3;
 
-
-
-
-
-
+          bulk = E / 3 / (1 - 2 * Poisson);
+          shear = E / 2 / (1 + Poisson);
+      }
 
       // Compute the trial elastic part of the volume preserving
       // part of the left Cauchy-Green deformation tensor
