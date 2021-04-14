@@ -724,8 +724,6 @@ void UCNH::computeStressTensor(const PatchSubset* patches,
       // Get the volume preserving part of the deformation gradient increment
       fBar = pDefGradInc/cbrt(Jinc);
 
-
-
       // Do Cable here
       if (flag->d_forCable) {
           if (deflection < d1) {
