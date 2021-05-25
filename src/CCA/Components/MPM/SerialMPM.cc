@@ -70,6 +70,8 @@
 #include <Core/Util/DebugStream.h>
 #include <Core/Util/DOUT.hpp>
 
+#include <Core/Grid/GIMPInterpolator.h>
+
 // Diffusion includes
 #include <CCA/Components/MPM/Materials/Diffusion/DiffusionInterfaces/SDInterfaceModel.h>
 #include <CCA/Components/MPM/Materials/Diffusion/DiffusionModels/ScalarDiffusionModel.h>
@@ -2265,9 +2267,13 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
     ParticleInterpolator* interpolator = flags->d_interpolator->clone(patch);
     vector<IntVector> ni(interpolator->size());
     vector<double> S(interpolator->size());
-
     ParticleInterpolator* linear_interpolator=scinew LinearInterpolator(patch);
 
+    // Herve apply GIMP for debris flow
+    ParticleInterpolator* GIMP_interpolator = scinew GIMPInterpolator(patch);
+    vector<IntVector> ni_GIMP(GIMP_interpolator->size());
+    vector<double> S_GIMP(GIMP_interpolator->size());
+    
     string interp_type = flags->d_interpolator_type;
 
     NCVariable<double> gmassglobal,gtempglobal,gvolumeglobal;
@@ -2429,33 +2435,58 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
         // Add each particles contribution to the local mass & velocity
         // Must use the node indices
         IntVector node;
-        // Iterate through the nodes that receive data from the current particle
-        for(int k = 0; k < NN; k++) {
-          node = ni[k];
-          if(patch->containsNode(node)) {
-            if (flags->d_GEVelProj){
-              Point gpos = patch->getNodePosition(node);
-              Vector distance = px[idx] - gpos;
-              Vector pvel_ext = pvelocity[idx] - pVelGrad[idx]*distance;
-              pmom = pvel_ext*pmass[idx];
-              ptemp_ext = pTemperature[idx] - Dot(pTempGrad[idx],distance);
-            }         
-            gmass[node]          += pmass[idx]                     * S[k];
-            gvelocity[node]      += pmom                           * S[k];
-            gvolume[node]        += pvolume[idx]                   * S[k];
-//            gColor[node]         += pColor[idx]*pmass[idx]         * S[k];
-            if (!flags->d_useCBDI) {
-              gexternalforce[node] += pexternalforce[idx]          * S[k];
+       
+        int NN_GIMP =
+            GIMP_interpolator->findCellAndWeights(px[idx], ni_GIMP, S_GIMP, psize[idx]);
+
+        if (dwi == 4) {
+            // Force GIMP interpolator
+            for (int k = 0; k < NN_GIMP; k++) {
+                node = ni_GIMP[k];
+
+                gmass[node] += pmass[idx] * S_GIMP[k];
+                gvelocity[node] += pmom * S_GIMP[k];
+                gvolume[node] += pvolume[idx] * S_GIMP[k];
+
+                if (!flags->d_useCBDI) {
+                    gexternalforce[node] += pexternalforce[idx] * S_GIMP[k];
+                }
+                gTemperature[node] += ptemp_ext * pmass[idx] * S_GIMP[k];
+                gSp_vol[node] += pSp_vol * pmass[idx] * S_GIMP[k];
             }
-            if (flags->d_with_mpmice2) {
-                //gPorosity[node] += pPorosity[idx] * pmass[idx] * S[k];
-                gVolumeFraction[node] += pVolumeFraction[idx] * pmass[idx] * S[k];
-            }
-            gTemperature[node]   += ptemp_ext * pmass[idx] * S[k];
-            gSp_vol[node]        += pSp_vol   * pmass[idx] * S[k];
-            //gexternalheatrate[node] += pexternalheatrate[idx]      * S[k];
-          }
         }
+
+        else {
+             // Iterate through the nodes that receive data from the current particle
+            for(int k = 0; k < NN; k++) {
+              node = ni[k];
+              if(patch->containsNode(node)) {
+                if (flags->d_GEVelProj){
+                  Point gpos = patch->getNodePosition(node);
+                  Vector distance = px[idx] - gpos;
+                  Vector pvel_ext = pvelocity[idx] - pVelGrad[idx]*distance;
+                  pmom = pvel_ext*pmass[idx];
+                  ptemp_ext = pTemperature[idx] - Dot(pTempGrad[idx],distance);
+                }         
+                gmass[node]          += pmass[idx]                     * S[k];
+                gvelocity[node]      += pmom                           * S[k];
+                gvolume[node]        += pvolume[idx]                   * S[k];
+              //gColor[node]         += pColor[idx]*pmass[idx]         * S[k];
+                if (!flags->d_useCBDI) {
+                  gexternalforce[node] += pexternalforce[idx]          * S[k];
+                }
+                if (flags->d_with_mpmice2) {
+                    //gPorosity[node] += pPorosity[idx] * pmass[idx] * S[k];
+                    gVolumeFraction[node] += pVolumeFraction[idx] * pmass[idx] * S[k];
+                }
+                gTemperature[node]   += ptemp_ext * pmass[idx] * S[k];
+                gSp_vol[node]        += pSp_vol   * pmass[idx] * S[k];
+                //gexternalheatrate[node] += pexternalheatrate[idx]      * S[k];
+              }
+            }
+
+        }
+
         if (flags->d_doScalarDiffusion) {
           double one_third = 1./3.;
           double pHydroStress = one_third*pStress[idx].Trace();
@@ -2580,6 +2611,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
     }
     delete interpolator;
     delete linear_interpolator;
+    delete GIMP_interpolator;
   }  // End loop over patches
 }
 
@@ -3002,6 +3034,13 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
     vector<Vector> d_S(interpolator->size());
     string interp_type = flags->d_interpolator_type;
 
+
+    // Herve apply GIMP for debris flow
+    ParticleInterpolator* GIMP_interpolator = scinew GIMPInterpolator(patch);
+    vector<IntVector> ni_GIMP(GIMP_interpolator->size());
+    vector<double> S_GIMP(GIMP_interpolator->size());
+    vector<Vector> d_S_GIMP(GIMP_interpolator->size());
+
     unsigned int numMPMMatls = m_materialManager->getNumMatls( "MPM" );
 
     NCVariable<Matrix3>       gstressglobal;
@@ -3090,16 +3129,32 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
           stressvol  = pstress[idx]*pvol[idx];
           stresspress = pstress[idx] + Id*(p_pressure[idx] - p_q[idx]);
 
-          //cerr << pstress[idx] << endl;
+          int NN_GIMP =
+              GIMP_interpolator->findCellAndWeightsAndShapeDerivatives(px[idx], ni_GIMP, S_GIMP,
+                  d_S_GIMP, psize[idx]);
 
-          for (int k = 0; k < NN; k++){
-            if(patch->containsNode(ni[k])){
-              Vector div(d_S[k].x()*oodx[0],d_S[k].y()*oodx[1],
-                         d_S[k].z()*oodx[2]);
-              internalforce[ni[k]] -= (div * stresspress)  * pvol[idx];
-              gstress[ni[k]]       += stressvol * S[k];
-            }
+          if (dwi == 4) {
+              for (int k = 0; k < NN_GIMP; k++) {
+                  if (patch->containsNode(ni_GIMP[k])) {
+                      Vector div(d_S_GIMP[k].x() * oodx[0], d_S_GIMP[k].y() * oodx[1],
+                          d_S_GIMP[k].z() * oodx[2]);
+                      internalforce[ni[k]] -= (div * stresspress) * pvol[idx];
+                      gstress[ni[k]] += stressvol * S_GIMP[k];
+                  }
+              }
           }
+
+          else {
+              for (int k = 0; k < NN; k++) {
+                  if (patch->containsNode(ni[k])) {
+                      Vector div(d_S[k].x() * oodx[0], d_S[k].y() * oodx[1],
+                          d_S[k].z() * oodx[2]);
+                      internalforce[ni[k]] -= (div * stresspress) * pvol[idx];
+                      gstress[ni[k]] += stressvol * S[k];
+                  }
+              }
+          }
+
         }
       }
 
@@ -3814,6 +3869,11 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
     vector<IntVector> ni(interpolator->size());
     vector<double> S(interpolator->size());
 
+    // Herve apply GIMP for debris flow
+    ParticleInterpolator* GIMP_interpolator = scinew GIMPInterpolator(patch);
+    vector<IntVector> ni_GIMP(GIMP_interpolator->size());
+    vector<double> S_GIMP(GIMP_interpolator->size());
+    
     // Performs the interpolation from the cell vertices of the grid
     // acceleration and velocity to the particles to update their
     // velocity and position respectively
@@ -4051,18 +4111,37 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           double concRate = 0.0;
           double burnFraction = 0.0;
 
-          // Accumulate the contribution from each surrounding vertex
-          for (int k = 0; k < NN; k++) {
-            IntVector node = ni[k];
-            vel      += gvelocity_star[node]  * S[k];
-            acc      += gacceleration[node]   * S[k];
+          // For debris flow
+          int NN_GIMP = GIMP_interpolator->findCellAndWeights(px[idx], ni_GIMP, S_GIMP,
+              pcursize[idx]);
+          if (dwi == 4) {
+              // Accumulate the contribution from each surrounding vertex
+              for (int k = 0; k < NN_GIMP; k++) {
+                  IntVector node = ni_GIMP[k];
+                  vel += gvelocity_star[node] * S_GIMP[k];
+                  acc += gacceleration[node] * S_GIMP[k];
 
-            //cerr << "gacceleration in SerialMPM of material " << dwi << " at node " << node << " is " << gacceleration[node] << endl;
+                  fricTempRate = frictionTempRate[node] * flags->d_addFrictionWork;
+                  tempRate += (gTemperatureRate[node] + dTdt[node] +
+                      fricTempRate) * S_GIMP[k];
+                  burnFraction += massBurnFrac[node] * S_GIMP[k];
+              }
+          }
 
-            fricTempRate = frictionTempRate[node]*flags->d_addFrictionWork;
-            tempRate += (gTemperatureRate[node] + dTdt[node] +
-                         fricTempRate)   * S[k];
-            burnFraction += massBurnFrac[node]     * S[k];
+          else {
+              // Accumulate the contribution from each surrounding vertex
+              for (int k = 0; k < NN; k++) {
+                  IntVector node = ni[k];
+                  vel += gvelocity_star[node] * S[k];
+                  acc += gacceleration[node] * S[k];
+
+                  //cerr << "gacceleration in SerialMPM of material " << dwi << " at node " << node << " is " << gacceleration[node] << endl;
+
+                  fricTempRate = frictionTempRate[node] * flags->d_addFrictionWork;
+                  tempRate += (gTemperatureRate[node] + dTdt[node] +
+                      fricTempRate) * S[k];
+                  burnFraction += massBurnFrac[node] * S[k];
+              }
           }
 
           // Update the particle's pos and vel using std "FLIP" method
@@ -4155,6 +4234,7 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       new_dw->put(sumvec_vartype(CMX),         lb->CenterOfMassPositionLabel);
     }
     delete interpolator;
+    delete GIMP_interpolator;
   }
 }
 
