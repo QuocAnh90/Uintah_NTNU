@@ -1166,8 +1166,8 @@ void SerialMPM::scheduleComputeInternalForce(SchedulerP& sched,
 
   t->computes(lb->gInternalForceLabel);
 
-  t->computes(lb->reaction_force1Label);
-  t->computes(lb->reaction_force2Label);
+  //t->computes(lb->reaction_force1Label);
+  //t->computes(lb->reaction_force2Label);
 
   for(std::list<Patch::FaceType>::const_iterator ftit(d_bndy_traction_faces.begin());
       ftit!=d_bndy_traction_faces.end();ftit++) {
@@ -3054,8 +3054,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
                            m_materialManager->getAllInOneMatls()->get(0), patch);
 
     // Hacking to get tension force for cable for Herve
-    Vector reaction_force1(0.0, 0.0, 0.0);
-    Vector reaction_force2(0.0, 0.0, 0.0);
+    //Vector reaction_force1(0.0, 0.0, 0.0);
+    //Vector reaction_force2(0.0, 0.0, 0.0);
     
 
     for(unsigned int m = 0; m < numMPMMatls; m++){
@@ -3191,6 +3191,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         }
       }
 
+      /*
       for(NodeIterator iter =patch->getNodeIterator();!iter.done();iter++){
         IntVector c = *iter;
         gstressglobal[c] += gstress[c];
@@ -3204,6 +3205,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
             reaction_force2 += internalforce[c];
         }
       }
+      */
 
       // save boundary forces before apply symmetry boundary condition.
       for(list<Patch::FaceType>::const_iterator fit(d_bndy_traction_faces.begin());
@@ -3249,8 +3251,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
       bc.setBoundaryCondition(patch,dwi,"Symmetric",internalforce,interp_type);
     }
 
-    new_dw->put(sumvec_vartype(reaction_force1), lb->reaction_force1Label);
-    new_dw->put(sumvec_vartype(reaction_force2), lb->reaction_force2Label);
+    //new_dw->put(sumvec_vartype(reaction_force1), lb->reaction_force1Label);
+    //new_dw->put(sumvec_vartype(reaction_force2), lb->reaction_force2Label);
 
     for(NodeIterator iter = patch->getNodeIterator();!iter.done();iter++){
       IntVector c = *iter;
