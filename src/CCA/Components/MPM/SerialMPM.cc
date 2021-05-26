@@ -2459,7 +2459,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
         }
         
 
-        //else {
+        else {
              // Iterate through the nodes that receive data from the current particle
             for(int k = 0; k < NN; k++) {
               node = ni[k];
@@ -2488,7 +2488,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
               }
             }
 
-        //}
+        }
 
         if (flags->d_doScalarDiffusion) {
           double one_third = 1./3.;
