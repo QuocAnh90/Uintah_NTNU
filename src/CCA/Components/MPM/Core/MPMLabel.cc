@@ -605,9 +605,9 @@ MPMLabel::MPMLabel()
   RigidReactionForceLabel = VarLabel::create( "RigidReactionForce",
                                  sumvec_vartype::getTypeDescription() );
 
-  reaction_force1Label = VarLabel::create(" reaction_force1",
+  reaction_force1Label = VarLabel::create("reaction_force1",
       sumvec_vartype::getTypeDescription());
-  reaction_force2Label = VarLabel::create(" reaction_force2",
+  reaction_force2Label = VarLabel::create("reaction_force2",
       sumvec_vartype::getTypeDescription());
 
   TotalLocalizedParticleLabel = VarLabel::create("TotalLocalizedParticle",
