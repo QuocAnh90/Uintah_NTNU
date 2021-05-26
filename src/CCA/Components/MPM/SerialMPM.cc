@@ -3197,11 +3197,11 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         gstressglobal[c] += gstress[c];
         gstress[c] /= gvolume[c];
 
-        if (m == 6) {
+        if (dwi == 6) {
             reaction_force1 += internalforce[c];
         }
 
-        if (m == 8) {
+        if (dwi == 8) {
             reaction_force2 += internalforce[c];
         }
       }
