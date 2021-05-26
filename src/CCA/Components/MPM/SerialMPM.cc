@@ -1173,6 +1173,8 @@ void SerialMPM::scheduleComputeInternalForce(SchedulerP& sched,
     t->computes(lb->BndyForceLabel[iface]);
     t->computes(lb->BndyContactAreaLabel[iface]);
     t->computes(lb->BndyTractionLabel[iface]);
+    t->computes(lb->reaction_force1Label);
+    t->computes(lb->reaction_force2Label);
   }
 
   t->computes(lb->gStressForSavingLabel);
