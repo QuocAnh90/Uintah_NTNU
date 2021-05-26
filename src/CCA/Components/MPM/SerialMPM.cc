@@ -2267,6 +2267,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
               "Doing MPM::interpolateParticlesToGrid");
 
     unsigned int numMatls = m_materialManager->getNumMatls( "MPM" );
+
     ParticleInterpolator* interpolator = flags->d_interpolator->clone(patch);
     vector<IntVector> ni(interpolator->size());
     vector<double> S(interpolator->size());
@@ -2442,24 +2443,23 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
         int NN_GIMP =
             GIMP_interpolator->findCellAndWeights(px[idx], ni_GIMP, S_GIMP, psize[idx]);
 
+        
         if (dwi == 4) {
             // Force GIMP interpolator
             for (int k = 0; k < NN_GIMP; k++) {
                 node = ni_GIMP[k];
-
-                gmass[node] += pmass[idx] * S_GIMP[k];
-                gvelocity[node] += pmom * S_GIMP[k];
-                gvolume[node] += pvolume[idx] * S_GIMP[k];
-
-                if (!flags->d_useCBDI) {
-                    gexternalforce[node] += pexternalforce[idx] * S_GIMP[k];
+                if (patch->containsNode(node)) {
+                    gmass[node] += pmass[idx] * S_GIMP[k];
+                    gvelocity[node] += pmom * S_GIMP[k];
+                    gvolume[node] += pvolume[idx] * S_GIMP[k];
+                    gTemperature[node] += ptemp_ext * pmass[idx] * S_GIMP[k];
+                    gSp_vol[node] += pSp_vol * pmass[idx] * S_GIMP[k];
                 }
-                gTemperature[node] += ptemp_ext * pmass[idx] * S_GIMP[k];
-                gSp_vol[node] += pSp_vol * pmass[idx] * S_GIMP[k];
             }
         }
+        
 
-        else {
+        //else {
              // Iterate through the nodes that receive data from the current particle
             for(int k = 0; k < NN; k++) {
               node = ni[k];
@@ -2488,7 +2488,7 @@ void SerialMPM::interpolateParticlesToGrid(const ProcessorGroup*,
               }
             }
 
-        }
+        //}
 
         if (flags->d_doScalarDiffusion) {
           double one_third = 1./3.;
@@ -3054,8 +3054,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
                            m_materialManager->getAllInOneMatls()->get(0), patch);
 
     // Hacking to get tension force for cable for Herve
-    //Vector reaction_force1(0.0, 0.0, 0.0);
-    //Vector reaction_force2(0.0, 0.0, 0.0);
+    Vector reaction_force1(0.0, 0.0, 0.0);
+    Vector reaction_force2(0.0, 0.0, 0.0);
     
 
     for(unsigned int m = 0; m < numMPMMatls; m++){
@@ -3191,7 +3191,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         }
       }
 
-      /*
+      
       for(NodeIterator iter =patch->getNodeIterator();!iter.done();iter++){
         IntVector c = *iter;
         gstressglobal[c] += gstress[c];
@@ -3205,7 +3205,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
             reaction_force2 += internalforce[c];
         }
       }
-      */
+      
 
       // save boundary forces before apply symmetry boundary condition.
       for(list<Patch::FaceType>::const_iterator fit(d_bndy_traction_faces.begin());
@@ -3251,8 +3251,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
       bc.setBoundaryCondition(patch,dwi,"Symmetric",internalforce,interp_type);
     }
 
-    //new_dw->put(sumvec_vartype(reaction_force1), lb->reaction_force1Label);
-    //new_dw->put(sumvec_vartype(reaction_force2), lb->reaction_force2Label);
+    new_dw->put(sumvec_vartype(reaction_force1), lb->reaction_force1Label);
+    new_dw->put(sumvec_vartype(reaction_force2), lb->reaction_force2Label);
 
     for(NodeIterator iter = patch->getNodeIterator();!iter.done();iter++){
       IntVector c = *iter;
