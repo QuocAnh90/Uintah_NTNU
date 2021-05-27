@@ -3191,12 +3191,13 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         }
       }
 
-      /*
+      
       for(NodeIterator iter =patch->getNodeIterator();!iter.done();iter++){
         IntVector c = *iter;
         gstressglobal[c] += gstress[c];
         gstress[c] /= gvolume[c];
 
+        /*
         if (m == 6) {
             reaction_force1 += internalforce[c];
         }
@@ -3204,8 +3205,9 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
         if (m == 8) {
             reaction_force2 += internalforce[c];
         }
+        */
       }
-      */
+      
 
       // save boundary forces before apply symmetry boundary condition.
       for(list<Patch::FaceType>::const_iterator fit(d_bndy_traction_faces.begin());
