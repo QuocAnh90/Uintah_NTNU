@@ -3136,14 +3136,14 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
               GIMP_interpolator->findCellAndWeightsAndShapeDerivatives(px[idx], ni_GIMP, S_GIMP,
                   d_S_GIMP, psize[idx]);
           
-          /*
+          
           if (dwi == 4) {
               for (int k = 0; k < NN_GIMP; k++) {
                   if (patch->containsNode(ni_GIMP[k])) {
                       Vector div(d_S_GIMP[k].x() * oodx[0], d_S_GIMP[k].y() * oodx[1],
                           d_S_GIMP[k].z() * oodx[2]);
-                      internalforce[ni[k]] -= (div * stresspress) * pvol[idx];
-                      gstress[ni[k]] += stressvol * S_GIMP[k];
+                      internalforce[ni_GIMP[k]] -= (div * stresspress) * pvol[idx];
+                      gstress[ni_GIMP[k]] += stressvol * S_GIMP[k];
                   }
               }
           }
@@ -3158,7 +3158,7 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
                   }
               }
           }
-          */
+          
         }
       }
 
