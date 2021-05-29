@@ -4261,6 +4261,14 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
     vector<IntVector> ni(interpolator->size());
     vector<double> S(interpolator->size());
     vector<Vector> d_S(interpolator->size());
+
+    // Herve apply GIMP for debris flow
+    ParticleInterpolator* GIMP_interpolator = scinew GIMPInterpolator(patch);
+    vector<IntVector> ni_GIMP(GIMP_interpolator->size());
+    vector<double> S_GIMP(GIMP_interpolator->size());
+    vector<Vector> d_S_GIMP(GIMP_interpolator->size());
+
+
     Vector dx = patch->dCell();
     double oodx[3] = {1./dx.x(), 1./dx.y(), 1./dx.z()};
 
@@ -4347,12 +4355,27 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
         particleIndex idx = *iter;
 
         int NN=flags->d_8or27;
+
+        int NN_GIMP = 27;   // GIMP
+
         Matrix3 tensorL(0.0);
         if(!flags->d_axisymmetric){
          // Get the node indices that surround the cell
          NN =interpolator->findCellAndShapeDerivatives(px[idx],ni,
                                                      d_S,psize[idx]);
-         computeVelocityGradient(tensorL,ni,d_S, oodx, gvelocity_star,NN);
+         //computeVelocityGradient(tensorL,ni,d_S, oodx, gvelocity_star,NN);
+
+         NN_GIMP = GIMP_interpolator->findCellAndShapeDerivatives(px[idx], ni_GIMP,
+             d_S_GIMP, psize[idx]);
+
+         if (dwi == 4) {             
+             computeVelocityGradient(tensorL, ni_GIMP, d_S_GIMP, oodx, gvelocity_star, NN_GIMP);
+         }
+
+         else {
+             computeVelocityGradient(tensorL, ni, d_S, oodx, gvelocity_star, NN);
+         }
+
         } else {  // axi-symmetric kinematics
          // Get the node indices that surround the cell
          NN =interpolator->findCellAndWeightsAndShapeDerivatives(px[idx],ni,
