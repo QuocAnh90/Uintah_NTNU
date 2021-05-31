@@ -129,6 +129,10 @@ MPMICELabel::~MPMICELabel()
   VarLabel::destroy(gMassLabel);
   VarLabel::destroy(gVelocityLabel);
 
+
+  VarLabel::destroy(stressX_CCLabel);
+  VarLabel::destroy(stressY_CCLabel);
+  VarLabel::destroy(stressZ_CCLabel);
   VarLabel::destroy(grad_stress_XFCLabel);
   VarLabel::destroy(grad_stress_YFCLabel);
   VarLabel::destroy(grad_stress_ZFCLabel);
