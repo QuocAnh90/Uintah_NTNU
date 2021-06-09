@@ -4438,20 +4438,32 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
               //partvoldef += pvolume[idx];
 
               if (flags->d_doCapDensity) {
-                  if (pvolume_trial < pvolume_critical_upperbound && pvolume_trial > pvolume_critical_lowerbound) {
-                      // Deformation gradient
-                      //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
-                      //pFNew[idx] = Finc * pFOld[idx];
+
+                  if (dwi == 4) {
+
+                      if (pvolume_trial < pvolume_critical_upperbound && pvolume_trial > pvolume_critical_lowerbound) {
+                          // Deformation gradient
+                          //Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
+                          //pFNew[idx] = Finc * pFOld[idx];
+                          pvolume[idx] = pvolume_trial;
+                          partvoldef += pvolume[idx];
+                          //double J = pFNew[idx].Determinant();
+                          //double JOld = pFOld[idx].Determinant();
+                          //pvolume[idx] = pVolumeOld[idx] * (J / JOld);
+                      }
+                      else {
+                          pvolume[idx] = pVolumeOld[idx];
+                          pFNew[idx] = pFOld[idx];
+                          partvoldef += pvolume[idx];
+                      }
+
+                  }
+
+                  else {
+                  
                       pvolume[idx] = pvolume_trial;
                       partvoldef += pvolume[idx];
-                      //double J = pFNew[idx].Determinant();
-                      //double JOld = pFOld[idx].Determinant();
-                      //pvolume[idx] = pVolumeOld[idx] * (J / JOld);
-                  }
-                  else {
-                      pvolume[idx] = pVolumeOld[idx];
-                      pFNew[idx] = pFOld[idx];
-                      partvoldef += pvolume[idx];
+                  
                   }
               }
               else {
