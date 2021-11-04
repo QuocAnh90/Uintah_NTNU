@@ -118,6 +118,34 @@ namespace ExchangeModels{
     //__________________________________
     //  variables
     ExchangeCoefficients* d_exchCoeff;
+
+    std::string model = "default";
+
+    void Darcy_model_CC(IntVector c,
+        int numALLMatls,
+        std::vector<constCCVariable<double> >& vol_frac_CC,
+        FastMatrix& K);
+
+    void Darcy_model_FC(IntVector c,
+        IntVector adj,
+        int numMatls,
+        std::vector<constCCVariable<double> >& vol_frac_CC,
+        FastMatrix& K);
+
+    void Reynolds_model_CC(IntVector c,
+        int numALLMatls,
+        std::vector<constCCVariable<double> >& vol_frac_CC,
+        FastMatrix& difvelnorm,
+        FastMatrix& K);
+
+    template<class constSFC, class SFC>
+    void Reynolds_model_FC(IntVector c,
+        IntVector adj,
+        int numMatls,
+        std::vector<constCCVariable<double> >& vol_frac_CC,
+        std::vector< constSFC>& vel_FC,
+        FastMatrix& K);
+
   };
 }
 }

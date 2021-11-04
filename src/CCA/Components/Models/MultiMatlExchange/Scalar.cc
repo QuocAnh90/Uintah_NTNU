@@ -42,6 +42,7 @@
 
 #include <ostream>                         // for operator<<, basic_ostream
 #include <vector>
+#include <Core/Exceptions/InvalidValue.h>
 
 #define MAX_MATLS 8
 
@@ -66,11 +67,22 @@ ScalarExch::~ScalarExch()
 
 //______________________________________________________________________
 //
-void ScalarExch::problemSetup(const ProblemSpecP & prob_spec)
+void ScalarExch::problemSetup(const ProblemSpecP & matl_ps)
 {
   // read in the exchange coefficients
-  ProblemSpecP notUsed;
-  d_exchCoeff->problemSetup( prob_spec, d_numMatls, notUsed );
+  // ProblemSpecP notUsed;
+  // d_exchCoeff->problemSetup( prob_spec, d_numMatls, notUsed );
+
+  ProblemSpecP exch_ps;
+  d_exchCoeff->problemSetup(matl_ps, d_numMatls, exch_ps);
+  ProblemSpecP model_ps = exch_ps->findBlock("Model");
+
+  if (model_ps != nullptr) {
+      // Overwrite the coefficient with the given Models
+      map<string, string> attributes;
+      model_ps->getAttributes(attributes);
+      model = attributes["type"];
+  }
 }
 
 //______________________________________________________________________
@@ -213,6 +225,15 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
 
         tmp[m] = -0.5 * delT * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
         vel[m] = vel_FC[m][c];
+      }
+
+      if (model == "Darcy") {
+          Darcy_model_FC(c, adj, numMatls, vol_frac_CC, K);
+      }
+      else if (model == "Reynolds") {
+
+          Reynolds_model_FC <constSFC, SFC >
+              (c, adj, numMatls, vol_frac_CC, vel_FC, K);
       }
 
       for(int m = 0; m < numMatls; m++)  {
@@ -546,6 +567,9 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     FastMatrix H(numALLMatls, numALLMatls);
     FastMatrix a(numALLMatls, numALLMatls);
     
+    FastMatrix difvelnorm(numALLMatls, numALLMatls);
+    difvelnorm.zero();
+
     beta.zero();
     acopy.zero();
     K.zero();
@@ -603,6 +627,22 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     //
     for(CellIterator iter = patch->getCellIterator(); !iter.done();iter++){
       IntVector c = *iter;
+
+      if (model == "Darcy") {
+          Darcy_model_CC(c, numALLMatls, vol_frac_CC, K);
+      }
+
+      else if (model == "Reynolds") {
+
+          for (int m = 0; m < numALLMatls; m++) {
+              const Vector& vel_m = vel_CC[m][c];
+              for (int n = 0; n < numALLMatls; n++) {
+                  difvelnorm(n, m) = (vel_CC[n][c] - vel_m).normalize();
+              }
+          }
+
+          Reynolds_model_CC(c, numALLMatls, vol_frac_CC, difvelnorm, K);
+      }
 
       //---------- M O M E N T U M   E X C H A N G E
       //   Form BETA matrix (a), off diagonal terms
@@ -904,4 +944,628 @@ void ScalarExch::addExch_Vel_Temp_CC_1matl( const ProcessorGroup * pg,
       Tdot[c]         = (Temp_CC[c] - old_temp[c])/delT;
     }
   } //patches
+}
+
+
+
+// Modify the coefficient according to Darcy's law
+void ScalarExch::Darcy_model_FC(IntVector c,
+    IntVector adj,
+    int numMatls,
+    std::vector<constCCVariable<double> >& vol_frac_CC,
+    FastMatrix& K) {
+
+    double Porosity_FC[MAX_MATLS];
+    double vol_frac_FC[MAX_MATLS];
+    double K_safe = 1e15;
+
+    for (int m = 0; m < numMatls; m++) {
+
+        Material* matl1 = d_matlManager->getMaterial(m);
+        ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
+        MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+        double visc1 = 0;
+        double ICE_density1 = 0;
+        double g = 10;
+
+        if (ice_matl1) {
+            visc1 = ice_matl1->getViscosity();
+            ICE_density1 = ice_matl1->getInitialDensity();
+        }
+
+        double IniPermeability1 = 1;
+        if (mpm_matl1) {
+            IniPermeability1 = mpm_matl1->getPermeability();
+            vol_frac_FC[m] = 0.5 * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
+            Porosity_FC[m] = 1 - vol_frac_FC[m];
+        }
+
+        for (int n = 0; n < numMatls; n++) {
+
+            Material* matl2 = d_matlManager->getMaterial(n);
+            ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
+            MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+            double visc2 = 0;
+            double ICE_density2 = 0;
+
+            if (ice_matl2) {
+                visc2 = ice_matl2->getViscosity();
+                ICE_density2 = ice_matl2->getInitialDensity();
+            }
+
+            double IniPermeability2 = 1;
+            if (mpm_matl2) {
+                IniPermeability2 = mpm_matl2->getPermeability();
+                vol_frac_FC[n] = 0.5 * (vol_frac_CC[n][adj] + vol_frac_CC[n][c]);
+                Porosity_FC[n] = 1 - vol_frac_FC[n];
+            }
+
+            if (ice_matl1) {
+                if (ice_matl2) { // ICE - ICE interaction
+                    // Put a safe value here
+                    K(n, m) = K_safe;
+                }
+                if (mpm_matl2) { // MPM - ICE interaction
+
+                    if (Porosity_FC[n] < 0.999 && Porosity_FC[n] > 0.001)
+                    {
+
+                        if (visc1 > 0) {
+                            // Calculate the momentum exchange coefficient K = porosity(MPM) * viscosity (ICE) / Permeability (MPM)
+                            K(n, m) = Porosity_FC[n] * visc1 / IniPermeability2;
+                        }
+                        else if (visc1 == 0) {
+                            // Darcy permeability
+                            K(n, m) = Porosity_FC[n] * ICE_density1 * g / IniPermeability2;
+                        }
+
+                        if (std::isnan(K(n, m))) {
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+            }
+
+            if (mpm_matl1) {
+                if (ice_matl2) {  // MPM - ICE interaction
+
+                    if (Porosity_FC[m] < 0.999 && Porosity_FC[m] > 0.001)
+                    {
+                        if (visc2 > 0) {
+                            // Calculate the momentum exchange coefficient K = porosity(MPM)^2/(1-porosity(MPM)) * viscosity (ICE) / Permeability (MPM)
+                            K(n, m) = Porosity_FC[m] * Porosity_FC[m] * visc2 / IniPermeability1 / (1 - Porosity_FC[m]);
+                        }
+                        else if (visc2 == 0) {
+                            // Darcy permeability
+                            K(n, m) = Porosity_FC[m] * Porosity_FC[m] * ICE_density2 * g / IniPermeability1 / (1 - Porosity_FC[m]);
+                        }
+
+                        if (std::isnan(K(n, m))) {
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+                if (mpm_matl2) { // MPM - MPM interaction
+                    // No momentum exchange between MPM materials
+                    K(n, m) = 0;
+                }
+            }
+            K(m, m) = 0;
+            K(n, n) = 0;
+        }  // end n material
+    } // end m material
+
+}
+
+void ScalarExch::Darcy_model_CC(IntVector c,
+    int numALLMatls,
+    std::vector<constCCVariable<double> >& vol_frac_CC,
+    FastMatrix& K) {
+
+    double K_safe = 1e15;
+
+    for (int m = 0; m < numALLMatls; m++) {
+
+        Material* matl1 = d_matlManager->getMaterial(m);
+        ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
+        MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+        double visc1 = 0;
+        double ICE_density1 = 0;
+        double g = 10;
+
+        if (ice_matl1) {
+            visc1 = ice_matl1->getViscosity();
+            ICE_density1 = ice_matl1->getInitialDensity();
+        }
+
+        double IniPermeability1 = 1;
+        double Porosity1 = 1;
+        if (mpm_matl1) {
+            IniPermeability1 = mpm_matl1->getPermeability();
+            Porosity1 = 1 - vol_frac_CC[m][c];
+        }
+
+        for (int n = 0; n < numALLMatls; n++) {
+
+            Material* matl2 = d_matlManager->getMaterial(n);
+            ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
+            MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+            double visc2 = 0;
+            double ICE_density2 = 0;
+
+            if (ice_matl2) {
+                visc2 = ice_matl2->getViscosity();
+                ICE_density2 = ice_matl2->getInitialDensity();
+            }
+
+            double IniPermeability2 = 1;
+            double Porosity2 = 1;
+            if (mpm_matl2) {
+                IniPermeability2 = mpm_matl2->getPermeability();
+                Porosity2 = 1 - vol_frac_CC[n][c];
+            }
+
+            if (ice_matl1) {
+                if (ice_matl2) { // ICE - ICE interaction
+                    // Put a safe value here
+                    K(n, m) = K_safe;
+                }
+                if (mpm_matl2) { // MPM - ICE interaction
+
+                    if (Porosity2 < 0.999 && Porosity2 > 0.001)
+                    {
+
+                        if (visc1 > 0) {
+                            // Calculate the momentum exchange coefficient K = porosity(MPM) * viscosity (ICE) / Permeability (MPM)
+                            K(n, m) = Porosity2 * visc1 / IniPermeability2;
+                        }
+                        else if (visc1 == 0) {
+                            // Darcy permeability
+                            K(n, m) = Porosity2 * ICE_density1 * g / IniPermeability2;
+                        }
+
+                        if (std::isnan(K(n, m))) {
+                            throw InvalidValue("**ERROR**:Reynolds_model_CC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+
+                    }
+
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+            }
+
+            if (mpm_matl1) {
+                if (ice_matl2) {  // MPM - ICE interaction
+                    if (Porosity1 < 0.999 && Porosity1 > 0.001)
+                    {
+                        if (visc2 > 0) {
+                            // Calculate the momentum exchange coefficient K = porosity(MPM)^2/(1-porosity(MPM)) * viscosity (ICE) / Permeability (MPM)
+                            K(n, m) = Porosity1 * Porosity1 * visc2 / IniPermeability1 / (1 - Porosity1);
+
+                        }
+                        else if (visc2 == 0) {
+                            // Darcy permeability
+                            K(n, m) = Porosity1 * Porosity1 * ICE_density2 * g / IniPermeability1 / (1 - Porosity1);
+                        }
+
+                        if (std::isnan(K(n, m))) {
+                            throw InvalidValue("**ERROR**:Reynolds_model_CC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+
+                    }
+
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+                if (mpm_matl2) { // MPM - MPM interaction
+                    // No momentum exchange between MPM materials
+                    K(n, m) = 0;
+                }
+            }
+            K(m, m) = 0;
+            K(n, n) = 0;
+        }  // end n material
+    } // end m material 
+}
+
+
+// Modify the coefficient according to Reynolds_model
+template<class constSFC, class SFC>
+void ScalarExch::Reynolds_model_FC(IntVector c,
+    IntVector adj,
+    int numMatls,
+    std::vector<constCCVariable<double> >& vol_frac_CC,
+    std::vector< constSFC>& vel_FC,
+    FastMatrix& K) {
+
+    double Porosity_FC[MAX_MATLS];
+    double vol_frac_FC[MAX_MATLS];
+    double K_safe = 1e15;
+
+    for (int m = 0; m < numMatls; m++) {
+
+        Material* matl1 = d_matlManager->getMaterial(m);
+        ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
+        MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+        double visc1 = 0;
+        double ICE_density1 = 0;
+        double g = 10;
+        double Reynolds_number = 0;
+        double F0 = 0;
+        double FRe = 0;
+
+        // grain size
+        double d_grain = 0.001;
+
+        if (ice_matl1) {
+            visc1 = ice_matl1->getViscosity();
+            ICE_density1 = ice_matl1->getInitialDensity();
+        }
+
+        if (mpm_matl1) {
+            vol_frac_FC[m] = 0.5 * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
+            Porosity_FC[m] = 1 - vol_frac_FC[m];
+        }
+
+        for (int n = 0; n < numMatls; n++) {
+
+            Material* matl2 = d_matlManager->getMaterial(n);
+            ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
+            MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+            double visc2 = 0;
+            double ICE_density2 = 0;
+
+            if (ice_matl2) {
+                visc2 = ice_matl2->getViscosity();
+                ICE_density2 = ice_matl2->getInitialDensity();
+            }
+
+            if (mpm_matl2) {
+                vol_frac_FC[n] = 0.5 * (vol_frac_CC[n][adj] + vol_frac_CC[n][c]);
+                Porosity_FC[n] = 1 - vol_frac_FC[n];
+            }
+
+            if (ice_matl1) {
+                if (ice_matl2) { // ICE - ICE interaction
+                    // Put a safe value here
+                    K(n, m) = K_safe;
+                }
+                if (mpm_matl2) { // MPM - ICE interaction
+
+                    if (Porosity_FC[n] < 0.999 && Porosity_FC[n] > 0.001)
+                    {
+                        double velNorm = abs(vel_FC[n][c] - vel_FC[m][c]);
+
+                        // Calculate the Renold number
+                        if (visc1 > 0) {
+                            Reynolds_number = Porosity_FC[n] * ICE_density1 * d_grain * velNorm / visc1;
+                        }
+                        else if (visc1 == 0) {
+                            Reynolds_number = Porosity_FC[n] * d_grain * velNorm / g;
+                        }
+
+                        // Calculate F(Re = 0)
+                        F0 = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) +
+                            (1 - vol_frac_FC[n]) * (1 - vol_frac_FC[n]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[n]));
+
+                        if (Reynolds_number != 0)
+                        {
+                            // Calculate F(Re)
+                            FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) *
+                                (sqrt(1 - vol_frac_FC[n]) + 3 * vol_frac_FC[n] + 8.4 * pow(Reynolds_number, -0.343))
+                                / (1 + pow(10, 3 * vol_frac_FC[n]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[n])));
+
+                        }
+                        else {
+                            FRe = F0;
+                        }
+
+                        // Carman-Kozeny formula
+                        FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                        //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+
+                        // Calculate the momentum exchange coefficient 
+                        if (visc1 > 0) {
+                            K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * visc1
+                                / d_grain / d_grain * FRe;
+                        }
+                        else if (visc1 == 0) {
+                            K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * ICE_density1 * g
+                                / d_grain / d_grain * FRe;
+                        }
+
+                        if (std::isnan(K(n, m))) {
+                            cout << " FC FRe = " << FRe << " velNorm = " << velNorm
+                                << " F0 = " << F0
+                                << " Reynolds_number = " << Reynolds_number << endl;
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+            }
+
+            if (mpm_matl1) {
+                if (ice_matl2) {  // MPM - ICE interaction
+
+                    if (Porosity_FC[m] < 0.999 && Porosity_FC[m] > 0.001)
+                    {
+                        double velNorm = abs(vel_FC[m][c] - vel_FC[n][c]);
+
+                        // Calculate the Renold number
+                        if (visc2 > 0) {
+                            Reynolds_number = Porosity_FC[m] * ICE_density2 * d_grain * velNorm / visc2;
+                        }
+                        else if (visc2 == 0) {
+                            Reynolds_number = Porosity_FC[m] * d_grain * velNorm / g;
+                        }
+
+                        // Calculate F(Re = 0)
+                        F0 = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) +
+                            (1 - vol_frac_FC[m]) * (1 - vol_frac_FC[m]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[m]));
+
+                        if (Reynolds_number != 0)
+                        {
+                            // Calculate F(Re)
+                            FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) *
+                                (sqrt(1 - vol_frac_FC[m]) + 3 * vol_frac_FC[m] + 8.4 * pow(Reynolds_number, -0.343))
+                                / (1 + pow(10, 3 * vol_frac_FC[m]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[m])));
+
+                        }
+                        else {
+                            FRe = F0;
+                        }
+
+                        // Carman-Kozeny formula
+                        FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                        //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+
+                        // Calculate the momentum exchange coefficient 
+                        if (visc2 > 0) {
+                            K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * visc2
+                                / d_grain / d_grain * FRe;
+                        }
+                        else if (visc2 == 0) {
+                            K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * ICE_density2 * g
+                                / d_grain / d_grain * FRe;
+                        }
+
+
+                        if (std::isnan(K(n, m))) {
+                            cout << " FC FRe = " << FRe << " velNorm = " << velNorm
+                                << " F0 = " << F0
+                                << " Reynolds_number = " << Reynolds_number << endl;
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+                if (mpm_matl2) { // MPM - MPM interaction
+                    // No momentum exchange between MPM materials
+                    K(n, m) = 0;
+                }
+            }
+
+            K(m, m) = 0;
+            K(n, n) = 0;
+
+        }  // end n material
+    } // end m material
+
+}
+
+
+void ScalarExch::Reynolds_model_CC(IntVector c,
+    int numALLMatls,
+    std::vector<constCCVariable<double> >& vol_frac_CC,
+    FastMatrix& difvelnorm,
+    FastMatrix& K) {
+
+    double K_safe = 1e15;
+
+    for (int m = 0; m < numALLMatls; m++) {
+
+        Material* matl1 = d_matlManager->getMaterial(m);
+        ICEMaterial* ice_matl1 = dynamic_cast<ICEMaterial*>(matl1);
+        MPMMaterial* mpm_matl1 = dynamic_cast<MPMMaterial*>(matl1);
+
+        double visc1 = 0;
+        double ICE_density1 = 0;
+        double g = 10;
+        double Reynolds_number = 0;
+        double F0 = 0;
+        double FRe = 0;
+
+        // grain size
+        double d_grain = 0.001;
+
+        if (ice_matl1) {
+            visc1 = ice_matl1->getViscosity();
+            ICE_density1 = ice_matl1->getInitialDensity();
+        }
+
+        double Porosity1 = 0;
+        if (mpm_matl1) {
+            Porosity1 = (1 - vol_frac_CC[m][c]);
+        }
+
+        for (int n = 0; n < numALLMatls; n++) {
+
+            Material* matl2 = d_matlManager->getMaterial(n);
+            ICEMaterial* ice_matl2 = dynamic_cast<ICEMaterial*>(matl2);
+            MPMMaterial* mpm_matl2 = dynamic_cast<MPMMaterial*>(matl2);
+
+            double visc2 = 0;
+            double ICE_density2 = 0;
+
+            if (ice_matl2) {
+                visc2 = ice_matl2->getViscosity();
+                ICE_density2 = ice_matl2->getInitialDensity();
+            }
+
+            double Porosity2 = 0;
+            if (mpm_matl2) {
+                Porosity2 = (1 - vol_frac_CC[n][c]);
+            }
+
+            if (ice_matl1) {
+                if (ice_matl2) { // ICE - ICE interaction
+                    // Put a safe value here
+                    K(n, m) = K_safe;
+                }
+                if (mpm_matl2) { // MPM - ICE interaction
+
+                    if (Porosity2 < 0.999 && Porosity2 > 0.001)
+                    {
+                        double velNorm = difvelnorm(n, m);
+
+                        // Calculate the Renold number
+                        if (visc1 > 0) {
+                            Reynolds_number = Porosity2 * ICE_density1 * d_grain * velNorm / visc1;
+                        }
+                        else if (visc1 == 0) {
+                            Reynolds_number = Porosity2 * d_grain * velNorm / g;
+                        }
+
+                        // Calculate F(Re = 0)
+                        F0 = 10 * vol_frac_CC[n][c] / Porosity2 / Porosity2 +
+                            Porosity2 * Porosity2 * (1 + 1.5 * sqrt(Porosity2));
+
+                        if (Reynolds_number != 0)
+                        {
+                            // Calculate F(Re)
+                            FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity2 / Porosity2 *
+                                (sqrt(Porosity2) + 3 * vol_frac_CC[n][c] + 8.4 * pow(Reynolds_number, -0.343))
+                                / (1 + pow(10, 3 * vol_frac_CC[n][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[n][c])));
+                        }
+                        else {
+                            FRe = F0;
+                        }
+
+                        // Carman-Kozeny formula
+                        FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                        //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+
+                        // Calculate the momentum exchange coefficient 
+                        if (visc1 > 0) {
+                            K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * visc1
+                                / d_grain / d_grain * FRe;
+                        }
+                        else if (visc1 == 0) {
+                            K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * ICE_density1 * g
+                                / d_grain / d_grain * FRe;
+                        }
+
+
+                        if (std::isnan(K(n, m))) {
+                            cout << " ce1 FC FRe = " << FRe << " velNorm = " << velNorm
+                                << " F0 = " << F0
+                                << " Reynolds_number = " << Reynolds_number << endl;
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+            }
+
+            if (mpm_matl1) {
+                if (ice_matl2) {  // MPM - ICE interaction
+
+                    if (Porosity1 < 0.999 && Porosity1 > 0.001)
+                    {
+                        double velNorm = difvelnorm(n, m);
+
+                        // Calculate the Renold number
+                        if (visc2 > 0) {
+                            Reynolds_number = Porosity1 * ICE_density2 * d_grain * velNorm / visc2;
+                        }
+                        else if (visc2 == 0) {
+                            Reynolds_number = Porosity1 * d_grain * velNorm / g;
+                        }
+
+                        // Calculate F(Re = 0)
+                        F0 = 10 * vol_frac_CC[m][c] / Porosity1 / Porosity1 +
+                            Porosity1 * Porosity1 * (1 + 1.5 * sqrt(Porosity1));
+
+                        if (Reynolds_number != 0)
+                        {
+                            // Calculate F(Re)
+                            FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity1 / Porosity1 *
+                                (sqrt(Porosity1) + 3 * vol_frac_CC[m][c] + 8.4 * pow(Reynolds_number, -0.343))
+                                / (1 + pow(10, 3 * vol_frac_CC[m][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[m][c])));
+                        }
+                        else {
+                            FRe = F0;
+                        }
+
+                        // Carman-Kozeny formula
+                        FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                        //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+
+                        // Calculate the momentum exchange coefficient 
+                        if (visc2 > 0) {
+                            K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * visc2
+                                / d_grain / d_grain * FRe;
+                        }
+                        else if (visc2 == 0) {
+                            K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * ICE_density2 * g
+                                / d_grain / d_grain * FRe;
+                        }
+
+
+                        if (std::isnan(K(n, m))) {
+                            cout << " ce2 FRe = " << FRe << " velNorm = " << velNorm
+                                << " F0 = " << F0
+                                << " Reynolds_number = " << Reynolds_number << endl;
+                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                        }
+                    }
+                    else {
+                        // Put a safe value here
+                        K(n, m) = 0;
+                    }
+                }
+                if (mpm_matl2) { // MPM - MPM interaction
+                    // No momentum exchange between MPM materials
+                    K(n, m) = 0;
+                }
+            }
+
+            K(m, m) = 0;
+            K(n, n) = 0;
+        }  // end n material
+    } // end m material
+
+
 }

@@ -273,11 +273,11 @@
 
     <!--ICE and MPMICE related -->
     <exchange_properties           spec="OPTIONAL NO_DATA" >
-      <Model                          spec="OPTIONAL NO_DATA" attribute1="type REQUIRED STRING 'slip'" >
-        <solidMatlIndex               spec="REQUIRED INTEGER" />
-        <fluidMatlIndex               spec="REQUIRED INTEGER" />
-        <momentum_accommodation_coeff spec="REQUIRED DOUBLE"  />
-        <thermal_accommodation_coeff  spec="REQUIRED DOUBLE"  />
+      <Model                          spec="OPTIONAL NO_DATA" attribute1="type REQUIRED STRING 'Reynolds, Darcy, slip'" >
+        <solidMatlIndex               spec="OPTIONAL INTEGER" />
+        <fluidMatlIndex               spec="OPTIONAL INTEGER" />
+        <momentum_accommodation_coeff spec="OPTIONAL DOUBLE"  />
+        <thermal_accommodation_coeff  spec="OPTIONAL DOUBLE"  />
         <useSlipCoeffs                spec="OPTIONAL BOOLEAN" />
       </Model>
 

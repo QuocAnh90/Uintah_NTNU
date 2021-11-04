@@ -262,7 +262,11 @@ ICELabel::ICELabel()
 
   //__________________________________
   // Implicit AMR variable
-  matrix_CFI_weightsLabel  =VarLabel::create("matrix_CFI_weights", CC_double );
+  matrix_CFI_weightsLabel  = VarLabel::create("matrix_CFI_weights", CC_double );
+
+  //__________________________________
+  // MPMICE2
+  Porosity_CCLabel         = VarLabel::create("Porosity_CC", CC_double);
 }
 
 ICELabel::~ICELabel()
@@ -454,4 +458,7 @@ ICELabel::~ICELabel()
 
     // Implicit AMR labels
     VarLabel::destroy(matrix_CFI_weightsLabel);
+
+    // MPMICE2
+    VarLabel::destroy(Porosity_CCLabel);
 }

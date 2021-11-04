@@ -1037,6 +1037,9 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
   t->computes(Ilb->sum_imp_delPLabel,   press_matl);  // needed by implicit ICE
   t->computes(Ilb->eq_press_itersLabel, press_matl);
   
+  t->computes(Ilb->Porosity_CCLabel, press_matl);
+  
+
   t->modifies(Ilb->sp_vol_CCLabel,      mpm_matls);
   t->computes(Ilb->sp_vol_CCLabel,      ice_matls);
   t->computes(Ilb->rho_CCLabel,         ice_matls);
@@ -1824,6 +1827,9 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     CCVariable<double> sum_imp_delP;
     CCVariable<int>  nIterations;
     
+    // MPMICE2
+    CCVariable<double> Porosity_CC;
+
     Ghost::GhostType  gn = Ghost::None;
     //__________________________________
     old_dw->get( press,                  Ilb->press_CCLabel,       0,patch,gn, 0); 
@@ -1836,6 +1842,10 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     
     sum_imp_delP.initialize(0.0);
     nIterations.initialize(0);
+
+    // MPMICE2
+    new_dw->allocateAndPut(Porosity_CC, Ilb->Porosity_CCLabel, 0, patch, gn, 0);
+    Porosity_CC.initialize(1.0);
 
     std::vector<MPMMaterial*> mpm_matl(numALLMatls);
     std::vector<ICEMaterial*> ice_matl(numALLMatls);
@@ -1887,8 +1897,18 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
         if(ice_matl[m]){                // I C E
          rho_micro[m][c] = 1.0/sp_vol_CC[m][c];
         } else if(mpm_matl[m]){                //  M P M
-          rho_micro[m][c] =  mpm_matl[m]->getConstitutiveModel()->
-            computeRhoMicroCM(press_new[c],press_ref, mpm_matl[m],Temp[m][c],1.0/sp_vol_CC[m][c]);
+
+            if (d_mpm->flags->d_UseMPMICE2) {
+
+                // Incompressible MPM material in MPMICE2
+                rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
+            }
+            else{
+                rho_micro[m][c] = mpm_matl[m]->getConstitutiveModel()->
+                    computeRhoMicroCM(press_new[c], press_ref, mpm_matl[m], Temp[m][c], 1.0 / sp_vol_CC[m][c]);
+            }
+
+
         }
         mat_volume[m] = ( rho_CC_old[m][c]*cell_vol )/rho_micro[m][c];
         total_mat_vol += mat_volume[m];
@@ -1900,6 +1920,18 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
         vol_frac[m][c]   = mat_volume[m]/total_mat_vol;
         rho_CC_new[m][c] = vol_frac[m][c]*rho_micro[m][c];
       }
+
+      // Compute Porosity
+      for (unsigned int m = 0; m < numALLMatls; m++) {
+          if (d_mpm->flags->d_UseMPMICE2) {
+
+              if (mpm_matl[m]) {
+                  Porosity_CC[c] -= vol_frac[m][c];   // This consider porosity over material volume
+                  //Porosity_CC[c] -= rho_CC_old[m][c] / rho_micro[m][c]; // This consider porosity over cell volume
+              }
+          }
+      }
+
     }  // cell iterator
 
     //______________________________________________________________________
@@ -1937,17 +1969,34 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
         double A = 0., B = 0., C = 0.;
 
         for (unsigned int m = 0; m < numALLMatls; m++)   {
-          double Q =  press_new[c] - press_eos[m];
-          double inv_y =  (vol_frac[m][c] * vol_frac[m][c])
+          
+            if (d_mpm->flags->d_UseMPMICE2) {
+                if (ice_matl[m]) {   // For I C E material only
+                    double Q = press_new[c] - press_eos[m];
+                    double inv_y = (vol_frac[m][c] * vol_frac[m][c])
                         / (dp_drho[m] * rho_CC_new[m][c] + d_SMALL_NUM);
-                                 
-          A   +=  vol_frac[m][c];
-          B   +=  Q * inv_y;
-          C   +=  inv_y;
-        } 
-        double vol_frac_not_close_packed = 1.;
-        delPress = (A - vol_frac_not_close_packed - B)/C;
 
+                    A += vol_frac[m][c];
+                    B += Q * inv_y;
+                    C += inv_y;
+                }
+            }
+
+            else{
+                double Q = press_new[c] - press_eos[m];
+                double inv_y = (vol_frac[m][c] * vol_frac[m][c])
+                    / (dp_drho[m] * rho_CC_new[m][c] + d_SMALL_NUM);
+
+                A += vol_frac[m][c];
+                B += Q * inv_y;
+                C += inv_y;
+            }
+
+        } 
+
+        double vol_frac_not_close_packed = 1.;
+        //delPress = (A - vol_frac_not_close_packed - B) / C;
+        delPress = (A - Porosity_CC[c] - B) / C; //Porosity_CC[c] = 1 without MPMICE2
         press_new[c] += delPress;
 
         if(press_new[c] < convergence_crit ){
@@ -1964,12 +2013,31 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
              ice_matl[m]->getEOS()->computeRhoMicro(press_new[c],gamma[m][c],
                                            cv[m][c],Temp[m][c],rho_micro[m][c]);
          } if(mpm_matl[m]){
-           rho_micro[m][c] =  
-             mpm_matl[m]->getConstitutiveModel()->computeRhoMicroCM(
-                                          press_new[c],press_ref,mpm_matl[m],Temp[m][c],rho_micro[m][c]);
+
+           if (d_mpm->flags->d_UseMPMICE2) {
+               // Incompressible MPM material in MPMICE2
+               rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
+           }
+
+           else {
+               rho_micro[m][c] =
+                   mpm_matl[m]->getConstitutiveModel()->computeRhoMicroCM(
+                       press_new[c], press_ref, mpm_matl[m], Temp[m][c], rho_micro[m][c]);
+           }
+
          }
          vol_frac[m][c]   = rho_CC_new[m][c]/rho_micro[m][c];
          sum += vol_frac[m][c];
+       }
+
+       // Reset Porosity
+       Porosity_CC[c] = 1.0;
+
+       for (unsigned int m = 0; m < numALLMatls; m++) {
+           if (mpm_matl[m]) {
+               Porosity_CC[c] -= vol_frac[m][c]; // This consider porosity over material volume
+               //Porosity_CC[c] -= rho_CC_old[m][c] / rho_micro[m][c]; // This consider porosity over cell volume
+           }
        }
 
        //__________________________________
@@ -2178,8 +2246,26 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
       const IntVector& c = *iter;
       sumKappa[c] = 0.0;
       for (unsigned int m = 0; m < numALLMatls; m++) {
-        kappa[m][c] = sp_vol_new[m][c]/(speedSound[m][c]*speedSound[m][c]);
+
+          if (d_mpm->flags->d_UseMPMICE2) {
+              if (ice_matl[m]) {
+                  kappa[m][c] = sp_vol_new[m][c] / (speedSound[m][c] * speedSound[m][c]);
+              }
+              if (mpm_matl[m]) {
+                  kappa[m][c] = 0;
+              }
+          }
+          else {
+              kappa[m][c] = sp_vol_new[m][c] / (speedSound[m][c] * speedSound[m][c]);
+          }
+
         sumKappa[c] += vol_frac[m][c]*kappa[m][c];
+
+        if (d_mpm->flags->d_UseMPMICE2) {
+            sumKappa[c] /= Porosity_CC[c];
+            sumKappa[c] /= Porosity_CC[c];
+        }
+
       }
       for (unsigned int m = 0; m < numALLMatls; m++) {
         f_theta[m][c] = vol_frac[m][c]*kappa[m][c]/sumKappa[c];
@@ -2277,9 +2363,17 @@ void MPMICE::binaryPressureSearch( std::vector<constCCVariable<double> >& Temp,
                                             cv[m][c],Temp[m][c],rho_micro[m][c]);
       }
       if(mpm_matl){        // MPM
-        rho_micro[m][c] =
-          mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
-                                       Pm,press_ref,mpm_matl,Temp[m][c],rho_micro[m][c]);
+
+            if (d_mpm->flags->d_UseMPMICE2) {
+                // Incompressible MPM material in MPMICE2
+                rho_micro[m][c] = mpm_matl->getInitialDensity();
+            }
+
+            else {
+                rho_micro[m][c] =
+                    mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
+                        Pm, press_ref, mpm_matl, Temp[m][c], rho_micro[m][c]);
+            }
       }
       vol_frac[m][c] = rho_CC_new[m][c]/rho_micro[m][c];
       sum += vol_frac[m][c];
@@ -2348,12 +2442,21 @@ void MPMICE::binaryPressureSearch( std::vector<constCCVariable<double> >& Temp,
          computeRhoMicro(Pleft, gamma[m][c],cv[m][c],Temp[m][c],rho_micro[m][c]);
       }
       if(mpm_matl){        //  MPM
-        rhoMicroR =
-          mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
-                                       Pright,press_ref,mpm_matl,Temp[m][c],rho_micro[m][c]);
-        rhoMicroL =
-          mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
-                                       Pleft, press_ref,mpm_matl,Temp[m][c],rho_micro[m][c]);
+
+          if (d_mpm->flags->d_UseMPMICE2) {
+              rhoMicroR = mpm_matl->getInitialDensity();
+              rhoMicroL = mpm_matl->getInitialDensity();
+          }
+
+          else {
+              rhoMicroR =
+                  mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
+                      Pright, press_ref, mpm_matl, Temp[m][c], rho_micro[m][c]);
+              rhoMicroL =
+                  mpm_matl->getConstitutiveModel()->computeRhoMicroCM(
+                      Pleft, press_ref, mpm_matl, Temp[m][c], rho_micro[m][c]);
+          }
+
       }
       vfR[m] = rho_CC_new[m][c]/rhoMicroR;
       vfL[m] = rho_CC_new[m][c]/rhoMicroL;

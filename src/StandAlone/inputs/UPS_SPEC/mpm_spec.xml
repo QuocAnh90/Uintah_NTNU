@@ -76,6 +76,7 @@
 		<water_damping_coef spec="OPTIONAL DOUBLE" />
 		<solid_damping_coef spec="OPTIONAL DOUBLE" />
 		<PorePressureFilter spec="OPTIONAL BOOLEAN" />
+		<Use_MPMICE2 spec="OPTIONAL BOOLEAN" />
 		
     </MPM>
     <PhysicalBC                   spec="OPTIONAL NO_DATA" >
@@ -218,6 +219,7 @@
         <thermal_conductivity            spec="REQUIRED DOUBLE 'positive'" />
         <geom_object                     spec="MULTIPLE" />
         <is_rigid                        spec="OPTIONAL BOOLEAN" />
+		<seismic_plate                   spec="OPTIONAL BOOLEAN" />
         <C_p                             spec="OPTIONAL DOUBLE" />
         <melt_temp                       spec="OPTIONAL DOUBLE" /> <!--295.0 -->
         <room_temp                       spec="OPTIONAL DOUBLE" /> <!--294.0 -->

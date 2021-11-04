@@ -223,6 +223,9 @@ namespace Uintah {
     // Implicit AMR variables
     const VarLabel* matrix_CFI_weightsLabel;
 
+    // MPMICE2
+    const VarLabel* Porosity_CCLabel;
+
     };
 } // end namespace Uintah
 

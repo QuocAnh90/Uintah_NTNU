@@ -143,6 +143,8 @@ WARNING
 
    bool getIsRigid() const;
 
+   bool getSeismicPlate() const;
+
    double getSpecificHeat() const;
    double getThermalConductivity() const;
 
@@ -197,6 +199,9 @@ WARNING
 
    // for implicit rigid body contact
    bool d_is_rigid;
+
+   // This is to trigger seismic loading
+   bool d_seismic_plate;
 
    // Parameters related to MPM Hydro-mechanical coupling
    double d_waterdensity, d_porosity, d_permeability, d_initial_porepressure;

@@ -159,6 +159,10 @@ MPMMaterial::standardInitialization(ProblemSpecP& ps,
   d_do_conc_reduction = false;
   ps->get("do_conc_reduction", d_do_conc_reduction);
 
+  // This is to trigger seismic loading
+  d_seismic_plate = false;
+  ps->get("seismic_plate", d_seismic_plate);
+
   // Step 5 -- Loop through all of the pieces in this geometry object
   //int piece_num = 0;
   list<GeometryObject::DataItem> geom_obj_data;
@@ -258,6 +262,7 @@ ProblemSpecP MPMMaterial::outputProblemSpec(ProblemSpecP& ps)
   mpm_ps->appendElement("room_temp",d_troom);
   mpm_ps->appendElement("melt_temp",d_tmelt);
   mpm_ps->appendElement("is_rigid",d_is_rigid);
+  mpm_ps->appendElement("seismic_plate", d_seismic_plate);
 
   d_cm->outputProblemSpec(mpm_ps);
   d_damageModel->outputProblemSpec(mpm_ps);
@@ -288,6 +293,7 @@ MPMMaterial::copyWithoutGeom(ProblemSpecP& ps,const MPMMaterial* mat,
   d_troom = mat->d_troom;
   d_tmelt = mat->d_tmelt;
   d_is_rigid = mat->d_is_rigid;
+  d_seismic_plate = mat->d_seismic_plate;
 
   // Check to see which ParticleCreator object we need
   d_particle_creator = ParticleCreatorFactory::create(ps,this,flags);
@@ -395,6 +401,11 @@ double MPMMaterial::getThermalConductivity() const
   return d_thermalConductivity;
 }
 
+bool MPMMaterial::getSeismicPlate() const
+{
+    return d_seismic_plate;
+}
+
 // MPM Hydro-mechanical coupling
 double MPMMaterial::getWaterDensity() const
 {
@@ -415,7 +426,6 @@ double MPMMaterial::getInitialPorepressure() const
 {
     return d_initial_porepressure;
 }
-
 // End MPM Hydro-mechanical coupling
 
 

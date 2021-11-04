@@ -121,6 +121,8 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_soliddampingCoeff = 0.0;
   d_PorePressureFilter = false;
 
+  d_UseMPMICE2 = false;
+
   //******* Reactive Flow Component
   d_doScalarDiffusion   =  false;  // for diffusion component found  in ReactiveFlow
   d_doAutoCycleBC       =  false;  // for scalar flux boundary conditions
@@ -224,6 +226,8 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("water_damping_coef", d_waterdampingCoeff);
   mpm_flag_ps->get("PorePressureFilter", d_PorePressureFilter);
 
+  mpm_flag_ps->get("Use_MPMICE2", d_UseMPMICE2);
+
   if(d_artificial_viscosity && d_integrator_type == "implicit"){
     if (d_myworld->myRank() == 0){
       cerr << "artificial viscosity is not implemented" << endl;
@@ -243,7 +247,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("DoExplicitHeatConduction",          d_doExplicitHeatConduction);
   mpm_flag_ps->get("DeleteGeometryObjects",             d_deleteGeometryObjects);
   mpm_flag_ps->get("DoPressureStabilization",           d_doPressureStabilization);
-  mpm_flag_ps->get("DoCapDensity", d_doCapDensity);
+  mpm_flag_ps->get("DoCapDensity",                      d_doCapDensity);
   mpm_flag_ps->get("DoThermalExpansion",                d_doThermalExpansion);
   mpm_flag_ps->getWithDefault("UseGradientEnhancedVelocityProjection",  d_GEVelProj,false);
   mpm_flag_ps->get("do_grid_reset",                     d_doGridReset);
@@ -434,7 +438,7 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("DoExplicitHeatConduction",           d_doExplicitHeatConduction);
   ps->appendElement("DeleteGeometryObjects",              d_deleteGeometryObjects);
   ps->appendElement("DoPressureStabilization",            d_doPressureStabilization);
-  ps->appendElement("DoCapDensity", d_doCapDensity);
+  ps->appendElement("DoCapDensity",                       d_doCapDensity);
   ps->appendElement("computeNodalHeatFlux",               d_computeNodalHeatFlux);
   ps->appendElement("computeScaleFactor",                 d_computeScaleFactor);
   ps->appendElement("DoThermalExpansion",                 d_doThermalExpansion);
@@ -451,6 +455,8 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("water_damping_coef", d_waterdampingCoeff);
   ps->appendElement("solid_damping_coef", d_soliddampingCoeff);
   ps->appendElement("PorePressureFilter", d_PorePressureFilter);
+
+  ps->appendElement("Use_MPMICE2", d_UseMPMICE2);
 
   if(d_prescribeDeformation){
     ps->appendElement("PrescribedDeformationFile",d_prescribedDeformationFile);

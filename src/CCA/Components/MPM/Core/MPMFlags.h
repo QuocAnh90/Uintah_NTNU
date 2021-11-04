@@ -129,6 +129,7 @@ class Output;
     double      d_waterdampingCoeff;
     double      d_soliddampingCoeff;
     bool		d_PorePressureFilter;						 // Pore Water Pressure filter option
+    bool		d_UseMPMICE2;						         // Turn on MPMICE2
 
    //********** Start Reactive Flow Section *********************
     bool        d_doScalarDiffusion;

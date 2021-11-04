@@ -49,19 +49,19 @@ ExchangeFactory::create(const ProblemSpecP     & matl_ps,
 {
   int numMatls = materialManager->getNumMatls();
   
-  //__________________________________
-  //    single matl 
-  if( numMatls == 1){
-    return ( scinew ExchangeModels::ScalarExch( matl_ps, materialManager, with_mpm) );
-  }
-  
   ProblemSpecP exchg_ps = matl_ps->findBlock("exchange_properties");
   ProblemSpecP model_ps = exchg_ps->findBlock( "Model" );
 
   //__________________________________
+//    single matl 
+  if (numMatls == 1) {
+      return (scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm));
+  }
+
+  //__________________________________
   //    default model
   if( model_ps == nullptr ) {
-    return ( scinew ExchangeModels::ScalarExch( matl_ps, materialManager, with_mpm ));
+    return ( scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm ));
   }
   
   //__________________________________
@@ -73,6 +73,15 @@ ExchangeFactory::create(const ProblemSpecP     & matl_ps,
   if ( model == "slip" ) {
     return ( scinew ExchangeModels::SlipExch( exchg_ps, materialManager, with_mpm ));
   }      
+
+  if (model == "Darcy") {
+      return (scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm));
+  }
+
+  if (model == "Reynolds") {
+      return (scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm));
+  }
+
   else {
     throw ProblemSetupException("\nERROR: Unknown exchange model.  "+model,__FILE__, __LINE__);
   }

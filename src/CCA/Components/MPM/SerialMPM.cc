@@ -2775,7 +2775,8 @@ void SerialMPM::computeInternalForce(const ProcessorGroup*,
       if(flags->d_with_ice){
         new_dw->get(p_pressure,lb->pPressureLabel, pset);
       }
-      else {
+
+      if(!flags->d_with_ice || flags->d_UseMPMICE2) {
         ParticleVariable<double>  p_pressure_create;
         new_dw->allocateTemporary(p_pressure_create,  pset);
         for(ParticleSubset::iterator it = pset->begin();it != pset->end();it++){
@@ -3777,6 +3778,12 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           pmassNew[idx]    = Max(pmass[idx]*(1.    - burnFraction),0.);
           psizeNew[idx]    = (pmassNew[idx]/pmass[idx])*psize[idx];
 
+          // Prevent the seismic plate moving!
+          if (mpm_matl->getSeismicPlate()) {
+              pxnew[idx] = px[idx];
+              pvelnew[idx] = (0.0, 0.0, 0.0);
+          }
+
           if (flags->d_doScalarDiffusion) {
             for (int k = 0; k < NN; ++k) {
               IntVector node = ni[k];
@@ -3939,6 +3946,11 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
                                pset);
       }
 
+      // critical density and volume
+      double rho_0 = mpm_matl->getInitialDensity();
+      double rho_critical_lowerbound = 0.9 * rho_0;
+      double rho_critical_upperbound = 1.1 * rho_0;
+
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
         particleIndex idx = *iter;
@@ -3996,17 +4008,46 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
             F=OP_tensorL_DT*F;
           }
           pFNew[idx]=F;
+
+          // Analytical equation to update volume (Dunatunga & Kamrin 2018)
+              //Matrix3 Amat = tensorL * delT;
+              //double traceAmat = Amat.Trace();
+              //double dJ = exp(traceAmat);
+              //double pvolume_trial = pVolumeOld[idx] * dJ;
+          double J = pFNew[idx].Determinant();
+          double JOld = pFOld[idx].Determinant();
+          double pvolume_trial = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
+          double pvolume_critical_upperbound = pmass[idx] / rho_critical_lowerbound;
+          double pvolume_critical_lowerbound = pmass[idx] / rho_critical_upperbound;
+
+          if (flags->d_doCapDensity) {
+              if (pvolume_trial < pvolume_critical_upperbound && pvolume_trial > pvolume_critical_lowerbound) {
+                  // Deformation gradient
+                  pvolume[idx] = pvolume_trial;
+                  partvoldef += pvolume[idx];
+              }
+              else {
+                  pvolume[idx] = pVolumeOld[idx];
+                  pFNew[idx] = pFOld[idx];
+                  partvoldef += pvolume[idx];
+              }
+          }
+          else {
+              pvolume[idx] = pvolume_trial;
+              partvoldef += pvolume[idx];
+          }
+
         }
         else{
           Matrix3 Amat = tensorL*delT;
           Matrix3 Finc = Amat.Exponential(abs(flags->d_min_subcycles_for_F));
           pFNew[idx] = Finc*pFOld[idx];
-        }
 
-        double J   =pFNew[idx].Determinant();
-        double JOld=pFOld[idx].Determinant();
-        pvolume[idx]=pVolumeOld[idx]*(J/JOld)*(pmassNew[idx]/pmass[idx]);
-        partvoldef += pvolume[idx];
+          double J = pFNew[idx].Determinant();
+          double JOld = pFOld[idx].Determinant();
+          pvolume[idx] = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
+          partvoldef += pvolume[idx];
+        }    
       }
 
       // The following is used only for pressure stabilization
