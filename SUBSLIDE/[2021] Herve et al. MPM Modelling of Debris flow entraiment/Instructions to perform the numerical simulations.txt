@@ -1,0 +1,6 @@
+1. Run the initialisation of the gravity load. Use artificial_damping_coeff=0.75 and start a simulation for 2s (6s for the EB simulation).
+2. From the output, change artificial_damping_coeff to 0. Run the simulation for the desired duration of the flow.
+
+CB refers to the curved barrier simulation
+RB refers to the rectilinear barrier simulation
+EB refers to the erodible bed simulation

@@ -1,0 +1,16 @@
+Barrier 2.8s 56 frame
+Max 5m/s
+
+
+
+Dry vs Saturated
+c 1000 phi 30
+
+Saturated vs Under water
+c 200
+mpmice 
+
+Barrier
+c 200
+Dry 
+Saturated 

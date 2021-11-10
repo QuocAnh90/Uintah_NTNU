@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- <!DOCTYPE Uintah_specification SYSTEM "input.dtd"> -->
+<!-- @version: Updated 7/31/00-->
+<Uintah_specification>
+
+   <Meta>
+       <title>Flumemodel</title>
+   </Meta>
+
+   <SimulationComponent type="mpm" />
+
+   <Time>
+       <maxTime>2</maxTime>
+       <initTime>0.0</initTime>
+       <delt_min>0.000000001</delt_min>
+       <delt_max>0.001</delt_max>
+       <timestep_multiplier>0.5</timestep_multiplier>
+   </Time>
+   <DataArchiver>
+       <filebase>ConsolidationCBn.uda</filebase>
+       <outputInterval>.1</outputInterval>
+       <save label = "p.x"/>
+       <save label = "p.velocity"/>
+       <save label = "p.volume"/>
+       <save label = "p.color"/>
+       <save label = "p.stress"/>
+       <save label = "g.mass"/>
+       <save label = "g.stressFS"/>
+       <save label = "Phi"/>
+       <save label = "y"/>
+
+       <checkpoint cycle = "2" interval = "0.01"/>
+   </DataArchiver>
+
+    <MPM>
+       <time_integrator>explicit</time_integrator>
+       <interpolator>gimp</interpolator>
+       <withColor>      true      </withColor>
+	<InsertParticles>true</InsertParticles>
+	<InsertParticlesFile>door_remove.txt</InsertParticlesFile>
+	<artificial_damping_coeff>0.75</artificial_damping_coeff>
+	<DoPressureStabilization>false</DoPressureStabilization>
+	<DoCapDensity>true</DoCapDensity>
+    </MPM>
+
+    <PhysicalConstants>
+       <gravity>[3.36,-9.22,0]</gravity>
+    </PhysicalConstants>
+
+    <MaterialProperties>
+       <MPM>
+           <material name="flume_base_release">
+              <density>7800.0</density>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>160E7</bulk_modulus>
+                 <shear_modulus>79E7</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+              <geom_object>
+		<parallelepiped label = "base_release">
+                     <p1>[0,0,0]</p1>
+                     <p2>[0,0,0.02]</p2>
+                     <p3>[-4.017,0.708,0]</p3>
+                     <p4>[-0.3658,-2.074,0]</p4>
+                  </parallelepiped>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+           </material>
+
+           <material name="flume_base">
+              <density>7800.0</density>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>160E7</bulk_modulus>
+                 <shear_modulus>79E7</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+		<geom_object>
+                  <box label = "base_channel">
+                     <min>[-0.57,-0.1,0]</min>
+                     <max>[15,0,0.02]</max>
+                  </box>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+		<geom_object>
+			<parallelepiped label = "base_channel_flat">
+	                     	<p1>[15,0,0]</p1>
+                    	 	<p2>[15,0,0.02]</p2>
+                     		<p3>[15,-2,0]</p3>
+                     		<p4>[19.134648,1.504889,0]</p4>
+                  	</parallelepiped>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+
+              <geom_object>
+		<parallelepiped label = "platform1">
+                     <p1>[8.11,0.12,0]</p1>
+                     <p2>[8.11,0.12,0.02]</p2>
+                     <p3>[7.13,0,0]</p3>
+                     <p4>[8.11,0,0]</p4>
+                  </parallelepiped>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+		<geom_object>
+                  <box label = "platform2">
+                     <min>[8.11,0,0]</min>
+                     <max>[9.09,0.12,0.02]</max>
+                  </box>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+           </material>
+
+
+
+           <material name="flume_door_fix">
+              <density>7800.0</density>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>160E7</bulk_modulus>
+                 <shear_modulus>79E7</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+		<geom_object>
+                  <box label = "door_fix">
+                     <min>[0,1,0]</min>
+                     <max>[0.2,3,0.02]</max>
+                  </box>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             2               </color>
+               </geom_object>
+           </material>
+
+
+           <material name="flume_door_remove">
+              <density>7800.0</density>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>160E7</bulk_modulus>
+                 <shear_modulus>79E7</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+		<geom_object>
+                  <box label = "door_remove">
+                     <min>[0,0,0]</min>
+                     <max>[0.1,1,0.02]</max>
+                  </box>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             1               </color>
+               </geom_object>
+           </material>
+
+
+
+           <material name="debris">
+              <density>2155.0</density>
+              <constitutive_model type="MohrCoulomb"> 
+                 <K>10E6</K>
+                 <G>0.2E6</G>
+		 <Phi>20</Phi>
+		 <Psi>0</Psi>
+		 <c>500</c>
+		 <Version>11</Version>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+
+              <geom_object>
+                  <difference>
+			<difference>
+				<box label = "r1">
+                     			<min>[-3.3315,0,0]</min>
+                     			<max>[0,1.8,0.02]</max>
+                  		</box>
+				<parallelepiped label = "r2">
+	                     	<p1>[0,0,0]</p1>
+                    	 	<p2>[0,0,0.02]</p2>
+                     		<p3>[-4.017,0.708,0]</p3>
+                     		<p4>[-0.3658,-2.074,0]</p4>
+                  		</parallelepiped>
+			</difference>
+				<parallelepiped label = "r3">
+                     			<p1>[0,1.8,0]</p1>
+                     			<p2>[0,1.8,0.02]</p2>
+                     			<p3>[-3.3315,0.5874,0]</p3>
+                     			<p4>[-0.4446,3.0216,0]</p4>
+                  		</parallelepiped>
+		  </difference>
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+           </material>
+
+
+
+
+
+           <material name="curved_barrier">
+              <density>7800.0</density>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>160E7</bulk_modulus>
+                 <shear_modulus>79E7</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+		<geom_object>
+
+                  <difference>
+                  <difference>
+			<difference>
+				<cylinder label = "ext">
+                     			<bottom>[4.1,0.3,0]</bottom>
+                     			<top>[4.1,0.3,0.02]</top>
+					<radius>0.7</radius>
+                  		</cylinder>
+				<cylinder label = "int">
+                     			<bottom>[4.1,0.3,0]</bottom>
+                     			<top>[4.1,0.3,0.02]</top>
+					<radius>0.5</radius>
+                  		</cylinder>
+			</difference>
+				<box label = "L">
+                     			<min>[0,-1,0]</min>
+                     			<max>[4.5,10,0.02]</max>
+                  		</box>
+		  </difference>
+				<box label = "T">
+                     			<min>[0,0.6,0]</min>
+                     			<max>[5,10,0.02]</max>
+                  		</box>
+		  </difference>
+
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>12</temperature>
+                  <color>             0               </color>
+               </geom_object>
+           </material>
+
+
+
+<!--Friction contact at the base release:-->
+           <contact>
+             <type>friction_bard</type>
+		<mu>0.157</mu>
+		<materials>[0,4]</materials>
+           </contact>
+<!--Friction contact at the base flume:-->
+           <contact>
+             <type>friction_bard</type>
+		<mu>0.157</mu>
+		<materials>[1,4]</materials>
+           </contact>
+<!--Friction contact with the fixed door:-->
+           <contact>
+             <type>friction_bard</type>
+		<mu>0.157</mu>
+		<materials>[2,4]</materials>
+           </contact>
+<!--removed door-->
+           <contact>
+             <type>specified</type>
+		<materials>[3,4]</materials>
+		<master_material>3</master_material>
+		<filename>door_fix.txt</filename>
+		<direction>[1,1,0]</direction>
+           </contact>
+
+
+
+<!--Friction contact debris-rigid barrier: same as for the flume base-->
+           <contact>
+             <type>friction_bard</type>
+		<mu>0.157</mu>
+		<materials>[4,5]</materials>
+           </contact>
+
+
+       </MPM>
+
+    </MaterialProperties>
+
+
+
+       
+    <Grid>
+       <BoundaryConditions>
+          <Face side = "x-">
+                  <BCType id = "all" var = "Dirichlet" label = "Velocity">
+                        <value> [0.0,0.0,0.0] </value>
+                   </BCType>
+           </Face>
+           <Face side = "x+">
+                  <BCType id = "all" var = "Neumann" label = "Velocity">
+                    <value> [0.0,0.0,0.0] </value>
+                  </BCType>
+           </Face>
+           <Face side = "y-">
+                  <BCType id = "all" var = "Dirichlet" label = "Velocity">
+                      <value> [0.0,0.0,0.0] </value>
+                  </BCType>
+           </Face>                  
+          <Face side = "y+">
+                  <BCType id = "all" var = "Dirichlet" label = "Velocity">
+                     <value> [0.0,0.0,0.0] </value>
+                 </BCType>
+           </Face>
+           <Face side = "z-">
+             <BCType id = "all" var = "symmetry" label = "Symmetric"> </BCType>
+           </Face>
+           <Face side = "z+">
+             <BCType id = "all" var = "symmetry" label = "Symmetric"> </BCType>
+           </Face>                           
+       </BoundaryConditions>
+       <Level>
+           <Box label = "1">
+              <lower>[-3.36,-0.02,0]</lower>
+              <upper>[9,2.2,.02]</upper>
+              <patches>[40,32,1]</patches>
+              <extraCells> [1,1,1]            </extraCells>
+           </Box>
+		<spacing>[0.02,0.02,0.02]</spacing>
+       </Level>
+    </Grid>
+    <!--____________________________________________________________________-->
+    
+    
+</Uintah_specification>
+
