@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=48;
+  d_NBASICINPUTS=50;
   d_NMGDC=0;
 
 // Total number of properties
@@ -361,6 +361,9 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("Use_linear",UI[25]);
   cm_ps->appendElement("a",UI[26]);
   cm_ps->appendElement("y_ref",UI[27]);
+  cm_ps->appendElement("Gjerdrum2D", UI[48]);
+  cm_ps->appendElement("x", UI[49]);
+
 
 
   cm_ps->appendElement("strain11",UI[28]);
@@ -373,8 +376,10 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("Use_softening",UI[34]);
   cm_ps->appendElement("St",UI[35]);
   cm_ps->appendElement("strain_95",UI[36]);
+  
 
-    cm_ps->appendElement("y",UI[37]);
+
+    cm_ps->appendElement("y_coordinate",UI[37]);
     cm_ps->appendElement("n",UI[38]);
 
     cm_ps->appendElement("s_xx",UI[39]);
@@ -498,6 +503,11 @@ double rho_orig = matl->getInitialDensity();
     constParticleVariable<Point> px, pxnew;
     delt_vartype delT;
 
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, lb->simulationTimeLabel);
+    double time = simTimeVar;
+
     old_dw->get(delT, lb->delTLabel, getLevel(patches));
 
     old_dw->get(px,                  lb->pXLabel,                  pset);
@@ -602,10 +612,18 @@ double rho_orig = matl->getInitialDensity();
 	  // Undrained increase linearly with depth
 	  double n = svarg[38];
 
-	  for (int i = 0; i < n; i++) {
+	  //for (int i = 0; i < n; i++) {
+          svarg[49] = px[idx](0);
+
+          //cerr << " px " << px[idx](0) << endl;
+          //cerr << " svarg[49] " << svarg[49] << endl;
+
+
 		  svarg[37] = px[idx](1);
-		  n = n - 1;
-	  }
+
+          //cerr << " svarg[37] " << svarg[37] << endl;
+		//  n = n - 1;
+	  //}
 	  svarg[38] = n;
 
 	  // Compute Ko
@@ -718,11 +736,17 @@ double rho_orig = matl->getInitialDensity();
   svarg[20] = shear_strain_rate;
 
 // Calling the external model here
-      CalculateStress (nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal);
+      CalculateStress (nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, time);
 
       // Unload ISVs from 1D array into ISVs_new
       for(int i=0;i<d_NINSV;i++){
         ISVs_new[i][idx]=svarg[i];
+
+        if (i==49){
+           // cerr << "svarg " << svarg[i] << endl;
+          //  cerr << "ISVs_new " << i << " is " << ISVs_new[i][idx] << endl;
+        }
+
       }
 
       // This is the Cauchy stress, still unrotated
@@ -1017,6 +1041,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("Use_linear",UI[25],0.0);
   ps->getWithDefault("a",UI[26],0.0);
   ps->getWithDefault("y_ref",UI[27],0.0);
+  ps->getWithDefault("Gjerdrum2D", UI[48], 0.0);
+  ps->getWithDefault("x", UI[49], 0.0);
 
   ps->getWithDefault("strain11",UI[28],0.0);
   ps->getWithDefault("strain22",UI[29],0.0);
@@ -1028,8 +1054,9 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("Use_softening",UI[34],0.0);
   ps->getWithDefault("St",UI[35],0.0);
   ps->getWithDefault("strain_95",UI[36],0.0);
+  
 
-  ps->getWithDefault("y",UI[37],0.0);
+  ps->getWithDefault("y_coordinate",UI[37],0.0);
   ps->getWithDefault("n",UI[38],0.0);
 
   ps->getWithDefault("s_xx",UI[39],0.0);
@@ -1082,6 +1109,8 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("Use_linear");
   ISVNames.push_back("a");
   ISVNames.push_back("y_ref");
+  ISVNames.push_back("Gjerdrum2D");
+  ISVNames.push_back("x");
 
   ISVNames.push_back("strain11");
   ISVNames.push_back("strain22");
@@ -1094,8 +1123,7 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("St");
   ISVNames.push_back("strain_95");
 
-
-  ISVNames.push_back("y");
+  ISVNames.push_back("y_coordinate");
   ISVNames.push_back("n");
 
 
@@ -1125,7 +1153,7 @@ MohrCoulomb::initializeLocalMPMLabels()
 //CODE ADDED BY WTS FOR SHENGMOHRCOULOMB BELOW
 void MohrCoulomb::CalculateStress (int &nblk, int &ninsv, double &dt,
                                     double UI[], double stress[], double D[],
-                                    double svarg[], double &USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal)
+                                    double svarg[], double &USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double time)
 
 
 /*
@@ -1195,11 +1223,17 @@ int Flavour=int(UI[5]);
     double Use_softening=UI[34];
     double St=UI[35];
     double strain_95=UI[36];
+    
 
     double Use_linear=UI[25];
     double a=UI[26];
     double y_ref=UI[27];
     double y=svarg[37];
+
+    //cerr << " y is " << y << endl;
+
+    double Gjerdrum2D = UI[48];
+    double x = svarg[49];
 
 /*
 Flavour
@@ -1250,15 +1284,39 @@ if (Usetransition>0)
 }
 
 // Shear strength linear with depth
+
+double y_ref1 = 0;
+
 if(Use_linear>0)
-{
-    c = c + a * (y-y_ref);
+{    
+    if (time < 0.0001){
+
+        if (Gjerdrum2D > 0) {
+
+            if (x < 50.85)  y_ref1 = 36.75 - 17.55;
+
+            if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
+
+            if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
+
+            if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
+
+            if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
+
+            if (y <= y_ref1) c = c + a * (y_ref1 - y);
+        }
+        else {
+            c = c + a * (y - y_ref);
+        }  
+
+        //cerr << " c is " << c << endl;
+    }
 }
 
 double Usemodul=UI[21];
+
 if(Usemodul>0)
 {
-
     G=m_modul*c/2.0/(1.0+nuy);
     K=m_modul*c/3.0/(1.0-2*nuy);
 }
