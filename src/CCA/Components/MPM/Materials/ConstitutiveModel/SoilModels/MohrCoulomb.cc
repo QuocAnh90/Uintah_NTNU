@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=50;
+  d_NBASICINPUTS=49;
   d_NMGDC=0;
 
 // Total number of properties
@@ -353,18 +353,16 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("strain_ref",UI[19]); // shear strain rate reference
   cm_ps->appendElement("shear_strain_rate",UI[20]); // shear strain rate
   cm_ps->appendElement("Usemodul",UI[21]); // modul with strain rate
-  cm_ps->appendElement("m_modyul",UI[22]); // modul ratio
+  cm_ps->appendElement("m_modul",UI[22]); // modul ratio
   cm_ps->appendElement("nuy",UI[23]); // modul ratio
   cm_ps->appendElement("shear_strain",UI[24]);
-
 
   cm_ps->appendElement("Use_linear",UI[25]);
   cm_ps->appendElement("a",UI[26]);
   cm_ps->appendElement("y_ref",UI[27]);
   cm_ps->appendElement("Gjerdrum2D", UI[48]);
-  cm_ps->appendElement("x", UI[49]);
-
-
+  cm_ps->appendElement("x", UI[38]);
+  cm_ps->appendElement("y_coordinate", UI[37]);
 
   cm_ps->appendElement("strain11",UI[28]);
   cm_ps->appendElement("strain22",UI[29]);
@@ -376,11 +374,6 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("Use_softening",UI[34]);
   cm_ps->appendElement("St",UI[35]);
   cm_ps->appendElement("strain_95",UI[36]);
-  
-
-
-    cm_ps->appendElement("y_coordinate",UI[37]);
-    cm_ps->appendElement("n",UI[38]);
 
     cm_ps->appendElement("s_xx",UI[39]);
     cm_ps->appendElement("s_yy",UI[40]);
@@ -391,7 +384,6 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
     cm_ps->appendElement("tShear",UI[44]);
 
     cm_ps->appendElement("s_xy",UI[45]);
-
 	cm_ps->appendElement("n_nonlocalMC", UI[46]);
 	cm_ps->appendElement("l_nonlocal", UI[47]);
 
@@ -610,34 +602,22 @@ double rho_orig = matl->getInitialDensity();
       }
 
 	  // Undrained increase linearly with depth
-	  double n = svarg[38];
-
-	  //for (int i = 0; i < n; i++) {
-          svarg[49] = px[idx](0);
-
-          //cerr << " px " << px[idx](0) << endl;
-          //cerr << " svarg[49] " << svarg[49] << endl;
-
-
-		  svarg[37] = px[idx](1);
-
-          //cerr << " svarg[37] " << svarg[37] << endl;
-		//  n = n - 1;
-	  //}
-	  svarg[38] = n;
+	  //double n = svarg[38];
+      svarg[38] = px[idx](0);
+	  svarg[37] = px[idx](1);
 
 	  // Compute Ko
-	  double s_xx = sigarg[0];
-	  double s_yy = sigarg[1];
-	  double s_xy = sigarg[3];
+	  //double s_xx = sigarg[0];
+	  //double s_yy = sigarg[1];
+	  //double s_xy = sigarg[3];
 
-	  svarg[39] = s_xx;
-	  svarg[40] = s_yy;
-	  svarg[45] = s_xy;
-	  double Ko = s_xx / s_yy;
-	  svarg[41] = Ko;
+	  //svarg[39] = s_xx;
+	  //svarg[40] = s_yy;
+	  //svarg[45] = s_xy;
+	  //double Ko = s_xx / s_yy;
+	  //svarg[41] = Ko;
 
-	  // SHear strain and shear strain rate
+	  // Shear strain and shear strain rate
 	  double shear_strain_local = 0;
 	  double strain11 = svarg[28];
 	  double strain22 = svarg[29];
@@ -665,9 +645,9 @@ double rho_orig = matl->getInitialDensity();
 	  strain23 += e23 * dt;
 	  strain13 += e13 * dt;
 
-	  shear_strain_local = 1.0 / 2.0*sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0*(pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));  
+	  shear_strain_local = 1.0 / 2.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0*(pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));  
 
-	  shear_strain_rate = 1.0 / 2.0*sqrt(2 * (pow((e11 - e22), 2) + pow((e11 - e33), 2) + pow((e22 - e33), 2)) + 3 * (pow(e12, 2) + pow(e13, 2) + pow(e23, 2)));  
+	  shear_strain_rate = 1.0 / 2.0 * sqrt(2 * (pow((e11 - e22), 2) + pow((e11 - e33), 2) + pow((e22 - e33), 2)) + 3 * (pow(e12, 2) + pow(e13, 2) + pow(e23, 2)));  
 
 	  svarg[28] = strain11;
 	  svarg[29] = strain22;
@@ -741,12 +721,6 @@ double rho_orig = matl->getInitialDensity();
       // Unload ISVs from 1D array into ISVs_new
       for(int i=0;i<d_NINSV;i++){
         ISVs_new[i][idx]=svarg[i];
-
-        if (i==49){
-           // cerr << "svarg " << svarg[i] << endl;
-          //  cerr << "ISVs_new " << i << " is " << ISVs_new[i][idx] << endl;
-        }
-
       }
 
       // This is the Cauchy stress, still unrotated
@@ -1042,7 +1016,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("a",UI[26],0.0);
   ps->getWithDefault("y_ref",UI[27],0.0);
   ps->getWithDefault("Gjerdrum2D", UI[48], 0.0);
-  ps->getWithDefault("x", UI[49], 0.0);
+  ps->getWithDefault("x", UI[38], 0.0);
+  ps->getWithDefault("y_coordinate", UI[37], 0.0);
 
   ps->getWithDefault("strain11",UI[28],0.0);
   ps->getWithDefault("strain22",UI[29],0.0);
@@ -1055,30 +1030,23 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("St",UI[35],0.0);
   ps->getWithDefault("strain_95",UI[36],0.0);
   
-
-  ps->getWithDefault("y_coordinate",UI[37],0.0);
-  ps->getWithDefault("n",UI[38],0.0);
-
   ps->getWithDefault("s_xx",UI[39],0.0);
   ps->getWithDefault("s_yy",UI[40],0.0);
-   ps->getWithDefault("Ko",UI[41],0.0);
+  ps->getWithDefault("Ko",UI[41],0.0);
 
-    ps->getWithDefault("Use_regular",UI[42],0.0);
-    ps->getWithDefault("tFE",UI[43],0.0);
-    ps->getWithDefault("tShear",UI[44],0.0);
+  ps->getWithDefault("Use_regular",UI[42],0.0);
+  ps->getWithDefault("tFE",UI[43],0.0);
+  ps->getWithDefault("tShear",UI[44],0.0);
 
-    ps->getWithDefault("s_xy",UI[45],0.0);
-
-	ps->getWithDefault("n_nonlocalMC", UI[46], 0.0);
-	ps->getWithDefault("l_nonlocal", UI[47], 0.0);
+  ps->getWithDefault("s_xy",UI[45],0.0);
+  ps->getWithDefault("n_nonlocalMC", UI[46], 0.0);
+  ps->getWithDefault("l_nonlocal", UI[47], 0.0);
 }
 
 void
 MohrCoulomb::initializeLocalMPMLabels()
 {
   vector<string> ISVNames;
-
-
 
   ISVNames.push_back("G");
   ISVNames.push_back("K");
@@ -1111,6 +1079,7 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("y_ref");
   ISVNames.push_back("Gjerdrum2D");
   ISVNames.push_back("x");
+  ISVNames.push_back("y_coordinate");
 
   ISVNames.push_back("strain11");
   ISVNames.push_back("strain22");
@@ -1123,24 +1092,16 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("St");
   ISVNames.push_back("strain_95");
 
-  ISVNames.push_back("y_coordinate");
-  ISVNames.push_back("n");
-
-
   ISVNames.push_back("s_xx");
   ISVNames.push_back("s_yy");
   ISVNames.push_back("Ko");
 
-
   ISVNames.push_back("Use_regular");
   ISVNames.push_back("tFE");
   ISVNames.push_back("tShear");
-    ISVNames.push_back("s_xy");
-
-	ISVNames.push_back("n_nonlocalMC");
-	ISVNames.push_back("l_nonlocal");
-
-	
+  ISVNames.push_back("s_xy");
+  ISVNames.push_back("n_nonlocalMC");
+  ISVNames.push_back("l_nonlocal");
 
   for(int i=0;i<d_NINSV;i++){
     ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1362,6 +1323,8 @@ SpecVol=svarg[12];
     svarg[6]=SuctionNew;
     svarg[12]=SpecVolNew;
 }
+
+
 svarg[0]=G;
 svarg[1]=K;
 svarg[2]=c;
