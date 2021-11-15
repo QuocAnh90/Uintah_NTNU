@@ -88,7 +88,8 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_doExplicitHeatConduction           =  true;
   d_deleteGeometryObjects              =  false;
   d_doPressureStabilization            =  false;
-  d_doCapDensity = false;
+  d_doCapDensity                       = false;
+  d_gDisplacement                      = false;
   d_computeNodalHeatFlux               =  false;
   d_computeScaleFactor                 =  false;
   d_doTransientImplicitHeatConduction  =  true;
@@ -248,6 +249,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("DeleteGeometryObjects",             d_deleteGeometryObjects);
   mpm_flag_ps->get("DoPressureStabilization",           d_doPressureStabilization);
   mpm_flag_ps->get("DoCapDensity",                      d_doCapDensity);
+  mpm_flag_ps->get("GetNodalDisplacement",              d_gDisplacement);
   mpm_flag_ps->get("DoThermalExpansion",                d_doThermalExpansion);
   mpm_flag_ps->getWithDefault("UseGradientEnhancedVelocityProjection",  d_GEVelProj,false);
   mpm_flag_ps->get("do_grid_reset",                     d_doGridReset);
@@ -439,6 +441,7 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("DeleteGeometryObjects",              d_deleteGeometryObjects);
   ps->appendElement("DoPressureStabilization",            d_doPressureStabilization);
   ps->appendElement("DoCapDensity",                       d_doCapDensity);
+  ps->appendElement("GetNodalDisplacement",               d_gDisplacement);
   ps->appendElement("computeNodalHeatFlux",               d_computeNodalHeatFlux);
   ps->appendElement("computeScaleFactor",                 d_computeScaleFactor);
   ps->appendElement("DoThermalExpansion",                 d_doThermalExpansion);

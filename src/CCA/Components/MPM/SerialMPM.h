@@ -365,6 +365,14 @@ protected:
                                                DataWarehouse* old_dw,
                                                DataWarehouse* new_dw);
 
+  //////////
+  // Insert Documentation Here:
+  virtual void GetNodalDisplacement(  const ProcessorGroup*,
+                                      const PatchSubset* patches,
+                                      const MaterialSubset* matls,
+                                      DataWarehouse* old_dw,
+                                      DataWarehouse* new_dw);
+
   virtual void computeParticleGradients(const ProcessorGroup*,
                                         const PatchSubset* patches,
                                         const MaterialSubset* matls,
@@ -504,6 +512,9 @@ protected:
   virtual void scheduleInterpolateToParticlesAndUpdate(SchedulerP&, 
                                                        const PatchSet*,
                                                        const MaterialSet*);
+
+  virtual void scheduleGetNodalDisplacement(SchedulerP&, const PatchSet*,
+      const MaterialSet*);
 
   virtual void scheduleComputeParticleGradients(SchedulerP&, 
                                                 const PatchSet*,

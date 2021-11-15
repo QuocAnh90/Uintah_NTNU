@@ -743,6 +743,11 @@ SerialMPM::scheduleTimeAdvance(const LevelP & level,
     scheduleIntegrateTemperatureRate(     sched, patches, matls);
   }
   scheduleInterpolateToParticlesAndUpdate(sched, patches, matls);
+
+  if (flags->d_gDisplacement) {
+      scheduleGetNodalDisplacement(sched, patches, matls);
+  }
+
   scheduleComputeParticleGradients(       sched, patches, matls);
   scheduleComputeStressTensor(            sched, patches, matls);
   scheduleFinalParticleUpdate(            sched, patches, matls);
@@ -1385,6 +1390,30 @@ void SerialMPM::scheduleInterpolateToParticlesAndUpdate(SchedulerP& sched,
   // The task will have a reference to z_matl
   if (z_matl->removeReference())
     delete z_matl; // shouln't happen, but...
+}
+
+void SerialMPM::scheduleGetNodalDisplacement(SchedulerP& sched,
+    const PatchSet* patches,
+    const MaterialSet* matls)
+{
+    if (!flags->doMPMOnLevel(getLevel(patches)->getIndex(),
+        getLevel(patches)->getGrid()->numLevels()))
+        return;
+
+    printSchedule(patches, cout_doing, "MPM::scheduleGetNodalDisplacement");
+
+    Task* t = scinew Task("MPM::GetNodalDisplacement",
+        this, &SerialMPM::GetNodalDisplacement);
+    Ghost::GhostType  gan = Ghost::AroundNodes;
+
+
+    t->requires(Task::OldDW, lb->pMassLabel, gan, NGP);
+    t->requires(Task::OldDW, lb->pXLabel, gan, NGP);
+    t->requires(Task::NewDW, lb->pCurSizeLabel, gan, NGP);
+    t->requires(Task::NewDW, lb->pDispLabel_preReloc, gan, NGP);
+    t->computes(lb->gDispLabel);
+
+    sched->addTask(t, patches, matls);
 }
 
 void SerialMPM::scheduleComputeParticleGradients(SchedulerP& sched,
@@ -3861,6 +3890,91 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
     }
     delete interpolator;
   }
+}
+
+void SerialMPM::GetNodalDisplacement(const ProcessorGroup*,
+    const PatchSubset* patches,
+    const MaterialSubset*,
+    DataWarehouse* old_dw,
+    DataWarehouse* new_dw)
+{
+    for (int p = 0; p < patches->size(); p++) {
+        const Patch* patch = patches->get(p);
+
+        printTask(patches, patch, cout_doing,
+            "Doing MPM::GetNodalDisplacement");
+
+        unsigned int numMatls = m_materialManager->getNumMatls("MPM");
+        ParticleInterpolator* interpolator = flags->d_interpolator->clone(patch);
+        vector<IntVector> ni(interpolator->size());
+        vector<double> S(interpolator->size());
+
+        string interp_type = flags->d_interpolator_type;
+
+        Ghost::GhostType  gan = Ghost::AroundNodes;
+
+        for (unsigned int m = 0; m < numMatls; m++) {
+            MPMMaterial* mpm_matl = (MPMMaterial*)m_materialManager->getMaterial("MPM", m);
+            int dwi = mpm_matl->getDWIndex();
+
+            // Create arrays for the particle data
+            constParticleVariable<Point>  px;
+            constParticleVariable<double> pmass;
+            constParticleVariable<Vector> pdis;
+            constParticleVariable<Matrix3> psize;
+            ParticleSubset* pset = old_dw->getParticleSubset(dwi, patch,
+                gan, NGP, lb->pXLabel);
+
+            old_dw->get(px, lb->pXLabel, pset);
+            old_dw->get(pmass, lb->pMassLabel, pset);
+            new_dw->get(pdis, lb->pDispLabel_preReloc, pset);
+            new_dw->get(psize, lb->pCurSizeLabel, pset);
+            // Create arrays for the grid data
+            NCVariable<double> gmass;
+            NCVariable<Vector> gDisp;
+
+            new_dw->allocateTemporary(gmass, patch);
+            new_dw->allocateAndPut(gDisp, lb->gDispLabel, dwi, patch);
+
+            gmass.initialize(d_SMALL_NUM_MPM);
+            gDisp.initialize(Vector(0, 0, 0));
+
+            //loop over all particles in the patch:
+            for (ParticleSubset::iterator iter = pset->begin();
+                iter != pset->end();
+                iter++) {
+                particleIndex idx = *iter;
+                int NN =
+                    interpolator->findCellAndWeights(px[idx], ni, S, psize[idx]);
+                Vector pDisMass = pdis[idx] * pmass[idx];
+
+                // Add each particles contribution to the local mass & velocity
+                // Must use the node indices
+                IntVector node;
+                // Iterate through the nodes that receive data from the current particle
+                for (int k = 0; k < NN; k++) {
+                    node = ni[k];
+                    if (patch->containsNode(node)) {
+
+                        gmass[node] += pmass[idx] * S[k];
+                        gDisp[node] += pDisMass * S[k];
+                    }
+                }
+
+            } // End of particle loop
+
+            for (NodeIterator iter = patch->getExtraNodeIterator();
+                !iter.done(); iter++) {
+                IntVector c = *iter;
+
+                gDisp[c] /= gmass[c];
+
+            }
+
+        }  // End loop over materials
+
+        delete interpolator;
+    }  // End loop over patches
 }
 
 void SerialMPM::computeParticleGradients(const ProcessorGroup*,
