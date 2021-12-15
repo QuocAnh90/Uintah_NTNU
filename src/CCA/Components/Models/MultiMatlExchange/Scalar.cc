@@ -75,13 +75,15 @@ void ScalarExch::problemSetup(const ProblemSpecP & matl_ps)
 
   ProblemSpecP exch_ps;
   d_exchCoeff->problemSetup(matl_ps, d_numMatls, exch_ps);
-  ProblemSpecP model_ps = exch_ps->findBlock("Model");
 
-  if (model_ps != nullptr) {
-      // Overwrite the coefficient with the given Models
-      map<string, string> attributes;
-      model_ps->getAttributes(attributes);
-      model = attributes["type"];
+  if (d_numMatls>1){
+      ProblemSpecP model_ps = exch_ps->findBlock("Model");
+      if (model_ps != nullptr) {
+          // Overwrite the coefficient with the given Models
+          map<string, string> attributes;
+          model_ps->getAttributes(attributes);
+          model = attributes["type"];
+      }
   }
 }
 
