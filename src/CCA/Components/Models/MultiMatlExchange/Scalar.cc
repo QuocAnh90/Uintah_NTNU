@@ -84,6 +84,11 @@ void ScalarExch::problemSetup(const ProblemSpecP & matl_ps)
           model_ps->getAttributes(attributes);
           model = attributes["type"];
       }
+
+      // <Model type="Reynolds">
+      if (model == "Reynolds") {
+          model_ps->require("grain_size", d_grain);
+      }
   }
 }
 
@@ -91,8 +96,20 @@ void ScalarExch::problemSetup(const ProblemSpecP & matl_ps)
 //
 void ScalarExch::outputProblemSpec(ProblemSpecP & matl_ps )
 {
-  ProblemSpecP notUsed;
-  d_exchCoeff->outputProblemSpec(matl_ps, notUsed);
+  //ProblemSpecP notUsed;
+  //d_exchCoeff->outputProblemSpec(matl_ps, notUsed);
+
+  ProblemSpecP exch_prop_ps;
+  d_exchCoeff->outputProblemSpec(matl_ps, exch_prop_ps);
+
+  if (d_numMatls > 1) {     
+      ProblemSpecP model_ps = exch_prop_ps->appendChild("Model");
+
+      // <Model type="Reynolds">
+      if (model == "Reynolds") {
+          model_ps->appendElement("grain_size", d_grain);
+      }
+  }
 }
 
 //______________________________________________________________________
@@ -1215,7 +1232,11 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
         double FRe = 0;
 
         // grain size
-        double d_grain = 0.001;
+        //double d_grain = 0.001;
+
+        if (d_grain < 0) {
+            throw InvalidValue("**ERROR**: Negative grain dize", __FILE__, __LINE__);
+        }
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
@@ -1406,7 +1427,13 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
         double FRe = 0;
 
         // grain size
-        double d_grain = 0.001;
+        //double d_grain = 0.001;
+
+        if (d_grain < 0) {
+            throw InvalidValue("**ERROR**: Negative grain dize", __FILE__, __LINE__);
+        }
+
+        cerr << d_grain << endl;
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
