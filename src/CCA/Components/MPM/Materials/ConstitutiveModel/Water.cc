@@ -49,6 +49,14 @@ Water::Water(ProblemSpecP& ps, MPMFlags* Mflag)
   ps->require("bulk_modulus", d_initialData.d_Bulk);
   ps->require("viscosity",    d_initialData.d_Viscosity);
   ps->require("gamma",        d_initialData.d_Gamma);
+  //ps->require("initial_stress", d_initialData.d_initial_stress);
+  //ps->require("y_ref_stress", d_initialData.d_y_ref_stress);
+
+  ps->getWithDefault("useInitialStressGravity", d_useInitialStressGravity, false);
+  if (d_useInitialStressGravity) {
+      ps->getWithDefault("dy_ref_gravity", dy_ref_gravity, 0.0);
+  }
+
   initializeLocalMPMLabels();
 }
 
@@ -67,6 +75,14 @@ void Water::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("bulk_modulus",d_initialData.d_Bulk);
   cm_ps->appendElement("viscosity",   d_initialData.d_Viscosity);
   cm_ps->appendElement("gamma",       d_initialData.d_Gamma);
+
+  cm_ps->appendElement("useInitialStressGravity", d_useInitialStressGravity);
+  if (d_useInitialStressGravity) {
+      cm_ps->appendElement("dy_ref_gravity", dy_ref_gravity);
+  }
+
+  //cm_ps->appendElement("initial_stress", d_initialData.d_initial_stress);
+  //cm_ps->appendElement("y_ref_stress", d_initialData.d_y_ref_stress);
 }
 
 Water* Water::clone()
@@ -88,6 +104,48 @@ void Water::initializeCMData(const Patch* patch,
   initSharedDataForExplicit(patch, matl, new_dw);
 
   computeStableTimeStep(patch, matl, new_dw);
+
+  // If d_useInitialStress then modify pDefGrad and pStress
+  ParticleSubset* pset = new_dw->getParticleSubset(matl->getDWIndex(), patch);
+
+  if (d_useInitialStressGravity) {
+      // Replace defaults with more accurate approximants.
+
+      // initSharedDataForExplicit(...) above allocates these variables, so
+      // here we need to modify them only
+      //ParticleVariable<Matrix3> pDefGrad;
+      //new_dw->getModifiable(pDefGrad, lb->pDeformationMeasureLabel, pset);
+      ParticleVariable<Matrix3> pStress;
+      new_dw->getModifiable(pStress, lb->pStressLabel, pset);
+
+      ParticleVariable<Point> px;
+      new_dw->getModifiable(px, lb->pXLabel, pset);
+
+      double rho_orig = matl->getInitialDensity();
+
+      ParticleSubset::iterator iter = pset->begin();
+      for (; iter != pset->end(); ++iter)
+      {
+          particleIndex idx = *iter;
+
+          double p = -rho_orig * (px[idx](1) - dy_ref_gravity);
+
+          Matrix3 stressInitial(p, 0.0, 0.0,
+                                0.0, p, 0.0,
+                                0.0, 0.0, p);
+
+          double rho_cur = rho_orig / d_initialData.d_Bulk * p;
+
+          //double DefDiagonal = cbrt(rho_cur / rho_orig);
+
+          //Matrix3 defGradInitial(DefDiagonal, 0.0, 0.0,
+          //                       0.0, DefDiagonal, 0.0,
+           //                      0.0, 0.0, DefDiagonal);
+
+         // pDefGrad[idx] = defGradInitial;
+          pStress[idx] = stressInitial;
+      }
+  }
 }
 
 void Water::computeStableTimeStep(const Patch* patch,
@@ -152,9 +210,11 @@ void Water::computeStressTensor(const PatchSubset* patches,
     ParticleVariable<int> pLocalized_new;
     ParticleVariable<double> pdTdt,p_q;
 
-    delt_vartype delT;
-    old_dw->get(delT, lb->delTLabel, getLevel(patches));
+    //delt_vartype delT;
+    //old_dw->get(delT, lb->delTLabel, getLevel(patches));
 
+    //constParticleVariable<Point> px;
+    //old_dw->get(px,                  lb->pXLabel,                  pset);
     old_dw->get(pvelocity,           lb->pVelocityLabel,           pset);
     old_dw->get(deformationGradient, lb->pDeformationMeasureLabel, pset);
     old_dw->get(pLocalized,          lb->pLocalizedMPMLabel,       pset);
@@ -169,6 +229,11 @@ void Water::computeStressTensor(const PatchSubset* patches,
     new_dw->get(pvolume,             lb->pVolumeLabel_preReloc,    pset);
     new_dw->get(velGrad,             lb->pVelGradLabel_preReloc,   pset);
 
+    // Get the current simulation time
+    //simTime_vartype simTimeVar;
+    //old_dw->get(simTimeVar, lb->simulationTimeLabel);
+    //double time = simTimeVar;
+
     // Get the particle IDs, useful in case a simulation goes belly up
     constParticleVariable<long64> pParticleID;
     old_dw->get(pParticleID, lb->pParticleIDLabel, pset);
@@ -176,6 +241,8 @@ void Water::computeStressTensor(const PatchSubset* patches,
     double viscosity = d_initialData.d_Viscosity;
     double bulk  = d_initialData.d_Bulk;
     double gamma = d_initialData.d_Gamma;
+    //double initial_stress = d_initialData.d_initial_stress;
+    //double y_ref_stress = d_initialData.d_y_ref_stress;
 
     double rho_orig = matl->getInitialDensity();
 
@@ -215,6 +282,13 @@ void Water::computeStressTensor(const PatchSubset* patches,
       // get the hydrostatic part of the stress
       double jtotheminusgamma = pow(J,-gamma);
       p = bulk*(jtotheminusgamma - 1.0);
+
+      // Generate initial stress
+      //if (time < 0.000001) {
+       //   if (initial_stress > 0) {
+       //       p = rho_orig * (px[idx](1) - y_ref_stress);
+       //   }
+      //}
 
       // compute the total stress (volumetric + deviatoric)
       pstress[idx] = Identity*(-p) + Shear;

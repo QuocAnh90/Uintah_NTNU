@@ -53,6 +53,8 @@ namespace Uintah {
       double d_Bulk;
       double d_Viscosity;
       double d_Gamma;
+      //double d_intial_stress;
+      //double d_y_ref_stress;
     };
 
 
@@ -61,6 +63,10 @@ namespace Uintah {
     CMData d_initialData;
     bool d_useModifiedEOS; 
     int d_8or27;
+
+    // Initial stress state
+    bool d_useInitialStressGravity;
+    double dy_ref_gravity;  // Initial pressure
 
   private:
     // Prevent copying of this class

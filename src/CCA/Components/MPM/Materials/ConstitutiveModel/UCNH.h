@@ -125,6 +125,9 @@ namespace Uintah {
     bool d_useInitialStress;
     double d_init_pressure;  // Initial pressure
 
+    bool d_useInitialStressGravity;
+    double dy_ref_gravity;  // Initial pressure
+
     // Model factories
     //bool d_useEOSFactory;
     MPMEquationOfState* d_eos;

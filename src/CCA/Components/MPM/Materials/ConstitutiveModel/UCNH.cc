@@ -89,6 +89,11 @@ UCNH::UCNH(ProblemSpecP& ps, MPMFlags* Mflag, bool plas, bool dam)
     ps->getWithDefault("initial_pressure", d_init_pressure, 0.0);
   }
 
+  ps->getWithDefault("useInitialStressGravity", d_useInitialStressGravity, false);
+  if (d_useInitialStressGravity) {
+      ps->getWithDefault("dy_ref_gravity", dy_ref_gravity, 0.0);
+  }
+
   // Universal Labels
   bElBarLabel                = VarLabel::create("p.bElBar",
                              ParticleVariable<Matrix3>::getTypeDescription());
@@ -163,6 +168,11 @@ void UCNH::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
 
   if (d_useInitialStress) {
     cm_ps->appendElement("initial_pressure", d_init_pressure);
+  }
+
+  cm_ps->appendElement("useInitialStressGravity", d_useInitialStressGravity);
+  if (d_useInitialStressGravity) {
+      cm_ps->appendElement("dy_ref_gravity", dy_ref_gravity);
   }
 }
 //______________________________________________________________________
@@ -259,6 +269,46 @@ void UCNH::initializeCMData(const Patch* patch,
     initSharedDataForExplicit(patch, matl, new_dw);
 
     // If d_useInitialStress then modify pDefGrad and pStress
+    if (d_useInitialStressGravity) {
+     // Replace defaults with more accurate approximants.
+
+     // initSharedDataForExplicit(...) above allocates these variables, so
+     // here we need to modify them only
+        //ParticleVariable<Matrix3> pDefGrad;
+        //new_dw->getModifiable(pDefGrad, lb->pDeformationMeasureLabel, pset);
+        ParticleVariable<Matrix3> pStress;
+        new_dw->getModifiable(pStress, lb->pStressLabel, pset);
+
+        ParticleVariable<Point> px;
+        new_dw->getModifiable(px, lb->pXLabel, pset);
+       
+        double rho_orig = matl->getInitialDensity();
+        
+        ParticleSubset::iterator iter = pset->begin();
+        for (; iter != pset->end(); ++iter)
+        {
+            particleIndex idx = *iter;
+
+            double p = -rho_orig * (px[idx](1) - dy_ref_gravity);
+
+            Matrix3 stressInitial(p, 0.0, 0.0,
+                                  0.0, p, 0.0,
+                                  0.0, 0.0, p);
+
+            double rho_cur = computeDensity(rho_orig, p);
+
+           // double DefDiagonal = cbrt(rho_cur / rho_orig);
+
+           // Matrix3 defGradInitial(DefDiagonal, 0.0, 0.0,
+           //                        0.0, DefDiagonal, 0.0,
+           //                        0.0, 0.0, DefDiagonal);
+
+            //pDefGrad[idx] = defGradInitial;
+            pStress[idx] = stressInitial;
+        }
+    }
+
+    // If d_useInitialStress then modify pDefGrad and pStress
     if (d_useInitialStress) {
       // Replace defaults with more accurate approximants.
 
@@ -287,6 +337,9 @@ void UCNH::initializeCMData(const Patch* patch,
         pStress[idx]  = stressInitial;
       }
     }
+
+    
+
   }
   ParticleSubset::iterator iterUniv = pset->begin();
   ParticleSubset::iterator iterPlas = pset->begin();

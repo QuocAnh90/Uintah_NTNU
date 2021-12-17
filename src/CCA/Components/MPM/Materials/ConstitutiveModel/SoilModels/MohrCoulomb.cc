@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=49;
+  d_NBASICINPUTS=50;
   d_NMGDC=0;
 
 // Total number of properties
@@ -387,6 +387,9 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
 	cm_ps->appendElement("n_nonlocalMC", UI[46]);
 	cm_ps->appendElement("l_nonlocal", UI[47]);
 
+    cm_ps->appendElement("dy_ref_gravity", UI[48]);
+    cm_ps->appendElement("useInitialStressGravityMC", UI[49]);
+
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -416,6 +419,51 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
   }
 
   computeStableTimestep(patch, matl, new_dw);
+
+  // If d_useInitialStress then modify pDefGrad and pStress
+  double d_useInitialStressGravity = UI[49];
+  double dy_ref_gravity = UI[48];
+  double bulk = UI[1];
+
+  if (d_useInitialStressGravity) {
+      // Replace defaults with more accurate approximants.
+
+      // initSharedDataForExplicit(...) above allocates these variables, so
+      // here we need to modify them only
+      //ParticleVariable<Matrix3> pDefGrad;
+      //new_dw->getModifiable(pDefGrad, lb->pDeformationMeasureLabel, pset);
+      ParticleVariable<Matrix3> pStress;
+      new_dw->getModifiable(pStress, lb->pStressLabel, pset);
+
+      ParticleVariable<Point> px;
+      new_dw->getModifiable(px, lb->pXLabel, pset);
+
+      double rho_orig = matl->getInitialDensity();
+
+      ParticleSubset::iterator iter = pset->begin();
+      for (; iter != pset->end(); ++iter)
+      {
+          particleIndex idx = *iter;
+
+          double p = rho_orig * (px[idx](1) - dy_ref_gravity);
+
+          Matrix3 stressInitial(p, 0.0, 0.0,
+                                0.0, p, 0.0,
+                                0.0, 0.0, p);
+
+          double rho_cur = rho_orig / bulk * p;
+
+          //double DefDiagonal = cbrt(rho_cur / rho_orig);
+
+          //Matrix3 defGradInitial(DefDiagonal, 0.0, 0.0,
+           //   0.0, DefDiagonal, 0.0,
+           //   0.0, 0.0, DefDiagonal);
+
+          //pDefGrad[idx] = defGradInitial;
+          pStress[idx] = stressInitial;
+      }
+  }
+
 }
 
 void MohrCoulomb::addParticleState(std::vector<const VarLabel*>& from,
@@ -566,6 +614,15 @@ double rho_orig = matl->getInitialDensity();
 
       // Look into using Rebecca's PD algorithm
       deformationGradient_new[idx].polarDecompositionRMB(tensorU, tensorR);
+
+      //double initial_stress = UI[49];
+      //double y_ref_stress = UI[48];
+      // Generate initial stress
+      //if (time < 0.000001) {
+       //   if (initial_stress > 0) {
+       //     // pstress[idx](1, 1) = rho_orig * (px[idx](1) - y_ref_stress);
+       //   }
+      //}
 
       // This is the previous timestep Cauchy stress
       // unrotated tensorSig=R^T*pstress*R
@@ -1041,6 +1098,9 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("s_xy",UI[45],0.0);
   ps->getWithDefault("n_nonlocalMC", UI[46], 0.0);
   ps->getWithDefault("l_nonlocal", UI[47], 0.0);
+
+  ps->getWithDefault("dy_ref_gravity", UI[48], 0.0);
+  ps->getWithDefault("useInitialStressGravityMC", UI[49], 0.0);
 }
 
 void
@@ -1102,6 +1162,9 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("s_xy");
   ISVNames.push_back("n_nonlocalMC");
   ISVNames.push_back("l_nonlocal");
+
+  ISVNames.push_back("dy_ref_gravity");
+  ISVNames.push_back("useInitialStressGravityMC");
 
   for(int i=0;i<d_NINSV;i++){
     ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1245,7 +1308,6 @@ if (Usetransition>0)
 }
 
 // Shear strength linear with depth
-
 double y_ref1 = 0;
 
 if(Use_linear>0)
@@ -1269,8 +1331,6 @@ if(Use_linear>0)
         else {
             c = c + a * (y - y_ref);
         }  
-
-        //cerr << " c is " << c << endl;
     }
 }
 
