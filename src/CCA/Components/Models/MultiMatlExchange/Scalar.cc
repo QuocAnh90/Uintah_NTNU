@@ -1433,8 +1433,6 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
             throw InvalidValue("**ERROR**: Negative grain dize", __FILE__, __LINE__);
         }
 
-        cerr << d_grain << endl;
-
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
             ICE_density1 = ice_matl1->getInitialDensity();
