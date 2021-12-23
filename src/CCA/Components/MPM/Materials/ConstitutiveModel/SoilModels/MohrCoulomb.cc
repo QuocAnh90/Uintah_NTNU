@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=50;
+  d_NBASICINPUTS=52;
   d_NMGDC=0;
 
 // Total number of properties
@@ -390,6 +390,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
     cm_ps->appendElement("dy_ref_gravity", UI[48]);
     cm_ps->appendElement("useInitialStressGravityMC", UI[49]);
 
+    cm_ps->appendElement("z", UI[50]);
+    cm_ps->appendElement("Gjerdrum3D", UI[51]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -662,6 +664,7 @@ double rho_orig = matl->getInitialDensity();
 	  //double n = svarg[38];
       svarg[38] = px[idx](0);
 	  svarg[37] = px[idx](1);
+      svarg[50] = px[idx](2);
 
 	  // Compute Ko
 	  //double s_xx = sigarg[0];
@@ -1075,7 +1078,7 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("Gjerdrum2D", UI[48], 0.0);
   ps->getWithDefault("x", UI[38], 0.0);
   ps->getWithDefault("y_coordinate", UI[37], 0.0);
-
+  
   ps->getWithDefault("strain11",UI[28],0.0);
   ps->getWithDefault("strain22",UI[29],0.0);
   ps->getWithDefault("strain33",UI[30],0.0);
@@ -1101,6 +1104,10 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
   ps->getWithDefault("dy_ref_gravity", UI[48], 0.0);
   ps->getWithDefault("useInitialStressGravityMC", UI[49], 0.0);
+
+  ps->getWithDefault("z", UI[50], 0.0);
+  ps->getWithDefault("Gjerdrum3D", UI[51], 0.0);
+
 }
 
 void
@@ -1165,6 +1172,9 @@ MohrCoulomb::initializeLocalMPMLabels()
 
   ISVNames.push_back("dy_ref_gravity");
   ISVNames.push_back("useInitialStressGravityMC");
+
+  ISVNames.push_back("z");
+  ISVNames.push_back("Gjerdrum3D");
 
   for(int i=0;i<d_NINSV;i++){
     ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1254,10 +1264,11 @@ int Flavour=int(UI[5]);
     double y_ref=UI[27];
     double y=svarg[37];
 
-    //cerr << " y is " << y << endl;
-
     double Gjerdrum2D = UI[48];
-    double x = svarg[49];
+    double x = svarg[38];
+
+    double Gjerdrum3D = UI[51];
+    double z = svarg[50];
 
 /*
 Flavour
@@ -1312,7 +1323,7 @@ double y_ref1 = 0;
 
 if(Use_linear>0)
 {    
-    if (time < 0.0001){
+    if (time < 0.00001){
 
         if (Gjerdrum2D > 0) {
 
@@ -1328,6 +1339,11 @@ if(Use_linear>0)
 
             if (y <= y_ref1) c = c + a * (y_ref1 - y);
         }
+
+        if (Gjerdrum3D > 0) {
+            if (z >= y_ref) c = c + a * (z - y_ref);
+        }
+
         else {
             c = c + a * (y - y_ref);
         }  
