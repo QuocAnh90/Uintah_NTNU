@@ -1341,7 +1341,7 @@ if(Use_linear>0)
         }
 
         if (Gjerdrum3D > 0) {
-            if (z >= y_ref) c = c + a * (z - y_ref);
+            if (z < y_ref) c = c + a * (y_ref1 - z);
         }
 
         else {

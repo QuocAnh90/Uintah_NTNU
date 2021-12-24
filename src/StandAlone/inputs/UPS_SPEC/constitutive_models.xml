@@ -1078,6 +1078,7 @@
 	  <y_coordinate		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<n		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<Gjerdrum2D		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <Gjerdrum3D		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <x		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
 	<Use_regular	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
