@@ -1241,7 +1241,7 @@ if (nblk!=1) cerr<<"Mohr-Coulomb model may only be used with nblk equal to 1. Re
 
 double G=UI[0]; //shear modulus [stress units]
 double K=UI[1]; //bulk modulus [stress units]
-double c=UI[2]; //cohesion [stress units]
+double c = svarg[2]; //cohesion [stress units]
 
 double m_modul=UI[22];
 double nuy=UI[23];
@@ -1341,7 +1341,7 @@ if(Use_linear>0)
         }
 
         if (Gjerdrum3D > 0) {
-            if (z < y_ref) c = c + a * (y_ref1 - z);
+            if (z < y_ref) c = c + a * (y_ref - z);
         }
 
         else {
