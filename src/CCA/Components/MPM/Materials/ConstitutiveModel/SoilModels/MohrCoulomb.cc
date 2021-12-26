@@ -279,7 +279,6 @@ MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
 
   // Check that model parameters are valid and allow model to change if needed
 
-
   //DMMCHK(UI,UI,&UI[d_NBASICINPUTS]);
   CheckModel (UI);
 
@@ -291,10 +290,8 @@ MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
     for (int i=0;i<nx;i++)
     {
         rinit[i]=UI[i];
-        //cerr<<" UI["<<i<<"]="<<UI[i];
     }
   d_NINSV=nx;
-  //  cout << "d_NINSV = " << d_NINSV <<l endl;
 
   initializeLocalMPMLabels();
 }
@@ -415,10 +412,44 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
   for(int i=0;i<d_NINSV;i++){
     new_dw->allocateAndPut(ISVs[i],ISVLabels[i], pset);
     ParticleSubset::iterator iter = pset->begin();
+
+    constParticleVariable<Point> px;
+
+    new_dw->get(px, lb->pXLabel, pset);
     for(;iter != pset->end(); iter++){
       ISVs[i][*iter] = rinit[i];
+
+      // Linear cohesion with depth (this code is run in actuallyinitialize in SericalCC before constructor)
+
+      if (i ==2){
+
+      //double x = px[*iter](0);
+      //double y = px[*iter](1);
+      double z = px[*iter](2);
+
+      /*
+              //if (Gjerdrum2D > 0) {
+                  double y_ref1 = 0;
+                  if (x < 50.85)  y_ref1 = 36.75 - 17.55;
+
+                  if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
+
+                  if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
+
+                  if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
+
+                  if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
+
+                  if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);
+              //}
+      */
+             // if (Gjerdrum3D > 0) {
+                  if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
+             // }
+      }
     }
   }
+
 
   computeStableTimestep(patch, matl, new_dw);
 
@@ -1257,18 +1288,6 @@ int Flavour=int(UI[5]);
     double Use_softening=UI[34];
     double St=UI[35];
     double strain_95=UI[36];
-    
-
-    double Use_linear=UI[25];
-    double a=UI[26];
-    double y_ref=UI[27];
-    double y=svarg[37];
-
-    double Gjerdrum2D = UI[48];
-    double x = svarg[38];
-
-    double Gjerdrum3D = UI[51];
-    double z = svarg[50];
 
 /*
 Flavour
@@ -1316,38 +1335,6 @@ if (Usetransition>0)
 	    else{
 	    c=St*a1*pow(W,-b1);
 	    }
-}
-
-// Shear strength linear with depth
-double y_ref1 = 0;
-
-if(Use_linear>0)
-{    
-    if (time < 0.00001){
-
-        if (Gjerdrum2D > 0) {
-
-            if (x < 50.85)  y_ref1 = 36.75 - 17.55;
-
-            if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
-
-            if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
-
-            if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
-
-            if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
-
-            if (y <= y_ref1) c = c + a * (y_ref1 - y);
-        }
-
-        if (Gjerdrum3D > 0) {
-            if (z < y_ref) c = c + a * (y_ref - z);
-        }
-
-        else {
-            c = c + a * (y - y_ref);
-        }  
-    }
 }
 
 double Usemodul=UI[21];
@@ -1403,7 +1390,7 @@ SpecVol=svarg[12];
 
 svarg[0]=G;
 svarg[1]=K;
-svarg[2]=c;
+//svarg[2]=c;
 
 
 int Region;
