@@ -264,7 +264,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=52;
+  d_NBASICINPUTS=50;
   d_NMGDC=0;
 
 // Total number of properties
@@ -354,12 +354,11 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("nuy",UI[23]); // modul ratio
   cm_ps->appendElement("shear_strain",UI[24]);
 
-  cm_ps->appendElement("Use_linear",UI[25]);
-  cm_ps->appendElement("a",UI[26]);
-  cm_ps->appendElement("y_ref",UI[27]);
-  cm_ps->appendElement("Gjerdrum2D", UI[48]);
-  cm_ps->appendElement("x", UI[38]);
-  cm_ps->appendElement("y_coordinate", UI[37]);
+  cm_ps->appendElement("Su",UI[25]);
+  //cm_ps->appendElement("a",UI[26]);
+  //cm_ps->appendElement("y_ref",UI[27]);
+  //cm_ps->appendElement("x", UI[38]);
+  //cm_ps->appendElement("y_coordinate", UI[37]);
 
   cm_ps->appendElement("strain11",UI[28]);
   cm_ps->appendElement("strain22",UI[29]);
@@ -386,9 +385,6 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
 
     cm_ps->appendElement("dy_ref_gravity", UI[48]);
     cm_ps->appendElement("useInitialStressGravityMC", UI[49]);
-
-    cm_ps->appendElement("z", UI[50]);
-    cm_ps->appendElement("Gjerdrum3D", UI[51]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -693,9 +689,9 @@ double rho_orig = matl->getInitialDensity();
 
 	  // Undrained increase linearly with depth
 	  //double n = svarg[38];
-      svarg[38] = px[idx](0);
-	  svarg[37] = px[idx](1);
-      svarg[50] = px[idx](2);
+      //svarg[38] = px[idx](0);
+	  //svarg[37] = px[idx](1);
+      //svarg[50] = px[idx](2);
 
 	  // Compute Ko
 	  //double s_xx = sigarg[0];
@@ -1103,12 +1099,11 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("nuy",UI[23],0.0);
   ps->getWithDefault("shear_strain",UI[24],0.0);
 
-  ps->getWithDefault("Use_linear",UI[25],0.0);
-  ps->getWithDefault("a",UI[26],0.0);
-  ps->getWithDefault("y_ref",UI[27],0.0);
-  ps->getWithDefault("Gjerdrum2D", UI[48], 0.0);
-  ps->getWithDefault("x", UI[38], 0.0);
-  ps->getWithDefault("y_coordinate", UI[37], 0.0);
+  ps->getWithDefault("Su",UI[25],0.0);
+  //ps->getWithDefault("a",UI[26],0.0);
+  //ps->getWithDefault("y_ref",UI[27],0.0);
+  //ps->getWithDefault("x", UI[38], 0.0);
+  //ps->getWithDefault("y_coordinate", UI[37], 0.0);
   
   ps->getWithDefault("strain11",UI[28],0.0);
   ps->getWithDefault("strain22",UI[29],0.0);
@@ -1135,10 +1130,6 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
   ps->getWithDefault("dy_ref_gravity", UI[48], 0.0);
   ps->getWithDefault("useInitialStressGravityMC", UI[49], 0.0);
-
-  ps->getWithDefault("z", UI[50], 0.0);
-  ps->getWithDefault("Gjerdrum3D", UI[51], 0.0);
-
 }
 
 void
@@ -1172,12 +1163,11 @@ MohrCoulomb::initializeLocalMPMLabels()
   ISVNames.push_back("nuy");
   ISVNames.push_back("shear_strain");
 
-  ISVNames.push_back("Use_linear");
-  ISVNames.push_back("a");
-  ISVNames.push_back("y_ref");
-  ISVNames.push_back("Gjerdrum2D");
-  ISVNames.push_back("x");
-  ISVNames.push_back("y_coordinate");
+  ISVNames.push_back("Su");
+  //ISVNames.push_back("a");
+  //ISVNames.push_back("y_ref");
+  //ISVNames.push_back("x");
+  //ISVNames.push_back("y_coordinate");
 
   ISVNames.push_back("strain11");
   ISVNames.push_back("strain22");
@@ -1203,9 +1193,6 @@ MohrCoulomb::initializeLocalMPMLabels()
 
   ISVNames.push_back("dy_ref_gravity");
   ISVNames.push_back("useInitialStressGravityMC");
-
-  ISVNames.push_back("z");
-  ISVNames.push_back("Gjerdrum3D");
 
   for(int i=0;i<d_NINSV;i++){
     ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1390,7 +1377,7 @@ SpecVol=svarg[12];
 
 svarg[0]=G;
 svarg[1]=K;
-//svarg[2]=c;
+svarg[25]=c;  // Undrained shear strength
 
 
 int Region;
