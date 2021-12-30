@@ -440,7 +440,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
               //}
       */
              // if (Gjerdrum3D > 0) {
-                  if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
+                  if (z < 140) ISVs[2][*iter] = 68000 + 3000 * (140 - z);
              // }
       }
     }
