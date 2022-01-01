@@ -331,7 +331,7 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
 
     cm_ps->appendElement("Use_softening", UI[12]);
     cm_ps->appendElement("St", UI[13]);
-    cm_ps->appendElement("strain_95", UI[26]);
+    
 
     cm_ps->appendElement("Usetransition", UI[14]); // undrained shear strength transition
     cm_ps->appendElement("A1", UI[15]);	// water influence parameter
@@ -345,6 +345,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("nuy", UI[23]); // modul ratio
     cm_ps->appendElement("shear_strain", UI[24]);
     cm_ps->appendElement("Su", UI[25]);
+
+    cm_ps->appendElement("strain_95", UI[26]);
 
     cm_ps->appendElement("Use_regular", UI[27]);
     cm_ps->appendElement("tFE", UI[28]);
@@ -886,7 +888,7 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
     ps->getWithDefault("Use_softening", UI[12], 0.0);
     ps->getWithDefault("St", UI[13], 0.0);
-    ps->getWithDefault("strain_95", UI[26], 0.0);
+    
 
     ps->getWithDefault("Usetransition", UI[14], 0.0); // undrained shear strength transition
     ps->getWithDefault("A1", UI[15], 0.0); 	// water influence parameter
@@ -900,6 +902,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("nuy", UI[23], 0.0);
     ps->getWithDefault("shear_strain", UI[24], 0.0);
     ps->getWithDefault("Su", UI[25], 0.0);
+
+    ps->getWithDefault("strain_95", UI[26], 0.0);
 
     ps->getWithDefault("Use_regular", UI[27], 0.0);
     ps->getWithDefault("tFE", UI[28], 0.0);
@@ -927,7 +931,7 @@ MohrCoulomb::initializeLocalMPMLabels()
 
     ISVNames.push_back("Use_softening");
     ISVNames.push_back("St");
-    ISVNames.push_back("strain_95");
+    
 
     ISVNames.push_back("Usetransition");
     ISVNames.push_back("A1");
@@ -941,6 +945,8 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("nuy");
     ISVNames.push_back("shear_strain");
     ISVNames.push_back("Su");
+
+    ISVNames.push_back("strain_95");
 
     ISVNames.push_back("Use_regular");
     ISVNames.push_back("tFE");
@@ -1087,7 +1093,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
 
     svarg[0] = G;
     svarg[1] = K;
-    svarg[25]=c;
+    svarg[25] = c;
 
     int Region;
 
