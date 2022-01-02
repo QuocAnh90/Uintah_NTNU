@@ -73,6 +73,7 @@ class Output;
     IntegratorType d_integrator;
 
     bool        d_artificial_viscosity;                        // Turn artificial viscosity on/off
+    std::string d_initial_stress;                              // Turn artificial viscosity on/off
     bool        d_artificial_viscosity_heating;                // Include heating due to AV
     bool        d_useLoadCurves;                               // Flag for using load curves
     bool        d_useCBDI;                                     // Flag for using CBDI boundary condition treatment

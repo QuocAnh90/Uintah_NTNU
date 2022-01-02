@@ -383,44 +383,40 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
             // Linear cohesion with depth (this code is run in actuallyinitialize in SericalCC before constructor)
 
-            if (i == 2) {
+            if (flag->d_initial_stress == "Gjerdrum3D") {
+                if (i == 2) {
 
-                //double x = px[*iter](0);
-                //double y = px[*iter](1);
-                double z = px[*iter](2);
-
-                /*
-                        //if (Gjerdrum2D > 0) {
-                            double y_ref1 = 0;
-                            if (x < 50.85)  y_ref1 = 36.75 - 17.55;
-
-                            if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
-
-                            if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
-
-                            if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
-
-                            if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
-
-                            if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);
-                        //}
-                */
-                // if (Gjerdrum3D > 0) {
-                if (z < 140) ISVs[2][*iter] = 68000 + 3000 * (140 - z);
-                // }
+                    double z = px[*iter](2);
+                    if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
+                }
             }
+
+            if (flag->d_initial_stress == "Gjerdrum2D") {
+                if (i == 2) {
+
+                    double x = px[*iter](0);
+                    double y = px[*iter](1);
+                    double y_ref1 = 0;
+                    
+                    if (x < 50.85)  y_ref1 = 36.75 - 17.55;
+
+                    if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
+
+                    if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
+
+                    if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
+
+                    if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
+
+                    if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);                }
+            }
+
         }
     }
 
-
     computeStableTimestep(patch, matl, new_dw);
 
-    // If d_useInitialStress then modify pDefGrad and pStress
-    double d_useInitialStressGravity = UI[49];
-    double dy_ref_gravity = UI[48];
-    double bulk = UI[1];
-
-    if (d_useInitialStressGravity) {
+    if (flag->d_initial_stress == "Erik") {
         ParticleVariable<Matrix3> pStress;
         new_dw->getModifiable(pStress, lb->pStressLabel, pset);
 
@@ -434,21 +430,12 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         {
             particleIndex idx = *iter;
 
-            double p = rho_orig * (px[idx](1) - dy_ref_gravity);
+            double p = rho_orig * (px[idx](1) - 0);
 
             Matrix3 stressInitial(p, 0.0, 0.0,
                 0.0, p, 0.0,
                 0.0, 0.0, p);
 
-            double rho_cur = rho_orig / bulk * p;
-
-            //double DefDiagonal = cbrt(rho_cur / rho_orig);
-
-            //Matrix3 defGradInitial(DefDiagonal, 0.0, 0.0,
-             //   0.0, DefDiagonal, 0.0,
-             //   0.0, 0.0, DefDiagonal);
-
-            //pDefGrad[idx] = defGradInitial;
             pStress[idx] = stressInitial;
         }
     }

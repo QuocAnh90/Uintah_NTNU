@@ -59,6 +59,7 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_SingleFieldMPM                =  false;
   d_axisymmetric                  =  false;
   d_artificial_viscosity          =  false;
+  d_initial_stress                = "none";
   d_artificial_viscosity_heating  =  false;
   d_artificialViscCoeff1          =  0.2;
   d_artificialViscCoeff2          =  2.0;
@@ -207,7 +208,8 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("axisymmetric", d_axisymmetric);
   mpm_flag_ps->get("withColor",  d_with_color);
   mpm_flag_ps->get("artificial_damping_coeff", d_artificialDampCoeff);
-  mpm_flag_ps->get("artificial_viscosity",     d_artificial_viscosity);
+  mpm_flag_ps->get("initial_stress", d_initial_stress);
+  mpm_flag_ps->get("artificial_viscosity", d_artificial_viscosity);
   mpm_flag_ps->get("refine_particles",         d_refineParticles);
   mpm_flag_ps->get("XPIC2",                    d_XPIC2);
   if(d_artificial_viscosity){
@@ -426,6 +428,7 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("withColor",                          d_with_color);
   ps->appendElement("artificial_damping_coeff",           d_artificialDampCoeff);
   ps->appendElement("artificial_viscosity",               d_artificial_viscosity);
+  ps->appendElement("initial_stress",                     d_initial_stress);
   ps->appendElement("artificial_viscosity_heating",       d_artificial_viscosity_heating);
   ps->appendElement("artificial_viscosity_coeff1",        d_artificialViscCoeff1);
   ps->appendElement("artificial_viscosity_coeff2",        d_artificialViscCoeff2);
