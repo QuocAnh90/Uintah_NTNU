@@ -2364,6 +2364,8 @@ void ICE::actuallyInitialize(const ProcessorGroup*,
 
         c_2 = dp_drho + dp_de * press_CC[c]/(rho_micro[indx][c] * rho_micro[indx][c]);
         speedSound[indx][c] = sqrt(c_2);
+
+
       }
       //____ B U L L E T   P R O O F I N G----
       IntVector neg_cell;
@@ -5320,6 +5322,10 @@ void ICE::hydrostaticPressureAdjustment(const Patch* patch,
 
     double press_hydro = rho_micro_CC[c] * gravity[dir] * dist_from_p_ref[dir];
     press_CC[c] += press_hydro;
+
+    cerr << " press_CC hydro at cell " << c << " is " << press_CC[c] << endl;
+
+
   }
 }
 
