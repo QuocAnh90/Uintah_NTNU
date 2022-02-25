@@ -2000,7 +2000,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     const Patch* patch = patches->get(p);
     printTask(patches,patch,cout_doing,"Doing computeEquilibrationPressure");
 
-    double    converg_coeff = 100.;
+    double    converg_coeff = 10000.;
     double    convergence_crit = converg_coeff * DBL_EPSILON;
     double    c_2;
     double press_ref= d_ice->getRefPress();

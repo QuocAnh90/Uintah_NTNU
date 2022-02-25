@@ -5322,10 +5322,6 @@ void ICE::hydrostaticPressureAdjustment(const Patch* patch,
 
     double press_hydro = rho_micro_CC[c] * gravity[dir] * dist_from_p_ref[dir];
     press_CC[c] += press_hydro;
-
-    cerr << " press_CC hydro at cell " << c << " is " << press_CC[c] << endl;
-
-
   }
 }
 
