@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_DataArchive>
+  <numberOfProcessors>1</numberOfProcessors>
+  <ParticlePosition>p.x</ParticlePosition>
+  <outputFormat>UDA</outputFormat>
+  <Meta>
+    <username>NTNU</username>
+    <date>Tue Nov 23 05:13:28 2021</date>
+    <endianness>little_endian</endianness>
+    <nBits>64</nBits>
+  </Meta>
+  <globals/>
+  <variables>
+    <variable type="CCVariable&lt;double&gt;" name="press_CC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="c.mass" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.pressure" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.volume" numMaterials="1"/>
+    <variable type="NCVariable&lt;double&gt;" name="g.volume" numMaterials="2"/>
+    <variable type="NCVariable&lt;double&gt;" name="g.mass" numMaterials="2"/>
+    <variable type="NCVariable&lt;Vector&gt;" name="g.velocity" numMaterials="2"/>
+    <variable type="NCVariable&lt;Vector&gt;" name="g.velocity_star" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="rho_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;Vector&gt;" name="vel_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;Vector&gt;" name="mom_L_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;Vector&gt;" name="dVdt_CC" numMaterials="1"/>
+    <variable type="NCVariable&lt;Vector&gt;" name="g.acceleration" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.velocity+" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="sp_vol_CC" numMaterials="2"/>
+    <variable type="ParticleVariable&lt;Point&gt;" name="p.x" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.velocity" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.stress" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.mass" numMaterials="1"/>
+    <variable type="SFCYVariable&lt;double&gt;" name="vvel_FC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="vol_frac_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="Porosity_CC" numMaterials="1"/>
+    <variable type="SFCYVariable&lt;double&gt;" name="pressY_FC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="TMV_CC" numMaterials="1"/>
+  </variables>
+  <timesteps>
+    <timestep href="t00001/timestep.xml" time="1e-08" oldDelt="1e-08">1</timestep>
+    <timestep href="t01466/timestep.xml" time="0.050023569704929986" oldDelt="3.4394434399324274e-05">1466</timestep>
+    <timestep href="t02920/timestep.xml" time="0.10002140826425959" oldDelt="3.4389976735898161e-05">2920</timestep>
+    <timestep href="t04374/timestep.xml" time="0.15002551649316762" oldDelt="3.439215982092149e-05">4374</timestep>
+    <timestep href="t05828/timestep.xml" time="0.2000342878061114" oldDelt="3.4395079435168768e-05">5828</timestep>
+    <timestep href="t07281/timestep.xml" time="0.25001233688498598" oldDelt="3.439745024796855e-05">7281</timestep>
+    <timestep href="t08735/timestep.xml" time="0.30002764831598788" oldDelt="3.4399244103530141e-05">8735</timestep>
+    <timestep href="t10188/timestep.xml" time="0.35001079196791557" oldDelt="3.4400607379758497e-05">10188</timestep>
+    <timestep href="t11642/timestep.xml" time="0.4000300702570454" oldDelt="3.4401656793130758e-05">11642</timestep>
+    <timestep href="t13095/timestep.xml" time="0.4500162899167901" oldDelt="3.4402465584010087e-05">13095</timestep>
+    <timestep href="t14548/timestep.xml" time="0.50000354403274494" oldDelt="3.4403087321160498e-05">14548</timestep>
+    <timestep href="t16002/timestep.xml" time="0.55002599421998943" oldDelt="3.4403562265918018e-05">16002</timestep>
+    <timestep href="t17455/timestep.xml" time="0.60001464347465316" oldDelt="3.4403921141033068e-05">17455</timestep>
+    <timestep href="t18908/timestep.xml" time="0.65000374540350758" oldDelt="3.440418905781124e-05">18908</timestep>
+    <timestep href="t20362/timestep.xml" time="0.7000275869596404" oldDelt="3.4404385630384238e-05">20362</timestep>
+    <timestep href="t21815/timestep.xml" time="0.75001726728411622" oldDelt="3.4404525937704999e-05">21815</timestep>
+    <timestep href="t23268/timestep.xml" time="0.80000711815868553" oldDelt="3.4404622191924411e-05">23268</timestep>
+    <timestep href="t24722/timestep.xml" time="0.85003148741871759" oldDelt="3.4404683893535787e-05">24722</timestep>
+    <timestep href="t26175/timestep.xml" time="0.90002152110144695" oldDelt="3.4404718395671792e-05">26175</timestep>
+    <timestep href="t27628/timestep.xml" time="0.95001158879883307" oldDelt="3.4404731586715217e-05">27628</timestep>
+    <timestep href="t29081/timestep.xml" time="1.0000016630094459" oldDelt="3.4404728046238461e-05">29081</timestep>
+  </timesteps>
+</Uintah_DataArchive>
