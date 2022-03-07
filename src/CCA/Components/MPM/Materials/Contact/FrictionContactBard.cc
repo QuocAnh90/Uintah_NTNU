@@ -107,6 +107,7 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
    std::vector<constNCVariable<Vector> >  gsurfnorm(numMatls);
    std::vector<constNCVariable<double> >  gnormtraction(numMatls);
    std::vector<NCVariable<Vector> >       gvelocity(numMatls);
+   std::vector<NCVariable<Vector> >       gvelocityBC(numMatls);
    std::vector<NCVariable<double> >       frictionWork(numMatls);
 
    Ghost::GhostType  gnone = Ghost::None;
@@ -132,6 +133,10 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
       new_dw->get(gnormtraction[m],  lb->gNormTractionLabel,
                                                          dwi, patch, gnone, 0);
       new_dw->getModifiable(gvelocity[m],   lb->gVelocityLabel,      dwi,patch);
+
+      if (flag->d_with_ice)
+          new_dw->getModifiable(gvelocityBC[m], lb->gVelocityBCLabel, dwi, patch);
+
       new_dw->getModifiable(frictionWork[m],lb->frictionalWorkLabel, dwi,patch);
     }  // loop over matls
 
@@ -139,6 +144,7 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
     for(NodeIterator iter = patch->getNodeIterator(); !iter.done();iter++){
       IntVector c = *iter;
       Vector centerOfMassMom(0.,0.,0.);
+      Vector centerOfMassMomBC(0., 0., 0.);
       Point  centerOfMassPos(0.,0.,0.);
       double centerOfMassMass=0.0; 
       double totalNodalVol=0.0; 
@@ -148,6 +154,9 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
         centerOfMassPos+=gposition[n][c].asVector() * gmass[n][c];
         centerOfMassMass+= gmass[n][c]; 
         totalNodalVol+=gvolume[n][c]*8.0*NC_CCweight[c];
+
+        if (flag->d_with_ice)  centerOfMassMomBC += gvelocityBC[n][c] * gmass[n][c];
+
       }
       centerOfMassPos/=centerOfMassMass;
 
@@ -155,6 +164,9 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
       // For grid points with mass calculate velocity
       if(!compare(centerOfMassMass,0.0)){
         Vector centerOfMassVelocity=centerOfMassMom/centerOfMassMass;
+
+        Vector centerOfMassVelocityBC(0., 0., 0.);
+        if (flag->d_with_ice) centerOfMassVelocityBC = centerOfMassMomBC / centerOfMassMass;
 
         if(flag->d_axisymmetric){
           // Nodal volume isn't constant for axisymmetry
@@ -199,6 +211,10 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
             if(!d_matls.requested(n)) continue;
             double mass=gmass[n][c];
             Vector deltaVelocity=gvelocity[n][c]-centerOfMassVelocity;
+
+            Vector deltaVelocityBC(0., 0., 0.);
+            if (flag->d_with_ice) deltaVelocityBC = gvelocityBC[n][c] - centerOfMassVelocityBC;
+
             if(!compare(mass/centerOfMassMass,0.0)
             && !compare(mass-centerOfMassMass,0.0)){
 
@@ -212,7 +228,12 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
               double sepscal= sepvec.length();
               if(sepscal < sepDis){
                double normalDeltaVel=Dot(deltaVelocity,normal);
-               Vector Dv(0.,0.,0.);
+
+               double normalDeltaVelBC = 0;
+               if (flag->d_with_ice) normalDeltaVelBC = Dot(deltaVelocityBC, normal);
+               Vector Dv(0., 0., 0.);
+               Vector DvBC(0., 0., 0.);
+
                double Tn = gnormtraction[n][c];
                if((Tn < -1.e-12) || (normalDeltaVel> 0.0)){
 
@@ -244,6 +265,8 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
                   // it is dissipative and should always be negative per the
                   // conventional definition.  However, here it is calculated
                   // as positive (Work=-force*distance).
+
+                  // Currently not available for MPMICE
                   if(compare(frictionCoefficient,d_mu)){
                     frictionWork[n][c] = mass*frictionCoefficient *
                                        (normalDeltaVel*normalDeltaVel) *
@@ -267,6 +290,64 @@ void FrictionContactBard::exMomInterpolated(const ProcessorGroup*,
                 Dv=scale_factor*Dv;
                 gvelocity[n][c]+=Dv;
               }  // if traction
+
+
+               // MPMICE            	
+               Vector normal_normaldVBC(0., 0., 0.);
+               Vector dV_normalDVBC(0., 0., 0.);
+               Vector surfaceTangentBC(0., 0., 0.);
+               double tangentDeltaVelocityBC = 0;
+               double frictionCoefficientBC = 0;
+               Vector epsilonBC(0., 0., 0.);
+               double epsilon_maxBC = 0;
+               if (flag->d_with_ice) {
+                   if ((Tn < -1.e-12) || (normalDeltaVelBC > 0.0)) {
+                       // Simplify algorithm in case where approach velocity	
+                       // is in direction of surface normal (no slip).	
+                       normal_normaldVBC = normal * normalDeltaVelBC;
+                       dV_normalDVBC = deltaVelocityBC - normal_normaldVBC;
+                       if (compare(dV_normalDVBC.length2(), 0.0)) {
+                           // Calculate velocity change needed to enforce contact	
+                           DvBC = -normal_normaldVBC;
+                       }
+                       // General algorithm, including frictional slip.  The	
+                       // contact velocity change and frictional work are both	
+                       // zero if normalDeltaVel is zero.	
+                       else if (!compare(fabs(normalDeltaVelBC), 0.0)) {
+                           surfaceTangentBC = dV_normalDVBC / dV_normalDVBC.length();
+                           tangentDeltaVelocityBC = Dot(deltaVelocityBC, surfaceTangentBC);
+                           frictionCoefficientBC =
+                               Min(d_mu, tangentDeltaVelocityBC / fabs(normalDeltaVelBC));
+                           // Calculate velocity change needed to enforce contact	
+                           DvBC = -normal_normaldVBC
+                               - surfaceTangentBC * frictionCoefficientBC * fabs(normalDeltaVelBC);
+                           surfaceTangentBC = dV_normalDVBC / dV_normalDVBC.length();
+                           tangentDeltaVelocityBC = Dot(deltaVelocityBC, surfaceTangentBC);
+                           frictionCoefficientBC =
+                               Min(d_mu, tangentDeltaVelocityBC / fabs(normalDeltaVelBC));
+                           // Calculate velocity change needed to enforce contact	
+                           DvBC = -normal_normaldVBC
+                               - surfaceTangentBC * frictionCoefficientBC * fabs(normalDeltaVelBC);
+
+                           // Currently not calculate frictionWork for MPMICE	
+                       }
+                       // Define contact algorithm imposed strain, find maximum	
+                       epsilonBC = (DvBC / dx) * delT;
+                       epsilon_maxBC =
+                           Max(fabs(epsilonBC.x()), fabs(epsilonBC.y()), fabs(epsilonBC.z()));
+                       if (!compare(epsilon_maxBC, 0.0)) {
+                           epsilon_maxBC *= Max(1.0, mass / (centerOfMassMass - mass));
+                           // Scale velocity change if contact algorithm	
+                           // imposed strain is too large.	
+                           double ff = Min(epsilon_maxBC, .5) / epsilon_maxBC;
+                           DvBC = DvBC * ff;
+                       }
+                       DvBC = scale_factor * DvBC;
+                       gvelocityBC[n][c] += DvBC;
+                   }  // if traction	
+               }  // if d_with_ice
+
+
              }   // if sepscal
             }    // if !compare && !compare
           }      // matls
@@ -519,6 +600,9 @@ void FrictionContactBard::addComputesAndRequiresInterpolated(SchedulerP & sched,
   t->requires(Task::OldDW, lb->NC_CCweightLabel,z_matl,  Ghost::None);
   t->modifies(lb->frictionalWorkLabel, mss);
   t->modifies(lb->gVelocityLabel,      mss);
+
+  if (flag->d_with_ice)
+      t->modifies(lb->gVelocityBCLabel, mss);
 
   sched->addTask(t, patches, ms);
 
