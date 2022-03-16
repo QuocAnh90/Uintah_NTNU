@@ -221,12 +221,14 @@ public:
                                     DataWarehouse*, 
                                     DataWarehouse*,
                                     const MaterialSubset* press_matl);
-
+  
+  /*
   void computeEquilPressure_1_matl(const ProcessorGroup*,
       const PatchSubset* patches,
       const MaterialSubset* matls,
       DataWarehouse* old_dw,
       DataWarehouse* new_dw);
+  */
 
   void interpolateCCToNC(const ProcessorGroup*,
                          const PatchSubset* patch,

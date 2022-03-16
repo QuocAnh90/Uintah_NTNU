@@ -996,6 +996,7 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
 
   printSchedule(patches, cout_doing,"MPMICE::scheduleComputeEquilibrationPressure");
   
+  /*
   if (d_mpm->flags->d_UseMPMICE2) {
       if (m_materialManager->getNumMatls("ICE") == 1) {
           t = scinew Task("MPMICE::computeEquilPressure_1_matl",
@@ -1005,11 +1006,12 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
           t = scinew Task("MPMICE::computeEquilibrationPressure",
               this, &MPMICE::computeEquilibrationPressure, press_matl);
       }
-  }
-  else {
+  }*/
+
+  //else {
       t = scinew Task("MPMICE::computeEquilibrationPressure",
           this, &MPMICE::computeEquilibrationPressure, press_matl);
-  }
+  //}
 
   t->requires(Task::OldDW, Ilb->timeStepLabel);
   t->requires(Task::OldDW, Ilb->delTLabel,getLevel(patches));
@@ -1762,6 +1764,7 @@ void MPMICE::interpolateCCToNC(const ProcessorGroup*,
  Function~  MPMICE::computeEquilPressure_1_matl--
  Purpose~   Simple EOS evaluation
 _____________________________________________________________________*/
+/*
 void MPMICE::computeEquilPressure_1_matl(const ProcessorGroup*,
                                       const PatchSubset* patches,
                                       const MaterialSubset* matls,
@@ -1956,6 +1959,7 @@ for (int p = 0; p < patches->size(); p++) {
     delete_CustomBCs(d_ice->d_BC_globalVars, BC_localVars);
 }  //patches
 }
+*/
 
 /* --------------------------------------------------------------------- 
  Function~  MPMICE::computeEquilibrationPressure-- 
