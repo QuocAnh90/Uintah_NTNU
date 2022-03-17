@@ -345,7 +345,7 @@ void RigidMPM::computeParticleGradients(const ProcessorGroup*,
            } // Loop over local node
           } else {  // axi-symmetric kinematics
            // Get the node indices that surround the cell
-           cout << "Fix the pTempGradient calc for axisymmetry" << endl;
+           //cout << "Fix the pTempGradient calc for axisymmetry" << endl;
 //           NN =interpolator->findCellAndWeightsAndShapeDerivatives(px[idx],ni,
 //                                                 S,d_S,psize[idx]);
           }
