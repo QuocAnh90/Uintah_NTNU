@@ -1223,10 +1223,8 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
              << "'volumeFraction' tags verify that they're correctly specified.\n";
         throw ProblemSetupException(warn.str(), __FILE__, __LINE__ );
       }
+    } // cell iterator for volume fraction*/
 
-      */
-
-    } // cell iterator for volume fraction
   } // Patch loop
 }
 
