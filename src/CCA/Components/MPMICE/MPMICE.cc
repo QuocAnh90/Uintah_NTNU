@@ -1206,6 +1206,8 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
       }
     }  // num_ICE_matls loop
 
+
+    /*
     double errorThresholdTop    = 1.0e0 + 1.0e-10;
     double errorThresholdBottom = 1.0e0 - 1.0e-10;
 
@@ -1221,6 +1223,9 @@ void MPMICE::actuallyInitialize(const ProcessorGroup*,
              << "'volumeFraction' tags verify that they're correctly specified.\n";
         throw ProblemSetupException(warn.str(), __FILE__, __LINE__ );
       }
+
+      */
+
     } // cell iterator for volume fraction
   } // Patch loop
 }
