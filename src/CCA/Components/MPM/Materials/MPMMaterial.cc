@@ -127,13 +127,17 @@ MPMMaterial::standardInitialization(ProblemSpecP& ps,
   // Also use for Darcy momentum exchange model
   ps->get("permeability", d_permeability);
 
+  // Also use for Reynolds momentum exchange model
+  if (flags->d_UseMPMICE2) {
+      ps->get("grain_size", d_grain);
+  }
+
   // For MPM hydro-mechanical coupling
   if (flags->d_coupledflow) {
       // Rigid material does not require porosity and permeability
       if (!ps->findBlockWithAttributeValue("constitutive_model", "type", "rigid")) {
           ps->require("water_density", d_waterdensity);
           ps->require("porosity", d_porosity);
-          //ps->require("permeability", d_permeability);
           d_initial_porepressure = 0.0;
           ps->get("initial_pore_pressure", d_initial_porepressure);
       }
@@ -264,6 +268,20 @@ ProblemSpecP MPMMaterial::outputProblemSpec(ProblemSpecP& ps)
   mpm_ps->appendElement("is_rigid",d_is_rigid);
   mpm_ps->appendElement("seismic_plate", d_seismic_plate);
 
+  // For MPM hydro-mechanical coupling
+  mpm_ps->appendElement("permeability", d_permeability);
+
+  // Also use for Reynolds momentum exchange model
+  mpm_ps->appendElement("grain_size", d_grain);
+
+  // For MPM hydro-mechanical coupling
+      // Rigid material does not require porosity and permeability
+      if (!ps->findBlockWithAttributeValue("constitutive_model", "type", "rigid")) {
+          mpm_ps->appendElement("water_density", d_waterdensity);
+          mpm_ps->appendElement("porosity", d_porosity);
+          mpm_ps->appendElement("initial_pore_pressure", d_initial_porepressure);
+      }
+
   d_cm->outputProblemSpec(mpm_ps);
   d_damageModel->outputProblemSpec(mpm_ps);
   d_erosionModel->outputProblemSpec(mpm_ps);
@@ -294,6 +312,22 @@ MPMMaterial::copyWithoutGeom(ProblemSpecP& ps,const MPMMaterial* mat,
   d_tmelt = mat->d_tmelt;
   d_is_rigid = mat->d_is_rigid;
   d_seismic_plate = mat->d_seismic_plate;
+
+  // For MPM hydro-mechanical coupling
+  d_permeability = mat->d_permeability;
+
+  // Also use for Reynolds momentum exchange model
+  if (flags->d_UseMPMICE2) {
+  d_grain = mat->d_grain;
+  }
+
+
+  // For MPM hydro-mechanical coupling
+  if (flags->d_coupledflow) {
+      d_waterdensity = mat->d_waterdensity;
+      d_porosity = mat->d_porosity;
+      d_initial_porepressure = mat->d_initial_porepressure;
+  }
 
   // Check to see which ParticleCreator object we need
   d_particle_creator = ParticleCreatorFactory::create(ps,this,flags);
@@ -420,6 +454,11 @@ double MPMMaterial::getPorosity() const
 double MPMMaterial::getPermeability() const
 {
     return d_permeability;
+}
+
+double MPMMaterial::getGrainSize() const
+{
+    return d_grain;
 }
 
 double MPMMaterial::getInitialPorepressure() const

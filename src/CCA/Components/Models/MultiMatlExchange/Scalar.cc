@@ -70,46 +70,29 @@ ScalarExch::~ScalarExch()
 void ScalarExch::problemSetup(const ProblemSpecP & matl_ps)
 {
   // read in the exchange coefficients
-  // ProblemSpecP notUsed;
-  // d_exchCoeff->problemSetup( prob_spec, d_numMatls, notUsed );
+   //ProblemSpecP notUsed;
+   //d_exchCoeff->problemSetup( prob_spec, d_numMatls, notUsed );
 
-  ProblemSpecP exch_ps;
-  d_exchCoeff->problemSetup(matl_ps, d_numMatls, exch_ps);
+   ProblemSpecP exch_ps;
+   d_exchCoeff->problemSetup(matl_ps, d_numMatls, exch_ps);
 
-  if (d_numMatls>1){
-      ProblemSpecP model_ps = exch_ps->findBlock("Model");
-      if (model_ps != nullptr) {
-          // Overwrite the coefficient with the given Models
-          map<string, string> attributes;
-          model_ps->getAttributes(attributes);
-          model = attributes["type"];
-      }
-
-      // <Model type="Reynolds">
-      if (model == "Reynolds") {
-          model_ps->require("grain_size", d_grain);
-      }
-  }
+   if (d_numMatls > 1) {
+       ProblemSpecP model_ps = exch_ps->findBlock("Model");
+       if (model_ps != nullptr) {
+           // Overwrite the coefficient with the given Models
+           map<string, string> attributes;
+           model_ps->getAttributes(attributes);
+           model = attributes["type"];
+       }
+   }
 }
 
 //______________________________________________________________________
 //
 void ScalarExch::outputProblemSpec(ProblemSpecP & matl_ps )
 {
-  //ProblemSpecP notUsed;
-  //d_exchCoeff->outputProblemSpec(matl_ps, notUsed);
-
-  ProblemSpecP exch_prop_ps;
-  d_exchCoeff->outputProblemSpec(matl_ps, exch_prop_ps);
-
-  if (d_numMatls > 1) {     
-      ProblemSpecP model_ps = exch_prop_ps->appendChild("Model");
-
-      // <Model type="Reynolds">
-      if (model == "Reynolds") {
-          model_ps->appendElement("grain_size", d_grain);
-      }
-  }
+  ProblemSpecP notUsed;
+  d_exchCoeff->outputProblemSpec(matl_ps, notUsed);
 }
 
 //______________________________________________________________________
@@ -1230,13 +1213,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
         double Reynolds_number = 0;
         double F0 = 0;
         double FRe = 0;
-
-        // grain size
-        //double d_grain = 0.001;
-
-        if (d_grain < 0) {
-            throw InvalidValue("**ERROR**: Negative grain dize", __FILE__, __LINE__);
-        }
+        double d_grain1 = 0;
+        double d_grain2 = 0;
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
@@ -1246,6 +1224,7 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
         if (mpm_matl1) {
             vol_frac_FC[m] = 0.5 * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
             Porosity_FC[m] = 1 - vol_frac_FC[m];
+            d_grain1 = mpm_matl1->getGrainSize();
         }
 
         for (int n = 0; n < numMatls; n++) {
@@ -1265,6 +1244,7 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
             if (mpm_matl2) {
                 vol_frac_FC[n] = 0.5 * (vol_frac_CC[n][adj] + vol_frac_CC[n][c]);
                 Porosity_FC[n] = 1 - vol_frac_FC[n];
+                d_grain2 = mpm_matl2->getGrainSize();
             }
 
             if (ice_matl1) {
@@ -1274,59 +1254,66 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                 }
                 if (mpm_matl2) { // MPM - ICE interaction
 
-                    if (Porosity_FC[n] < 0.999 && Porosity_FC[n] > 0.001)
-                    {
-                        double velNorm = abs(vel_FC[n][c] - vel_FC[m][c]);
+                    if (d_grain2 > 0) {  //soil materials
 
-                        // Calculate the Renold number
-                        if (visc1 > 0) {
-                            Reynolds_number = Porosity_FC[n] * ICE_density1 * d_grain * velNorm / visc1;
-                        }
-                        else if (visc1 == 0) {
-                            Reynolds_number = Porosity_FC[n] * d_grain * velNorm / g;
-                        }
-
-                        // Calculate F(Re = 0)
-                        F0 = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) +
-                            (1 - vol_frac_FC[n]) * (1 - vol_frac_FC[n]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[n]));
-
-                        if (Reynolds_number != 0)
+                        if (Porosity_FC[n] < 0.999 && Porosity_FC[n] > 0.001)
                         {
-                            // Calculate F(Re)
-                            FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) *
-                                (sqrt(1 - vol_frac_FC[n]) + 3 * vol_frac_FC[n] + 8.4 * pow(Reynolds_number, -0.343))
-                                / (1 + pow(10, 3 * vol_frac_FC[n]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[n])));
+                            double velNorm = abs(vel_FC[n][c] - vel_FC[m][c]);
 
+                            // Calculate the Renold number
+                            if (visc1 > 0) {
+                                Reynolds_number = Porosity_FC[n] * ICE_density1 * d_grain2 * velNorm / visc1;
+                            }
+                            else if (visc1 == 0) {
+                                Reynolds_number = Porosity_FC[n] * d_grain2 * velNorm / g;
+                            }
+
+                            // Calculate F(Re = 0)
+                            F0 = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) +
+                                (1 - vol_frac_FC[n]) * (1 - vol_frac_FC[n]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[n]));
+
+                            if (Reynolds_number != 0)
+                            {
+                                // Calculate F(Re)
+                                FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) *
+                                    (sqrt(1 - vol_frac_FC[n]) + 3 * vol_frac_FC[n] + 8.4 * pow(Reynolds_number, -0.343))
+                                    / (1 + pow(10, 3 * vol_frac_FC[n]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[n])));
+
+                            }
+                            else {
+                                FRe = F0;
+                            }
+
+                            // Carman-Kozeny formula
+                            FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                            //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+
+                            // Calculate the momentum exchange coefficient 
+                            if (visc1 > 0) {
+                                K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * visc1
+                                    / d_grain2 / d_grain2 * FRe;
+                            }
+                            else if (visc1 == 0) {
+                                K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * ICE_density1 * g
+                                    / d_grain2 / d_grain2 * FRe;
+                            }
+
+                            if (std::isnan(K(n, m))) {
+                                cout << " FC FRe = " << FRe << " velNorm = " << velNorm
+                                    << " F0 = " << F0
+                                    << " Reynolds_number = " << Reynolds_number << endl;
+                                throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            }
                         }
                         else {
-                            FRe = F0;
+                            // Put a safe value here
+                            K(n, m) = 0;
                         }
 
-                        // Carman-Kozeny formula
-                        FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
-                        //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
-
-                        // Calculate the momentum exchange coefficient 
-                        if (visc1 > 0) {
-                            K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * visc1
-                                / d_grain / d_grain * FRe;
-                        }
-                        else if (visc1 == 0) {
-                            K(n, m) = 18 * vol_frac_FC[n] * (1 - vol_frac_FC[n]) * ICE_density1 * g
-                                / d_grain / d_grain * FRe;
-                        }
-
-                        if (std::isnan(K(n, m))) {
-                            cout << " FC FRe = " << FRe << " velNorm = " << velNorm
-                                << " F0 = " << F0
-                                << " Reynolds_number = " << Reynolds_number << endl;
-                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
-                        }
                     }
 
-                    else {
-                        // Put a safe value here
-                        K(n, m) = 0;
+                    else { // structure
+                     K(n, m) = K_safe; 
                     }
                 }
             }
@@ -1334,62 +1321,70 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
             if (mpm_matl1) {
                 if (ice_matl2) {  // MPM - ICE interaction
 
-                    if (Porosity_FC[m] < 0.999 && Porosity_FC[m] > 0.001)
-                    {
-                        double velNorm = abs(vel_FC[m][c] - vel_FC[n][c]);
+                    if (d_grain1 > 0) {  //soil materials
 
-                        // Calculate the Renold number
-                        if (visc2 > 0) {
-                            Reynolds_number = Porosity_FC[m] * ICE_density2 * d_grain * velNorm / visc2;
-                        }
-                        else if (visc2 == 0) {
-                            Reynolds_number = Porosity_FC[m] * d_grain * velNorm / g;
-                        }
-
-                        // Calculate F(Re = 0)
-                        F0 = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) +
-                            (1 - vol_frac_FC[m]) * (1 - vol_frac_FC[m]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[m]));
-
-                        if (Reynolds_number != 0)
+                        if (Porosity_FC[m] < 0.999 && Porosity_FC[m] > 0.001)
                         {
-                            // Calculate F(Re)
-                            FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) *
-                                (sqrt(1 - vol_frac_FC[m]) + 3 * vol_frac_FC[m] + 8.4 * pow(Reynolds_number, -0.343))
-                                / (1 + pow(10, 3 * vol_frac_FC[m]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[m])));
+                            double velNorm = abs(vel_FC[m][c] - vel_FC[n][c]);
 
+                            // Calculate the Renold number
+                            if (visc2 > 0) {
+                                Reynolds_number = Porosity_FC[m] * ICE_density2 * d_grain1 * velNorm / visc2;
+                            }
+                            else if (visc2 == 0) {
+                                Reynolds_number = Porosity_FC[m] * d_grain1 * velNorm / g;
+                            }
+
+                            // Calculate F(Re = 0)
+                            F0 = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) +
+                                (1 - vol_frac_FC[m]) * (1 - vol_frac_FC[m]) * (1 + 1.5 * sqrt(1 - vol_frac_FC[m]));
+
+                            if (Reynolds_number != 0)
+                            {
+                                // Calculate F(Re)
+                                FRe = F0 + (0.413 * Reynolds_number) / 24 / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) *
+                                    (sqrt(1 - vol_frac_FC[m]) + 3 * vol_frac_FC[m] + 8.4 * pow(Reynolds_number, -0.343))
+                                    / (1 + pow(10, 3 * vol_frac_FC[m]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_FC[m])));
+
+                            }
+                            else {
+                                FRe = F0;
+                            }
+
+                            // Carman-Kozeny formula
+                            FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                            //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+
+                            // Calculate the momentum exchange coefficient 
+                            if (visc2 > 0) {
+                                K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * visc2
+                                    / d_grain1 / d_grain1 * FRe;
+                            }
+                            else if (visc2 == 0) {
+                                K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * ICE_density2 * g
+                                    / d_grain1 / d_grain1 * FRe;
+                            }
+
+
+                            if (std::isnan(K(n, m))) {
+                                cout << " FC FRe = " << FRe << " velNorm = " << velNorm
+                                    << " F0 = " << F0
+                                    << " Reynolds_number = " << Reynolds_number << endl;
+                                throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            }
                         }
+                    
                         else {
-                            FRe = F0;
-                        }
-
-                        // Carman-Kozeny formula
-                        FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
-                        //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
-
-                        // Calculate the momentum exchange coefficient 
-                        if (visc2 > 0) {
-                            K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * visc2
-                                / d_grain / d_grain * FRe;
-                        }
-                        else if (visc2 == 0) {
-                            K(n, m) = 18 * vol_frac_FC[m] * (1 - vol_frac_FC[m]) * ICE_density2 * g
-                                / d_grain / d_grain * FRe;
-                        }
-
-
-                        if (std::isnan(K(n, m))) {
-                            cout << " FC FRe = " << FRe << " velNorm = " << velNorm
-                                << " F0 = " << F0
-                                << " Reynolds_number = " << Reynolds_number << endl;
-                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            // Put a safe value here
+                            K(n, m) = 0;
                         }
                     }
 
-                    else {
-                        // Put a safe value here
-                        K(n, m) = 0;
+                    else { // structure
+                        K(n, m) = K_safe;
                     }
                 }
+
                 if (mpm_matl2) { // MPM - MPM interaction
                     // No momentum exchange between MPM materials
                     K(n, m) = 0;
@@ -1425,13 +1420,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
         double Reynolds_number = 0;
         double F0 = 0;
         double FRe = 0;
-
-        // grain size
-        //double d_grain = 0.001;
-
-        if (d_grain < 0) {
-            throw InvalidValue("**ERROR**: Negative grain dize", __FILE__, __LINE__);
-        }
+        double d_grain1 = 0;
+        double d_grain2 = 0;
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
@@ -1441,6 +1431,7 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
         double Porosity1 = 0;
         if (mpm_matl1) {
             Porosity1 = (1 - vol_frac_CC[m][c]);
+            d_grain1 = mpm_matl1->getGrainSize();
         }
 
         for (int n = 0; n < numALLMatls; n++) {
@@ -1460,6 +1451,7 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
             double Porosity2 = 0;
             if (mpm_matl2) {
                 Porosity2 = (1 - vol_frac_CC[n][c]);
+                d_grain2 = mpm_matl2->getGrainSize();
             }
 
             if (ice_matl1) {
@@ -1469,119 +1461,136 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                 }
                 if (mpm_matl2) { // MPM - ICE interaction
 
-                    if (Porosity2 < 0.999 && Porosity2 > 0.001)
-                    {
-                        double velNorm = difvelnorm(n, m);
+                    if (d_grain2 > 0) {  //soil materials
 
-                        // Calculate the Renold number
-                        if (visc1 > 0) {
-                            Reynolds_number = Porosity2 * ICE_density1 * d_grain * velNorm / visc1;
-                        }
-                        else if (visc1 == 0) {
-                            Reynolds_number = Porosity2 * d_grain * velNorm / g;
-                        }
-
-                        // Calculate F(Re = 0)
-                        F0 = 10 * vol_frac_CC[n][c] / Porosity2 / Porosity2 +
-                            Porosity2 * Porosity2 * (1 + 1.5 * sqrt(Porosity2));
-
-                        if (Reynolds_number != 0)
+                        if (Porosity2 < 0.999 && Porosity2 > 0.001)
                         {
-                            // Calculate F(Re)
-                            FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity2 / Porosity2 *
-                                (sqrt(Porosity2) + 3 * vol_frac_CC[n][c] + 8.4 * pow(Reynolds_number, -0.343))
-                                / (1 + pow(10, 3 * vol_frac_CC[n][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[n][c])));
+                            double velNorm = difvelnorm(n, m);
+
+                            // Calculate the Renold number
+                            if (visc1 > 0) {
+                                Reynolds_number = Porosity2 * ICE_density1 * d_grain2 * velNorm / visc1;
+                            }
+                            else if (visc1 == 0) {
+                                Reynolds_number = Porosity2 * d_grain2 * velNorm / g;
+                            }
+
+                            // Calculate F(Re = 0)
+                            F0 = 10 * vol_frac_CC[n][c] / Porosity2 / Porosity2 +
+                                Porosity2 * Porosity2 * (1 + 1.5 * sqrt(Porosity2));
+
+                            if (Reynolds_number != 0)
+                            {
+                                // Calculate F(Re)
+                                FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity2 / Porosity2 *
+                                    (sqrt(Porosity2) + 3 * vol_frac_CC[n][c] + 8.4 * pow(Reynolds_number, -0.343))
+                                    / (1 + pow(10, 3 * vol_frac_CC[n][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[n][c])));
+                            }
+                            else {
+                                FRe = F0;
+                            }
+
+                            // Carman-Kozeny formula
+                            FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                            //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+
+                            // Calculate the momentum exchange coefficient 
+                            if (visc1 > 0) {
+                                K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * visc1
+                                    / d_grain2 / d_grain2 * FRe;
+                            }
+                            else if (visc1 == 0) {
+                                K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * ICE_density1 * g
+                                    / d_grain2 / d_grain2 * FRe;
+                            }
+
+
+                            if (std::isnan(K(n, m))) {
+                                cout << " ce1 FC FRe = " << FRe << " velNorm = " << velNorm
+                                    << " F0 = " << F0
+                                    << " Reynolds_number = " << Reynolds_number << endl;
+                                throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            }
                         }
+
                         else {
-                            FRe = F0;
-                        }
-
-                        // Carman-Kozeny formula
-                        FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
-                        //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
-
-                        // Calculate the momentum exchange coefficient 
-                        if (visc1 > 0) {
-                            K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * visc1
-                                / d_grain / d_grain * FRe;
-                        }
-                        else if (visc1 == 0) {
-                            K(n, m) = 18 * vol_frac_CC[n][c] * Porosity2 * ICE_density1 * g
-                                / d_grain / d_grain * FRe;
-                        }
-
-
-                        if (std::isnan(K(n, m))) {
-                            cout << " ce1 FC FRe = " << FRe << " velNorm = " << velNorm
-                                << " F0 = " << F0
-                                << " Reynolds_number = " << Reynolds_number << endl;
-                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            // Put a safe value here
+                            K(n, m) = 0;
                         }
                     }
 
-                    else {
-                        // Put a safe value here
-                        K(n, m) = 0;
+                    else { // structure
+                        K(n, m) = K_safe;
                     }
+
                 }
             }
 
             if (mpm_matl1) {
                 if (ice_matl2) {  // MPM - ICE interaction
 
-                    if (Porosity1 < 0.999 && Porosity1 > 0.001)
-                    {
-                        double velNorm = difvelnorm(n, m);
+                    if (d_grain1 > 0) {  //soil materials
 
-                        // Calculate the Renold number
-                        if (visc2 > 0) {
-                            Reynolds_number = Porosity1 * ICE_density2 * d_grain * velNorm / visc2;
-                        }
-                        else if (visc2 == 0) {
-                            Reynolds_number = Porosity1 * d_grain * velNorm / g;
-                        }
-
-                        // Calculate F(Re = 0)
-                        F0 = 10 * vol_frac_CC[m][c] / Porosity1 / Porosity1 +
-                            Porosity1 * Porosity1 * (1 + 1.5 * sqrt(Porosity1));
-
-                        if (Reynolds_number != 0)
+                        if (Porosity1 < 0.999 && Porosity1 > 0.001)
                         {
-                            // Calculate F(Re)
-                            FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity1 / Porosity1 *
-                                (sqrt(Porosity1) + 3 * vol_frac_CC[m][c] + 8.4 * pow(Reynolds_number, -0.343))
-                                / (1 + pow(10, 3 * vol_frac_CC[m][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[m][c])));
+                            double velNorm = difvelnorm(n, m);
+
+                            // Calculate the Renold number
+                            if (visc2 > 0) {
+                                Reynolds_number = Porosity1 * ICE_density2 * d_grain1 * velNorm / visc2;
+                            }
+                            else if (visc2 == 0) {
+                                Reynolds_number = Porosity1 * d_grain1 * velNorm / g;
+                            }
+
+                            // Calculate F(Re = 0)
+                            F0 = 10 * vol_frac_CC[m][c] / Porosity1 / Porosity1 +
+                                Porosity1 * Porosity1 * (1 + 1.5 * sqrt(Porosity1));
+
+                            if (Reynolds_number != 0)
+                            {
+                                // Calculate F(Re)
+                                FRe = F0 + (0.413 * Reynolds_number) / 24 / Porosity1 / Porosity1 *
+                                    (sqrt(Porosity1) + 3 * vol_frac_CC[m][c] + 8.4 * pow(Reynolds_number, -0.343))
+                                    / (1 + pow(10, 3 * vol_frac_CC[m][c]) * pow(Reynolds_number, -0.5 * (1 + 4 * vol_frac_CC[m][c])));
+                            }
+                            else {
+                                FRe = F0;
+                            }
+
+                            // Carman-Kozeny formula
+                            FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                            //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+
+                            // Calculate the momentum exchange coefficient 
+                            if (visc2 > 0) {
+                                K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * visc2
+                                    / d_grain1 / d_grain1 * FRe;
+                            }
+                            else if (visc2 == 0) {
+                                K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * ICE_density2 * g
+                                    / d_grain1 / d_grain1 * FRe;
+                            }
+
+
+                            if (std::isnan(K(n, m))) {
+                                cout << " ce2 FRe = " << FRe << " velNorm = " << velNorm
+                                    << " F0 = " << F0
+                                    << " Reynolds_number = " << Reynolds_number << endl;
+                                throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
+                            }
                         }
+
                         else {
-                            FRe = F0;
-                        }
-
-                        // Carman-Kozeny formula
-                        FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
-                        //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
-
-                        // Calculate the momentum exchange coefficient 
-                        if (visc2 > 0) {
-                            K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * visc2
-                                / d_grain / d_grain * FRe;
-                        }
-                        else if (visc2 == 0) {
-                            K(n, m) = 18 * vol_frac_CC[m][c] * Porosity1 * ICE_density2 * g
-                                / d_grain / d_grain * FRe;
-                        }
-
-
-                        if (std::isnan(K(n, m))) {
-                            cout << " ce2 FRe = " << FRe << " velNorm = " << velNorm
-                                << " F0 = " << F0
-                                << " Reynolds_number = " << Reynolds_number << endl;
-                            throw InvalidValue("**ERROR**:Reynolds_model_FC: K(n, m) = nan.", __FILE__, __LINE__);
-                        }
+                            // Put a safe value here
+                            K(n, m) = 0;
+                        }                
                     }
-                    else {
-                        // Put a safe value here
-                        K(n, m) = 0;
+
+                    else { // structure
+                        K(n, m) = K_safe;
                     }
+
                 }
                 if (mpm_matl2) { // MPM - MPM interaction
                     // No momentum exchange between MPM materials

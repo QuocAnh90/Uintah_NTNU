@@ -278,10 +278,7 @@
         <fluidMatlIndex               spec="OPTIONAL INTEGER" />
         <momentum_accommodation_coeff spec="OPTIONAL DOUBLE"  />
         <thermal_accommodation_coeff  spec="OPTIONAL DOUBLE"  />
-        <useSlipCoeffs                spec="OPTIONAL BOOLEAN" />
-
-		  <grain_size                spec="OPTIONAL DOUBLE" />
-		  
+        <useSlipCoeffs                spec="OPTIONAL BOOLEAN" />		  
       </Model>
 
       <convective_fluid            spec="OPTIONAL INTEGER" />

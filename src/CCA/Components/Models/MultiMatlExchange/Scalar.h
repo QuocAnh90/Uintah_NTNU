@@ -118,9 +118,7 @@ namespace ExchangeModels{
     //__________________________________
     //  variables
     ExchangeCoefficients* d_exchCoeff;
-
     std::string model = "default";
-    double    d_grain = -9;
 
     void Darcy_model_CC(IntVector c,
         int numALLMatls,

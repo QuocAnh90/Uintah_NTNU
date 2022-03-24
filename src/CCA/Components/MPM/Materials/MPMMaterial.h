@@ -156,6 +156,9 @@ WARNING
    double getPermeability() const;
    double getInitialPorepressure() const;
 
+   // For MPMICE2
+   double getGrainSize() const;
+
    // For MPMICE
    double getGamma() const;
    void initializeCCVariables(CCVariable<double>& rhom,
@@ -205,6 +208,9 @@ WARNING
 
    // Parameters related to MPM Hydro-mechanical coupling
    double d_waterdensity, d_porosity, d_permeability, d_initial_porepressure;
+
+   // Parameters related to MPMICE2
+   double d_grain;
 
    // for autocycleflux boundary condtions
    bool d_do_conc_reduction;
