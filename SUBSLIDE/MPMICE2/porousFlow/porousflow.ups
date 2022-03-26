@@ -184,6 +184,7 @@
     <MaterialProperties>
        <MPM>	 
 		 <material name = "bed">
+		 <grain_size>             0.001         </grain_size>
             <density>             2650.0           </density>
 			<permeability>0.001</permeability>
 			<seismic_plate>true </seismic_plate>
@@ -276,7 +277,6 @@
       <exchange_properties> 
 	  
         <Model type="Reynolds">
-		<grain_size>             0.001         </grain_size>
          </Model>
 		
         <exchange_coefficients>
