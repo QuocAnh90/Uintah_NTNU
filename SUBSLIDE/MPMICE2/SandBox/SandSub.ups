@@ -199,6 +199,8 @@
 	 
 		 <material name = "bed">
 		 <seismic_plate>true </seismic_plate>
+		 <grain_size>    0.0    </grain_size>
+
             <density>             8900.0           </density>
             <constitutive_model type = "comp_neo_hook">
               <useModifiedEOS>      true          </useModifiedEOS>
@@ -234,7 +236,8 @@
 		 
          <material name = "sand">
             <density>             2500.0           </density>
-			
+			<grain_size>             0.00001         </grain_size>
+
            <constitutive_model type="MohrCoulomb"> 
                  <K>8.33E6</K>
                  <G>3.85E6</G>
@@ -416,8 +419,7 @@
       <exchange_properties> 
 	  
 	  <Model type="Reynolds">
-		<grain_size>             0.00002         </grain_size>
-         </Model>
+      </Model>
 		  
         <exchange_coefficients>
               <momentum>           [0 1e15 1e15 1e15 1e15 1e15]      </momentum>
