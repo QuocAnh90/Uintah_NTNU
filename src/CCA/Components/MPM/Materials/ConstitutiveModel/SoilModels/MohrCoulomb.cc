@@ -432,9 +432,11 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                     if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
 
                     if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);
+
+                    ISVs[13][*iter] = ISVs[2][*iter] / ISVs[30][*iter];
                 }
 
-                ISVs[13][*iter] = ISVs[2][*iter] / ISVs[30][*iter];
+                
             }
 
         }
