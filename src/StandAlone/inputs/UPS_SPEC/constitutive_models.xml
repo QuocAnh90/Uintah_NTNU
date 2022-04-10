@@ -1070,7 +1070,8 @@
 	<Use_softening	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<St       		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<strain_95		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	<Su_re		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+    <UseRemould	       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<Su_re		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
 
 	<Use_linear	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>

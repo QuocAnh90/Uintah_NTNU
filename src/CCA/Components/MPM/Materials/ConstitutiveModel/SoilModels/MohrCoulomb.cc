@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 31;
+    d_NBASICINPUTS = 32;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -353,6 +353,7 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("tShear", UI[29]);
 
     cm_ps->appendElement("Su_re", UI[30]);
+    cm_ps->appendElement("UseRemould", UI[31]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -393,6 +394,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                 }
             }
 
+            
             if (flag->d_initial_stress == "Gjerdrum2D") {
                 if (i == 2) {
 
@@ -413,32 +415,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                     if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);                
                 }
             }
-
-            if (flag->d_initial_stress == "Gjerdrum2D_Su") {
-                if (i == 2) {
-
-                    double x = px[*iter](0);
-                    double y = px[*iter](1);
-                    double y_ref1 = 0;
-
-                    if (x < 50.85)  y_ref1 = 36.75 - 17.55;
-
-                    if (50.85 <= x && x <= 124.6)  y_ref1 = 0.13424 * x + 29.95 - 17.55;
-
-                    if (124.6 < x && x <= 167.2)  y_ref1 = 0.018801 * x + 44.37 - 17.55;
-
-                    if (167.2 < x && x <= 212.9)  y_ref1 = 0.10262 * x + 30.297 - 17.55;
-
-                    if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
-
-                    if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);
-
-                    ISVs[13][*iter] = ISVs[2][*iter] / ISVs[30][*iter];
-                }
-
-                
-            }
-
+            
         }
     }
 
@@ -925,6 +902,7 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("tShear", UI[29], 0.0);
 
     ps->getWithDefault("Su_re", UI[30], 0.0);
+    ps->getWithDefault("UseRemould", UI[31], 0.0);
 }
 
 void
@@ -970,6 +948,7 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("tShear");
 
     ISVNames.push_back("Su_re");
+    ISVNames.push_back("UseRemould");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1036,7 +1015,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double G = UI[0]; //shear modulus [stress units]
     double K = UI[1]; //bulk modulus [stress units]
     double c = svarg[2]; //cohesion [stress units]
-
+    
     double m_modul = UI[22];
     double nuy = UI[23];
     double Phi = UI[3]; //friction angle [degrees]
@@ -1082,6 +1061,14 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     {
         InitialPoint.stress[i] = -stress[i];
         StrainIncrement[i] = -D[i] * dt;
+    }
+
+    double UseRemould = UI[31];
+    double Su_re = UI[30];
+    double c_ini = UI[2]; //cohesion [stress units]
+    if (UseRemould > 0)
+    {
+        St = c_ini / Su_re;
     }
 
     double Usetransition = UI[14];
