@@ -98,6 +98,7 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_prescribedDeformationFile          =  "time_defgrad_rotation";
   d_exactDeformation                   =  false;
   d_insertParticles                    =  false;
+  d_insertUndrainedShearStrength       = false;
   d_doGridReset                        =  true;
   d_min_part_mass                      =  3.e-15;
   d_min_subcycles_for_F                =  1;
@@ -273,6 +274,11 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("InsertParticles",d_insertParticles);
   if(d_insertParticles){
     mpm_flag_ps->require("InsertParticlesFile",d_insertParticlesFile);
+  }
+
+  mpm_flag_ps->get("InsertUndrainedShearStrength", d_insertUndrainedShearStrength);
+  if (d_insertUndrainedShearStrength) {
+      mpm_flag_ps->require("InsertUndrainedShearStrength", d_insertUndrainedShearStrengthFile);
   }
 
   mpm_flag_ps->get("do_contact_friction_heating",d_do_contact_friction);
@@ -472,6 +478,11 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("InsertParticles",d_insertParticles);
   if(d_insertParticles){
     ps->appendElement("InsertParticlesFile",d_insertParticlesFile);
+  }
+
+  ps->appendElement("InsertUndrainedShearStrengthFile", d_insertUndrainedShearStrength);
+  if (d_insertUndrainedShearStrength) {
+      ps->appendElement("InsertUndrainedShearStrengthFile", d_insertUndrainedShearStrengthFile);
   }
 
   ps->appendElement("do_contact_friction_heating",d_do_contact_friction);
