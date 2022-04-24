@@ -52,8 +52,10 @@
       <PrescribedDeformationFile          spec="OPTIONAL STRING" />
       <exactDeformation                   spec="OPTIONAL BOOLEAN" /> 
       <InsertParticles                    spec="OPTIONAL BOOLEAN" /> 
-      <InsertParticlesFile                spec="OPTIONAL STRING" /> 
-      <withColor                          spec="OPTIONAL BOOLEAN" />
+      <InsertParticlesFile                spec="OPTIONAL STRING" />
+	  <InsertUndrainedShearStrength       spec="OPTIONAL BOOLEAN" />
+	  <InsertUndrainedShearStrengthFile   spec="OPTIONAL STRING" />
+   	  <withColor                          spec="OPTIONAL BOOLEAN" />
     
       <!-- FIXME:  THE FOLLOW APPLY ONLY TO THE IMPLICIT MPM CODE -->
       <dynamic                            spec="OPTIONAL BOOLEAN" />

@@ -278,7 +278,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
 
   mpm_flag_ps->get("InsertUndrainedShearStrength", d_insertUndrainedShearStrength);
   if (d_insertUndrainedShearStrength) {
-      mpm_flag_ps->require("InsertUndrainedShearStrength", d_insertUndrainedShearStrengthFile);
+      mpm_flag_ps->require("InsertUndrainedShearStrengthFile", d_insertUndrainedShearStrengthFile);
   }
 
   mpm_flag_ps->get("do_contact_friction_heating",d_do_contact_friction);
@@ -480,7 +480,7 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
     ps->appendElement("InsertParticlesFile",d_insertParticlesFile);
   }
 
-  ps->appendElement("InsertUndrainedShearStrengthFile", d_insertUndrainedShearStrength);
+  ps->appendElement("InsertUndrainedShearStrength", d_insertUndrainedShearStrength);
   if (d_insertUndrainedShearStrength) {
       ps->appendElement("InsertUndrainedShearStrengthFile", d_insertUndrainedShearStrengthFile);
   }

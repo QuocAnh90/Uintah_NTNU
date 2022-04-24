@@ -388,9 +388,33 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
             if (flag->d_initial_stress == "Gjerdrum3D") {
                 if (i == 2) {
+                    //double z = px[*iter](2);
+                    //if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
+                                      
+                    if (flag->d_insertUndrainedShearStrengthFile != "") {
+                        std::ifstream is(flag->d_insertUndrainedShearStrengthFile.c_str());
+                        if (!is) {
+                            throw ProblemSetupException("ERROR Opening undrained shear strength file '" + flag->d_insertUndrainedShearStrengthFile + "'\n",
+                                __FILE__, __LINE__);
+                        }
+                        double x = px[*iter](0);
+                        double y = px[*iter](1);
+                        double z = px[*iter](2);
+                            while (is) {
+                                double x_file, y_file, z_file, Su_file;
+                                is >> x_file >> y_file >> z_file >> Su_file;
 
-                    double z = px[*iter](2);
-                    if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
+                                if (is) {
+                                    if (x_file - x <= 0.01 && y_file - y <= 0.01 && z_file - z <= 0.01) {
+
+                                        cerr << Su_file << endl;
+                                        ISVs[2][*iter] = Su_file;
+                                        cerr << ISVs[2][*iter] << endl;
+                                        continue;
+                                    }
+                                }
+                            }
+                    }
                 }
             }
 
@@ -412,7 +436,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
                     if (212.9 < x && x <= 253.15)  y_ref1 = -0.011194 * x + 54.51 - 17.55;
 
-                    if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);                
+                    if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);   
                 }
             }
             
