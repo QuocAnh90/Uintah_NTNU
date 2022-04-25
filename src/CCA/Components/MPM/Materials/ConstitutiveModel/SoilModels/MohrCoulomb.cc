@@ -379,8 +379,11 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         ParticleSubset::iterator iter = pset->begin();
 
         constParticleVariable<Point> px;
+        constParticleVariable<double> pTemperature;
 
         new_dw->get(px, lb->pXLabel, pset);
+        new_dw->get(pTemperature, lb->pTemperatureLabel, pset);
+
         for (; iter != pset->end(); iter++) {
             ISVs[i][*iter] = rinit[i];
 
@@ -388,9 +391,13 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
             if (flag->d_initial_stress == "Gjerdrum3D") {
                 if (i == 2) {
+
+                    ISVs[2][*iter] = pTemperature[*iter];
+
                     //double z = px[*iter](2);
                     //if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
-                                      
+                    
+                    /*
                     if (flag->d_insertUndrainedShearStrengthFile != "") {
                         std::ifstream is(flag->d_insertUndrainedShearStrengthFile.c_str());
                         if (!is) {
@@ -414,7 +421,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                                     }
                                 }
                             }
-                    }
+                    }*/
                 }
             }
 
