@@ -379,10 +379,12 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         ParticleSubset::iterator iter = pset->begin();
 
         constParticleVariable<Point> px;
-        constParticleVariable<double> pTemperature;
+        constParticleVariable<double> pColor;
 
         new_dw->get(px, lb->pXLabel, pset);
-        new_dw->get(pTemperature, lb->pTemperatureLabel, pset);
+        if (flag->d_initial_stress == "Gjerdrum3D") {
+            new_dw->get(pColor, lb->pColorLabel, pset);
+        }
 
         for (; iter != pset->end(); iter++) {
             ISVs[i][*iter] = rinit[i];
@@ -392,7 +394,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
             if (flag->d_initial_stress == "Gjerdrum3D") {
                 if (i == 2) {
 
-                    ISVs[2][*iter] = pTemperature[*iter];
+                    ISVs[2][*iter] = pColor[*iter]*1000;
 
                     //double z = px[*iter](2);
                     //if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
