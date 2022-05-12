@@ -1102,6 +1102,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     if (UseRemould > 0)
     {
         St = c_ini / Su_re;
+        svarg[13] = St;
     }
 
     double Usetransition = UI[14];
