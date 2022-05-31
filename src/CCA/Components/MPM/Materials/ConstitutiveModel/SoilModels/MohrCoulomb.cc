@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 32;
+    d_NBASICINPUTS = 33;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -354,6 +354,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
 
     cm_ps->appendElement("Su_re", UI[30]);
     cm_ps->appendElement("UseRemould", UI[31]);
+
+    cm_ps->appendElement("volumetric_strain", UI[32]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -656,6 +658,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
             // Shear strain and shear strain rate
             double shear_strain_local = 0;
+            double volumetric_strain = 0;
             double strain11 = svarg[6];
             double strain22 = svarg[7];
             double strain33 = svarg[8];
@@ -682,6 +685,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             strain23 += e23 * dt;
             strain13 += e13 * dt;
 
+            volumetric_strain = (strain11 + strain22 + strain33) / 3;
             shear_strain_local = 1.0 / 2.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0 * (pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));
             shear_strain_rate = 1.0 / 2.0 * sqrt(2 * (pow((e11 - e22), 2) + pow((e11 - e33), 2) + pow((e22 - e33), 2)) + 3 * (pow(e12, 2) + pow(e13, 2) + pow(e23, 2)));
 
@@ -706,6 +710,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
             svarg[24] = shear_strain_local;
             svarg[20] = shear_strain_rate;
+            svarg[32] = volumetric_strain;
 
             // Calling the external model here
             CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal);
@@ -936,6 +941,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
     ps->getWithDefault("Su_re", UI[30], 0.0);
     ps->getWithDefault("UseRemould", UI[31], 0.0);
+    ps->getWithDefault("volumetric_strain", UI[32], 0.0);
+   
 }
 
 void
@@ -982,6 +989,8 @@ MohrCoulomb::initializeLocalMPMLabels()
 
     ISVNames.push_back("Su_re");
     ISVNames.push_back("UseRemould");
+
+    ISVNames.push_back("volumetric_strain");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
