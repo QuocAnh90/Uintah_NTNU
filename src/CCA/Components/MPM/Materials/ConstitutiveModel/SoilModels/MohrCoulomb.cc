@@ -396,10 +396,10 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
             if (flag->d_initial_stress == "Gjerdrum3D") {
                 if (i == 2) {
 
-                    if (pColor[*iter] > 50){
+                    //if (pColor[*iter] > 50){
                     ISVs[2][*iter] = pColor[*iter]*1000;
-                    }
-                    else { ISVs[2][*iter]  = 50000}
+                    //}
+                    //else { ISVs[2][*iter] = 50000; }
 
                     //double z = px[*iter](2);
                     //if (z < 150) ISVs[2][*iter] = 68000 + 3000 * (150 - z);
