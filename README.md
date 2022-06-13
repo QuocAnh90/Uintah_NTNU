@@ -11,3 +11,4 @@ Publication
 
 4. H. Vicardi, Q. A. Tran, S. Nordal, V. Thakur. MPM simulations of debris flow entrainment, modelling boulders explicitly.  Proceedings in the 8th Canadian Conference on Geotechnique and Natural Hazards 12-15 June 2022, Quebec, Canada.
  
+5. Q. A. Tran, A. Rogstad, G. Grimstad, S. Nordal, G. H. Alene. Preliminary study of 3D large deformation modeling of the Gjerdrum 2020 sensitive clay landslide.  Proceedings in the 8th Canadian Conference on Geotechnique and Natural Hazards 12-15 June 2022, Quebec, Canada.
