@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 33;
+    d_NBASICINPUTS = 38;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -332,7 +332,6 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Use_softening", UI[12]);
     cm_ps->appendElement("St", UI[13]);
     
-
     cm_ps->appendElement("Usetransition", UI[14]); // undrained shear strength transition
     cm_ps->appendElement("A1", UI[15]);	// water influence parameter
     cm_ps->appendElement("B1", UI[16]);	// water influence parameter
@@ -347,15 +346,19 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Su", UI[25]);
 
     cm_ps->appendElement("strain_95", UI[26]);
-
     cm_ps->appendElement("Use_regular", UI[27]);
     cm_ps->appendElement("tFE", UI[28]);
     cm_ps->appendElement("tShear", UI[29]);
 
     cm_ps->appendElement("Su_re", UI[30]);
     cm_ps->appendElement("UseRemould", UI[31]);
-
     cm_ps->appendElement("volumetric_strain", UI[32]);
+
+    cm_ps->appendElement("Use_friction", UI[33]);
+    cm_ps->appendElement("strain1", UI[34]);
+    cm_ps->appendElement("strain2", UI[35]);
+    cm_ps->appendElement("Phi_CS", UI[36]);
+    cm_ps->appendElement("Phi_P", UI[37]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -945,7 +948,12 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("Su_re", UI[30], 0.0);
     ps->getWithDefault("UseRemould", UI[31], 0.0);
     ps->getWithDefault("volumetric_strain", UI[32], 0.0);
-   
+
+    ps->getWithDefault("Use_friction", UI[33], 0.0);
+    ps->getWithDefault("strain1", UI[34], 0.0);
+    ps->getWithDefault("strain2", UI[35], 0.0);
+    ps->getWithDefault("Phi_CS", UI[36], 0.0);
+    ps->getWithDefault("Phi_P", UI[37], 0.0);  
 }
 
 void
@@ -970,7 +978,6 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Use_softening");
     ISVNames.push_back("St");
     
-
     ISVNames.push_back("Usetransition");
     ISVNames.push_back("A1");
     ISVNames.push_back("B1");
@@ -985,15 +992,18 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Su");
 
     ISVNames.push_back("strain_95");
-
     ISVNames.push_back("Use_regular");
     ISVNames.push_back("tFE");
     ISVNames.push_back("tShear");
-
     ISVNames.push_back("Su_re");
     ISVNames.push_back("UseRemould");
-
     ISVNames.push_back("volumetric_strain");
+
+    ISVNames.push_back("Use_friction");
+    ISVNames.push_back("strain1");
+    ISVNames.push_back("strain2");
+    ISVNames.push_back("Phi_CS");
+    ISVNames.push_back("Phi_P");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1075,6 +1085,12 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double St = UI[13];
     double strain_95 = UI[26];
 
+    double Use_friction = UI[33];
+    double strain1 = UI[34];
+    double strain2 = UI[35];
+    double Phi_CS = UI[36];
+    double Phi_P = UI[37];
+
     /*
     Flavour
     1- classic Mohr - Coulomb,
@@ -1143,9 +1159,29 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         }
     }
 
+    double mu = 0;
+    if (Use_friction > 0)
+    {
+        if (shear_strain_nonlocal < strain1) {
+            mu = tan(Phi_P * 3.1415 / 180);
+        }
+        if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+        {
+            mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+        }
+        else if (shear_strain_nonlocal > strain2)
+        {
+            mu = tan(Phi_CS * 3.1415 / 180);
+        }
+        Phi = atan(mu) * 180 / 3.1415;
+        Psi = Phi - Phi_CS;
+    }
+
     svarg[0] = G;
     svarg[1] = K;
     svarg[25] = c;
+    svarg[3] = Phi;
+    svarg[3] = Psi;
 
     int Region;
 

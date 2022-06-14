@@ -1059,13 +1059,12 @@
     <A1                spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <B1                spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <W                 spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-    <beta_rate              spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+    <beta_rate         spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <strain_ref        spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
     <Usemodul  		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<m_modul  		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<nuy      		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-
 	
 	<Use_softening	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<St       		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
@@ -1073,24 +1072,26 @@
     <UseRemould	       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<Su_re		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
+	<Use_friction	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <strain1		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <strain2		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <Phi_CS		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <Phi_P		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
-	<Use_linear	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<Use_linear	       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<a       		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	<y_ref		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	  <y_coordinate		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	<n		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<y_ref		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<y_coordinate	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<n		           spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<Gjerdrum2D		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	  <Gjerdrum3D		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	  <x		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-
+	<Gjerdrum3D		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<x		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<Use_regular	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<tFE       		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	<tShear		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	
-	<n_nonlocalMC		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<tShear		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<n_nonlocalMC	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<l_nonlocal		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-
-	  <useInitialStressGravityMC		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	<useInitialStressGravityMC		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  
 	  
     <UseWaterRetention spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
