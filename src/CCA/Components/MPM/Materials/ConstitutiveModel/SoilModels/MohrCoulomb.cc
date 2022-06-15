@@ -1181,7 +1181,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     svarg[1] = K;
     svarg[25] = c;
     svarg[3] = Phi;
-    svarg[3] = Psi;
+    svarg[4] = Psi;
 
     int Region;
 
