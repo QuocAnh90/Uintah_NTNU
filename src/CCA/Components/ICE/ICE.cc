@@ -5299,12 +5299,12 @@ void ICE::hydrostaticPressureAdjustment(const Patch* patch,
   GridP grid = level->getGrid();
   BBox b;
   grid->getSpatialRange(b);
-  Vector gridMin = b.min().asVector();
+  Vector gridMax = b.max().asVector();
   Vector dx_L0 = grid->getLevel(0)->dCell();
 
   // Pressure reference point is assumed to be
-  //at CELL-CENTER of cell 0,0,0
-  Vector press_ref_pt = gridMin + 1.5*dx_L0;
+  //at y+
+  Vector press_ref_pt = gridMax +- 1.5*dx_L0;
 
   // Which direction is the gravitational vector pointing
   int dir = -9;
