@@ -1078,6 +1078,8 @@
 	  <Phi_CS		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <Phi_P		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
+	  <Intial_Stress		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+
 	<Use_linear	       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<a       		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<y_ref		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>

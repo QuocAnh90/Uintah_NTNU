@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 38;
+    d_NBASICINPUTS = 39;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -359,6 +359,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("strain2", UI[35]);
     cm_ps->appendElement("Phi_CS", UI[36]);
     cm_ps->appendElement("Phi_P", UI[37]);
+
+    cm_ps->appendElement("Intial_Stress", UI[38]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -544,6 +546,11 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         double se = 0.0;
         const Patch* patch = patches->get(p);
 
+        // Get the current simulation time
+        simTime_vartype simTimeVar;
+        old_dw->get(simTimeVar, lb->simulationTimeLabel);
+        double time = simTimeVar;
+
         Matrix3 Identity; Identity.Identity();
         double c_dil = 0.0;
         Vector WaveSpeed(1.e-12, 1.e-12, 1.e-12);
@@ -595,8 +602,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         for (ParticleSubset::iterator iter = pset->begin();
             iter != pset->end(); iter++) {
             particleIndex idx = *iter;
-
-
+        
             // Assign zero internal heating by default - modify if necessary.
             pdTdt[idx] = 0.0;
 
@@ -660,6 +666,16 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             // Load ISVs into a 1D array for fortran code
             for (int i = 0; i < d_NINSV; i++) {
                 svarg[i] = ISVs[i][idx];
+            }
+
+            // Artifitical initial stress by gravity
+            if (UI[38] > 0) {
+                if (time < 2) {
+                    svarg[2] = 100000;
+                }
+                else {
+                    svarg[2] = UI[2];
+                }
             }
 
             // Shear strain and shear strain rate
@@ -954,6 +970,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("strain2", UI[35], 0.0);
     ps->getWithDefault("Phi_CS", UI[36], 0.0);
     ps->getWithDefault("Phi_P", UI[37], 0.0);  
+
+    ps->getWithDefault("Intial_Stress", UI[38], 0.0);
 }
 
 void
@@ -1004,6 +1022,8 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("strain2");
     ISVNames.push_back("Phi_CS");
     ISVNames.push_back("Phi_P");
+
+    ISVNames.push_back("Intial_Stress");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
