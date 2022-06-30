@@ -142,6 +142,11 @@ WARNING
    double getMeltTemperature() const;
 
    bool getIsRigid() const;
+   void setIsRigid(const bool is_rigid);
+
+   bool getIsActive() const;
+   void setIsActive(const bool is_active);
+   double getActivationTime() const;
 
    bool getSeismicPlate() const;
 
@@ -203,8 +208,14 @@ WARNING
    // for implicit rigid body contact
    bool d_is_rigid;
 
+<<<<<<< HEAD
    // This is to trigger seismic loading
    bool d_seismic_plate;
+=======
+   // for insert particles
+   bool d_is_active;
+   double d_activation_time;
+>>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
 
    // Parameters related to MPM Hydro-mechanical coupling
    double d_waterdensity, d_porosity, d_permeability, d_initial_porepressure;

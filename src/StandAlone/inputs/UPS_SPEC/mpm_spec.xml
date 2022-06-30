@@ -22,8 +22,12 @@
       <DoExplicitHeatConduction           spec="OPTIONAL BOOLEAN" />
       <DeleteGeometryObjects              spec="OPTIONAL BOOLEAN" />
       <DoPressureStabilization            spec="OPTIONAL BOOLEAN" />
+<<<<<<< HEAD
 	  <DoCapDensity                       spec="OPTIONAL BOOLEAN" />
 	  <GetNodalDisplacement               spec="OPTIONAL BOOLEAN" />
+=======
+      <DoCapDensity                       spec="OPTIONAL BOOLEAN" />
+>>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
       <DoDefGradAveraging                 spec="OPTIONAL BOOLEAN" /> 
       <DoThermalExpansion                 spec="OPTIONAL BOOLEAN" />  <!-- FIXME: default is? -->
       <computeNodalHeatFlux               spec="OPTIONAL BOOLEAN" />
@@ -67,7 +71,7 @@
       <DoTransientImplicitHeatConduction  spec="OPTIONAL BOOLEAN" />  <!-- default value is true -->
       <delT_decrease_factor               spec="OPTIONAL DOUBLE" />
       <delT_increase_factor               spec="OPTIONAL DOUBLE" />
-      <RunMMSProblem                           spec="OPTIONAL STRING 'AxisAligned, GeneralizedVortex , ExpandingRing, AxisAligned3L'" /> <!-- MMS runtime option -->
+      <RunMMSProblem                      spec="OPTIONAL STRING 'AxisAligned, GeneralizedVortex , ExpandingRing, AxisAligned3L'" /> <!-- MMS runtime option -->
       <do_scalar_diffusion                spec="OPTIONAL BOOLEAN" />
       <do_auto_cycle_bc                   spec="OPTIONAL BOOLEAN" />
       <auto_cycle_use_minmax              spec="OPTIONAL BOOLEAN" />
@@ -75,6 +79,7 @@
       <auto_cycle_min                     spec="OPTIONAL DOUBLE" />
       <with_gauss_solver                  spec="OPTIONAL BOOLEAN" />
 
+<<<<<<< HEAD
 		<!-- Hydro mechanical coupling -->
 		<coupled_flow_analysis spec="OPTIONAL BOOLEAN" />
 		<water_damping_coef spec="OPTIONAL DOUBLE" />
@@ -82,6 +87,14 @@
 		<PorePressureFilter spec="OPTIONAL BOOLEAN" />
 		<Use_MPMICE2 spec="OPTIONAL BOOLEAN" />
 		
+=======
+      <!-- Hydro mechanical coupling -->
+      <coupled_flow_analysis              spec="OPTIONAL BOOLEAN" />
+      <water_damping_coef                 spec="OPTIONAL DOUBLE" />
+      <solid_damping_coef                 spec="OPTIONAL DOUBLE" />
+      <PorePressureFilter                 spec="OPTIONAL BOOLEAN" />
+                
+>>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
     </MPM>
     <PhysicalBC                   spec="OPTIONAL NO_DATA" >
       <MPM                        spec="REQUIRED NO_DATA" >
@@ -95,7 +108,7 @@
             </time_point>
           </load_curve>
           <polynomial_data        spec="REQUIRED NO_DATA" >
-            <file                 spec="MULTIPLE STRING" />
+            <filename             spec="MULTIPLE STRING" />
           </polynomial_data>
         </arches_heat_flux>
         <force                    spec="MULTIPLE NO_DATA" >
@@ -156,11 +169,12 @@
         <colinear_norms                  spec="OPTIONAL BOOLEAN"/>
         <materials                       spec="OPTIONAL MULTIPLE_INTEGERS" />
         <stop_time                       spec="OPTIONAL DOUBLE" /> <!-- Time at which to make the velocity of the rigid body have the value of velocity_after_stop -->
-        <type                            spec="REQUIRED STRING 'null, nodal_svf, single_velocity, rigid, specified, friction_bard, friction_LR, approach'" />
+        <type                            spec="REQUIRED STRING 'null, nodal_svf, single_velocity, rigid, specified, friction_bard, friction_LR, approach, specified_friction'" />
         <vel_fields                      spec="OPTIONAL MULTIPLE_INTEGERS" />
         <velocity_after_stop             spec="OPTIONAL VECTOR" />
         <filename                        spec="OPTIONAL STRING" />
         <master_material                 spec="OPTIONAL INTEGER" />
+        <rigid_material                  spec="OPTIONAL INTEGER" />
         <normal_only                     spec="OPTIONAL BOOLEAN" />
         <include_rotation                spec="OPTIONAL BOOLEAN" />
       </contact>
@@ -168,7 +182,10 @@
       <material                          spec="MULTIPLE NO_DATA"
                                            attribute1="name OPTIONAL STRING" >
         <density                         spec="REQUIRED DOUBLE" />
+        <is_active                       spec="OPTIONAL BOOLEAN" />
+        <activation_time                 spec="OPTIONAL DOUBLE" />
 
+<<<<<<< HEAD
 		  <!--Hydro mechanical coupling-->
 		  <water_density spec="OPTIONAL DOUBLE 'positive'"/>
 		  <porosity spec="OPTIONAL DOUBLE 'positive'"/>
@@ -177,6 +194,14 @@
 
 		  <grain_size spec="OPTIONAL DOUBLE 'positive'"/>
 		  
+=======
+                  <!--Hydro mechanical coupling-->s
+                  <water_density spec="OPTIONAL DOUBLE 'positive'"/>
+                  <porosity spec="OPTIONAL DOUBLE 'positive'"/>
+                  <permeability spec="OPTIONAL DOUBLE 'positive'"/>
+                  <initial_pore_pressure spec="OPTIONAL DOUBLE"/>
+                  
+>>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
         <include href="constitutive_models.xml" />
         <!--__________________________________-->
         <!-- Damage models -->
@@ -186,11 +211,13 @@
                <!-- Threshold     -->      
           <failure_mean         spec="REQUIRED DOUBLE 'positive'"     need_applies_to="type Threshold"/>
           <failure_std          spec="OPTIONAL DOUBLE 'positive'"     need_applies_to="type Threshold"/>
+          <failure_seed          spec="OPTIONAL DOUBLE"               need_applies_to="type Threshold"/>
           <failure_distrib      spec="REQUIRED STRING 'constant, weibull, gauss'" 
                                                                       need_applies_to="type Threshold"/>
           <failure_criteria     spec="REQUIRED STRING 'MaximumPrincipalStress MaximumPrincipalStrain MohrColoumb'" 
                                                                       need_applies_to="type Threshold"/> 
           <friction_angle       spec="OPTIONAL DOUBLE"                need_applies_to="type Threshold"/> 
+          <LocalizeParticles    spec="OPTIONAL BOOLEAN"               need_applies_to="type Threshold"/>
           <tensile_cutoff_fraction_of_cohesion spec="OPTIONAL DOUBLE '0,1e999'"         
                                                                       need_applies_to="type Threshold"/> 
 

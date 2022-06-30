@@ -136,7 +136,6 @@ DESCRIPTION
     SpecifiedBodyContact(const SpecifiedBodyContact &con);
     SpecifiedBodyContact& operator=(const SpecifiedBodyContact &con);
          
-    Vector findVelFromProfile(double t) const;
     Vector findValFromProfile(double t, 
                         std::vector< std::pair<double, Vector> > profile) const;
     
@@ -161,10 +160,14 @@ DESCRIPTION
   public:
     // Constructor
     SpecifiedBodyContact(const ProcessorGroup* myworld,
-                         ProblemSpecP& ps,MaterialManagerP& d_sS,MPMLabel* lb,MPMFlags*flag);
+                         ProblemSpecP& ps, MaterialManagerP& d_sS,
+                         MPMLabel* lb, MPMFlags*flag);
          
     // Destructor
     virtual ~SpecifiedBodyContact();
+
+    // Currently, setting if any materials are rigid
+    virtual void setContactMaterialAttributes();
 
     virtual void outputProblemSpec(ProblemSpecP& ps);
 

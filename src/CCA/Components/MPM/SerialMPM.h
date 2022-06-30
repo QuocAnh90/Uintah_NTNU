@@ -173,6 +173,12 @@ protected:
                                   DataWarehouse* old_dw,
                                   DataWarehouse* new_dw);
 
+
+  void scheduleParticleRelocation( SchedulerP        & sched,
+                                   const LevelP      & level,
+                                   const MaterialSet * matls,
+                                   const MaterialSet * cz_matls);
+
   void deleteGeometryObjects(const ProcessorGroup*,
                              const PatchSubset* patches,
                              const MaterialSubset* matls,
@@ -214,6 +220,21 @@ protected:
                           int dwi, const Patch* patch);
 
   void scheduleInitializePressureBCs(const LevelP& level, SchedulerP&);
+
+  void scheduleRestartInitializeHACK( SchedulerP   & sched,
+                                      const LevelP & level);
+
+  void restartInitializeHACK( const ProcessorGroup  *,
+                              const PatchSubset     * patches,
+                              const MaterialSubset  * matls,
+                              DataWarehouse         *,
+                              DataWarehouse         * new_dw){};
+
+  void restartInitializeTask(const ProcessorGroup *,
+                             const PatchSubset    * patches,
+                             const MaterialSubset * ,
+                             DataWarehouse        * ,
+                             DataWarehouse        * new_dw);
 
   void countMaterialPointsPerLoadCurve(const ProcessorGroup*,
                                        const PatchSubset* patches,

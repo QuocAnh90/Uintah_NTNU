@@ -962,7 +962,7 @@ SchedulerCommon::addTask(       Task        * task
                                  << " on level " << levelidx << ", DW " << dw);
 
       std::ostringstream taskname;
-      taskname << "Reduction: " << dep->m_var->getName() << ", level " << levelidx << ", dw " << dw;
+      taskname << "SchedulerCommon::Reduction: " << dep->m_var->getName() << ", level " << levelidx << ", dw " << dw;
 
       Task* reduction_task = scinew Task(taskname.str(), Task::Reduction);
       
@@ -2094,39 +2094,6 @@ SchedulerCommon::copyDataToNewGrid( const ProcessorGroup * /* pg */
   }  // end patches
 
   DOUTR(g_schedulercommon_dbg, "SchedulerCommon::copyDataToNewGrid() END");
-}
-
-//______________________________________________________________________
-//
-void
-SchedulerCommon::scheduleParticleRelocation( const LevelP       & level
-                                           , const VarLabel     * old_posLabel
-                                           , const VarLabelList & old_labels
-                                           , const VarLabel     * new_posLabel
-                                           , const VarLabelList & new_labels
-                                           , const VarLabel     * particleIDLabel
-                                           , const MaterialSet  * matls
-                                           ,       int            which
-                                           )
-{
-  if (which == 1) {
-    if (m_reloc_new_pos_label) {
-      ASSERTEQ(m_reloc_new_pos_label, new_posLabel);
-    }
-    m_reloc_new_pos_label = new_posLabel;
-
-    m_relocate_1.scheduleParticleRelocation(this, d_myworld, m_loadBalancer, level, old_posLabel, old_labels, new_posLabel, new_labels, particleIDLabel, matls);
-    releasePort("load balancer");
-  }
-
-  if (which == 2) {
-    if (m_reloc_new_pos_label) {
-      ASSERTEQ(m_reloc_new_pos_label, new_posLabel);
-    }
-    m_reloc_new_pos_label = new_posLabel;
-
-    m_relocate_2.scheduleParticleRelocation(this, d_myworld, m_loadBalancer, level, old_posLabel, old_labels, new_posLabel, new_labels, particleIDLabel, matls);
-  }
 }
 
 //______________________________________________________________________
