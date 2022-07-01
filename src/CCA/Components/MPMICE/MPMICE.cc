@@ -1048,29 +1048,10 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
   Task* t = nullptr;
 
   printSchedule(patches, cout_doing,"MPMICE::scheduleComputeEquilibrationPressure");
-<<<<<<< HEAD
-  
-  /*
-  if (d_mpm->flags->d_UseMPMICE2) {
-      if (m_materialManager->getNumMatls("ICE") == 1) {
-          t = scinew Task("MPMICE::computeEquilPressure_1_matl",
-              this, &MPMICE::computeEquilPressure_1_matl);
-      }
-      else {
-          t = scinew Task("MPMICE::computeEquilibrationPressure",
-              this, &MPMICE::computeEquilibrationPressure, press_matl);
-      }
-  }*/
 
-  //else {
-      t = scinew Task("MPMICE::computeEquilibrationPressure",
-          this, &MPMICE::computeEquilibrationPressure, press_matl);
-  //}
-=======
 
   t = scinew Task("MPMICE::computeEquilibrationPressure",
             this, &MPMICE::computeEquilibrationPressure, press_matl);
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
 
   t->requires(Task::OldDW, Ilb->timeStepLabel);
   t->requires(Task::OldDW, Ilb->delTLabel,getLevel(patches));
@@ -1108,14 +1089,8 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
   t->computes(Ilb->TMV_CCLabel,         press_matl);
   t->computes(Ilb->press_equil_CCLabel, press_matl);
   t->computes(Ilb->sum_imp_delPLabel,   press_matl);  // needed by implicit ICE
-  t->computes(Ilb->eq_press_itersLabel, press_matl);
-<<<<<<< HEAD
-  
+  t->computes(Ilb->eq_press_itersLabel, press_matl);  
   t->computes(Ilb->Porosity_CCLabel, press_matl);
-  
-=======
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
-
   t->modifies(Ilb->sp_vol_CCLabel,      mpm_matls);
   t->computes(Ilb->sp_vol_CCLabel,      ice_matls);
   t->computes(Ilb->rho_CCLabel,         ice_matls);
@@ -2104,13 +2079,10 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     constCCVariable<double> press;
     CCVariable<double> press_new, delPress_tmp, sumKappa, TMV_CC;
     CCVariable<double> sum_imp_delP;
-    CCVariable<int>  nIterations;
-<<<<<<< HEAD
-    
+    CCVariable<int>  nIterations;    
+
     // MPMICE2
     CCVariable<double> Porosity_CC;
-=======
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
 
     Ghost::GhostType  gn = Ghost::None;
     //__________________________________
@@ -2258,7 +2230,6 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
                     double inv_y = (vol_frac[m][c] * vol_frac[m][c])
                         / (dp_drho[m] * rho_CC_new[m][c] + d_SMALL_NUM);
 
-<<<<<<< HEAD
                     A += vol_frac[m][c];
                     B += Q * inv_y;
                     C += inv_y;
@@ -2275,12 +2246,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
             }
         } 
 
-=======
-          A   +=  vol_frac[m][c];
-          B   +=  Q * inv_y;
-          C   +=  inv_y;
-        }
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
+      
         double vol_frac_not_close_packed = 1.;
         //delPress = (A - vol_frac_not_close_packed - B) / C;
         delPress = (A - Porosity_CC[c] - B) / C; //Porosity_CC[c] = 1 without MPMICE2
@@ -2289,11 +2255,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
         if(press_new[c] < convergence_crit ){
           press_new[c] = fabs(delPress);
         }
-<<<<<<< HEAD
-     
-=======
 
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
        //__________________________________
        // backout rho_micro_CC at this new pressure
        // - compute the updated volume fractions
@@ -2304,7 +2266,6 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
              ice_matl[m]->getEOS()->computeRhoMicro(press_new[c],gamma[m][c],
                                            cv[m][c],Temp[m][c],rho_micro[m][c]);
          } if(mpm_matl[m]){
-<<<<<<< HEAD
 
            if (d_mpm->flags->d_UseMPMICE2) {
                // Incompressible MPM material in MPMICE2
@@ -2315,14 +2276,8 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
                    mpm_matl[m]->getConstitutiveModel()->computeRhoMicroCM(
                        press_new[c], press_ref, mpm_matl[m], Temp[m][c], rho_micro[m][c]);
            }
-
          }       
-=======
-           rho_micro[m][c] =
-             mpm_matl[m]->getConstitutiveModel()->computeRhoMicroCM(
-                                          press_new[c],press_ref,mpm_matl[m],Temp[m][c],rho_micro[m][c]);
-         }
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
+
          vol_frac[m][c]   = rho_CC_new[m][c]/rho_micro[m][c];
          sum += vol_frac[m][c];
        }
@@ -2397,13 +2352,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
          }
          dbgEqPress.push_back(dbg);
        }
-<<<<<<< HEAD
-       
-      }   // end of converged
-=======
-
      }   // end of converged
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
 
       delPress_tmp[c] = delPress;
 

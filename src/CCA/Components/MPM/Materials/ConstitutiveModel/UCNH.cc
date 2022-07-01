@@ -87,7 +87,6 @@ UCNH::UCNH(ProblemSpecP& ps, MPMFlags* Mflag, bool plas, bool dam)
   if (d_useInitialStress) {
     ps->getWithDefault("initial_pressure", d_init_pressure, 0.0);
   }
-<<<<<<< HEAD
 
   ps->getWithDefault("useInitialStressGravity", d_useInitialStressGravity, false);
   if (d_useInitialStressGravity) {
@@ -99,9 +98,6 @@ UCNH::UCNH(ProblemSpecP& ps, MPMFlags* Mflag, bool plas, bool dam)
                              ParticleVariable<Matrix3>::getTypeDescription());
   bElBarLabel_preReloc       = VarLabel::create("p.bElBar+",
                              ParticleVariable<Matrix3>::getTypeDescription());
-
-=======
->>>>>>> 973c2ad64c74caf61ae3c4db24e4812c0f7f68e4
 }
 
 //______________________________________________________________________
