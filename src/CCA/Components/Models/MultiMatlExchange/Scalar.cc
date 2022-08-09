@@ -1285,8 +1285,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
-                            //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                            //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                            FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
 
                             // Calculate the momentum exchange coefficient 
                             if (visc1 > 0) {
@@ -1352,8 +1352,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
-                            //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                            //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                            FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
 
                             // Calculate the momentum exchange coefficient 
                             if (visc2 > 0) {
@@ -1491,8 +1491,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
-                            //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                            //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                            FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
 
                             // Calculate the momentum exchange coefficient 
                             if (visc1 > 0) {
@@ -1559,8 +1559,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
-                            //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                            //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                            FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
 
                             // Calculate the momentum exchange coefficient 
                             if (visc2 > 0) {
