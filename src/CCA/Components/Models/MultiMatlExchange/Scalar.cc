@@ -232,10 +232,10 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
       if (model == "Darcy") {
           Darcy_model_FC(c, adj, numMatls, vol_frac_CC, K);
       }
-      else if (model == "Reynolds") {
+      else if (model == "Reynolds" || model == "Carman-Kozeny") {
 
           Reynolds_model_FC <constSFC, SFC >
-              (c, adj, numMatls, vol_frac_CC, vel_FC, K);
+              (c, adj, numMatls, vol_frac_CC, vel_FC, K, model);
       }
 
       for(int m = 0; m < numMatls; m++)  {
@@ -634,7 +634,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
           Darcy_model_CC(c, numALLMatls, vol_frac_CC, K);
       }
 
-      else if (model == "Reynolds") {
+      else if (model == "Reynolds" || model == "Carman-Kozeny") {
 
           for (int m = 0; m < numALLMatls; m++) {
               const Vector& vel_m = vel_CC[m][c];
@@ -643,7 +643,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
               }
           }
 
-          Reynolds_model_CC(c, numALLMatls, vol_frac_CC, difvelnorm, K);
+          Reynolds_model_CC(c, numALLMatls, vol_frac_CC, difvelnorm, K, model);
       }
 
       //---------- M O M E N T U M   E X C H A N G E
@@ -1195,7 +1195,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
     int numMatls,
     std::vector<constCCVariable<double> >& vol_frac_CC,
     std::vector< constSFC>& vel_FC,
-    FastMatrix& K) {
+    FastMatrix& K,
+    std::string model) {
 
     double Porosity_FC[MAX_MATLS];
     double vol_frac_FC[MAX_MATLS];
@@ -1285,8 +1286,9 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            //FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
-                            FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                            if (model == "Carman-Kozeny") {
+                                FRe = 10 * vol_frac_FC[n] / (1 - vol_frac_FC[n]) / (1 - vol_frac_FC[n]);
+                            }
 
                             // Calculate the momentum exchange coefficient 
                             if (visc1 > 0) {
@@ -1352,8 +1354,9 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            //FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
-                            FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                            if (model == "Carman-Kozeny") {
+                                FRe = 10 * vol_frac_FC[m] / (1 - vol_frac_FC[m]) / (1 - vol_frac_FC[m]);
+                            }
 
                             // Calculate the momentum exchange coefficient 
                             if (visc2 > 0) {
@@ -1404,7 +1407,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
     int numALLMatls,
     std::vector<constCCVariable<double> >& vol_frac_CC,
     FastMatrix& difvelnorm,
-    FastMatrix& K) {
+    FastMatrix& K,
+    std::string model) {
 
     double K_safe = 1e15;
 
@@ -1491,8 +1495,9 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            //FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
-                            FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                            if (model == "Carman-Kozeny") {
+                                FRe = 10 * vol_frac_CC[n][c] / (1 - vol_frac_CC[n][c]) / (1 - vol_frac_CC[n][c]);
+                            }
 
                             // Calculate the momentum exchange coefficient 
                             if (visc1 > 0) {
@@ -1559,8 +1564,9 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                             }
 
                             // Carman-Kozeny formula
-                            //FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
-                            FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                            if (model == "Carman-Kozeny") {
+                                FRe = 10 * vol_frac_CC[m][c] / (1 - vol_frac_CC[m][c]) / (1 - vol_frac_CC[m][c]);
+                            }
 
                             // Calculate the momentum exchange coefficient 
                             if (visc2 > 0) {

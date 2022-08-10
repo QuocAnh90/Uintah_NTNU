@@ -135,7 +135,8 @@ namespace ExchangeModels{
         int numALLMatls,
         std::vector<constCCVariable<double> >& vol_frac_CC,
         FastMatrix& difvelnorm,
-        FastMatrix& K);
+        FastMatrix& K,
+        std::string model);
 
     template<class constSFC, class SFC>
     void Reynolds_model_FC(IntVector c,
@@ -143,7 +144,8 @@ namespace ExchangeModels{
         int numMatls,
         std::vector<constCCVariable<double> >& vol_frac_CC,
         std::vector< constSFC>& vel_FC,
-        FastMatrix& K);
+        FastMatrix& K,
+        std::string model);
 
   };
 }

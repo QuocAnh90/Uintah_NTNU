@@ -79,7 +79,7 @@ ExchangeFactory::create(const ProblemSpecP     & matl_ps,
       return (scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm));
   }
 
-  if (model == "Reynolds") {
+  if (model == "Reynolds" || model == "Carman-Kozeny") {
       return (scinew ExchangeModels::ScalarExch(exchg_ps, materialManager, with_mpm));
   }
 

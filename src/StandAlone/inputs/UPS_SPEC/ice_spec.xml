@@ -273,7 +273,7 @@
 
     <!--ICE and MPMICE related -->
     <exchange_properties           spec="OPTIONAL NO_DATA" >
-      <Model                          spec="OPTIONAL NO_DATA" attribute1="type REQUIRED STRING 'Reynolds, Darcy, slip'" >
+      <Model                          spec="OPTIONAL NO_DATA" attribute1="type REQUIRED STRING 'Reynolds, Darcy, Carman-Kozeny, slip'" >
         <solidMatlIndex               spec="OPTIONAL INTEGER" />
         <fluidMatlIndex               spec="OPTIONAL INTEGER" />
         <momentum_accommodation_coeff spec="OPTIONAL DOUBLE"  />
