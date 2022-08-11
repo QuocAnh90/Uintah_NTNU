@@ -39,7 +39,7 @@
   <MPM>
     <gravity>[0, 0, 0]</gravity>
     <time_integrator>explicit</time_integrator>
-    <interpolator>gimp</interpolator>
+    <interpolator>linear</interpolator>
     <cpdi_lcrit>10000000000</cpdi_lcrit>
     <AMR>false</AMR>
     <SingleFieldMPM>false</SingleFieldMPM>
@@ -47,6 +47,7 @@
     <withColor>false</withColor>
     <artificial_damping_coeff>0</artificial_damping_coeff>
     <artificial_viscosity>false</artificial_viscosity>
+    <initial_stress>none</initial_stress>
     <artificial_viscosity_heating>false</artificial_viscosity_heating>
     <artificial_viscosity_coeff1>0.20000000000000001</artificial_viscosity_coeff1>
     <artificial_viscosity_coeff2>2</artificial_viscosity_coeff2>
@@ -80,6 +81,7 @@
     <Use_MPMICE2>true</Use_MPMICE2>
     <RunMMSProblem/>
     <InsertParticles>false</InsertParticles>
+    <InsertUndrainedShearStrength>false</InsertUndrainedShearStrength>
     <do_contact_friction_heating>false</do_contact_friction_heating>
     <computeNormals>false</computeNormals>
     <useLogisticRegression>false</useLogisticRegression>
@@ -102,12 +104,18 @@
         <melt_temp>2950000000000</melt_temp>
         <is_rigid>false</is_rigid>
         <seismic_plate>false</seismic_plate>
+        <permeability>1.0000000000000001e-15</permeability>
+        <grain_size>0.0001</grain_size>
+        <water_density>1.4821969375237396e-323</water_density>
+        <porosity>6.9173297987793204e-310</porosity>
+        <initial_pore_pressure>0</initial_pore_pressure>
         <constitutive_model type="UCNH">
           <bulk_modulus>8330000</bulk_modulus>
           <shear_modulus>3840000</shear_modulus>
           <useModifiedEOS>true</useModifiedEOS>
           <usePlasticity>false</usePlasticity>
           <useInitialStress>false</useInitialStress>
+          <useInitialStressGravity>false</useInitialStressGravity>
         </constitutive_model>
         <damage_model type="null"/>
         <geom_object>
@@ -180,9 +188,6 @@
         <momentum>[0]</momentum>
         <heat>[0]</heat>
       </exchange_coefficients>
-      <Model type="Reynolds">
-        <grain_size>0.001</grain_size>
-      </Model>
     </exchange_properties>
   </MaterialProperties>
   <PhysicalBC>
@@ -207,7 +212,8 @@
             <load>10000</load>
           </time_point>
         </load_curve>
-        <outward_normal>false</outward_normal>
+        <outward_normal>true</outward_normal>
+        <res>[967988496, 21992, 968765728]</res>
       </pressure>
     </MPM>
   </PhysicalBC>

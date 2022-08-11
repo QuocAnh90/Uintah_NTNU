@@ -11,7 +11,7 @@
   <!--__________________________________________________
 	_________________-->
   <Time>
-    <maxTime>             1         </maxTime>
+    <maxTime>             7.5        </maxTime>
     <initTime>           0.0         </initTime>
     <delt_min>           1.0e-8      </delt_min>
     <delt_max>           1.0e0       </delt_max>
@@ -80,7 +80,7 @@
   <!--____________________________________________________________________-->
   <DataArchiver>
     <filebase>consolidation.uda</filebase>
-    <outputInterval>5.0e-2</outputInterval>
+    <outputInterval>0.25</outputInterval>
     <save label="press_CC"/>
     <save label="c.mass"/>
     <save label="p.pressure"/>

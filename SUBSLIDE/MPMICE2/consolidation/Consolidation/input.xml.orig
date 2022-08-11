@@ -11,7 +11,7 @@
   <!--__________________________________________________
 	_________________-->
   <Time>
-    <maxTime>             1         </maxTime>
+    <maxTime>             7.5        </maxTime>
     <initTime>           0.0         </initTime>
     <delt_min>           1.0e-8      </delt_min>
     <delt_max>           1.0e0       </delt_max>
@@ -80,7 +80,7 @@
   <!--____________________________________________________________________-->
   <DataArchiver>
     <filebase>consolidation.uda</filebase>
-    <outputInterval>5.0e-2</outputInterval>
+    <outputInterval>0.25</outputInterval>
     <save label="press_CC"/>
     <save label="c.mass"/>
     <save label="p.pressure"/>
@@ -144,7 +144,7 @@
   <MPM>
     <time_integrator>     explicit  </time_integrator>
     <testForNegTemps_mpm> false     </testForNegTemps_mpm>
-    <interpolator>        gimp      </interpolator>
+    <interpolator>        linear      </interpolator>
     <artificial_damping_coeff>        0.0      </artificial_damping_coeff>
     <use_load_curves> true </use_load_curves>
     <Use_MPMICE2>        true      </Use_MPMICE2>
@@ -192,12 +192,14 @@
       <material name="bed">
         <density>             2650.0           </density>
         <permeability>1e-15</permeability>
+        <grain_size>             0.0001         </grain_size>
         <constitutive_model type="comp_neo_hook">
           <useModifiedEOS>      true          </useModifiedEOS>
           <bulk_modulus>       8.33e6        </bulk_modulus>
           <shear_modulus>      3.84e6        </shear_modulus>
           <usePlasticity>false</usePlasticity>
           <useInitialStress>false</useInitialStress>
+          <useInitialStressGravity>false</useInitialStressGravity>
         </constitutive_model>
         <thermal_conductivity>  400.0         </thermal_conductivity>
         <specific_heat>         386.0         </specific_heat>
@@ -270,9 +272,8 @@
       </material>
     </ICE>
     <exchange_properties>
-      <Model type="Reynolds">
-        <grain_size>             0.001         </grain_size>
-      </Model>
+      <Model type="Carman-Kozeny">
+         </Model>
       <exchange_coefficients>
         <momentum>             [0]          </momentum>
         <heat>                  [0]           </heat>
