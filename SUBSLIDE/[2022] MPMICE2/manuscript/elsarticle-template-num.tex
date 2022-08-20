@@ -177,7 +177,7 @@ $\pmb{\sigma}$ 			&  $[M/L^2]$ 	& Total stress tensor\\
 $\delt$       			&  $[t]$      	& Time increment\\
 $\pmb{b}$ 			    &  $[L/t]$ 	    & Gravity acceleration\\
 $c_v$                   &  $[L^2/t^2]$  & Constant volume specific heat\\
-$f_{fs}$ 		  	    &  $[ML//t^2]$ 	& Drag forces in momentum exchange term\\
+$f_{d}$ 		  	    &  $[ML//t^2]$ 	& Drag forces in momentum exchange term\\
 $f^{int}$ 		  	    &  $[ML//t^2]$ 	& Internal forces\\
 $f^{ext}$ 		  	    &  $[ML//t^2]$ 	& External forces\\
 $q_{fs}$ 		  	    &  $[ML//t^2]$ 	& Heat exchange term\\
@@ -264,12 +264,12 @@ The following assumptions are made for the MPMICE model.
 %
 %_______________________________
 \subsection{\textsf{Governing equations}}
-A representative element volume $\Omega$ is decomposed by two domains: solid domain $\Omega_s$ and fluid domain $\Omega_f$. Then, the two domains are homogenized into two overlapping continua. Considering the true (or Eulerian) porosity $n=\Omega_f/\Omega$ of the representative element volume, the average density of solid and fluid phase are defined as:\\
+A representative element volume $\Omega$ is decomposed by two domains: solid domains $\Omega_s$ and fluid domains $\Omega_f$. Then, all domains are homogenized into two overlapping continua. Considering the volume fraction of solid $\phi_s = \Omega_s/\Omega$ and fluid $\phi_f = \Omega_f/\Omega$ with the true (or Eulerian) porosity $n=\sum{\phi_f}$ of the representative element volume, the average density of solid and fluid phase are defined as:\\
 %
 %
 \begin{equation}
     \label{density} 
-  \overline{\rho}_s   = (1-n) \rho_s, \qquad  \overline{\rho}_f   = n \rho_f \quad
+  \overline{\rho}_s   = \phi_s \rho_s, \qquad  \overline{\rho}_f   = \phi_f \rho_f \quad
 \end{equation}
 %
 %
@@ -328,7 +328,7 @@ The momentum balance equation for the fluid phase is\\
 %
 \begin{equation}
      \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} = -n\nabla P_{eq} +  \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +
-     \pmb{f}_{sf}
+     \pmb{f}_{d}
 \end{equation}
 %
 %
@@ -339,7 +339,7 @@ The momentum balance equation for the solid phase is\\
      \frac{1}{V}\frac{D_s(m_s \pmb{U}_s)}{Dt} = 
     \nabla \cdot (\pmb{\sigma}^\prime) - (1-n) \nabla p_f 
     + \overline{\rho}_s \pmb{b}
-    - \pmb{f}_{sf}
+    - \pmb{f}_{d}
 \end{equation}
 %
 %
@@ -354,7 +354,7 @@ The internal energy balance equation for the fluid phase is
 \begin{equation}
     \label{fluidenergy}
      \frac{1}{V}\frac{D_f(m_f e_f)}{Dt} = 
-    -\overline{\rho}_f P_{eq}  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f + q_{sf}
+    -\overline{\rho}_f P_{eq}  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f + q_{d}
 \end{equation}
 %
 %
@@ -363,7 +363,7 @@ The internal energy balance equation for the solid phase is
 %
 \begin{equation}
     \label{solidenergy}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s - q_{sf} 
+     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s - q_{d} 
 \end{equation}
 %
 %
@@ -451,17 +451,48 @@ where $\lambda$ and $\mu$ are bulk and shear modulus ad J is the determinant of 
 where the $c^{\prime}$, $\phi^{\prime}$ and $\psi^{\prime}$ are cohesion and friction angle and dilation angle. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ are maximum and minimum principal stress.
 %_______________________________
 \subsubsection{Momentum and Energy exchange model}
-Currently, the energy exchange coefficient is assumed to be constant for the sake of simplicity. For the momentum exchange, we can either select the Darcy's law for laminar flow or other models for non laminar flow
-\subsubsection{Darcy law}
-The drag force following the Darcy law is given by
+Currently, the energy exchange coefficient is assumed to be constant for the sake of simplicity. For the momentum exchange, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid vicosity $\mu_f$, and is propotional to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Therefore, The drag force following the Darcy law is given by: \\
 %
 %
 \begin{equation}
-     \pmb{f}_{fs} = n^2 \frac{\mu}{\kappa} (\pmb{U}_s - \pmb{U}_f)  
+     \pmb{f}_{d} = \frac{18\phi_s(1-\phi_s)\mu_f}{D_p^2} F(\phi_s, Re) (\pmb{U}_s - \pmb{U}_f)  
+\label{fd}
 \end{equation}
 %
 %
-where $\mu$ is the fluid viscosity, $\kappa$ is the intrinsic permeability of soil which can be calculated using Kozeny-Carman equation for sand
+where Reynolds number $Re$ are computed as:
+%
+%
+\begin{equation}
+     Re = \frac{n \rho_f D_p}{\mu_f} |\big\|(\pmb{U}_s - \pmb{U}_f)\big\|
+\end{equation}
+%
+%
+Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ (cite{Drag}). The function $F(\phi_s, Re)$ can be calculated as:
+%
+%
+\begin{equation}
+     F(\phi_s, Re)  = F(\phi_s, 0)  + \frac{0.413Re}{24 (1-\phi_s)^2} (\frac{(1-\phi_s)^{-1}+3\phi_s(1-\phi_s)+8.4Re^{-0.343}}{1+10^{3\phi_s}Re^{-(1+4\phi_s)/2}})
+\end{equation}
+%
+%
+where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
+%
+%
+\begin{equation}
+     F(\phi_s, 0)  = \frac{10\phi_s}{ (1-\phi_s)^2}+(1-\phi_s)^2(1+1.5\sqrt{\phi_s})
+\end{equation}
+%
+%
+In the paper, we convert the equation \ref{fd} to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$. Indeed, the Kozeny-Carman formula can be written as:
+%
+%
+\begin{equation}
+     \pmb{f}_{d} = n^2 \frac{\mu_f}{\kappa} (\pmb{U}_s - \pmb{U}_f)  
+\end{equation}
+%
+%
+where $\kappa$ is the intrinsic permeability of soil with the Kozeny-Carman coefficient:
 %
 %
 \begin{equation}
@@ -469,7 +500,7 @@ where $\mu$ is the fluid viscosity, $\kappa$ is the intrinsic permeability of so
 \end{equation}
 %
 %
-where $D_p$ is average dimameter of sand grains and $A$ is empirical parameter considering the tortuosity effect. 
+where $A=1$ is empirical parameter considering the tortuosity effect. 
 \subsubsection{Solving momentum exchange with an implicit solve}
 In this study, we apply the Darcy's law to compute the momentum exchange term. The derivation of the implicit integration for the momentum exchange is presented in the section 'Momentum exchange with an implicit solve'. The linear equations 
 has the form:
@@ -968,7 +999,7 @@ Fluid flow through porous media is important in many engineering disciplines, li
 \end{equation}
 %
 %
-If the Carman-Kozeny formula is adopted $F = 10p/(1-p)^4$, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$. Then, the analytical formula of average velocity in one dimension through the porous media is::\\
+If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$. Then, the analytical formula of average velocity in one dimension through the porous media is:\\
 %
 %
 \begin{equation}
@@ -1222,7 +1253,7 @@ The linear momentum balance equation for the fluid phase based on mixture theory
 %
 \begin{equation}
     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} = 
-    \nabla \cdot (-np_f\pmb{I}) + \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} + \pmb{f}_{sf} + \pmb{f}_b
+    \nabla \cdot (-np_f\pmb{I}) + \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} + \pmb{f}_{d} + \pmb{f}_b
 \end{equation}
 %
 %
@@ -1241,7 +1272,7 @@ As a result, the linear momentum balance equation for fluid phase becomes:
     \label{fluidmom}
      \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} = -n\nabla p_f + \nabla \cdot \pmb{\tau}_f + 
    \overline{\rho}_f \pmb{b} +
-     \pmb{f}_{sf}
+     \pmb{f}_{d}
 \end{equation}
 %
 %
@@ -1265,7 +1296,7 @@ Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with e
 %     \frac{1}{V}\frac{D_s(m_s \pmb{U}_s)}{Dt} = 
     \nabla \cdot (\pmb{\sigma}^\prime) - (1-n) \nabla p_f 
     + \overline{\rho}_s \pmb{b}
-    - \pmb{f}_{sf}
+    - \pmb{f}_{d}
 \end{equation}
 %
 %
@@ -1275,7 +1306,7 @@ We adopt the general form of the total energy balance equation for the porous me
 %
 \begin{equation}
 \label{e1}
-     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} = \nabla \cdot (-np_f\pmb{I}) \cdot \pmb{U}_f + \nabla \cdot \pmb{q}_f + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f + \pmb{f}_{sf} \cdot \pmb{U}_f + q_{sf}
+     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} = \nabla \cdot (-np_f\pmb{I}) \cdot \pmb{U}_f + \nabla \cdot \pmb{q}_f + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f + \pmb{f}_{d} \cdot \pmb{U}_f + q_{sf}
 \end{equation}
 %
 %
@@ -1306,7 +1337,7 @@ On the right hand side, the terms include the average pressure-volume work, the 
      \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} + \frac{1}{V}\frac{D_s(m_s (e_s+0.5\pmb{U}_s^2))}{Dt} = \nabla \cdot (-np_f\pmb{I}) \cdot \pmb{U}_f \\
      + \nabla \cdot (\pmb{\sigma}^\prime-(1-n)p_f\pmb{I}) \cdot \pmb{U}_s + (-np_f\pmb{I}) : \nabla \pmb{U}_f + (\pmb{\sigma}^\prime-(1-n)p_f\pmb{I}) : \nabla \pmb{U}_s \\
      + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f + (\overline{\rho}_s \pmb{b}) \cdot \pmb{U}_s
-     + \nabla \cdot \pmb{q}_f + \nabla \cdot \pmb{q}_s + \pmb{f}_{sf} \cdot (\pmb{U}_f - \pmb{U}_s)  
+     + \nabla \cdot \pmb{q}_f + \nabla \cdot \pmb{q}_s + \pmb{f}_{d} \cdot (\pmb{U}_f - \pmb{U}_s)  
 \end{gathered}
 \end{equation}
 %
