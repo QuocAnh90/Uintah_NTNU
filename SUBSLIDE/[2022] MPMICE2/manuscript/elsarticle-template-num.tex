@@ -468,7 +468,7 @@ where Reynolds number $Re$ are computed as:
 \end{equation}
 %
 %
-Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ (cite{Drag}). The function $F(\phi_s, Re)$ can be calculated as:
+Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ \cite{Drag}. The function $F(\phi_s, Re)$ can be calculated as:
 %
 %
 \begin{equation}
@@ -484,23 +484,7 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 \end{equation}
 %
 %
-In the paper, we convert the equation \ref{fd} to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$. Indeed, the Kozeny-Carman formula can be written as:
-%
-%
-\begin{equation}
-     \pmb{f}_{d} = n^2 \frac{\mu_f}{\kappa} (\pmb{U}_s - \pmb{U}_f)  
-\end{equation}
-%
-%
-where $\kappa$ is the intrinsic permeability of soil with the Kozeny-Carman coefficient:
-%
-%
-\begin{equation}
-     \kappa = A \frac {D_p^2n^3}{(1-n)^2}
-\end{equation}
-%
-%
-where $A=1$ is empirical parameter considering the tortuosity effect. 
+In the paper, we convert the equation \ref{fd} to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
 \subsubsection{Solving momentum exchange with an implicit solve}
 In this study, we apply the Darcy's law to compute the momentum exchange term. The derivation of the implicit integration for the momentum exchange is presented in the section 'Momentum exchange with an implicit solve'. The linear equations 
 has the form:
@@ -528,17 +512,11 @@ where the intermediate velocity can be calculated by
 \end{equation}
 %
 %
-Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with Cauchy coefficient $K = (n^n)^2 \mu / \kappa^n$.
+Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with Cauchy coefficient $K =  18\phi_s(1-\phi_s)\mu_f  F(\phi_s, Re) /D_p^2$.
 
 %_______________________________
 \subsubsection{Turbulent model}
-The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. the concept is
-\begin{enumerate}
-\item the velocity is split to a filtered component $\overline{\pmb{U}}$ representing the motion of large eddies, and a residual component $\pmb{U}^{'}$.
-\item The filtered velocity is computed by solving the filtered Navier-Stokes equation which derived from the original Navier-Stokes equation.
-\item The residual stress tensor is calculated using the Smagorinski model.
-\end{enumerate}
-In the Smagorinsky mode, the residual stress tensor is:
+The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky mode, the residual stress tensor is:
 %
 \begin{equation}
      \tau_{ij} = 2 \mu_{eff} (\overline{S}_{ij} - \frac{1}{3} \delta_{ij} \overline{S}_{kk}) + \frac{1}{3} \delta_{ij} \tau_{kk}
