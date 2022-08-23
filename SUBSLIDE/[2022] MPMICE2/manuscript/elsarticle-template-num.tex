@@ -96,7 +96,7 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{MPMICE2}
+\title{MPMICE: A Lagrangian-Eulerian framework for non-isothermal coupling of deformable porous media and fluid flow}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -114,29 +114,36 @@
 %%             state={},
 %%             country={}}
 
-\author{Quoc Anh Tran}
-
-\affiliation{organization={},%Department and Organization
-            addressline={}, 
-            city={},
-            postcode={}, 
-            state={},
-            country={}}
+%%\author{Quoc Anh Tran}
+%%\affiliation{organization={Norwegian University of Science and Technology},%Department and Organization
+ %%           addressline={}, 
+ %%           city={Trondheim},
+  %%          postcode={7034}, 
+  %%          state={},
+   %%         country={Norway}}
 
 \begin{abstract}
 %% Text of abstract
-Abtract here
+Since offshore structures are expanding significantly, it is critical to estimate potential submarine landslides so that offshore structures can withstand landslides. The complex interaction between saturated sediment, seawater, and offshore structures makes it challenging to simulate submarine landslides. In this paper, a soil-fluid-structure interaction model is presented that combines soil mechanics (saturated sediments), fluid mechanics (seawater), and solid mechanics (structures). The formulation involves coupling the Material Point Method, which models large deformation of porous media, with the Implicit Continuous-fluid Eulerian, which models complex fluid flow. We validate the model and simulate the whole process of earthquake-induced submarine landslides. 
 \end{abstract}
 
 %%Graphical abstract
 \begin{graphicalabstract}
 %\includegraphics{grabs}
+%
+%
+\center
+\includegraphics[scale=0.45]{abstract.jpg}
+%
+%
 \end{graphicalabstract}
 
 %%Research highlights
 \begin{highlights}
-\item Research highlight 1
-\item Research highlight 2
+\item MPMICE is introduced for multiphase flow in porous media.
+\item Material Point method allows to model large deformation of non-isothermal porous media.
+\item ICE (compressible multi-material CFD formulation) allows to stablize pore water pressure and turbulent flow.
+\item MPMICE is validated and apply to simulate the earthquake-induced submarine landslide.
 \end{highlights}
 
 \begin{keyword}
@@ -146,7 +153,9 @@ Abtract here
 
 %% MSC codes here, in the form: \MSC code \sep code
 %% or \MSC[2008] code \sep code (2000 is the default)
-
+Material Point Method 
+\sep MPMICE
+\sep submarine landslide.
 \end{keyword}
 
 \end{frontmatter}
@@ -246,7 +255,35 @@ $L, R $       			&             	&    Left and Right cell faces\\
 %__________________________________________________
 %% main text
 \section{\textsf{Introduction}}
-write introduction
+Submarine landslides can pose significant threats to the offshore infrastructures and the coastal communities. Submarine landslides have three stages: triggering, failure, and post-failure. Erosion or earthquakes can trigger slope failures in the first stage. Following the failure, sediments move quickly after the post-failure stage. As a submarine landslide is triggered, sediment behaves like solid (soil) materials and changes to fluid-like behavior after failure. This phase transition makes it challenge to simulate the submarine landslides.\\
+
+Due to this phase transition, submarine landslide can be modeled by either the Computational Fluid Dynamics (CFD) or the particle-based methods. For simulating submarine slides, CFD methods solve governing equations in a full-Eulerian framework for single-phase flows \cite{CFD1, CFD2} and for multi-phase flows \cite{CFD3, CFD4} with interface capturing techniques. While CFD can handle complex flows (such as turbulent flows), it cannot account for the triggering mechanism of submarine landslides because it is not straightforwad to consider 'soil constitutive laws' of sediment materials in the Eulerian framework. In contrast, particle-based methods can overcome this problem by using the Lagrangian framework. These methods have been extensively used to simulate landslides, like Material Point Method (MPM) \cite{Tran2019}, Smooth Particle Hydro Dynamics \cite{Capone2010}, Particle Finite Element Method \cite{Zhang2019}, or Coupled Eulerian Lagrangian Method \cite{Dey2016}. For simplicity, these simulations adopt total stress analysis which neglects the pore pressure development which is the key factor triggering slope failures. \\
+
+Recent developments in particle-based methods model the coupling of fluid flow in porous media by sets of Lagrangian particles. For the MPM family, it is the double-point MPM (\cite{Bandara2015, Tampubolon2017, Baumgarten2019}) where fluid particles and solid particles are overlapped in a single computational grid. Even if fluid flows are considered, particle-based methods have numerical instability in modeling the fluid flow, which requires additional numerical treatments such as the B-bar method \cite{Bandara2015}, null-space filter \cite{nullspace}, or least square approximation \cite{Zheng2021, CPLS}. Indeed, CFD is a more optimal option for complex fluid flows especially dealing with large distortions of continuum fluid media. Therefore, it could be ideal to combine the CFD with particle-based methods. More than 50 particle-based methods have been developed to solve large deformations of solids over the last two decades \cite{Chen2017}, but the MPM appears to be the best candidate for coupling with the CFD. Because MPM incorporates a stationary mesh during computation, just like CFD. As such, both MPM and CFD can be coupled naturally in a unified computational mesh.\\
+%
+%
+\begin{figure}[h]
+\center
+\includegraphics[scale=.5]{water1.jpg}
+\caption{Equation of state of water}
+\label{fig:water1}
+\end{figure}
+%
+%
+%
+%
+\begin{figure}[h]
+\center
+\includegraphics[scale=.5]{water1.jpg}
+\caption{Equation of state of water}
+\label{fig:water1}
+\end{figure}
+%
+%
+To simulate the interaction between sediment (soil), seawater (fluid) and offshore structure (solid), the work presented here describes a numerical approach for simulation of soil-fluid-structure interaction involving large deformation namely MPMICE. MPMICE is the coupling of the Material Point Method (MPM) and Implicit Continuous Eulerian (ICE). MPM allows the
+
+
+
 %_______________________________
 \section{\textsf{Theory and formulation}}
 This section lay out the theoretical framework for the MPMICE model. We use the common notation of the continuum mechaniccs with vector and tensor denoted simply by using bold font and scalar denoted by using normal font. The notation
