@@ -264,25 +264,25 @@ Recent developments in particle-based methods model the coupling of fluid flow i
 %
 \begin{figure}[h]
 \center
-\includegraphics[scale=.5]{water1.jpg}
-\caption{Equation of state of water}
-\label{fig:water1}
+\includegraphics[scale=.3]{3phases.jpg}
+\caption{Interaction between soil-fluid-structure}
+\label{fig:3phases}
 \end{figure}
 %
 %
+
 %
 %
 \begin{figure}[h]
 \center
-\includegraphics[scale=.5]{water1.jpg}
-\caption{Equation of state of water}
-\label{fig:water1}
+\includegraphics[scale=.4]{MPMICE.jpg}
+\caption{Coupling of soil-water-structure interaction using MPMICE}
+\label{fig:MPMICE}
 \end{figure}
 %
 %
-To simulate the interaction between sediment (soil), seawater (fluid) and offshore structure (solid), the work presented here describes a numerical approach for simulation of soil-fluid-structure interaction involving large deformation namely MPMICE. MPMICE is the coupling of the Material Point Method (MPM) and Implicit Continuous Eulerian (ICE). MPM allows the
 
-
+A numerical method for simulating soil-fluid-structure interaction (Figure \ref{fig:3phases}) involving large deformations, is presented in this work in order to simulate the interaction between sediment (soil), seawater (fluid) and offshore structures (structure) namely MPMICE (Figure \ref{fig:MPMICE}). In the MPMICE, the Material Point Method (MPM) is coupled with the Implicit Continuous Eulerian (ICE). The MPM method is a particle method that allows the porous soil to undergo arbitrary distortions. The ICE method, on the other hand, is a compressible, conservative finite volume technique with all state variables located at the cell center (temperature, velocity, mass, pressure). An initial technical report \cite{Kashiwa} at Los Alamos National Laboratory provided the theoretical and algorithmic foundation for the MPMICE, followed by the MPMICE development and implementation in the high-performance Uintah computational framework for simulating fluid-structure interactions \cite{MPMICE}. This paper primarily contributes futher to the development of the MPMICE for analyzing the \textbf{soil}-fluid-structure interaction, since sediment should be considered as a porous media (soil) and not as a solid to capture the evolution of the pore water pressure. Baumgarten et al. \cite{Baumgarten2021} made the first attempt at coupling the Finite Volume Method with the MPM for the simulation of soil-fluid interaction. Our contribution differs from the mentioned work in that we use the implicit time integration for the fluid phase instead of the explicit time integration.
 
 %_______________________________
 \section{\textsf{Theory and formulation}}
@@ -328,15 +328,14 @@ Reviewing the Terzaghi's effective stress concept for the saturated porous media
 \end{equation}
 %
 %
-The balance equations are derived based on the mixture theory. The average thermodynamic state of the fluid phase is given by the vector $[m_f,\pmb{U}_f,e_f,T_f,\upsilon_f]$ which are mass, velocity, internal energy, temperature, specific volume. The average state of the solid phase is given by the vector $[m_s,\pmb{U}_s,e_s,T_s,\pmb{\sigma}^\prime]$ which are mass, velocity, internal energy, temperature, effective stress. Here, we summarize the final form of the equations while the derivation is presented in detail in the Appendix. 
-\\
+The balance equations are derived based on the mixture theory. The average thermodynamic state of the fluid phase is given by the vector $[m_f,\pmb{U}_f,e_f,T_f,\upsilon_f]$ which are mass, velocity, internal energy, temperature, specific volume. The average state of the solid phase is given by the vector $[m_s,\pmb{U}_s,e_s,T_s,\pmb{\sigma}^\prime]$ which are mass, velocity, internal energy, temperature, effective stress. Here, we summarize the final form of the equations while the derivation is presented in detail in the Appendix. \\
 %
 %_______________________________
 % mass
 %_______________________________
 \underline{\hspace{5in}}\\
 \underline{\textsf{Mass Conservation}}\\
-The mass balance equations for both fluid and solid phase are\\
+The mass balance equations for both fluid and solid phase are:\\
 %
 %
 \begin{equation}
@@ -346,7 +345,7 @@ The mass balance equations for both fluid and solid phase are\\
 \end{equation}
 %
 %
-Solving the solid mass and the fluid mass balance equation leading to the  rate of the specific volume as
+Solving the solid mass and the fluid mass balance equation leading to the  rate of the specific volume as:
 %
 %
 \begin{equation}
@@ -360,7 +359,7 @@ Solving the solid mass and the fluid mass balance equation leading to the  rate 
 %_______________________________
 \underline{\hspace{5in}}\\
 \underline{\textsf{Momentum Conservation}}\\
-The momentum balance equation for the fluid phase is\\
+The momentum balance equation for the fluid phase is:\\
 %
 %
 \begin{equation}
@@ -369,7 +368,7 @@ The momentum balance equation for the fluid phase is\\
 \end{equation}
 %
 %
-The momentum balance equation for the solid phase is\\
+The momentum balance equation for the solid phase is:\\
 %
 %
 \begin{equation}
@@ -385,26 +384,26 @@ The momentum balance equation for the solid phase is\\
 %_______________________________
 \underline{\hspace{5in}}\\
 \underline{\textsf{Energy Conservation}}\\
-The internal energy balance equation for the fluid phase is
+The internal energy balance equation for the fluid phase is:
 %
 %
 \begin{equation}
     \label{fluidenergy}
      \frac{1}{V}\frac{D_f(m_f e_f)}{Dt} = 
-    -\overline{\rho}_f P_{eq}  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f + q_{d}
+    -\overline{\rho}_f P_{eq}  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f + q_{sf}
 \end{equation}
 %
 %
-The internal energy balance equation for the solid phase is
+The internal energy balance equation for the solid phase is:
 %
 %
 \begin{equation}
     \label{solidenergy}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s - q_{d} 
+     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s - q_{sf} 
 \end{equation}
 %
 %
-Furthermore, to close the systems of the equations, it requires the additional models: (1) An equation of state to establish relations between thermodynamics variables $[P_{eq}, \rho_f, T_f]$. (2) A constitutive equation to describe the stress - strain behaviour of solid phase. (3) Exchange momentum model. (4) Energy exchange model. (5) Optional turbulent model to compute the viscous shear stress $\pmb{\tau}_f$.\\
+To close the systems of the equations, it requires the additional models: (1) An equation of state to establish relations between thermodynamics variables $[P_{eq}, \rho_f, T_f]$. (2) A constitutive equation to describe the stress - strain behaviour of solid phase (computing effective stress $\pmb{\sigma}^\prime$). (3) Exchange momentum model (computing drag force $\pmb{f}_{d}$). (4) Energy exchange model (computing temerature exhange term $q_{sf}$). (5) Optional turbulent model to compute the viscous shear stress $\pmb{\tau}_f$.\\
 %_______________________________
 \subsubsection{Equation of state for fluid plases}
 %
@@ -488,7 +487,7 @@ where $\lambda$ and $\mu$ are bulk and shear modulus ad J is the determinant of 
 where the $c^{\prime}$, $\phi^{\prime}$ and $\psi^{\prime}$ are cohesion and friction angle and dilation angle. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ are maximum and minimum principal stress.
 %_______________________________
 \subsubsection{Momentum and Energy exchange model}
-Currently, the energy exchange coefficient is assumed to be constant for the sake of simplicity. For the momentum exchange, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid vicosity $\mu_f$, and is propotional to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Therefore, The drag force following the Darcy law is given by: \\
+Currently, the energy exchange coefficient is assumed to be constant for the sake of simplicity. For the momentum exchange, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid vicosity $\mu_f$, and is propotional to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Therefore, The drag force is given by: \\
 %
 %
 \begin{equation}
@@ -521,7 +520,7 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 \end{equation}
 %
 %
-In the paper, we convert the equation \ref{fd} to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
+When validating the model with analytical solution, it requires to know the hydraulic conductivity. In such case, we convert the equation \ref{fd} to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
 \subsubsection{Solving momentum exchange with an implicit solve}
 In this study, we apply the Darcy's law to compute the momentum exchange term. The derivation of the implicit integration for the momentum exchange is presented in the section 'Momentum exchange with an implicit solve'. The linear equations 
 has the form:
@@ -549,7 +548,7 @@ where the intermediate velocity can be calculated by
 \end{equation}
 %
 %
-Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with Cauchy coefficient $K =  18\phi_s(1-\phi_s)\mu_f  F(\phi_s, Re) /D_p^2$.
+Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient $K =  18\phi_s(1-\phi_s)\mu_f  F(\phi_s, Re) /D_p^2$.
 
 %_______________________________
 \subsubsection{Turbulent model}
@@ -1139,7 +1138,6 @@ Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in t
 We also explore the difference between underwater debris flow and saturated debris flow in terms of interacting with obstacle. Figure x shows the snapshot of the simulations of underwater and saturated debris flow. The saturated debris flow behaves like frictional flow as grain have contact forces with each other. On the other hand, the underwater debris flow behave like tubulent flow as grains are separated from each other and exhibit no contact forces between grains.  \\
 %_______________________________
 \subsection{\textsf{Earthquake-induced submarine landslides}}
-0-10-26-final
 %
 %
 \begin{figure}[h]
@@ -1159,18 +1157,15 @@ We also explore the difference between underwater debris flow and saturated debr
 \end{figure}
 %
 %
-
-%
-%
 \begin{figure}[h]
 \center
-\includegraphics[scale=0.3]{model.jpg}
+\includegraphics[scale=0.25]{model.jpg}
 \caption{Mobilized friction angle in Mohr Coulomb model}
 \label{fig:model}
 \end{figure}
 %
 %
-
+Wirte something
 %
 %
 \begin{figure}[h]
@@ -1213,8 +1208,9 @@ We also explore the difference between underwater debris flow and saturated debr
 This project has received funding from the European Union’s Horizon 2020 research and innovation program under the Marie Skłodowska-Curie Actions (MSCA) Individual Fellowship (Project SUBSLIDE “Submarine landslides and their impacts on offshore infrastructures”) grant agreement 101022007. The authors would also like to acknowledge the support from the Research Council of Norway through its Centers of Excellence funding scheme, project number 262644 Porelab. The computations were performed on High Performance Computing resources provided by UNINETT Sigma2 - the National Infrastructure for High Performance Computing and Data Storage in Norway.
 
 %_______________________________
-\appendix
-\section{\textsf{Appendix}}
+%\appendix
+
+\section*{\textsf{Appendix}}
 %
 %
 Before deriving the governing equation, we give some definition (following \cite{Kashiwa}) as below:
