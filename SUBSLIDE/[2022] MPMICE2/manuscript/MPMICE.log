@@ -1,0 +1,847 @@
+This is LuaHBTeX, Version 1.12.0 (MiKTeX 20.7) (format=lualatex 2022.8.24)  24 AUG 2022 15:39
+ restricted system commands enabled.
+**MPMICE.tex
+(./MPMICE.tex
+LaTeX2e <2020-10-01>
+Lua module: luaotfload-main 2020-09-02 3.15 luaotfload entry point
+Lua module: luaotfload-init 2020-09-02 3.15 luaotfload submodule / initializatio
+n
+Lua module: lualibs 2020-08-31 2.72 ConTeXt Lua standard libraries.
+Lua module: lualibs-extended 2020-08-31 2.72 ConTeXt Lua libraries -- extended c
+ollection.
+Lua module: luaotfload-log 2020-09-02 3.15 luaotfload submodule / logging
+Lua module: luaotfload-parsers 2020-09-02 3.15 luaotfload submodule / parsers
+Lua module: luaotfload-configuration 2020-09-02 3.15 luaotfload submodule / conf
+ig file reader
+luaotfload | conf : Root cache directory is "C:/Users/quoct/AppData/Local/MiKTeX
+/luatex-cache/generic/names".
+luaotfload | init : Loading fontloader "fontloader-2020-08-31.lua" from kpse-res
+olved path "C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/luatex/luaotfload/f
+ontloader-2020-08-31.lua".
+Lua-only attribute luaotfload@noligature = 1
+Lua-only attribute luaotfload@syllabe = 2
+luaotfload | init : Context OpenType loader version 0x1.8e353f7ced917p+1
+Lua module: luaotfload-fallback 2020-09-02 3.15 luaotfload submodule / fallback
+Lua module: luaotfload-multiscript 2020-09-02 3.15 luaotfload submodule / multis
+cript
+Lua module: luaotfload-script 2020-09-02 3.15 luaotfload submodule / Script help
+ers
+Inserting `luaotfload.node_processor' at position 1 in `pre_linebreak_filter'.
+Inserting `luaotfload.node_processor' at position 1 in `hpack_filter'.
+Inserting `luaotfload.glyph_stream' at position 1 in `glyph_stream_provider'.
+Lua module: luaotfload-loaders 2020-09-02 3.15 luaotfload submodule / callback h
+andling
+Inserting `luaotfload.define_font' at position 1 in `define_font'.
+Lua module: luaotfload-database 2020-09-02 3.15 luaotfload submodule / database
+Lua module: luaotfload-unicode 2020-09-02 3.15 luaotfload submodule / Unicode he
+lpers
+Lua module: luaotfload-colors 2020-09-02 3.15 luaotfload submodule / color
+Lua-only attribute luaotfload_color_attribute = 3
+Lua module: luaotfload-resolvers 2020-09-02 3.15 luaotfload submodule / resolver
+s
+luaotfload | conf : Root cache directory is "C:/Users/quoct/AppData/Local/MiKTeX
+/luatex-cache/generic/names".
+Lua module: luaotfload-features 2020-09-02 3.15 luaotfload submodule / features
+Lua module: luaotfload-harf-define 2020-09-02 3.15 luaotfload submodule / HarfBu
+zz font loading
+Inserting `luaotfload.harf.strip_prefix' at position 1 in `find_opentype_file'.
+Inserting `luaotfload.harf.strip_prefix' at position 1 in `find_truetype_file'.
+Lua module: luaotfload-harf-plug 2020-09-02 3.15 luaotfload submodule / HarfBuzz
+ shaping
+Inserting `Harf pre_output_filter callback' at position 1 in `pre_output_filter'
+.
+Inserting `Harf wrapup_run callback' at position 1 in `wrapup_run'.
+Inserting `Harf finish_pdffile callback' at position 1 in `finish_pdffile'.
+Inserting `Harf glyph_info callback' at position 1 in `glyph_info'.
+Lua module: luaotfload-letterspace 2020-09-02 3.15 luaotfload submodule / letter
+spacing
+Lua module: luaotfload-embolden 2020-09-02 3.15 luaotfload submodule / embolden
+Lua module: luaotfload-notdef 2020-09-02 3.15 luaotfload submodule / notdef
+Lua module: luaotfload-suppress 2020-09-02 3.15 luaotfload submodule / suppress
+Lua module: luaotfload-szss 2020-09-02 3.15 luaotfload submodule / Special featu
+re handling
+Lua module: luaotfload-auxiliary 2020-09-02 3.15 luaotfload submodule / auxiliar
+y functions
+Inserting `luaotfload.aux.set_sscale_dimens' at position 1 in `luaotfload.patch_
+font'.
+Inserting `luaotfload.aux.set_font_index' at position 2 in `luaotfload.patch_fon
+t'.
+Inserting `luaotfload.aux.patch_cambria_domh' at position 3 in `luaotfload.patch
+_font'.
+Inserting `luaotfload.aux.fixup_fontdata' at position 1 in `luaotfload.patch_fon
+t_unsafe'.
+Inserting `luaotfload.aux.set_capheight' at position 4 in `luaotfload.patch_font
+'.
+Inserting `luaotfload.aux.set_xheight' at position 5 in `luaotfload.patch_font'.
+Lua module: luaotfload-tounicode 2020-09-02 3.15 luaotfload submodule / tounicod
+e
+Inserting `luaotfload.rewrite_fontname' at position 6 in `luaotfload.patch_font'
+. L3 programming layer <2020-09-24> xparse <2020-03-03>
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/elsarticle/elsarticle.c
+ls
+Document Class: elsarticle 2020/11/20, 3.3: Elsevier Ltd
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/l3kernel/expl3.sty
+Package: expl3 2020-09-24 L3 programming layer (loader) 
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/l3backend/l3backend-lua
+tex.def
+File: l3backend-luatex.def 2020-09-24 L3 backend support: PDF output (LuaTeX)
+\l__kernel_color_stack_int=\count171
+\l__pdf_internal_box=\box47
+))
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/l3packages/xparse/xpars
+e.sty
+Package: xparse 2020-05-15 L3 Experimental document command parser
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/l3packages/xparse/xpars
+e-generic.tex))
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2020/08/24 v2.5j e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count172
+)
+\@bls=\dimen138
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/base/article.cls
+Document Class: article 2020/04/10 v1.4m Standard LaTeX document class
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/base/size12.clo
+File: size12.clo 2020/04/10 v1.4m Standard LaTeX file (size option)
+luaotfload | db : Font names database loaded from C:/Users/quoct/AppData/Local/M
+iKTeX/luatex-cache/generic/names/luaotfload-names.luc)
+\c@part=\count173
+\c@section=\count174
+\c@subsection=\count175
+\c@subsubsection=\count176
+\c@paragraph=\count177
+\c@subparagraph=\count178
+\c@figure=\count179
+\c@table=\count180
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen139
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics/graphicx.sty
+Package: graphicx 2020/09/09 v1.2b Enhanced LaTeX Graphics (DPC,SPQR)
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics/graphics.sty
+Package: graphics 2020/08/30 v1.4c Standard LaTeX Graphics (DPC,SPQR)
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics-cfg/graphics.c
+fg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: luatex.def on input line 105.
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/graphics-def/luatex.def
+File: luatex.def 2020/08/26 v1.2 Graphics/color driver for luatex
+))
+\Gin@req@height=\dimen140
+\Gin@req@width=\dimen141
+)
+\c@tnote=\count181
+\c@fnote=\count182
+\c@cnote=\count183
+\c@ead=\count184
+\c@author=\count185
+\@eadauthor=\toks16
+\c@affn=\count186
+\absbox=\box48
+\elsarticlehighlightsbox=\box49
+\elsarticlegrabsbox=\box50
+\keybox=\box51
+\Columnwidth=\dimen142
+\space@left=\dimen143
+\els@boxa=\box52
+\els@boxb=\box53
+\leftMargin=\dimen144
+\@enLab=\toks17
+\@sep=\skip49
+\@@sep=\skip50
+ (./MPMICE.spl)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip51
+\bibsep=\skip52
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count187
+)
+\splwrite=\write3
+
+\openout3 = MPMICE.spl
+\appnamewidth=\dimen145
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks18
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2020/09/23 v2.17i AMS math features
+\@mathmargin=\skip53
+
+For additional information on amsmath, use the `?' option.
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks19
+\ex@=\dimen146
+))
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen147
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count188
+LaTeX Info: Redefining \frac on input line 236.
+\uproot@=\count189
+\leftroot@=\count190
+LaTeX Info: Redefining \overline on input line 399.
+\classnum@=\count191
+\DOTSCASE@=\count192
+LaTeX Info: Redefining \ldots on input line 496.
+LaTeX Info: Redefining \dots on input line 499.
+LaTeX Info: Redefining \cdots on input line 620.
+\Mathstrutbox@=\box54
+\strutbox@=\box55
+\big@size=\dimen148
+LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
+\macc@depth=\count193
+\c@MaxMatrixCols=\count194
+\dotsspace@=\muskip16
+\c@parentequation=\count195
+\dspbrk@lvl=\count196
+\tag@help=\toks20
+\row@=\count197
+\column@=\count198
+\maxfields@=\count199
+\andhelp@=\toks21
+\eqnshift@=\dimen149
+\alignsep@=\dimen150
+\tagshift@=\dimen151
+\tagwidth@=\dimen152
+\totwidth@=\dimen153
+\lineht@=\dimen154
+\@envbody=\toks22
+\multlinegap=\skip54
+\multlinetaggap=\skip55
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2923.
+LaTeX Info: Redefining \] on input line 2924.
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count266
+\float@exts=\toks24
+\float@box=\box56
+\@float@everytoks=\toks25
+\@floatcapt=\box57
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/caption/caption.sty
+Package: caption 2020/09/12 v3.5b Customizing captions (AR)
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/caption/caption3.sty
+Package: caption3 2020/09/17 v2.1b caption3 kernel (AR)
+\captionmargin=\dimen155
+\captionmargin@=\dimen156
+\captionwidth=\dimen157
+\caption@tempdima=\dimen158
+\caption@indent=\dimen159
+\caption@parindent=\dimen160
+\caption@hangindent=\dimen161
+Package caption Info: elsarticle document class detected.
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/caption/caption-elsarti
+cle.sto
+File: caption-elsarticle.sto 2020/08/22 v2.0 Adaption of the caption package to 
+the elsarticle document class (AR)
+))
+\c@caption@flags=\count267
+\c@continuedfloat=\count268
+Package caption Info: float package is loaded.
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/caption/subcaption.sty
+Package: subcaption 2020/08/23 v1.3g Sub-captions (AR)
+\c@subfigure=\count269
+\c@subtable=\count270
+) (./MPMICE.aux (./newcommands.aux)
+
+LaTeX Warning: Label `watersurface' multiply defined.
+
+)
+\openout1 = MPMICE.aux
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 63.
+LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 63
+.
+ (C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/base/ts1cmr.fd
+File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
+)
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 63.
+LaTeX Font Info:    ... okay on input line 63.
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/context/base/mkii/supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count271
+\scratchdimen=\dimen162
+\scratchbox=\box58
+\nofMPsegments=\count272
+\nofMParguments=\count273
+\everyMPshowfont=\toks26
+\MPscratchCnt=\count274
+\MPscratchDim=\dimen163
+\MPnumerator=\count275
+\makeMPintoPDFobject=\count276
+\everyMPtoPDFconversion=\toks27
+)
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/epstopdf-pkg/epstopdf-b
+ase.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
+5.
+)
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+
+\openout2 = newcommands.aux
+ (./newcommands.tex)
+<figures//abstract.jpg, id=1, 751.30687pt x 968.11688pt>
+File: figures//abstract.jpg Graphic file (type jpg)
+<use figures//abstract.jpg>
+Package luatex.def Info: figures//abstract.jpg  used on input line 137.
+(luatex.def)             Requested size: 338.08496pt x 435.64857pt.
+
+Overfull \hbox (18.30028pt too wide) in paragraph at lines 145--146
+[]\TU/lmr/m/n/12 Ma-te-rial Point method al-lows to model large de-for-ma-tion 
+of non-isothermal
+ []
+
+[1
+
+
+
+
+{C:/Users/quoct/AppData/Local/MiKTeX/pdftex/config/pdftex.map}<./figures//abstra
+ct.jpg>] [2
+
+]
+Overfull \hbox (20.9389pt too wide) has occurred while \output is active
+\TU/lmr/m/it/10 Preprint sub-mit-ted to Com-puter Meth-ods in Ap-plied Me-chan-i
+cs and En-gi-neer-ing  Au-gust 24, 2022
+ []
+
+
+Overfull \hbox (2.608pt too wide) has occurred while \output is active
+[] 
+ []
+
+[1
+
+
+]
+LaTeX Font Info:    Trying to load font information for U+msa on input line 172.
+
+ (C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 172.
+
+
+(C:/Users/quoct/AppData/Local/Programs/MiKTeX/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+(./MPMICE.toc [2])
+\tf@toc=\write4
+
+\openout4 = MPMICE.toc
+ [3]
+Overfull \hbox (20.07619pt too wide) in paragraph at lines 180--212
+[][] 
+ []
+
+[4]
+Overfull \hbox (60.0939pt too wide) in paragraph at lines 218--249
+ [][] 
+ []
+
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 259--260
+
+ []
+
+
+Package natbib Warning: Citation `CFD1' on page 6 undefined on input line 261.
+
+
+Package natbib Warning: Citation `CFD2' on page 6 undefined on input line 261.
+
+
+Package natbib Warning: Citation `CFD3' on page 6 undefined on input line 261.
+
+
+Package natbib Warning: Citation `CFD4' on page 6 undefined on input line 261.
+
+
+Package natbib Warning: Citation `Tran2019' on page 6 undefined on input line 26
+1.
+
+
+Package natbib Warning: Citation `Capone2010' on page 6 undefined on input line 
+261.
+
+
+Package natbib Warning: Citation `Zhang2019' on page 6 undefined on input line 2
+61.
+
+
+Package natbib Warning: Citation `Dey2016' on page 6 undefined on input line 261
+.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 261--262
+
+ []
+
+
+Package natbib Warning: Citation `Bandara2015' on page 6 undefined on input line
+ 263.
+
+
+Package natbib Warning: Citation `Tampubolon2017' on page 6 undefined on input l
+ine 263.
+
+
+Package natbib Warning: Citation `Baumgarten2019' on page 6 undefined on input l
+ine 263.
+
+
+Package natbib Warning: Citation `Bandara2015' on page 6 undefined on input line
+ 263.
+
+
+Package natbib Warning: Citation `nullspace' on page 6 undefined on input line 2
+63.
+
+
+Package natbib Warning: Citation `Zheng2021' on page 6 undefined on input line 2
+63.
+
+
+Package natbib Warning: Citation `CPLS' on page 6 undefined on input line 263.
+
+
+Package natbib Warning: Citation `Chen2017' on page 6 undefined on input line 26
+3.
+
+<figures//3phases.jpg, id=38, 635.976pt x 550.2156pt>
+File: figures//3phases.jpg Graphic file (type jpg)
+<use figures//3phases.jpg>
+Package luatex.def Info: figures//3phases.jpg  used on input line 268.
+(luatex.def)             Requested size: 190.79427pt x 165.06595pt.
+[6]
+<figures//MPMICE.jpg, id=42, 927.465pt x 447.6725pt>
+File: figures//MPMICE.jpg Graphic file (type jpg)
+<use figures//MPMICE.jpg>
+Package luatex.def Info: figures//MPMICE.jpg  used on input line 279.
+(luatex.def)             Requested size: 370.97943pt x 179.06583pt.
+
+
+Package natbib Warning: Citation `Kashiwa' on page 7 undefined on input line 286
+.
+
+
+Package natbib Warning: Citation `MPMICE' on page 7 undefined on input line 286.
+
+
+
+Package natbib Warning: Citation `Baumgarten2021' on page 7 undefined on input l
+ine 286.
+
+[7<./figures//3phases.jpg><./figures//MPMICE.jpg>]
+LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <12> not available
+(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 293.
+
+Underfull \hbox (badness 10000) in paragraph at lines 306--309
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 312--318
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 321--327
+
+ []
+
+
+Overfull \hbox (21.52667pt too wide) in paragraph at lines 330--343
+\TU/lmr/m/n/12 ther-mo-dy-namic state of the fluid phases are given by the vec-t
+or $\OT1/cmr/m/n/12 [\OML/cmm/m/it/12 m[]; [][][]; e[]; T[]; []\OT1/cmr/m/n/12
+ ]$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 330--343
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 347--357
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 360--366
+
+ []
+
+[9] [10]
+<figures//water1.jpg, id=58, 562.1pt x 421.575pt>
+File: figures//water1.jpg Graphic file (type jpg)
+<use figures//water1.jpg>
+Package luatex.def Info: figures//water1.jpg  used on input line 443.
+(luatex.def)             Requested size: 281.04932pt x 210.78697pt.
+ [11<./figures//water1.jpg>] [12]
+
+Package natbib Warning: Citation `Drag' on page 13 undefined on input line 528.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 525--531
+
+ []
+
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 619--622
+
+ []
+
+[14] [15]
+Underfull \hbox (badness 10000) in paragraph at lines 684--687
+
+ []
+
+[16] [17] [18] [19]
+Overfull \hbox (8.62518pt too wide) in paragraph at lines 995--998
+[]\TU/lmr/m/n/12 The state vari-ables of the solid phase $\OT1/cmr/m/n/12 [[][]
+[]\OML/cmm/m/it/12 ; [][][]; \OMS/cmsy/m/n/12 r[][][]\OML/cmm/m/it/12 ; T[]; []
+[][]; V[]\OT1/cmr/m/n/12 ]$
+ []
+
+[20]
+Underfull \hbox (badness 10000) in paragraph at lines 1031--1033
+
+ []
+
+<figures//porousflow1.jpg, id=92, 803.6424pt x 766.062pt>
+File: figures//porousflow1.jpg Graphic file (type jpg)
+<use figures//porousflow1.jpg>
+Package luatex.def Info: figures//porousflow1.jpg  used on input line 1041.
+(luatex.def)             Requested size: 195.0pt x 185.88086pt.
+<figures//porousflow.jpg, id=93, 794.0064pt x 614.17455pt>
+File: figures//porousflow.jpg Graphic file (type jpg)
+<use figures//porousflow.jpg>
+Package luatex.def Info: figures//porousflow.jpg  used on input line 1046.
+(luatex.def)             Requested size: 195.0pt x 150.83488pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1055--1058
+
+ []
+
+[21<./figures//porousflow1.jpg><./figures//porousflow.jpg>]
+Underfull \hbox (badness 10000) in paragraph at lines 1060--1066
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1072--1075
+
+ []
+
+<figures//consolidation.jpg, id=100, 794.0064pt x 614.17455pt>
+File: figures//consolidation.jpg Graphic file (type jpg)
+<use figures//consolidation.jpg>
+Package luatex.def Info: figures//consolidation.jpg  used on input line 1080.
+(luatex.def)             Requested size: 238.20375pt x 184.25378pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1091--1097
+
+ []
+
+[22]
+<figures//box_thermal.jpg, id=104, 391.7034pt x 385.1991pt>
+File: figures//box_thermal.jpg Graphic file (type jpg)
+<use figures//box_thermal.jpg>
+Package luatex.def Info: figures//box_thermal.jpg  used on input line 1102.
+(luatex.def)             Requested size: 195.85121pt x 192.59908pt.
+<figures//thermal.png, id=105, 581.17125pt x 565.36218pt>
+File: figures//thermal.png Graphic file (type png)
+<use figures//thermal.png>
+Package luatex.def Info: figures//thermal.png  used on input line 1113.
+(luatex.def)             Requested size: 195.0pt x 189.69296pt.
+<figures//velocity_thermal-1.jpg, id=106, 365.86688pt x 353.82187pt>
+File: figures//velocity_thermal-1.jpg Graphic file (type jpg)
+<use figures//velocity_thermal-1.jpg>
+Package luatex.def Info: figures//velocity_thermal-1.jpg  used on input line 111
+7.
+(luatex.def)             Requested size: 195.0pt x 188.58287pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1125--1128
+
+ []
+
+[23<./figures//consolidation.jpg>] [24<./figures//box_thermal.jpg><./figures//th
+ermal.png><./figures//velocity_thermal-1.jpg>]
+<figures//SandBoxscheme.jpg, id=114, 1111.15125pt x 568.37344pt>
+File: figures//SandBoxscheme.jpg Graphic file (type jpg)
+<use figures//SandBoxscheme.jpg>
+Package luatex.def Info: figures//SandBoxscheme.jpg  used on input line 1133.
+(luatex.def)             Requested size: 333.34795pt x 170.51334pt.
+
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 25 undefined on input lin
+e 1139.
+
+<figures//1.jpg, id=115, 589.4522pt x 353.82187pt>
+File: figures//1.jpg Graphic file (type jpg)
+<use figures//1.jpg>
+Package luatex.def Info: figures//1.jpg  used on input line 1147.
+(luatex.def)             Requested size: 195.0pt x 117.04771pt.
+<figures//2.jpg, id=116, 749.04843pt x 465.23813pt>
+File: figures//2.jpg Graphic file (type jpg)
+<use figures//2.jpg>
+Package luatex.def Info: figures//2.jpg  used on input line 1152.
+(luatex.def)             Requested size: 195.0pt x 121.11523pt.
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 25 undefined on input lin
+e 1161.
+
+<figures//0.4swater.jpg, id=117, 794.97pt x 614.0541pt>
+File: figures//0.4swater.jpg Graphic file (type jpg)
+<use figures//0.4swater.jpg>
+Package luatex.def Info: figures//0.4swater.jpg  used on input line 1170.
+(luatex.def)             Requested size: 195.0pt x 150.6179pt.
+<figures//0.8swater.jpg, id=118, 794.97pt x 614.0541pt>
+File: figures//0.8swater.jpg Graphic file (type jpg)
+<use figures//0.8swater.jpg>
+Package luatex.def Info: figures//0.8swater.jpg  used on input line 1175.
+(luatex.def)             Requested size: 195.0pt x 150.6179pt.
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 25 undefined on input lin
+e 1184.
+
+<figures//SHMPM.jpg, id=119, 849.1725pt x 1210.5225pt>
+File: figures//SHMPM.jpg Graphic file (type jpg)
+<use figures//SHMPM.jpg>
+Package luatex.def Info: figures//SHMPM.jpg  used on input line 1192.
+(luatex.def)             Requested size: 195.0pt x 277.97101pt.
+<figures//MPMICE_debris.jpg, id=120, 825.0825pt x 1198.4775pt>
+File: figures//MPMICE_debris.jpg Graphic file (type jpg)
+<use figures//MPMICE_debris.jpg>
+Package luatex.def Info: figures//MPMICE_debris.jpg  used on input line 1196.
+(luatex.def)             Requested size: 195.0pt x 283.23325pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1139--1206
+
+ []
+
+[25<./figures//SandBoxscheme.jpg>] [26<./figures//1.jpg><./figures//2.jpg><./fig
+ures//0.4swater.jpg><./figures//0.8swater.jpg>]
+<figures//acer.jpg, id=127, 794.0064pt x 614.17455pt>
+File: figures//acer.jpg Graphic file (type jpg)
+<use figures//acer.jpg>
+Package luatex.def Info: figures//acer.jpg  used on input line 1214.
+(luatex.def)             Requested size: 195.0pt x 150.83488pt.
+<figures//vel.jpg, id=128, 799.3062pt x 614.17455pt>
+File: figures//vel.jpg Graphic file (type jpg)
+<use figures//vel.jpg>
+Package luatex.def Info: figures//vel.jpg  used on input line 1218.
+(luatex.def)             Requested size: 195.0pt x 149.83212pt.
+ [27<./figures//SHMPM.jpg><./figures//MPMICE_debris.jpg>]
+<figures//model.jpg, id=132, 794.0064pt x 614.17455pt>
+File: figures//model.jpg Graphic file (type jpg)
+<use figures//model.jpg>
+Package luatex.def Info: figures//model.jpg  used on input line 1229.
+(luatex.def)             Requested size: 198.50111pt x 153.54326pt.
+<figures//landslide_gamma.jpeg, id=133, 815.29594pt x 635.37375pt>
+File: figures//landslide_gamma.jpeg Graphic file (type jpg)
+<use figures//landslide_gamma.jpeg>
+Package luatex.def Info: figures//landslide_gamma.jpeg  used on input line 1239.
+
+(luatex.def)             Requested size: 407.64697pt x 317.6861pt.
+
+Overfull \hbox (17.64697pt too wide) in paragraph at lines 1239--1240
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<figures//PWP.jpeg, id=134, 814.54312pt x 608.2725pt>
+File: figures//PWP.jpeg Graphic file (type jpg)
+<use figures//PWP.jpeg>
+Package luatex.def Info: figures//PWP.jpeg  used on input line 1250.
+(luatex.def)             Requested size: 407.27055pt x 304.13551pt.
+
+Overfull \hbox (17.27055pt too wide) in paragraph at lines 1250--1251
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<figures//landslide_vel.jpg, id=135, 853.68938pt x 630.10406pt>
+File: figures//landslide_vel.jpg Graphic file (type jpg)
+<use figures//landslide_vel.jpg>
+Package luatex.def Info: figures//landslide_vel.jpg  used on input line 1261.
+(luatex.def)             Requested size: 426.84364pt x 315.05125pt.
+
+Overfull \hbox (36.84364pt too wide) in paragraph at lines 1261--1262
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[28<./figures//acer.jpg><./figures//vel.jpg><./figures//model.jpg>] [29<./figure
+s//landslide_gamma.jpeg>]
+
+Package natbib Warning: Citation `Kashiwa' on page 30 undefined on input line 12
+82.
+
+[30<./figures//PWP.jpeg>]
+Overfull \hbox (4.26544pt too wide) detected at line 1326
+[] \OT1/cmr/m/n/12 = [] = \OML/cmm/m/it/12 []V[] \OT1/cmr/m/n/12 + (1 \OMS/cms
+y/m/n/12 ^^@ \OML/cmm/m/it/12 n\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 V[] \OT1/cmr/m
+/n/12 + (1 \OMS/cmsy/m/n/12 ^^@ \OML/cmm/m/it/12 n\OT1/cmr/m/n/12 )\OML/cmm/m/i
+t/12 [][] \OT1/cmr/m/n/12 = 0
+ []
+
+[31<./figures//landslide_vel.jpg>] [32]
+Underfull \hbox (badness 10000) in paragraph at lines 1405--1408
+
+ []
+
+
+Package natbib Warning: Citation `DRUMHELLER' on page 33 undefined on input line
+ 1414.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1411--1417
+
+ []
+
+[33]
+
+Package natbib Warning: Citation `Hassanizadeh' on page 34 undefined on input li
+ne 1458.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1464--1470
+
+ []
+
+
+Package natbib Warning: Citation `Hassanizadeh' on page 34 undefined on input li
+ne 1485.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1482--1488
+
+ []
+
+[34] [35]
+Overfull \hbox (48.04086pt too wide) detected at line 1590
+\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 m[]\OT1/cmr/m/n/12 )[] = (\OML/cmm/m/it/12 m[
+]\OT1/cmr/m/n/12 )[] \OMS/cmsy/m/n/12 ^^@ \OT1/cmr/m/n/12 \OML/cmm/m/it/12 t\O
+T1/cmr/m/n/12 (\OML/cmm/m/it/12 V\OMS/cmsy/m/n/12 r[]  [][][] ^^@ \OML/cmm/m/i
+t/12 V\OT1/cmr/m/n/12 (1 \OMS/cmsy/m/n/12 ^^@ \OML/cmm/m/it/12 n\OT1/cmr/m/n/12
+ )\OMS/cmsy/m/n/12 r[]\OML/cmm/m/it/12 P[] \OT1/cmr/m/n/12 + \OML/cmm/m/it/12 m[][]\OT1/cmr/m/n/12 ) \OMS/cmsy/m/n/12 ^^@ \OML/cmm/m/it/12 VK\OT1/cmr/m/n/12 \OML/cmm/m/it/12 t\OT1/cmr/m/n/12 ([][][] \OMS/cmsy/m/n/12 ^^@ [][][]\OT1/cmr/m/n/12 )
+ []
+
+[36]
+No file MPMICE.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+[37] (./MPMICE.aux (./newcommands.aux))
+
+LaTeX Warning: There were multiply-defined labels.
+
+)
+
+Here is how much of LuaTeX's memory you used:
+ 5418 strings out of 479058
+ 100000,383344 words of node,token memory allocated
+ 1482 words of node memory still in use:
+   6 hlist, 2 vlist, 2 rule, 4 glue, 4 kern, 1 glyph, 247 attribute, 56 glue_spe
+c, 247 attribute_list, 1 write nodes
+   avail lists: 2:1142,3:253,4:33,5:1572,6:66,7:5934,8:177,9:1461,10:21,11:500
+ 24494 multiletter control sequences out of 65536+200000
+ 75 fonts using 7335443 bytes
+ 72i,12n,73p,1627b,514s stack positions out of 5000i,500n,10000p,200000b,50000s
+<//?/c:/users/quoct/appdata/local/programs/miktex/fonts/opentype/public/lm/lmrom
+an10-regular.otf><//?/c:/users/quoct/appdata/local/programs/miktex/fonts/opentyp
+e/public/lm/lmroman7-regular.otf><//?/c:/users/quoct/appdata/local/programs/mikt
+ex/fonts/opentype/public/lm/lmroman8-regular.otf><//?/c:/users/quoct/appdata/loc
+al/programs/miktex/fonts/opentype/public/lm/lmsans12-oblique.otf><//?/c:/users/q
+uoct/appdata/local/programs/miktex/fonts/opentype/public/lm/lmsans12-regular.otf
+><//?/c:/users/quoct/appdata/local/programs/miktex/fonts/opentype/public/lm/lmsa
+ns10-bold.otf><//?/c:/users/quoct/appdata/local/programs/miktex/fonts/opentype/p
+ublic/lm/lmroman10-italic.otf><//?/c:/users/quoct/appdata/local/programs/miktex/
+fonts/opentype/public/lm/lmroman12-italic.otf><//?/c:/users/quoct/appdata/local/
+programs/miktex/fonts/opentype/public/lm/lmroman12-regular.otf><//?/c:/users/quo
+ct/appdata/local/programs/miktex/fonts/opentype/public/lm/lmroman12-bold.otf><//
+?/c:/users/quoct/appdata/local/programs/miktex/fonts/opentype/public/lm/lmroman1
+7-regular.otf><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/a
+msfonts/cm/cmex10.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmmi12.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/font
+s/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/quoct/AppData/Local/Programs/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/quoct/AppData/Local/Progra
+ms/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/quoct/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/quoct/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/quoct/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users
+/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C
+:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8
+.pfb>
+Output written on MPMICE.pdf (39 pages, 23761069 bytes).
+
+PDF statistics: 265 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 1 words of extra memory for PDF output out of 10000 (max. 100000000)
+
