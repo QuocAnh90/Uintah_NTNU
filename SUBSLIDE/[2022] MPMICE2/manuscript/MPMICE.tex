@@ -611,8 +611,24 @@ and the effective viscosity is sum of molecular viscosity and turbulent viscosit
 \end{equation}
 %
 %
-where $C_s$ is the Smagorinsky constant and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale. 
+where $C_s$ is the Smagorinsky constant and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
+%_______________________________
+\subsubsection{Contact law for soil-structure interaction}
+MPMICE includes a contactlaw for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $f_{norm}$  computed from the projection of the contact force  in the normal direction.
 %
+\begin{equation}
+   f_{fric} = \mu_{fric} f_{norm}
+\end{equation}
+%
+%
+The contact determines whether the soil is sliding or sticking to the structure by comparing the friction force with the sticking force $f_{stick}$  computed from the projection of the contact force in the tangent direction:
+%
+\begin{equation}
+\begin{gathered}
+\textrm{   if    }   f_{fric} \geq f_{stick}   \textrm{    no sliding    } \\
+\textrm{    if    }  f_{fric} <  f_{stick}   \textrm{    sliding occurs    }  
+\end{gathered}
+\end{equation}
 %_______________________________
 \section{\textsf{Numerical implementation}}
 \label{Discretization}
@@ -1194,7 +1210,7 @@ On all boundary faces, the Dirichlet boundary condition is imposed for velocity 
 \end{figure}
 %
 %
-Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results. Unlike other computational models based on total stress analysis, the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
+Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results \cite{Zhang2019}. Unlike other computational models based on total stress analysis, the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
 %
 %
 \begin{figure}
@@ -1221,25 +1237,37 @@ We also explore the difference between underwater debris flow and saturated debr
 \subsection{\textsf{Earthquake-induced submarine landslides}}
 %
 %
-\begin{figure}[h]
+\begin{figure}[H]
+\center
+\includegraphics[scale=0.5]{schematic.jpeg}
+\caption{Numerical model of the earthquake-induced submarine landslide}
+\label{fig:scheme}
+\end{figure}
+%
+%
+%
+%
+\begin{figure}[H]
 \center
 %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
 %(or a blank line to force the subfigure onto a new line)
 \begin{subfigure}[c]{0.5\linewidth}
 \includegraphics[width=\linewidth]{acer.jpg}
 \caption{accerleration}
+\label{groundacceleration_accerleration}
 \end{subfigure}\hfill    
 \begin{subfigure}[d]{0.5\linewidth}
 \includegraphics[width=\linewidth]{vel.jpg}
 \caption{velocity}
-\label{velocity}
+\label{groundacceleration_velocity}
 \end{subfigure}
 \caption{Ground acceleration profile, frequency of 2Hz and magnitude of 1g}
 \label{groundacceleration}
 \end{figure}
+In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A slope underwater is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the peak ground acceleration of 1g and the frequency of 2Hz (see Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (see Figure \ref{groundacceleration_velocity}). The earthquake of this magnitude can occured typically for the earthquake of magnitude of more than 6. \\
 %
 %
-\begin{figure}[h]
+\begin{figure}[H]
 \center
 \includegraphics[scale=0.25]{model.jpg}
 \caption{Mobilized friction angle in Mohr Coulomb model}
@@ -1247,9 +1275,17 @@ We also explore the difference between underwater debris flow and saturated debr
 \end{figure}
 %
 %
-In the final example, we perform numerical analysis of the earthquake induced submarine landslides. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the peak ground acceleration of 1g and the frequency of 2Hz (see Figure \ref{groundacceleration}). The earthquake of this magnitude can occured typically for the earthquake of magnitude of more than 6. 
+A non-associated Mohr-Coulomb model is used for the sand. The soil grain has the density of 2650 kg/$m_3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The firction angle is mobilized following the softening curve (see Figure \ref{fig:model}) with the peak friction angle of 45 degrees and the residual friction angle of 10 degrees. The average grain size of the clay is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the Row-stress dilatancy as follow:
 %
-\begin{figure}[h]
+%
+\begin{equation}
+  \sin{\psi}_m = \frac{\sin{\phi}_m}{\sin{\psi}_{cs}(1-\sin{\phi}_m)}
+\end{equation}
+%
+%
+The solid plane is modeled as a rigid body acted as a shaking table. The contact between horizontal plane and the sand is the frictional contact with the friction coefficient of 0.1. No artificial damping is applied in the simulation. The contact between vertical plane and the sand is consdered to be smooth with zero friction coefficient. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45e^{-3}$  mPa s and 1  mPa s respectively. On all boundary faces, the symmetric boundary condition is imposed, while the Neuman boundary condition is imposed at the top boundaryfor pressure (dp/dx = 0 kPa) and density (d/dx = 0 $kg/m^3$). \\
+%
+\begin{figure}[H]
 \center
 \includegraphics[scale=0.5]{landslide_gamma.jpeg}
 \caption{Shear strain during the earthquake-induced submarine landslides}
@@ -1257,10 +1293,11 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end{figure}
 %
 %
-
+We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water ressure in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be charaterized as the progressive failure mechanism. Here are some numerical observation:\\
+\begin{enumerate}
+\item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 10 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3m towards the slide direaction.
 %
-%
-\begin{figure}[h]
+\begin{figure}[H]
 \center
 \includegraphics[scale=0.5]{PWP.jpeg}
 \caption{pore water pressure during the earthquake-induced submarine landslides}
@@ -1268,10 +1305,14 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end{figure}
 %
 %
-
+\item When the onset of the failure occurs in the slope (for example at 10 seconds and 26 seconds), the negative excess pore water pressure is developed along the shear band of the slope with pore water pressure is under 1atm. This is a typical dilatancy behavior when the soil is sheared rapidly in the undrained behavior. 
+\item  When the seismic loading ends at 23 seconds, the last shear band is mobilized and the slope soon reaches to the final deposition. No more progressive failure developed in the slope. The turbulent flow developed as the interaction between debris flow and seawater.
+\end{enumerate}
+%
+Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the delvelopment of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
 %
 %
-\begin{figure}[h]
+\begin{figure}[H]
 \center
 \includegraphics[scale=0.5]{landslide_vel.jpg}
 \caption{Velocity during the earthquake-induced submarine landslides}
@@ -1279,10 +1320,11 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end{figure}
 %
 %
-
-
 %_______________________________
 \section{\textsf{Conclusions}}
+We have presented a numerical approach MPMICE for the simulation of large deformation soil-fluid-structure interaction, emphasizing the simulation of the earthquake-induced submarine landslides. The model uses (1) the Material Point Method for capturing the large deformation of iso-thermal porous media and solid structures and (2) Implicit Continuous Eulerian (compressible, conservative multi-material CFD formulation) for modeling the complex fluid flow including turbulence. This model is implemented in the high-performance Uintah computational framework and validated against analytical solution and experiment. We then demonstrate the capability of the model to simulate the entire process of the earthquake induced submarine landslides.
+
+
 
 %_______________________________
 \section{\textsf{Acknowledgements}}
