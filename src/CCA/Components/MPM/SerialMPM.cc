@@ -3810,7 +3810,7 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           // Prevent the seismic plate moving!
           if (mpm_matl->getSeismicPlate()) {
               pxnew[idx] = px[idx];
-              //pvelnew[idx] = (0.0, 0.0, 0.0);
+              pvelnew[idx] = (0.0, 0.0, 0.0);
           }
 
           if (flags->d_doScalarDiffusion) {
