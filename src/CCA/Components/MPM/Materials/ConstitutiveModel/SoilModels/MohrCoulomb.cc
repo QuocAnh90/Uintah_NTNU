@@ -1170,7 +1170,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
             mu = tan(Phi_CS * 3.1415 / 180);
         }
         Phi = atan(mu) * 180 / 3.1415;
-        double sinPSi = (sin(Phi) - sin(Phi_CS)) / (1 - sin(Phi)*sin(Phi_CS));
+        double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180)*sin(Phi_CS * 3.1415 / 180));
         Psi = sinh(sinPSi) * 180 / 3.1415;
     }
 
