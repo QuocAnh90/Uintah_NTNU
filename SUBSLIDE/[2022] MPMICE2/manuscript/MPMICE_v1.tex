@@ -638,7 +638,7 @@ The contact determines whether the soil is sliding or sticking to the structure 
 \begin{figure}[H]
 \center
 \includegraphics[scale=.5]{GIMPshape.jpg}
-\caption{GIMP weighting function (red9 as a convolution of the linear basis shape function (green) and the charateristic function (blue)}
+\caption{GIMP weighting function (red as a convolution of the linear basis shape function (green) and the charateristic function (blue)}
 \label{fig:GIMP}
 \end{figure}
 %
@@ -657,9 +657,7 @@ where the volume $V_p (\pmb{x})$ of the material point p can be calculated as:
      V_{p} = \int_{\Omega_p} \chi_p (\pmb{x}) d\pmb{x}
 \end{equation}
 %
-The charateristic function is the Heaviside function as $\chi_p = 1 if \pmb{x} \in \Omega_p, \textsf{otherwise 0} $ (see Figure \ref{fig:GIMP}).\\
-%
-The time discretization are solved using the following steps:\\
+The charateristic function is the Heaviside function as $\chi_p = 1  \text{  if  } \pmb{x} \in \Omega_p, \text{otherwise 0} $ (see Figure \ref{fig:GIMP}). The time discretization are solved using the following steps:
 %
 %
 \subsection{\textsf{Interpolation from Solid Particle to Grid}}
