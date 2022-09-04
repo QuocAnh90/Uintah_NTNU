@@ -397,10 +397,10 @@ The internal energy balance equation for the solid phase is:
 \underline{\hspace{5in}}\\
 Closing the systems of equations, the following additional models are needed: \\
 (1) A constitutive equation to describe the stress - strain behaviour of solid phase (computing effective stress $\pmb{\sigma}^\prime$). \\
-(2) Exchange momentum model (computing drag force $\pmb{f}_{d}$). \\
-(3) Energy exchange model (computing temerature exhange term $q_{sf}$). \\
-(4) Optional turbulent model to compute the viscous shear stress $\pmb{\tau}_f$.\\
-(5) Frictional force $\pmb{f}_{fric}$ for the contact between soil-structure interaction with the friction coefficient $\mu_{fric}$. \\
+(2) Optional turbulent model to compute the viscous shear stress $\pmb{\tau}_f$.\\
+(3) Frictional force $\pmb{f}_{fric}$ for the contact between soil-structure interaction with the friction coefficient $\mu_{fric}$. \\
+(4) Exchange momentum model (computing drag force $\pmb{f}_{d}$). \\
+(5) Energy exchange model (computing temerature exhange term $q_{sf}$). \\
 (6) An equation of state to establish relations between thermodynamics variables of each fluid materials $[P_{eq}, \overline{\rho}_f, \upsilon_f, T_f, e_f]$. \\
 Here, $P_{eq}$ is "equilibrium" pressure which is defined as pressure enables mass of fluid material to fills in an entire pore volume with no ongoing compression or expansion with given true density $\rho_f$ and temperature $T_f$.  Four thermodynamic relations for the equation of states are:
 %
@@ -434,36 +434,6 @@ And the rate of the specific volumne of fluid materias are:
 where $ f_f^{\phi} = (\phi_f  \kappa_f ) / (\sum_{n=1}^{N} \phi_n \kappa_n)$ with  $\kappa_f$ being f-material bulk compressibility and $\alpha$ is the constant pressure thermal expansitivity of fluids.
 %
 %
-%_______________________________
-\subsubsection{Equation of state for fluid plases}
-%
-%
-\begin{figure}[h]
-\center
-\includegraphics[scale=.5]{water1.jpg}
-\caption{Equation of state of water}
-\label{fig:water1}
-\end{figure}
-%
-%
-The equation of state establishes relations between thermodynamics variables $[P_f, \rho_f, T_f]$. The choice of the equation of state depends on the types of the fluid materials. For example, for the air, it is possible to assume the equation of state for the perfect gas which obeys:
-%
-%
-\begin{equation}
-    P_f = \rho_f R T_f
-\end{equation}
-%
-%
-where $R$ is the gas constant. For the water, a simple linear equation of state is in the following form:
-%
-%
-\begin{equation}
-    P_f = P_{ref} + K_f (\rho_f - \rho_{ref} - \alpha_f(T_f - T_{ref}))
-\label{waterEOS}
-\end{equation}
-%
-%
-where reference pressure $P_{ref}$ = 1 atm = 101325 Pa, reference temperature $T_{ref}$ = 10°C, reference density  $\rho_{ref}$ = 999.8 kg/m3, the bulk modulus of water $K_f$ = 2 GPa, and the water thermal expansion $\alpha_f$ = 0.18 °$C^{-1}$. Equation (\ref{waterEOS}) matches well with the state of the water (see Figure \ref{fig:water1}).
 %_______________________________
 \subsubsection{Constitutive soil model}
 As a result of the explicit MPM formulation, we can derive the constitutive law in the updated Lagrangian framework of "small strain - large deformation". Therefore, the rotation of the particles (representative element volume) is manipulated by rotating the Cauchy stress tensor. First, the deformation gradient is decomposed into the polar rotation tensor $\pmb{R}_s^{n+1}$ and sketch tensor $\pmb{V}_s^{n+1}$ as
@@ -516,6 +486,47 @@ where $\lambda$ and $\mu$ are bulk and shear modulus ad J is the determinant of 
 %
 where the $c^{\prime}$, $\phi^{\prime}$ and $\psi^{\prime}$ are cohesion and friction angle and dilation angle. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ are maximum and minimum principal stress.
 %_______________________________
+\subsubsection{Turbulent model}
+The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky mode, the residual stress tensor is:
+%
+\begin{equation}
+     \tau_{ij} = 2 \mu_{eff} (\overline{S}_{ij} - \frac{1}{3} \delta_{ij} \overline{S}_{kk}) + \frac{1}{3} \delta_{ij} \tau_{kk}
+\end{equation}
+%
+%
+where the the strain rate tensor is given by
+%
+\begin{equation}
+     \overline{S}_{ij} = \frac{1}{2} (\frac{\delta \overline{\pmb{U}}_i}{\delta x_j} + \frac{\delta \overline{\pmb{U}}_j}{\delta x_i})
+\end{equation}
+%
+%
+and the effective viscosity is sum of molecular viscosity and turbulent viscosity $\mu_{eff} = \mu + \mu_t$ in which the turbulent viscosity $\mu_t$ is calculated by
+%
+\begin{equation}
+    \mu_t = (C_s \triangle)^2 \sqrt{2 \overline{S}_{ij} \overline{S}_{ij}}
+\end{equation}
+%
+%
+where $C_s$ is the Smagorinsky constant and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
+%_______________________________
+\subsubsection{Frictional force for soil-structure interaction}
+MPMICE includes a contactlaw for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $ \pmb{f}_{norm}$  computed from the projection of the contact force  in the normal direction.
+%
+\begin{equation}
+   \pmb{f}_{fric} = \mu_{fric}  \pmb{f}_{norm}
+\end{equation}
+%
+%
+The contact determines whether the soil is sliding or sticking to the structure by comparing the friction force with the sticking force $\pmb{f}_{stick}$  computed from the projection of the contact force in the tangent direction:
+%
+\begin{equation}
+\begin{gathered}
+\textrm{   if    }    \pmb{f}_{fric} \geq  \pmb{f}_{stick}   \textrm{    no sliding    } \\
+\textrm{    if    }   \pmb{f}_{fric} <   \pmb{f}_{stick}   \textrm{    sliding occurs    }  
+\end{gathered}
+\end{equation}
+%_______________________________
 \subsubsection{Momentum and Energy exchange model}
 Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. Then the energy exchange can be written as:
 %
@@ -558,26 +569,36 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 \end{equation}
 %
 %
-When validating the model with analytical solution, it requires to know the hydraulic conductivity. In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then the hydraulic conductivity will be expressed as  $K = D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
+When validating the model with analytical solution, it requires to know the hydraulic conductivity. In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then the hydraulic conductivity will be expressed as  $D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
 
 \subsubsection{Solving momentum exchange with an implicit solver}
-The derivation of the implicit integration for the momentum exchange is presented in the Appendix's section 'Momentum exchange with an implicit solve'. The linear equations 
+%
+%
+\begin{figure}[h]
+\center
+\includegraphics[scale=1.0]{K.jpg}
+\caption{Momentum exchange coefficient between materials}
+\label{fig:K}
+\end{figure}
+%
+%
+The derivation of the implicit integration for the momentum exchange is presented in the Appendix's section 'Momentum exchange with an implicit solver'. The linear equations for multi phases i,j=1:$N$
 has the form:
 %
-\[ \begin{vmatrix} (1 + \beta_{12})  &  -\beta_{12} \\
-                  -\beta_{21}       &  (1 + \beta_{21})
+\[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
+                  -\beta_{ji}       &  (1 + \beta_{ji})
     \end{vmatrix}
-    \begin{vmatrix} \Delta \pmb{U}_{f} \\
-                    \Delta \pmb{U}_{s}
+    \begin{vmatrix} \Delta \pmb{U}_{i} \\
+                    \Delta \pmb{U}_{j}
     \end{vmatrix}
     =
-    \begin{vmatrix}  \beta_{12}(\pmb{U}_{s}^{*} - \pmb{U}_{f}^{*}) \\
-                    \beta_{21}(\pmb{U}_{f}^{*} - \pmb{U}_{s}^{*})
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i}^{*} - \pmb{U}_{j}^{*}) \\
+                    \beta_{ji}(\pmb{U}_{i}^{*} - \pmb{U}_{j}^{*})
     \end{vmatrix}                
 \]
 %
 %
-where the intermediate velocity can be calculated by
+where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous phases s=1:$N_s$ can be calculated by
 %
 \begin{equation}
 \begin{gathered}
@@ -587,49 +608,44 @@ where the intermediate velocity can be calculated by
 \end{equation}
 %
 %
-Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient $K =  18\phi_s(1-\phi_s)\mu_f  F(\phi_s, Re) /D_p^2$.
+Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient depending on the different type of interactions (see Figure \ref{fig:K}) as for example: \\
+\begin{enumerate}
+\item For soil-structure interaction, the drag force is set to be zero and the frictional force is computed instead.
+\item For fluid-structure interaction, the momentum exchange coefficient is set to be extremely high which consider the solid material points being the 'zero-porosity'/'zero permeability' materials.
+\item For between multiphase flows, the momentum exchange coefficient is set to be 1E5. That value is sufficient to increase the numerical stability for the simulations in the numerical example.
+\item For soil-fluid interaction, the drag force is computed based on the equation (\ref{fd}).
+\end{enumerate}
+%_______________________________
+\subsubsection{Equation of state for fluid plases}
+%
+%
+\begin{figure}[H]
+\center
+\includegraphics[scale=.5]{water1.jpg}
+\caption{Equation of state of water}
+\label{fig:water1}
+\end{figure}
+%
+%
+The equation of state establishes relations between thermodynamics variables $[P_f, \rho_f, T_f]$. The choice of the equation of state depends on the types of the fluid materials. For example, for the air, it is possible to assume the equation of state for the perfect gas which obeys:
+%
+%
+\begin{equation}
+    P_f = \rho_f R T_f
+\end{equation}
+%
+%
+where $R$ is the gas constant. For the water, a simple linear equation of state is in the following form:
+%
+%
+\begin{equation}
+    P_f = P_{ref} + K_f (\rho_f - \rho_{ref} - \alpha_f(T_f - T_{ref}))
+\label{waterEOS}
+\end{equation}
+%
+%
+where reference pressure $P_{ref}$ = 1 atm = 101325 Pa, reference temperature $T_{ref}$ = 10°C, reference density  $\rho_{ref}$ = 999.8 kg/m3, the bulk modulus of water $K_f$ = 2 GPa, and the water thermal expansion $\alpha_f$ = 0.18 °$C^{-1}$. Equation (\ref{waterEOS}) matches well with the state of the water (see Figure \ref{fig:water1}).
 
-%_______________________________
-\subsubsection{Turbulent model}
-The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky mode, the residual stress tensor is:
-%
-\begin{equation}
-     \tau_{ij} = 2 \mu_{eff} (\overline{S}_{ij} - \frac{1}{3} \delta_{ij} \overline{S}_{kk}) + \frac{1}{3} \delta_{ij} \tau_{kk}
-\end{equation}
-%
-%
-where the the strain rate tensor is given by
-%
-\begin{equation}
-     \overline{S}_{ij} = \frac{1}{2} (\frac{\delta \overline{\pmb{U}}_i}{\delta x_j} + \frac{\delta \overline{\pmb{U}}_j}{\delta x_i})
-\end{equation}
-%
-%
-and the effective viscosity is sum of molecular viscosity and turbulent viscosity $\mu_{eff} = \mu + \mu_t$ in which the turbulent viscosity $\mu_t$ is calculated by
-%
-\begin{equation}
-    \mu_t = (C_s \triangle)^2 \sqrt{2 \overline{S}_{ij} \overline{S}_{ij}}
-\end{equation}
-%
-%
-where $C_s$ is the Smagorinsky constant and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
-%_______________________________
-\subsubsection{Frictional force for soil-structure interaction}
-MPMICE includes a contactlaw for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $ \pmb{f}_{norm}$  computed from the projection of the contact force  in the normal direction.
-%
-\begin{equation}
-   \pmb{f}_{fric} = \mu_{fric}  \pmb{f}_{norm}
-\end{equation}
-%
-%
-The contact determines whether the soil is sliding or sticking to the structure by comparing the friction force with the sticking force $\pmb{f}_{stick}$  computed from the projection of the contact force in the tangent direction:
-%
-\begin{equation}
-\begin{gathered}
-\textrm{   if    }    \pmb{f}_{fric} \geq  \pmb{f}_{stick}   \textrm{    no sliding    } \\
-\textrm{    if    }   \pmb{f}_{fric} <   \pmb{f}_{stick}   \textrm{    sliding occurs    }  
-\end{gathered}
-\end{equation}
 %_______________________________
 \section{\textsf{Numerical implementation}}
 \label{Discretization}
@@ -657,7 +673,13 @@ where the volume $V_p (\pmb{x})$ of the material point p can be calculated as:
      V_{p} = \int_{\Omega_p} \chi_p (\pmb{x}) d\pmb{x}
 \end{equation}
 %
-The charateristic function is the Heaviside function as $\chi_p = 1  \text{  if  } \pmb{x} \in \Omega_p, \text{otherwise 0} $ (see Figure \ref{fig:GIMP}). The time discretization are solved using the following steps:
+The charateristic function is the Heaviside function as $\chi_p = 1  \text{  if  } \pmb{x} \in \Omega_p$, otherwise 0 (see Figure \ref{fig:GIMP}). For the interpolation of the centroid of the cell, the linear basis function is used as:
+%
+\begin{equation}
+     S_{ci}  = N_i(\pmb{x_c}) 
+\end{equation}
+%
+The time discretization are solved using the following steps:
 %
 %
 \subsection{\textsf{Interpolation from Solid Particle to Grid}}
@@ -760,7 +782,7 @@ Computing the modified faced-centered velocity $\pmb{U}_{FC}^{L}$ considering th
 \end{equation}
 %
 %
-By solving the linear equation below to obtain the increment of velocity
+Solving the linear equation below to obtain the increment of velocity with f = 1 : $N_f$ and s = 1 : $N_s$ as
 %
 \[ \begin{vmatrix} (1 + \beta_{12,FC})  &  -\beta_{12,FC} \\
                   -\beta_{21,FC}       &  (1 + \beta_{21,FC})
@@ -918,7 +940,7 @@ where the cell-centered intermediate velocity can be calculated by
 \end{equation}
 %
 %
-And the increment of the velocity can be computed by solving the linear equation below
+And the increment of the velocity can be computed by solving the linear equation with f = 1 : $N_f$ and s = 1 : $N_s$ as:
 %
 \[ \begin{vmatrix} (1 + \beta_{12,c})  &  -\beta_{12,c} \\
                   -\beta_{21,c}       &  (1 + \beta_{21,c})
@@ -962,7 +984,7 @@ As such, the Lagrangian specific volume rate is:
 %
 %
 \begin{equation}
- \Delta (m \upsilon)_{fc} == V f_{fc}^{\phi} \nabla \cdot \pmb{U} + (\phi_{fc} \alpha_{fc} \frac{D_f T_{fc}}{Dt} - f_{fc}^{\phi} \sum_{n=1}^{N} \phi_{nc} \alpha_{nc} \frac{D_n T_{nc}}{Dt})
+ \Delta (m \upsilon)_{fc} = V f_{fc}^{\phi} \nabla \cdot \pmb{U} + (\phi_{fc} \alpha_{fc} \frac{D_f T_{fc}}{Dt} - f_{fc}^{\phi} \sum_{n=1}^{N} \phi_{nc} \alpha_{nc} \frac{D_n T_{nc}}{Dt})
 \end{equation}
 %
 %
@@ -1651,7 +1673,7 @@ Combining equations (\ref{append:pressure2}, \ref{append:pressure3}, \ref{append
 When the fluid is incompressible, $\kappa$ approaches to zero and the equation (\ref{append:pressure6}) becomes the Poisson's equation for the incompressible fluid flow.
 %
 %
-\subsection{\textsf{Momentum exchange with an implicit solve}}
+\subsection{\textsf{Momentum exchange with an implicit solver}}
 %
 %
 Considering the fluid momentum balance equation as 
@@ -1717,7 +1739,7 @@ Rearranging the equation (\ref{append:exchange3}), it leads to the linear system
 \]
 %
 %
-Solving this linear equations with $\beta_{12,FC} = (\delt K)/\overline{\rho}_{f,FC}^n$ and $\beta_{21,FC} = (\delt K)/\overline{\rho}_{s,FC}^n$. Similar derivation can be performed to computed the cell-center velocity increment leading to
+Solving this linear equations with $\beta_{12,FC} = (\delt K)/\overline{\rho}_{f,FC}^n$ and $\beta_{21,FC} = (\delt K)/\overline{\rho}_{s,FC}^n$ with K is the momentum exchange coefficient. Similar derivation can be performed to computed the cell-center velocity increment leading to
 %
 \[ \begin{vmatrix} (1 + \beta_{12c})  &  -\beta_{12c} \\
                   -\beta_{21c}       &  (1 + \beta_{21c})
@@ -1740,6 +1762,24 @@ with $\beta_{12c} = (\delt K)/\overline{\rho}_{fc}^n$ and $\beta_{21c} = (\delt 
 \pmb{U}_{sc}^{*} = \pmb{U}_{sc}^{n} + \delt (\frac{\nabla \cdot \pmb{\sigma}_c^{'n}}{\overline{\rho}^n_{sc}}    - \frac{\nabla P_{fc}^{n+1}}{\rho_s}  + \pmb{b})
 \end{gathered}
 \end{equation}
+%
+For generalize multi materials i,j = 1:N, the linear equations is in the form:
+%
+%
+\[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
+                  -\beta_{ji}       &  (1 + \beta_{ji})
+    \end{vmatrix}
+    \begin{vmatrix} \Delta \pmb{U}_{i} \\
+                    \Delta \pmb{U}_{j}
+    \end{vmatrix}
+    =
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i}^{*} - \pmb{U}_{j}^{*}) \\
+                    \beta_{ji}(\pmb{U}_{j}^{*} - \pmb{U}_i^{*})
+    \end{vmatrix}                
+\]
+%
+%
+
 %
 %
 %% The Appendices part is started with the command \appendix;
