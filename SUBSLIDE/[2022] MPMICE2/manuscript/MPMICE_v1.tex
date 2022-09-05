@@ -255,9 +255,7 @@ $L, R $       			&             &    Left and Right cell faces\\
 %% main text
 \section{\textsf{Introduction}}
 
-The introduction starts with an example of application and do not directly link to the title. I would consider to change this. Add a paragraph in front with general description of application
-
-Submarine landslides can pose significant threats to the offshore infrastructures and the coastal communities. Submarine landslides contain three stages: triggering, failure, and post-failure. Erosion or earthquakes can trigger slope failures in the first stage. Following the failure, sediments move quickly after the post-failure stage. In other words, solid-like sediments will behave like a fluid after failure. This phase transition makes the simulation of submarine landslides a challeging task.\\
+ Many geological natural processes and their interactions with man-made structures are influenced by soil-fluid-structure interactions. The prediction of these processes requires a tool that can capture complex interactions between soil, fluid, and structure, such as the process of submarine landslides. Indeed, The offshore infrastructure as well as coastal communities may be vulnerable to submarine landslides. Submarine landslides contain three stages: triggering, failure, and post-failure. Erosion or earthquakes can trigger slope failures in the first stage. Following the failure, sediments move quickly after the post-failure stage. In other words, solid-like sediments will behave like a fluid after failure. This phase transition makes the simulation of submarine landslides a challeging task.\\
 
 Due to this phase transition, submarine landslide can be modeled by either the Computational Fluid Dynamics (CFD) or the particle-based methods. For simulating submarine slides, CFD methods solve governing equations in a full-Eulerian framework \cite{CFD1, CFD2,CFD3, CFD4} with interface capturing techniques. While CFD can handle complex flows (such as turbulent flows), it cannot account for the triggering mechanism of submarine landslides because it is not straightforwad to consider 'soil constitutive laws' of sediment materials in the Eulerian framework. In contrast, particle-based methods can overcome this problem by using the Lagrangian framework. These methods have been extensively used to simulate landslides, like Material Point Method (MPM) \cite{Tran2019}, Smooth Particle Hydro Dynamics \cite{Capone2010}, Particle Finite Element Method \cite{Zhang2019}, or Coupled Eulerian Lagrangian Method \cite{Dey2016}. For simplicity, these simulations adopt total stress analysis which neglects the pore pressure development which is key factor triggering slope failures. \\
 
@@ -284,7 +282,7 @@ Recent developments in particle-based methods model the coupling of fluid flows 
 %
 %
 
-A numerical method for simulating soil-fluid-structure interaction (Figure \ref{fig:3phases}) involving large deformations, is presented in this work in order to simulate the interaction between sediment (soil), seawater (fluid) and offshore structures (structure) namely MPMICE (Figure \ref{fig:MPMICE}). In the MPMICE, the Material Point Method (MPM) is coupled with the Implicit Continuous Eulerian (ICE). The MPM method is a particle method that allows the porous soil to undergo arbitrary distortions. The ICE method, on the other hand, is a conservative finite volume technique with all state variables located at the cell center (temperature, velocity, mass, pressure). An initial technical report \cite{Kashiwa} at Los Alamos National Laboratory provided the theoretical and algorithmic foundation for the MPMICE, followed by the MPMICE development and implementation in the high-performance Uintah computational framework for simulating fluid-structure interactions \cite{MPMICE}. This paper primarily contributes futher to the development of the MPMICE for analyzing the \textbf{soil}-fluid-structure interaction, since sediment should be considered as a porous media (soil) and not as a solid to capture the evolution of the pore water pressure. Baumgarten et al. \cite{Baumgarten2021} made the first attempt at coupling the Finite Volume Method with the MPM for the simulation of soil-fluid interaction. Our contribution differs from the mentioned work in that we use the implicit time integration for the fluid phases instead of the explicit time integration.
+A numerical method for simulating soil-fluid-structure interaction (Figure \ref{fig:3phases}) involving large deformations, is presented in this work in order to simulate the interaction between sediment (soil), seawater (fluid) and offshore structures (structure) namely MPMICE (Figure \ref{fig:MPMICE}). In the MPMICE, the Material Point Method (MPM) is coupled with the Implicit Continuous Eulerian (ICE). The MPM method is a particle method that allows the porous soil to undergo arbitrary distortions. The ICE method, on the other hand, is a conservative finite volume technique with all state variables located at the cell center (temperature, velocity, mass, pressure). An initial technical report \cite{Kashiwa} at Los Alamos National Laboratory provided the theoretical and algorithmic foundation for the MPMICE, followed by the MPMICE development and implementation in the high-performance Uintah computational framework for simulating fluid-structure interactions \cite{MPMICE}. This paper primarily contributes futher to the development of the MPMICE for analyzing the \textbf{soil}-fluid-structure interaction, since sediment should be considered as a porous media (soil) and not as a solid to capture the evolution of the pore water pressure. Baumgarten et al. \cite{Baumgarten2021} made the first attempt at coupling the Finite Volume Method with the MPM for the simulation of soil-fluid interaction. In contrast to the mentioned work, we use implicit time integration for the multi phase flows instead of explicit time integration for the single-phase flow.
 
 %_______________________________
 \section{\textsf{Theory and formulation}}
@@ -528,7 +526,7 @@ The contact determines whether the soil is sliding or sticking to the structure 
 \end{equation}
 %_______________________________
 \subsubsection{Momentum and Energy exchange model}
-Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. Then the energy exchange can be written as:
+Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. In all simulations, we assume $H_{sf}=100$.  Then the energy exchange can be written as:
 %
 %
 \begin{equation}
@@ -571,7 +569,7 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 %
 When validating the model with analytical solution, it requires to know the hydraulic conductivity. In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then the hydraulic conductivity will be expressed as  $D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
 
-\subsubsection{Solving momentum exchange with an implicit solver}
+\subsubsection{Solving momentum and energy exchange with an implicit solver}
 %
 %
 \begin{figure}[h]
@@ -582,7 +580,7 @@ When validating the model with analytical solution, it requires to know the hydr
 \end{figure}
 %
 %
-The derivation of the implicit integration for the momentum exchange is presented in the Appendix's section 'Momentum exchange with an implicit solver'. The linear equations for multi phases i,j=1:$N$
+The derivation of the implicit integration for the momentum exchange is presented in the Appendix's section 'Momentum and energy exchange with an implicit solver'. The linear equations for multi phases i,j=1:$N$
 has the form:
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -612,9 +610,24 @@ Also, the momentum exchange coefficient can be computed at every time step as $\
 \begin{enumerate}
 \item For soil-structure interaction, the drag force is set to be zero and the frictional force is computed instead.
 \item For fluid-structure interaction, the momentum exchange coefficient is set to be extremely high which consider the solid material points being the 'zero-porosity'/'zero permeability' materials.
+\item For soil-fluid interaction, the drag force is computed based on the equation (\ref{fd}). Since air has much lower vicosity than water, the drag force of air is much lower than the drag force of water in the pore.
 \item For between multiphase flows, the momentum exchange coefficient is set to be 1E5. That value is sufficient to increase the numerical stability for the simulations in the numerical example.
-\item For soil-fluid interaction, the drag force is computed based on the equation (\ref{fd}).
 \end{enumerate}
+Similar approach applied for the ernergy exchange term leading to:
+%
+%
+\[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
+                  -\eta_{ji}       &  (1 + \eta_{ji})
+    \end{vmatrix}
+    \begin{vmatrix} \Delta T_{i} \\
+                    \Delta T_{j}
+    \end{vmatrix}
+    =
+    \begin{vmatrix}  \eta_{ij}(T_{i}^{n} - T_{j}^{n}) \\
+                    \eta_{ji}(T_{j}^{n} - T_i^{n})
+    \end{vmatrix}                
+\]
+with $\eta$ is the energy exchange coefficient.\\
 %_______________________________
 \subsubsection{Equation of state for fluid plases}
 %
@@ -782,17 +795,52 @@ Computing the modified faced-centered velocity $\pmb{U}_{FC}^{L}$ considering th
 \end{equation}
 %
 %
-Solving the linear equation below to obtain the increment of velocity with f = 1 : $N_f$ and s = 1 : $N_s$ as
+Solving the linear equation below to obtain the increment of velocity with i,j = 1 : $N$ as:
 %
-\[ \begin{vmatrix} (1 + \beta_{12,FC})  &  -\beta_{12,FC} \\
-                  -\beta_{21,FC}       &  (1 + \beta_{21,FC})
+%
+\[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
+                  -\beta_{ji}       &  (1 + \beta_{ji})
     \end{vmatrix}
-    \begin{vmatrix} \Delta \pmb{U}_{f,FC} \\
-                    \Delta \pmb{U}_{s,FC}
+    \begin{vmatrix} \Delta \pmb{U}_{i,FC} \\
+                    \Delta \pmb{U}_{j,FC}
     \end{vmatrix}
     =
-    \begin{vmatrix}  \beta_{12,FC}(\pmb{U}_{s,FC}^{*} - \pmb{U}_{f,FC}^{*}) \\
-                    \beta_{21,FC}(\pmb{U}_{f,FC}^{*} - \pmb{U}_{s,FC}^{*})
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,FC}^{*} - \pmb{U}_{j,FC}^{*}) \\
+                    \beta_{ji}(\pmb{U}_{j,FC}^{*} - \pmb{U}_{i,FC}^{*})
+    \end{vmatrix}                
+\]
+%
+%
+\subsection{\textsf{Compute faced-centered temperature}}
+Similar to the velocity, the faced temperature is computed as:
+%
+\begin{equation}
+T_{fx}^{n} = \frac{(\overline{\rho} T)_{fx,R}^n + (\overline{\rho} T)_{fx,L}^n}{\overline{\rho}_{fx,L}^n + \overline{\rho}_{fx,R}^n} 
+\end{equation}
+%
+%
+Computing the modified faced-centered temperature $T_{FC}^{L}$ considering the energy exchange (see the Appendix: Momentum and energy exchange with an implicit solver)
+%
+\begin{equation}
+\begin{gathered}
+   T_{f,FC}^{L} = T_{f,FC}^{n} + \Delta T_{f,FC}\\
+   T_{s,FC}^{L} = T_{s,FC}^{n} + \Delta T_{s,FC}
+\end{gathered}
+\end{equation}
+%
+%
+Solving the linear equation below to obtain the increment of velocity with i,j = 1 : $N$ as:
+%
+%
+\[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
+                  -\eta_{ji}       &  (1 + \eta_{ji})
+    \end{vmatrix}
+    \begin{vmatrix} \Delta T_{i,FC} \\
+                    \Delta T_{j,FC}
+    \end{vmatrix}
+    =
+    \begin{vmatrix}  \eta_{ij}(T_{i,FC}^{n} - T_{j,FC}^{n}) \\
+                    \eta_{ji}(T_{j,FC}^{n} - T_{i,FC}^{n})
     \end{vmatrix}                
 \]
 %
@@ -810,7 +858,7 @@ For multi-phase flows, the increment of the fluid pressure of the mixture can be
   \kappa \frac{\Delta P}{dt} = \sum_{f=1}^{N_f}  \nabla^c \cdot (\phi_{f,FC} \pmb{U}_{f,FC})^{n+1}
 \end{equation}
 %
-where $\kappa =  \sum_{f=1}^{N_f}  (\phi_{f,FC} \kappa_f)$. Then, the fluid pressure at cell center is:
+where $\kappa =  \sum_{f=1}^{N_f}  (\phi_{f,FC} \kappa_f) / \sum_{f=1}^{N_f}  (\phi_{f,FC})$. Then, the fluid pressure at cell center is:
 
 \begin{equation}
   P_c^{n+1} = P_{eq} + \Delta P_c^{n}
@@ -940,19 +988,57 @@ where the cell-centered intermediate velocity can be calculated by
 \end{equation}
 %
 %
-And the increment of the velocity can be computed by solving the linear equation with f = 1 : $N_f$ and s = 1 : $N_s$ as:
+And the increment of the velocity can be computed by solving the linear equation with i,j = 1 : $N$ as:
 %
-\[ \begin{vmatrix} (1 + \beta_{12,c})  &  -\beta_{12,c} \\
-                  -\beta_{21,c}       &  (1 + \beta_{21,c})
+%
+\[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
+                  -\beta_{ji}       &  (1 + \beta_{ji})
     \end{vmatrix}
-    \begin{vmatrix} \Delta \pmb{U}_{fc} \\
-                    \Delta \pmb{U}_{sc}
+    \begin{vmatrix} \Delta \pmb{U}_{i,c} \\
+                    \Delta \pmb{U}_{j,c}
     \end{vmatrix}
     =
-    \begin{vmatrix}  \beta_{12,c}(\pmb{U}_{sc}^{L-} - \pmb{U}_{fc}^{L-}) \\
-                    \beta_{21,c}(\pmb{U}_{fc}^{L-} - \pmb{U}_{sc}^{L-})
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,c}^{*} - \pmb{U}_{j,c}^{*}) \\
+                    \beta_{ji}(\pmb{U}_{j,c}^{*} - \pmb{U}_{i,c}^{*})
     \end{vmatrix}                
 \]
+%
+%
+To consider the energy exchange, the Lagrangian temperature  is modified as
+%
+\begin{equation}
+\begin{gathered}
+T_{fc}^{L} = T_{fc}^{L-} + \Delta T_{fc} \\
+T_{sc}^{L} = T_{sc}^{L-} + \Delta T_{sc}
+\end{gathered}
+\end{equation}
+%
+%
+where the cell-centered intermediate temperature can be calculated by
+%
+\begin{equation}
+\begin{gathered}
+T_{fc}^{L-} = \frac{(m T)_{fc}^{L-}}{m_{fc}^L c_v} \\
+T_{sc}^{L-} = \frac{(m T)_{sc}^{L-}}{m_{sc}^L c_v} 
+\end{gathered}
+\end{equation}
+%
+%
+And the increment of the velocity can be computed by solving the linear equation with i,j = 1 : $N$ as:
+%
+%
+\[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
+                  -\eta_{ji}       &  (1 + \eta_{ji})
+    \end{vmatrix}
+    \begin{vmatrix} \Delta T_{i,c} \\
+                    \Delta T_{j,c}
+    \end{vmatrix}
+    =
+    \begin{vmatrix}  \eta_{ij}(T_{i,c}^{n} - T_{j,c}^{n}) \\
+                    \eta_{ji}(T_{j,c}^{n} - T_{i,c}^{n})
+    \end{vmatrix}                
+\]
+%
 %
 Finally, we obtain the cell-centered solid  acceleration and temperature rate as
 %
@@ -1673,7 +1759,7 @@ Combining equations (\ref{append:pressure2}, \ref{append:pressure3}, \ref{append
 When the fluid is incompressible, $\kappa$ approaches to zero and the equation (\ref{append:pressure6}) becomes the Poisson's equation for the incompressible fluid flow.
 %
 %
-\subsection{\textsf{Momentum exchange with an implicit solver}}
+\subsection{\textsf{Momentum and Energy exchange with an implicit solver}}
 %
 %
 Considering the fluid momentum balance equation as 
@@ -1777,6 +1863,21 @@ For generalize multi materials i,j = 1:N, the linear equations is in the form:
                     \beta_{ji}(\pmb{U}_{j}^{*} - \pmb{U}_i^{*})
     \end{vmatrix}                
 \]
+Similar approach applied for the ernergy exchange term leading to:
+%
+%
+\[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
+                  -\eta_{ji}       &  (1 + \eta_{ji})
+    \end{vmatrix}
+    \begin{vmatrix} \Delta T_{i} \\
+                    \Delta T_{j}
+    \end{vmatrix}
+    =
+    \begin{vmatrix}  \eta_{ij}(T_{i}^{n} - T_{j}^{n}) \\
+                    \eta_{ji}(T_{j}^{n} - T_i^{n})
+    \end{vmatrix}                
+\]
+with $\eta$ is the energy exchange coefficient.
 %
 %
 
