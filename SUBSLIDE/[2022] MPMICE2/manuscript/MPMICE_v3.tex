@@ -59,7 +59,7 @@
 %% for the whole article with \linenumbers.
 %% \usepackage{lineno}
 
-\journal{Computer Methods in Applied Mechanics and Engineering          }
+\journal{Arxiv}
 
 \begin{document}
 \include{newcommands}
@@ -130,10 +130,7 @@
 %% Text of abstract
 In this paper, we describe a soil-fluid-structure interaction model that combines soil mechanics (saturated sediments), fluid mechanics (seawater or air), and solid mechanics (structures). The formulation combines the Material Point Method, which models large deformation of the porous media and the structure, with the Implicit Continuous-fluid Eulerian, which models complex fluid flows. We validate the model and simulate the whole process of earthquake-induced submarine landslides. We show that this model captures complex interactions between saturated sediment, seawater, and structure, so we can use the model to estimate the impact of potential submarine landslides on offshore structures.
 
-
-
 \end {abstract}
-
 %%Graphical abstract
 \begin{graphicalabstract}
 %\includegraphics{grabs}
@@ -164,9 +161,7 @@ Material Point Method
 \sep MPMICE
 \sep submarine landslide.
 \end {keyword}
-
 \end {frontmatter}
-
 %
 %
 %
@@ -206,11 +201,10 @@ $\phi_s$				      &		  			& Solid volume fraction\\
 $\overline{\rho}_s$			&	$[ML^{-3}]$  	& Bulk Solid density\\
 $\pmb{x}_s$   			&  	$[L]$    			& Solid Position vector\\
 $\pmb{U}_s$   			&  	$[Lt^{-1}]$    	& Solid Velocity vector\\
-$\pmb{U}_s$   			&  	$[Lt^{-1}]$    	& Solid Velocity gradient vector\\
 $\pmb{a}_s$   			&  	$[Lt^{-2}]$   	& Solid Acceleration vector\\
-$\pmb{\sigma}^\prime$ 	&  	$[ML^{-2}]$ 	& Effective Stress tensor\\
+$\pmb{\sigma}^\prime$ 	&  	$[ML^{-1}t^{-2}]$ 	& Effective Stress tensor\\
 $ \pmb{\epsilon}_s$ 	&  			 	& Strain tensor\\
-$e_s$         				&  	$[L^2t^{-2}]$  	& Solid Internal energy \\   
+$e_s$         				&  	$[L^2t^{-2}]$  	& Solid Internal energy per unit mass\\   
 $T_s$           			&  	$[T]$      		& Solid Temperature\\
 $\pmb{F}_s$     			&       	    			& Solid Deformation gradient\\
 $V_s$     				&  	$[L^3]$      		& Solid Volume\\
@@ -229,7 +223,7 @@ $\pmb{U}_f$   			&  $[Lt^{-1}]$    			& Fluid Velocity vector\\
 $\pmb{\sigma}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid stress tensor\\
 $p_f$ 				&  $[ML^{-1}t^{-2}]$ 	& Fluid isotropic pressure\\
 $\pmb{\tau}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid shear stress tensor\\
-$e_f$         				&  $[L^2t^{-2}]$  		& Fluid Internal energy \\   
+$e_f$         				&  $[L^2t^{-2}]$  		& Fluid Internal energy per unit mass\\   
 $T_f$           				&  $[T]$      				& Fluid Temperature\\
 $\upsilon_f$    			&  $[L^3/M]$  			& Fluid Specific volume $\frac{1}{\rho_f}$\\
 $\alpha_f$    		    		&  $[1/T]$  				& Thermal expansion\\
@@ -522,7 +516,7 @@ Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant fo
 \end {equation}
 %
 %
-On the other hand, the draf force can be calculated as:
+On the other hand, the drag force can be calculated as:
 %
 %
 \begin{equation}
@@ -901,7 +895,7 @@ The nodal internal temperature rate is computed based on the heat conduction mod
 \end {equation}
 %
 %
-where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}^p_s$ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}^p_s$ is the plastic strain. The nodal internal temperature is calculated by
+where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s$ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s$ is the total strain. The nodal internal temperature is calculated by
 \begin{equation}
      T_{si}^L = T_{si}^n + dT_{si}^L
 \end {equation}
@@ -1199,7 +1193,7 @@ Finally, the effective stress $(\pmb{\sigma}^\prime)^{n+1}$ is updated from the 
 %
 %_______________________________
 \section{\textsf{Numerical examples}}
-All input files and the analytical calculations in this section are provided in the Github repository \footnote{https://github.com/QuocAnh90/Uintah NTNU} for the reproduction of the numerical results.\\
+All input files and the analytical calculations in this section are provided in the Github repository for the reproduction of the numerical results.\\
 %_______________________________
 \subsection{\textsf{Fluid Flow through isothermal porous media}}
 %
@@ -1648,7 +1642,7 @@ Subtracting equation (\ref{e3}) to equations (\ref{e1}) and (\ref{solidmom}), we
 \end {equation}
 %
 %
-On the right hand side, the terms include the mechanical work $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}^p_s$ computed from the constitutive model with $\pmb{\epsilon}^p_s$ is the plastic strain, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
+On the right hand side, the terms include the mechanical work $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s$ computed from the constitutive model with $\pmb{\epsilon}_s$ is the total strain, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
 %
 %
 \subsection{\textsf{Advanced Fluid Pressure}}
