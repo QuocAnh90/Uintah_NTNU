@@ -1094,9 +1094,12 @@
 	<n_nonlocalMC	   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<l_nonlocal		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<useInitialStressGravityMC		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	  
-	  
-    <UseWaterRetention spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+
+	  <Use_pressure_dependence		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <m		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+
+
+	  <UseWaterRetention spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <PhiB  spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type MohrCoulomb"/>
     <suction  spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type MohrCoulomb"/>
     <SpecVol  spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type MohrCoulomb"/>

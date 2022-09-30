@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 39;
+    d_NBASICINPUTS = 41;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -361,6 +361,9 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Phi_P", UI[37]);
 
     cm_ps->appendElement("Intial_Stress", UI[38]);
+
+    cm_ps->appendElement("Use_pressure_dependence", UI[39]);
+    cm_ps->appendElement("m", UI[40]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -948,6 +951,9 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("Phi_P", UI[37], 0.0);  
 
     ps->getWithDefault("Intial_Stress", UI[38], 0.0);
+
+    ps->getWithDefault("Use_pressure_dependence", UI[39], 0.0);
+    ps->getWithDefault("m", UI[40], 0.0);
 }
 
 void
@@ -1000,6 +1006,9 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Phi_P");
 
     ISVNames.push_back("Intial_Stress");
+
+    ISVNames.push_back("Use_pressure_dependence");
+    ISVNames.push_back("m");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1087,6 +1096,9 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double Phi_CS = UI[36];
     double Phi_P = UI[37];
 
+    double Use_pressure_dependence = UI[39];
+    double m = UI[40];
+
     /*
     Flavour
     1- classic Mohr - Coulomb,
@@ -1145,6 +1157,16 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     {
         G = m_modul * c / 2.0 / (1.0 + nuy);
         K = m_modul * c / 3.0 / (1.0 - 2 * nuy);
+    }
+
+    if (Use_pressure_dependence > 0)
+    {
+        double E0 = (9 * K * G) / (3 * K + G);
+        double mean_stress = (stress[0] + stress[1] + stress[2]) / 3;
+        double E = std::min(10000.0, E0 * pow((fabs(mean_stress) / 101325), m));
+
+        G = E / 2 / (1 + nuy);
+        K = E / 3 / (1 - 2 * nuy);
     }
 
     if (Use_softening > 0)
