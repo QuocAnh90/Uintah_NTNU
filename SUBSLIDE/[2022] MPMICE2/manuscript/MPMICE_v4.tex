@@ -287,7 +287,7 @@ This section lay out the theoretical framework for the MPMICE model. We use the 
 The following assumptions are made for the MPMICE model.
 \begin{enumerate}
 \item Solid phases (MPM) are described in a Lagrangian formulation while fluid phases (ICE) are described in an Eulerian formulation in the framework of continuum mechanics and mixture theory.
-\item Solid grains are incompressible while the fluid phases are compressible.
+\item Solid grains are incompressible while the fluid phases are compressible. Solid's thermal expasion is negligible.
 \item There is no mass exchange between solid and fluid phases.
 \item Terzaghi's effective stress is valid. 
 \end {enumerate}
@@ -506,9 +506,17 @@ The contact determines whether the soil is sliding or sticking to the structure 
 \textrm{    if    }   \pmb{f}_{fric} <   \pmb{f}_{stick}   \textrm{    sliding occurs    }  
 \end {gathered}
 \end {equation}
+Frictional sliding between solid materials also generates dissipation and the work rate generated from the sliding can be calculated as:
+%
+\begin{equation}
+   \Delta W_{friction} = \pmb{f}_{fric} d
+\end {equation}
+%
+%
+where d is the sliding distance which can computed based on the sliding velocity between two materials. 
 %_______________________________
 \subsubsection{Momentum and Energy exchange model}
-Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. In all simulations, we assume $H_{sf}=1$.  Then the energy exchange can be written as:
+Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. Then the energy exchange can be written as:
 %
 %
 \begin{equation}
@@ -891,11 +899,11 @@ The nodal internal temperature rate is computed based on the heat conduction mod
 %
 %
 \begin{equation}
-     dT_{si}^L = \frac{(\Delta W_{si}^n + \nabla^i \cdot \pmb{q}_{si}^n)}{m_{si}^n c_v}
+     dT_{si}^L = \frac{(\Delta W_{si}^n + \Delta W_{fric,i}^n + \nabla^i \cdot \pmb{q}_{si}^n)}{m_{si}^n c_v}
 \end {equation}
 %
 %
-where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain. The nodal internal temperature is calculated by
+where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate compted from the contact law due to the frictional sliding between solid materials. The nodal internal temperature is calculated by
 \begin{equation}
      T_{si}^L = T_{si}^n + dT_{si}^L
 \end {equation}
@@ -1122,7 +1130,7 @@ Finally, the state variables of the fluid phases of the next time step are
 %
 \subsection{\textsf{Interpolate from cell to node of the solid phase}}
 %
-First we interpolate the acceleration, velocity and temperature to the node
+First we interpolate the acceleration, velocity and temperature rate to the node
 %
 %
 \begin{equation}
@@ -1638,11 +1646,11 @@ Subtracting equation (\ref{e3}) to equations (\ref{e1}) and (\ref{solidmom}), we
 %
 %
 \begin{equation}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \Delta W_{s} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \Delta W_{s} +  \Delta W_{friction} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
 \end {equation}
 %
 %
-On the right hand side, the terms include the rate of the mechanical work $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
+On the right hand side, the terms include the mechanical work rate $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, the work rate from frictional sliding between solid materials  $\Delta W_{friction}$, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
 %
 %
 \subsection{\textsf{Advanced Fluid Pressure}}

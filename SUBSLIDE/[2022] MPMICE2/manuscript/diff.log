@@ -1,0 +1,2283 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.7) (preloaded format=pdflatex 2022.9.6)  29 SEP 2022 02:07
+entering extended mode
+**"D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/diff.tex"
+("D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/diff.tex"
+LaTeX2e <2020-10-01>
+L3 programming layer <2020-09-24> xparse <2020-03-03>
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/elsarticle\elsarticle.c
+ls
+Document Class: elsarticle 2020/11/20, 3.3: Elsevier Ltd
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+Package: expl3 2020-09-24 L3 programming layer (loader) 
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def
+File: l3backend-pdftex.def 2020-09-24 L3 backend support: PDF output (pdfTeX)
+\l__kernel_color_stack_int=\count175
+\l__pdf_internal_box=\box47
+))
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xpars
+e.sty
+Package: xparse 2020-05-15 L3 Experimental document command parser
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xpars
+e-generic.tex))
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+Package: etoolbox 2020/08/24 v2.5j e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count176
+)
+\@bls=\dimen138
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2020/04/10 v1.4m Standard LaTeX document class
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo
+File: size12.clo 2020/04/10 v1.4m Standard LaTeX file (size option)
+)
+\c@part=\count177
+\c@section=\count178
+\c@subsection=\count179
+\c@subsubsection=\count180
+\c@paragraph=\count181
+\c@subparagraph=\count182
+\c@figure=\count183
+\c@table=\count184
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen139
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+Package: graphicx 2020/09/09 v1.2b Enhanced LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2020/08/30 v1.4c Standard LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 105.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2020/08/26 v1.2 Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen140
+\Gin@req@width=\dimen141
+)
+\c@tnote=\count185
+\c@fnote=\count186
+\c@cnote=\count187
+\c@ead=\count188
+\c@author=\count189
+\@eadauthor=\toks16
+\c@affn=\count190
+\absbox=\box48
+\elsarticlehighlightsbox=\box49
+\elsarticlegrabsbox=\box50
+\keybox=\box51
+\Columnwidth=\dimen142
+\space@left=\dimen143
+\els@boxa=\box52
+\els@boxb=\box53
+\leftMargin=\dimen144
+\@enLab=\toks17
+\@sep=\skip49
+\@@sep=\skip50
+ (C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip51
+\bibsep=\skip52
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count191
+)
+\splwrite=\write3
+\openout3 = `diff.spl'.
+
+\appnamewidth=\dimen145
+) (C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks18
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+Package: amsmath 2020/09/23 v2.17i AMS math features
+\@mathmargin=\skip53
+
+For additional information on amsmath, use the `?' option.
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks19
+\ex@=\dimen146
+))
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen147
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count192
+LaTeX Info: Redefining \frac on input line 234.
+\uproot@=\count193
+\leftroot@=\count194
+LaTeX Info: Redefining \overline on input line 399.
+\classnum@=\count195
+\DOTSCASE@=\count196
+LaTeX Info: Redefining \ldots on input line 496.
+LaTeX Info: Redefining \dots on input line 499.
+LaTeX Info: Redefining \cdots on input line 620.
+\Mathstrutbox@=\box54
+\strutbox@=\box55
+\big@size=\dimen148
+LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
+\macc@depth=\count197
+\c@MaxMatrixCols=\count198
+\dotsspace@=\muskip16
+\c@parentequation=\count199
+\dspbrk@lvl=\count266
+\tag@help=\toks20
+\row@=\count267
+\column@=\count268
+\maxfields@=\count269
+\andhelp@=\toks21
+\eqnshift@=\dimen149
+\alignsep@=\dimen150
+\tagshift@=\dimen151
+\tagwidth@=\dimen152
+\totwidth@=\dimen153
+\lineht@=\dimen154
+\@envbody=\toks22
+\multlinegap=\skip54
+\multlinetaggap=\skip55
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2923.
+LaTeX Info: Redefining \] on input line 2924.
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count270
+\float@exts=\toks24
+\float@box=\box56
+\@float@everytoks=\toks25
+\@floatcapt=\box57
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+Package: caption 2020/09/12 v3.5b Customizing captions (AR)
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
+Package: caption3 2020/09/17 v2.1b caption3 kernel (AR)
+\captionmargin=\dimen155
+\captionmargin@=\dimen156
+\captionwidth=\dimen157
+\caption@tempdima=\dimen158
+\caption@indent=\dimen159
+\caption@parindent=\dimen160
+\caption@hangindent=\dimen161
+Package caption Info: elsarticle document class detected.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption-elsarti
+cle.sto
+File: caption-elsarticle.sto 2020/08/22 v2.0 Adaption of the caption package to
+ the elsarticle document class (AR)
+))
+\c@caption@flags=\count271
+\c@continuedfloat=\count272
+Package caption Info: float package is loaded.
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/caption\subcaption.sty
+Package: subcaption 2020/08/23 v1.3g Sub-captions (AR)
+\c@subfigure=\count273
+\c@subtable=\count274
+) (C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/ulem\ulem.sty
+\UL@box=\box58
+\UL@hyphenbox=\box59
+\UL@skip=\skip56
+\UL@hook=\toks26
+\UL@height=\dimen162
+\UL@pe=\count275
+\UL@pixel=\dimen163
+\ULC@box=\box60
+Package: ulem 2019/11/18
+\ULdepth=\dimen164
+)
+
+! LaTeX Error: Option clash for package ulem.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.73 \RequirePackage
+                    {color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{r...
+
+? H
+The package ulem has already been loaded with options:
+  []
+There has now been an attempt to load it with options
+  [normalem]
+Adding the global options:
+  ,normalem
+to your \documentclass declaration may fix this.
+Try typing  <return>  to proceed.
+? ,normalem
+Type <return> to proceed, S to scroll future error messages,
+R to run without stopping, Q to run quietly,
+I to insert something, E to edit your file,
+1 or ... or 9 to ignore the next 1 to 9 tokens of input,
+H for help, X to quit.
+? Q
+OK, entering \batchmode...
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics\color.sty
+Package: color 2020/02/24 v1.2b Standard LaTeX Color (DPC)
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: pdftex.def on input line 147.
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/oberdiek\settobox.sty
+Package: settobox 2016/05/16 v1.5 Assign box dimensions to length registers (HO
+)
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/letltxmacro\letltxmacro
+.sty
+Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+)
+\DIFdelgraphicsbox=\box61
+\DIFdelgraphicswidth=\skip57
+\DIFdelgraphicsheight=\skip58
+LaTeX Info: Redefining \DIFaddbegin on input line 119.
+LaTeX Info: Redefining \DIFaddend on input line 120.
+LaTeX Info: Redefining \DIFdelbegin on input line 121.
+LaTeX Info: Redefining \DIFdelend on input line 122.
+LaTeX Info: Redefining \DIFaddbeginFL on input line 127.
+LaTeX Info: Redefining \DIFaddendFL on input line 128.
+LaTeX Info: Redefining \DIFdelbeginFL on input line 129.
+LaTeX Info: Redefining \DIFdelendFL on input line 130.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
+\lst@mode=\count276
+\lst@gtempboxa=\box62
+\lst@token=\toks27
+\lst@length=\count277
+\lst@currlwidth=\dimen165
+\lst@column=\count278
+\lst@pos=\count279
+\lst@lostspace=\dimen166
+\lst@width=\dimen167
+\lst@newlines=\count280
+\lst@lineno=\count281
+\lst@maxwidth=\dimen168
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
+File: lstmisc.sty 2020/03/24 1.8d (Carsten Heinz)
+\c@lstnumber=\count282
+\lst@skipnumbers=\count283
+\lst@framebox=\box63
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg
+File: listings.cfg 2020/03/24 1.8d listings configuration
+))
+Package: listings 2020/03/24 1.8d (Carsten Heinz)
+No file diff.aux.
+\openout1 = `diff.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 149.
+LaTeX Font Info:    ... okay on input line 149.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count284
+\scratchdimen=\dimen169
+\scratchbox=\box64
+\nofMPsegments=\count285
+\nofMParguments=\count286
+\everyMPshowfont=\toks28
+\MPscratchCnt=\count287
+\MPscratchDim=\dimen170
+\MPnumerator=\count288
+\makeMPintoPDFobject=\count289
+\everyMPtoPDFconversion=\toks29
+)
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+)
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: listings package is loaded.
+Package caption Info: End \AtBeginDocument code.
+\c@lstlisting=\count290
+\openout2 = `newcommands.aux'.
+
+
+("D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript\newcommands.tex")
+Overfull \hbox (29.04442pt too wide) in paragraph at lines 223--223
+[][]|   []   |   []   |   []   |   []   |   []   |   []   |   []   []\OT1/cmr/b
+x/n/12 in []|   []
+ []
+
+<figures//abstract.jpg, id=1, 742.27313pt x 995.21812pt>
+File: figures//abstract.jpg Graphic file (type jpg)
+<use figures//abstract.jpg>
+Package pdftex.def Info: figures//abstract.jpg  used on input line 228.
+(pdftex.def)             Requested size: 334.01982pt x 447.84402pt.
+
+Overfull \hbox (29.04442pt too wide) in paragraph at lines 234--234
+[][]|   []   |   []   |   []   |   []   |   []   |   []   |   []   []\OT1/cmr/b
+x/n/12 in []|   []
+ []
+
+
+Overfull \hbox (17.61661pt too wide) in paragraph at lines 236--237
+[]\OT1/cmr/m/n/12 Material Point method al-lows to model large de-for-ma-tion o
+f non-isothermal
+ []
+
+ [1
+
+
+
+
+{C:/Users/quoct/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] [2 <D:/Uintah/U
+intah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//abstract.jpg>] [3
+
+]
+LaTeX Font Info:    Trying to load font information for U+msa on input line 255
+.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 255
+.
+
+(C:\Users\quoct\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Overfull \hbox (2.61108pt too wide) has occurred while \output is active
+[] 
+ []
+
+ [1
+
+
+]
+No file diff.toc.
+\tf@toc=\write4
+\openout4 = `diff.toc'.
+
+ [2]
+Overfull \hbox (190.43494pt too wide) in paragraph at lines 273--310
+[][] 
+ []
+
+ [3] [4]
+Underfull \hbox (badness 10000) in paragraph at lines 351--352
+
+ []
+
+
+Package natbib Warning: Citation `CFD1' on page 5 undefined on input line 353.
+
+
+Package natbib Warning: Citation `CFD2' on page 5 undefined on input line 353.
+
+
+Package natbib Warning: Citation `CFD3' on page 5 undefined on input line 353.
+
+
+Package natbib Warning: Citation `CFD4' on page 5 undefined on input line 353.
+
+
+Package natbib Warning: Citation `Tran2019' on page 5 undefined on input line 3
+53.
+
+
+Package natbib Warning: Citation `Capone2010' on page 5 undefined on input line
+ 353.
+
+
+Package natbib Warning: Citation `Zhang2019' on page 5 undefined on input line 
+353.
+
+
+Package natbib Warning: Citation `Dey2016' on page 5 undefined on input line 35
+3.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 353--354
+
+ []
+
+
+Package natbib Warning: Citation `Bandara2015' on page 5 undefined on input lin
+e 355.
+
+
+Package natbib Warning: Citation `Tampubolon2017' on page 5 undefined on input 
+line 355.
+
+
+Package natbib Warning: Citation `Baumgarten2019' on page 5 undefined on input 
+line 355.
+
+
+Package natbib Warning: Citation `Bandara2015' on page 5 undefined on input lin
+e 355.
+
+
+Package natbib Warning: Citation `nullspace' on page 5 undefined on input line 
+355.
+
+
+Package natbib Warning: Citation `Zheng2021' on page 5 undefined on input line 
+355.
+
+
+Package natbib Warning: Citation `CPLS' on page 5 undefined on input line 355.
+
+
+Package natbib Warning: Citation `Chen2017' on page 5 undefined on input line 3
+55.
+
+<figures//3phases.jpg, id=41, 641.7576pt x 558.888pt>
+File: figures//3phases.jpg Graphic file (type jpg)
+<use figures//3phases.jpg>
+Package pdftex.def Info: figures//3phases.jpg  used on input line 360.
+(pdftex.def)             Requested size: 192.52876pt x 167.66768pt.
+ [5]
+<figures//MPMICE.jpg, id=45, 927.465pt x 447.6725pt>
+File: figures//MPMICE.jpg Graphic file (type jpg)
+<use figures//MPMICE.jpg>
+Package pdftex.def Info: figures//MPMICE.jpg  used on input line 371.
+(pdftex.def)             Requested size: 370.97943pt x 179.06583pt.
+
+LaTeX Warning: Reference `fig:3phases' on page 6 undefined on input line 378.
+
+
+LaTeX Warning: Reference `fig:MPMICE' on page 6 undefined on input line 378.
+
+
+Package natbib Warning: Citation `Kashiwa' on page 6 undefined on input line 37
+8.
+
+
+Package natbib Warning: Citation `MPMICE' on page 6 undefined on input line 378
+.
+
+
+Package natbib Warning: Citation `Baumgarten2021' on page 6 undefined on input 
+line 378.
+
+ [6 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//3phases.
+jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//MPMICE.
+jpg>]
+LaTeX Font Info:    Font shape `OT1/cmss/m/it' in size <12> not available
+(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 384.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 396--399
+
+ []
+
+ [7]
+Underfull \hbox (badness 10000) in paragraph at lines 402--408
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 411--417
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 420--433
+
+ []
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.444 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.444 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Extra }, or forgotten $.
+\DIFadd #1->{\protect \color {blue}\uwave {#1}}
+                                               
+l.444 }\end {\DIFadd{equation}}
+                               
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra \endcsname.
+\end  ...ook {env/#1/end}}\csname end#1\endcsname 
+                                                  \@checkend {#1}\expandafte...
+l.444 }\end {\DIFadd{equation}}
+                               
+I'm ignoring this, since I wasn't doing a \csname.
+
+
+! LaTeX Error: \begin{equation} on input line 442 ended by \end{{\color{blue}\u
+wave {equation}}}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.444 }\end {\DIFadd{equation}}
+                               
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.444 }\end {\DIFadd{equation}}
+                               
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.444 }\end {\DIFadd{equation}}
+                               
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.444 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 444--455
+
+ []
+
+ [8]
+Underfull \hbox (badness 10000) in paragraph at lines 457--463
+
+ []
+
+
+Overfull \hbox (16.44656pt too wide) in paragraph at lines 491--505
+\OT1/cmr/m/n/12 (4) Ex-change mo-men-tum []|   []   [][]|   []   [](com-put-ing
+ drag force $[][]$) []|   []   |   []
+ []
+
+ [9]
+! Missing $ inserted.
+<inserted text> 
+                $
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Improper \spacefactor.
+<argument> ...def \UL@spfactor {\the \spacefactor 
+                                                  }
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+You can refer to \spacefactor only in horizontal mode;
+you can refer to \prevdepth only in vertical mode; and
+neither of these is meaningful inside \write. So
+I'm forgetting what you said and using zero instead.
+
+! Extra }, or forgotten $.
+\UL@word ...r \ifx \expandafter \UL@end #1\egroup 
+                                                  \egroup \unskip \unskip \u...
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@word ...expandafter \UL@end #1\egroup \egroup 
+                                                  \unskip \unskip \unskip \s...
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! You can't use `\spacefactor' in math mode.
+\UL@word ... \unskip \unskip \unskip \spacefactor 
+                                                  \UL@spfactor \let \UL@word...
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Extra }, or forgotten $.
+\UL@word ...stop \UL@leaders \fi \fi \fi \UL@word 
+                                                  \@empty 
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.520 ... \frac{D_f P_{eq}}{Dt} = - \nabla \cdot }
+                                                  %DIFDELCMD < \pmb{U} %%%
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Limit controls must follow a math operator.
+<recently read> \limits 
+                        
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I'm ignoring this misplaced \limits or \nolimits command.
+
+! Extra }, or forgotten $.
+\UL@onmath ...L@leadtype \LA@hskip \p@ plus1fill}}
+                                                  \egroup 
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@onmath ...pe \LA@hskip \p@ plus1fill}}\egroup 
+                                                  
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.531 }
+       %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.542 }
+       \DIFdelend %_______________________________
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Limit controls must follow a math operator.
+<recently read> \limits 
+                        
+l.542 }
+       \DIFdelend %_______________________________
+I'm ignoring this misplaced \limits or \nolimits command.
+
+! Extra }, or forgotten $.
+\UL@onmath ...L@leadtype \LA@hskip \p@ plus1fill}}
+                                                  \egroup 
+l.542 }
+       \DIFdelend %_______________________________
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@onmath ...pe \LA@hskip \p@ plus1fill}}\egroup 
+                                                  
+l.542 }
+       \DIFdelend %_______________________________
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.542 }
+       \DIFdelend %_______________________________
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.543 \subsubsection
+                    {Constitutive soil model}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+Overfull \hbox (1450.88257pt too wide) in paragraph at lines 543--543
+[]|   []
+ []
+
+ [10]
+
+Package natbib Warning: Citation `MPMcontact' on page 11 undefined on input lin
+e 619.
+
+ [11]
+Overfull \hbox (253.82803pt too wide) in paragraph at lines 633--636
+[]|   [][] 
+ []
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.638 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.638 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Extra }, or forgotten $.
+\DIFadd #1->{\protect \color {blue}\uwave {#1}}
+                                               
+l.638 }\end {\DIFadd{equation}}
+                               
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra \endcsname.
+\end  ...ook {env/#1/end}}\csname end#1\endcsname 
+                                                  \@checkend {#1}\expandafte...
+l.638 }\end {\DIFadd{equation}}
+                               
+I'm ignoring this, since I wasn't doing a \csname.
+
+
+! LaTeX Error: \begin{equation} on input line 636 ended by \end{{\color{blue}\u
+wave {equation}}}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.638 }\end {\DIFadd{equation}}
+                               
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.638 }\end {\DIFadd{equation}}
+                               
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.638 }\end {\DIFadd{equation}}
+                               
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.638 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+
+Overfull \hbox (154.47629pt too wide) in paragraph at lines 638--643
+[] []|   [][] 
+ []
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.657 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.657 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+! Extra }, or forgotten $.
+\DIFadd #1->{\protect \color {blue}\uwave {#1}}
+                                               
+l.657 }\end {\DIFadd{equation}}
+                               
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra \endcsname.
+\end  ...ook {env/#1/end}}\csname end#1\endcsname 
+                                                  \@checkend {#1}\expandafte...
+l.657 }\end {\DIFadd{equation}}
+                               
+I'm ignoring this, since I wasn't doing a \csname.
+
+
+! LaTeX Error: \begin{equation} on input line 655 ended by \end{{\color{blue}\u
+wave {equation}}}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.657 }\end {\DIFadd{equation}}
+                               
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.657 }\end {\DIFadd{equation}}
+                               
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.657 }\end {\DIFadd{equation}}
+                               
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+! Missing \endcsname inserted.
+<to be read again> 
+                   \protect 
+l.657 }\end {\DIFadd{equation}}
+                               
+The control sequence marked <to be read again> should
+not appear between \csname and \endcsname.
+
+
+Package natbib Warning: Citation `Drag' on page 12 undefined on input line 660.
+
+
+! Undefined control sequence.
+\UL@leaders ...L@skip \tw@ \UL@pixel \UL@leadtype 
+                                                  \LA@hskip \UL@skip \LA@hsk...
+l.660 ...ite{Drag}. The drag force is given by: \\
+                                                  
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.664      \pmb{f}_
+                   {d} = \frac{18\phi_s(1-\phi_s)\mu_f}{D_p^2} F(\phi_s, Re)...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! You can't use `\eqno' in math mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.666 \end {equation}
+                     
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.666 \end {equation}
+                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.673      Re = \frac{n \rho_f D_p}{\mu_f}
+                                           |\big\|(\pmb{U}_s - \pmb{U}_f)\big\|
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.673      Re = \frac{n \rho_f D_p}{\mu_f}
+                                           |\big\|(\pmb{U}_s - \pmb{U}_f)\big\|
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.673      Re = \frac{n \rho_f D_p}{\mu_f}
+                                           |\big\|(\pmb{U}_s - \pmb{U}_f)\big\|
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Extra }, or forgotten $.
+\frac  #1#2->{\begingroup #1\endgroup \@@over #2}
+                                                 
+l.673      Re = \frac{n \rho_f D_p}{\mu_f}
+                                           |\big\|(\pmb{U}_s - \pmb{U}_f)\big\|
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! You can't use `\eqno' in math mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.674 \end {equation}
+                     
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.674 \end {equation}
+                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.674 \end {equation}
+                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.681      F(\phi
+                 _s, Re)  = F(\phi_s, 0)  + \frac{0.413Re}{24 (1-\phi_s)^2} ...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! You can't use `\eqno' in math mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.682 \end {equation}
+                     
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.682 \end {equation}
+                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.689      F(\phi
+                 _s, 0)  = \frac{10\phi_s}{ (1-\phi_s)^2}+(1-\phi_s)^2(1+1.5...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! You can't use `\eqno' in math mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.690 \end {equation}
+                     
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.690 \end {equation}
+                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+LaTeX Warning: Reference `fd' on page 12 undefined on input line 693.
+
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.695 \subsubsection
+                    {Solving momentum and energy exchange with an implicit s...
+
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.695 \subsubsection
+                    {Solving momentum and energy exchange with an implicit s...
+
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.695 ... energy exchange with an implicit solver}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.695 ... energy exchange with an implicit solver}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 657--695
+
+ []
+
+<figures//K.jpg, id=68, 251.2587pt x 225.4824pt>
+File: figures//K.jpg Graphic file (type jpg)
+<use figures//K.jpg>
+Package pdftex.def Info: figures//K.jpg  used on input line 700.
+(pdftex.def)             Requested size: 251.25807pt x 225.48184pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+ [12]
+
+LaTeX Warning: Reference `fig:K' on page 13 undefined on input line 732.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 729--734
+
+ []
+
+
+LaTeX Warning: Reference `fd' on page 13 undefined on input line 736.
+
+ [13 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//K.jpg>]
+
+Package natbib Warning: Citation `Stewart1974' on page 14 undefined on input li
+ne 739.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 754--757
+
+ []
+
+<figures//water1.jpg, id=77, 562.1pt x 421.575pt>
+File: figures//water1.jpg Graphic file (type jpg)
+<use figures//water1.jpg>
+Package pdftex.def Info: figures//water1.jpg  used on input line 762.
+(pdftex.def)             Requested size: 281.04932pt x 210.78697pt.
+
+LaTeX Warning: Reference `waterEOS' on page 14 undefined on input line 785.
+
+
+LaTeX Warning: Reference `fig:water1' on page 14 undefined on input line 785.
+
+ [14 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//water1.
+jpg>]
+<figures//GIMPshape.jpg, id=81, 603.2136pt x 476.0184pt>
+File: figures//GIMPshape.jpg Graphic file (type jpg)
+<use figures//GIMPshape.jpg>
+Package pdftex.def Info: figures//GIMPshape.jpg  used on input line 794.
+(pdftex.def)             Requested size: 301.60605pt x 238.0086pt.
+
+Package natbib Warning: Citation `GIMP' on page 15 undefined on input line 799.
+
+
+
+LaTeX Warning: Reference `fig:GIMP' on page 15 undefined on input line 814.
+
+ [15 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//GIMPsha
+pe.jpg>] [16]
+
+LaTeX Warning: Reference `V' on page 17 undefined on input line 883.
+
+
+LaTeX Warning: Reference `n' on page 17 undefined on input line 883.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 885--888
+
+ []
+
+
+LaTeX Warning: Reference `faced_vel_fluid' on page 17 undefined on input line 8
+94.
+
+
+LaTeX Warning: Reference `faced_vel_solid' on page 17 undefined on input line 9
+06.
+
+ [17] [18] [19] [20] [21]
+Overfull \hbox (8.24673pt too wide) in paragraph at lines 1289--1292
+[]\OT1/cmr/m/n/12 The state vari-ables of the solid phase $[[][]\OML/cmm/m/it/1
+2 ; [][]; \OMS/cmsy/m/n/12 r[][]\OML/cmm/m/it/12 ; T[]; [][]; V[]\OT1/cmr/m/n/1
+2 ]$
+ []
+
+ [22]
+Underfull \hbox (badness 10000) in paragraph at lines 1332--1336
+
+ []
+
+<figures//porousflow1.jpg, id=108, 803.6424pt x 766.062pt>
+File: figures//porousflow1.jpg Graphic file (type jpg)
+<use figures//porousflow1.jpg>
+Package pdftex.def Info: figures//porousflow1.jpg  used on input line 1344.
+(pdftex.def)             Requested size: 195.0pt x 185.88086pt.
+<figures//porousflow.jpg, id=109, 794.0064pt x 614.17455pt>
+File: figures//porousflow.jpg Graphic file (type jpg)
+<use figures//porousflow.jpg>
+Package pdftex.def Info: figures//porousflow.jpg  used on input line 1349.
+(pdftex.def)             Requested size: 195.0pt x 150.83488pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1358--1361
+
+ []
+
+ [23 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//porousf
+low1.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//po
+rousflow.jpg>]
+Underfull \hbox (badness 10000) in paragraph at lines 1363--1369
+
+ []
+
+
+LaTeX Warning: Reference `fig:porousflow' on page 24 undefined on input line 13
+75.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1375--1378
+
+ []
+
+<figures//consolidation.jpg, id=115, 794.0064pt x 614.17455pt>
+File: figures//consolidation.jpg Graphic file (type jpg)
+<use figures//consolidation.jpg>
+Package pdftex.def Info: figures//consolidation.jpg  used on input line 1383.
+(pdftex.def)             Requested size: 238.20375pt x 184.25378pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: Reference `fig:consolidation' on page 24 undefined on input line
+ 1398.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1394--1400
+
+ []
+
+ [24]
+<figures//box_thermal.jpg, id=119, 391.7034pt x 385.1991pt>
+File: figures//box_thermal.jpg Graphic file (type jpg)
+<use figures//box_thermal.jpg>
+Package pdftex.def Info: figures//box_thermal.jpg  used on input line 1405.
+(pdftex.def)             Requested size: 195.85121pt x 192.59908pt.
+
+Package natbib Warning: Citation `Ali' on page 25 undefined on input line 1406.
+
+
+
+Package natbib Warning: Citation `Ali' on page 25 undefined on input line 1406.
+
+
+<figures//thermal.png, id=120, 581.17125pt x 565.36218pt>
+File: figures//thermal.png Graphic file (type png)
+<use figures//thermal.png>
+Package pdftex.def Info: figures//thermal.png  used on input line 1416.
+(pdftex.def)             Requested size: 195.0pt x 189.69296pt.
+<figures//velocity_thermal-1.jpg, id=122, 365.86688pt x 353.82187pt>
+File: figures//velocity_thermal-1.jpg Graphic file (type jpg)
+<use figures//velocity_thermal-1.jpg>
+Package pdftex.def Info: figures//velocity_thermal-1.jpg  used on input line 14
+20.
+(pdftex.def)             Requested size: 195.0pt x 188.58287pt.
+
+Package natbib Warning: Citation `Ali' on page 25 undefined on input line 1421.
+
+
+
+Package natbib Warning: Citation `Ali' on page 25 undefined on input line 1421.
+
+
+
+LaTeX Warning: Reference `fig:thermal' on page 25 undefined on input line 1429.
+
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1428--1431
+
+ []
+
+ [25 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//consoli
+dation.jpg>] [26 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figu
+res//box_thermal.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript
+/figures//thermal.png> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscrip
+t/figures//velocity_thermal-1.jpg>]
+<figures//SandBoxscheme.jpg, id=131, 1111.15125pt x 568.37344pt>
+File: figures//SandBoxscheme.jpg Graphic file (type jpg)
+<use figures//SandBoxscheme.jpg>
+Package pdftex.def Info: figures//SandBoxscheme.jpg  used on input line 1436.
+(pdftex.def)             Requested size: 333.34795pt x 170.51334pt.
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 27 undefined on input li
+ne 1442.
+
+
+LaTeX Warning: Reference `fig:SandBoxModel' on page 27 undefined on input line 
+1442.
+
+<figures//1.jpg, id=132, 589.4522pt x 353.82187pt>
+File: figures//1.jpg Graphic file (type jpg)
+<use figures//1.jpg>
+Package pdftex.def Info: figures//1.jpg  used on input line 1450.
+(pdftex.def)             Requested size: 195.0pt x 117.04771pt.
+<figures//2.jpg, id=133, 749.04843pt x 465.23813pt>
+File: figures//2.jpg Graphic file (type jpg)
+<use figures//2.jpg>
+Package pdftex.def Info: figures//2.jpg  used on input line 1455.
+(pdftex.def)             Requested size: 195.0pt x 121.11523pt.
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 27 undefined on input li
+ne 1477.
+
+
+LaTeX Warning: Reference `table2' on page 27 undefined on input line 1477.
+
+<figures//0.4swater.jpg, id=134, 794.97pt x 614.0541pt>
+File: figures//0.4swater.jpg Graphic file (type jpg)
+<use figures//0.4swater.jpg>
+Package pdftex.def Info: figures//0.4swater.jpg  used on input line 1486.
+(pdftex.def)             Requested size: 195.0pt x 150.6179pt.
+<figures//0.8swater.jpg, id=135, 794.97pt x 614.0541pt>
+File: figures//0.8swater.jpg Graphic file (type jpg)
+<use figures//0.8swater.jpg>
+Package pdftex.def Info: figures//0.8swater.jpg  used on input line 1491.
+(pdftex.def)             Requested size: 195.0pt x 150.6179pt.
+
+LaTeX Warning: Reference `0.4s' on page 27 undefined on input line 1500.
+
+
+LaTeX Warning: Reference `0.8s' on page 27 undefined on input line 1500.
+
+
+Package natbib Warning: Citation `Rzadkiewicz' on page 27 undefined on input li
+ne 1500.
+
+
+LaTeX Warning: Reference `watersurface' on page 27 undefined on input line 1500
+.
+
+
+Package natbib Warning: Citation `Zhang2019' on page 27 undefined on input line
+ 1500.
+
+<figures//SHMPM.jpg, id=136, 849.1725pt x 1210.5225pt>
+File: figures//SHMPM.jpg Graphic file (type jpg)
+<use figures//SHMPM.jpg>
+Package pdftex.def Info: figures//SHMPM.jpg  used on input line 1508.
+(pdftex.def)             Requested size: 195.0pt x 277.97101pt.
+<figures//MPMICE_debris.jpg, id=137, 825.0825pt x 1198.4775pt>
+File: figures//MPMICE_debris.jpg Graphic file (type jpg)
+<use figures//MPMICE_debris.jpg>
+Package pdftex.def Info: figures//MPMICE_debris.jpg  used on input line 1513.
+(pdftex.def)             Requested size: 195.0pt x 283.23325pt.
+
+LaTeX Warning: Reference `saturatedflow' on page 27 undefined on input line 152
+2.
+
+
+LaTeX Warning: Reference `saturatedflowa' on page 27 undefined on input line 15
+22.
+
+
+LaTeX Warning: Reference `saturatedflowb' on page 27 undefined on input line 15
+22.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1442--1524
+
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+ [27 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//SandBox
+scheme.jpg>] [28 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figu
+res//1.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//
+2.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//0.4sw
+ater.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//0.
+8swater.jpg>]
+<figures//schematic.jpeg, id=145, 701.62125pt x 237.13594pt>
+File: figures//schematic.jpeg Graphic file (type jpg)
+<use figures//schematic.jpeg>
+Package pdftex.def Info: figures//schematic.jpeg  used on input line 1529.
+(pdftex.def)             Requested size: 350.80975pt x 118.56767pt.
+<figures//acer.jpg, id=146, 794.0064pt x 614.17455pt>
+File: figures//acer.jpg Graphic file (type jpg)
+<use figures//acer.jpg>
+Package pdftex.def Info: figures//acer.jpg  used on input line 1540.
+(pdftex.def)             Requested size: 195.0pt x 150.83488pt.
+<figures//vel.jpg, id=147, 799.3062pt x 614.17455pt>
+File: figures//vel.jpg Graphic file (type jpg)
+<use figures//vel.jpg>
+Package pdftex.def Info: figures//vel.jpg  used on input line 1545.
+(pdftex.def)             Requested size: 195.0pt x 149.83212pt.
+ [29] [30 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//SH
+MPM.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//MPM
+ICE_debris.jpg>]
+
+LaTeX Warning: Reference `fig:scheme' on page 31 undefined on input line 1552.
+
+
+LaTeX Warning: Reference `groundacceleration_accerleration' on page 31 undefine
+d on input line 1552.
+
+
+LaTeX Warning: Reference `groundacceleration_velocity' on page 31 undefined on 
+input line 1552.
+
+<figures//model.jpg, id=154, 794.0064pt x 614.17455pt>
+File: figures//model.jpg Graphic file (type jpg)
+<use figures//model.jpg>
+Package pdftex.def Info: figures//model.jpg  used on input line 1557.
+(pdftex.def)             Requested size: 198.50111pt x 153.54326pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1552--1560
+
+ []
+
+ [31 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//schemat
+ic.jpeg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//ace
+r.jpg> <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//vel.j
+pg>]
+
+LaTeX Warning: Reference `fig:model' on page 32 undefined on input line 1563.
+
+<figures//landslide_gamma.jpeg, id=158, 740.7675pt x 577.40718pt>
+File: figures//landslide_gamma.jpeg Graphic file (type jpg)
+<use figures//landslide_gamma.jpeg>
+Package pdftex.def Info: figures//landslide_gamma.jpeg  used on input line 1575
+.
+(pdftex.def)             Requested size: 370.38284pt x 288.70288pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 1568--1578
+
+ []
+
+ [32 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//model.j
+pg>]
+
+LaTeX Warning: Reference `fig:gamma' on page 33 undefined on input line 1581.
+
+
+LaTeX Warning: Reference `fig:PWP' on page 33 undefined on input line 1581.
+
+
+LaTeX Warning: Reference `fig:vel' on page 33 undefined on input line 1581.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1581--1583
+
+ []
+
+<figures//PWP.jpeg, id=162, 771.63281pt x 577.40718pt>
+File: figures//PWP.jpeg Graphic file (type jpg)
+<use figures//PWP.jpeg>
+Package pdftex.def Info: figures//PWP.jpeg  used on input line 1587.
+(pdftex.def)             Requested size: 385.81546pt x 288.70288pt.
+ [33 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//landsli
+de_gamma.jpeg>]
+<figures//landslide_vel.jpeg, id=166, 706.13812pt x 577.40718pt>
+File: figures//landslide_vel.jpeg Graphic file (type jpg)
+<use figures//landslide_vel.jpeg>
+Package pdftex.def Info: figures//landslide_vel.jpeg  used on input line 1602.
+(pdftex.def)             Requested size: 353.06819pt x 288.70288pt.
+ [34 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//PWP.jpe
+g>] [35 <D:/Uintah/Uintah_NTNU/SUBSLIDE/[2022] MPMICE2/manuscript/figures//land
+slide_vel.jpeg>]
+
+Package natbib Warning: Citation `Kashiwa' on page 36 undefined on input line 1
+631.
+
+
+Overfull \hbox (5.97284pt too wide) detected at line 1648
+[][]
+ []
+
+
+LaTeX Warning: Reference `massbalance' on page 36 undefined on input line 1654.
+
+
+
+LaTeX Warning: Reference `mass' on page 36 undefined on input line 1654.
+
+
+Overfull \hbox (122.73412pt too wide) detected at line 1659
+[] \OT1/cmr/m/n/12 = [][][][] = \OML/cmm/m/it/12 []V[][][][] \OT1/cmr/m/n/12 +
+ [][][][]\OML/cmm/m/it/12 V[] \OT1/cmr/m/n/12 + [][][][]\OML/cmm/m/it/12 [][] 
+\OT1/cmr/m/n/12 = 0
+ []
+
+ [36]
+
+LaTeX Warning: Reference `fluidvolumerate' on page 37 undefined on input line 1
+670.
+
+
+Overfull \hbox (52.42915pt too wide) detected at line 1690
+[] \OT1/cmr/m/n/12 = [] + [][] \OMS/cmsy/m/n/12  r\OML/cmm/m/it/12 n \OT1/cmr/
+m/n/12 = [][][][][][][][][][][][]\OMS/cmsy/m/n/12 r  [][][][][][]
+ []
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Extra }, or forgotten $.
+\frac  #1#2->{\begingroup #1\endgroup \@@over #2}
+                                                 
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Improper \spacefactor.
+<argument> ...def \UL@spfactor {\the \spacefactor 
+                                                  }
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+You can refer to \spacefactor only in horizontal mode;
+you can refer to \prevdepth only in vertical mode; and
+neither of these is meaningful inside \write. So
+I'm forgetting what you said and using zero instead.
+
+! Extra }, or forgotten $.
+\UL@word ...r \ifx \expandafter \UL@end #1\egroup 
+                                                  \egroup \unskip \unskip \u...
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@word ...expandafter \UL@end #1\egroup \egroup 
+                                                  \unskip \unskip \unskip \s...
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! You can't use `\spacefactor' in math mode.
+\UL@word ... \unskip \unskip \unskip \spacefactor 
+                                                  \UL@spfactor \let \UL@word...
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+! Extra }, or forgotten $.
+\UL@word ...stop \UL@leaders \fi \fi \fi \UL@word 
+                                                  \@empty 
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.1705 ...al t} (n - \sum_{f=1}^{N_f} \upsilon_f }
+                                                  %DIFDELCMD < \overline{\rh...
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+LaTeX Warning: Reference `fluidvolumerate' on page 37 undefined on input line 1
+724.
+
+
+LaTeX Warning: Reference `equilP' on page 37 undefined on input line 1724.
+
+
+LaTeX Warning: Reference `p1' on page 37 undefined on input line 1739.
+
+
+LaTeX Warning: Reference `equilP1' on page 37 undefined on input line 1739.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+LaTeX Warning: Reference `DP' on page 37 undefined on input line 1750.
+
+
+LaTeX Warning: Reference `specificvolume' on page 37 undefined on input line 17
+50.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Limit controls must follow a math operator.
+<recently read> \limits 
+                        
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I'm ignoring this misplaced \limits or \nolimits command.
+
+! Extra }, or forgotten $.
+\UL@onmath ...L@leadtype \LA@hskip \p@ plus1fill}}
+                                                  \egroup 
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@onmath ...pe \LA@hskip \p@ plus1fill}}\egroup 
+                                                  
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.1750 }
+        %DIFDELCMD < \begin{equation}
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1758 }
+        %DIFDELCMD <
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1758 }
+        %DIFDELCMD <
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1758 }
+        %DIFDELCMD <
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1758 }
+        %DIFDELCMD <
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1758 }
+        %DIFDELCMD <
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1758 }
+        %DIFDELCMD <
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Limit controls must follow a math operator.
+<recently read> \limits 
+                        
+l.1758 }
+        %DIFDELCMD <
+I'm ignoring this misplaced \limits or \nolimits command.
+
+! Extra }, or forgotten $.
+\UL@onmath ...L@leadtype \LA@hskip \p@ plus1fill}}
+                                                  \egroup 
+l.1758 }
+        %DIFDELCMD <
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\UL@onmath ...pe \LA@hskip \p@ plus1fill}}\egroup 
+                                                  
+l.1758 }
+        %DIFDELCMD <
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Extra }, or forgotten $.
+\DIFdel #1->{\protect \color {red}\sout {#1}}
+                                             
+l.1758 }
+        %DIFDELCMD <
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.1759 
+       
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1761 \DIFdelend \subsection
+                             {\textsf{Momentum conservation}}
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1761 \DIFdelend \subsection
+                             {\textsf{Momentum conservation}}
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+! Undefined control sequence.
+\UL@leaders ...L@skip \tw@ \UL@pixel \UL@leadtype 
+                                                  \LA@hskip \UL@skip \LA@hsk...
+l.1761 ...bsection{\textsf{Momentum conservation}}
+                                                  
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1761 ...bsection{\textsf{Momentum conservation}}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+! Missing } inserted.
+<inserted text> 
+                }
+l.1761 ...bsection{\textsf{Momentum conservation}}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+Overfull \hbox (3094.30038pt too wide) in paragraph at lines 1702--1761
+|   [] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1765--1768
+
+ []
+
+
+Package natbib Warning: Citation `DRUMHELLER' on page 37 undefined on input lin
+e 1774.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1771--1777
+
+ []
+
+
+Overfull \hbox (15.02982pt too wide) detected at line 1788
+[][] \OT1/cmr/m/n/12 = [] [] = \OMS/cmsy/m/n/12  \OML/cmm/m/it/12 []\OMS/cmsy/
+m/n/12 r\OML/cmm/m/it/12 p[] \OT1/cmr/m/n/12 + \OMS/cmsy/m/n/12 r  [][] \OT1/c
+mr/m/n/12 + [][][] + [][][][]
+ []
+
+ [37]
+
+LaTeX Warning: Reference `Terzaghi' on page 38 undefined on input line 1803.
+
+
+LaTeX Warning: Reference `fluidmom' on page 38 undefined on input line 1803.
+
+
+Package natbib Warning: Citation `Hassanizadeh' on page 38 undefined on input l
+ine 1816.
+
+
+Overfull \hbox (2.68074pt too wide) detected at line 1822
+[][] \OT1/cmr/m/n/12 = \OMS/cmsy/m/n/12 r  \OT1/cmr/m/n/12 (\OMS/cmsy/m/n/12  
+\OML/cmm/m/it/12 np[][]\OT1/cmr/m/n/12 ) \OMS/cmsy/m/n/12  [][] \OT1/cmr/m/n/1
+2 + \OMS/cmsy/m/n/12 r  [][] \OT1/cmr/m/n/12 + ([][][]) \OMS/cmsy/m/n/12  [][
+] \OT1/cmr/m/n/12 + [][][][] \OMS/cmsy/m/n/12  [][] \OT1/cmr/m/n/12 + [][]\OML
+/cmm/m/it/12 q[]
+ []
+
+
+LaTeX Warning: Reference `e1' on page 38 undefined on input line 1825.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1822--1828
+
+ []
+
+
+LaTeX Warning: Reference `fluidmom' on page 38 undefined on input line 1834.
+
+
+LaTeX Warning: Reference `e1' on page 38 undefined on input line 1834.
+
+
+LaTeX Warning: Reference `e2' on page 38 undefined on input line 1834.
+
+
+Package natbib Warning: Citation `Hassanizadeh' on page 38 undefined on input l
+ine 1843.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1840--1846
+
+ []
+
+ [38]
+Overfull \hbox (31.96703pt too wide) detected at line 1854
+[][]
+ []
+
+
+LaTeX Warning: Reference `e3' on page 39 undefined on input line 1857.
+
+
+LaTeX Warning: Reference `e1' on page 39 undefined on input line 1857.
+
+
+LaTeX Warning: Reference `solidmom' on page 39 undefined on input line 1857.
+
+
+Overfull \hbox (26.19603pt too wide) in paragraph at lines 1865--1871
+\OT1/cmr/m/n/12 On the right hand side, the terms in-clude the me-chan-i-cal wo
+rk []|   []   |   []
+ []
+
+
+LaTeX Warning: Reference `append:pressure1' on page 39 undefined on input line 
+1886.
+
+
+LaTeX Warning: Reference `append:pressure4' on page 39 undefined on input line 
+1903.
+
+ [39]
+
+LaTeX Warning: Reference `append:pressure2' on page 40 undefined on input line 
+1911.
+
+
+LaTeX Warning: Reference `append:pressure3' on page 40 undefined on input line 
+1911.
+
+
+LaTeX Warning: Reference `append:pressure5' on page 40 undefined on input line 
+1911.
+
+
+LaTeX Warning: Reference `append:pressure6' on page 40 undefined on input line 
+1918.
+
+
+Overfull \hbox (48.04086pt too wide) detected at line 1950
+\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 m[]\OT1/cmr/m/n/12 )[] = (\OML/cmm/m/it/12 m[
+]\OT1/cmr/m/n/12 )[] \OMS/cmsy/m/n/12   \OT1/cmr/m/n/12 \OML/cmm/m/it/12 t\OT1
+/cmr/m/n/12 (\OML/cmm/m/it/12 V\OMS/cmsy/m/n/12 r[]  [][]   \OML/cmm/m/it/12 V
+\OT1/cmr/m/n/12 (1 \OMS/cmsy/m/n/12   \OML/cmm/m/it/12 n\OT1/cmr/m/n/12 )\OMS/c
+msy/m/n/12 r[]\OML/cmm/m/it/12 P[] \OT1/cmr/m/n/12 + \OML/cmm/m/it/12 m[][]\OT1
+/cmr/m/n/12 ) \OMS/cmsy/m/n/12   \OML/cmm/m/it/12 VK\OT1/cmr/m/n/12 \OML/cmm/m
+/it/12 t\OT1/cmr/m/n/12 ([][] \OMS/cmsy/m/n/12   [][]\OT1/cmr/m/n/12 )
+ []
+
+
+LaTeX Warning: Reference `append:exchange1' on page 40 undefined on input line 
+1961.
+
+
+LaTeX Warning: Reference `append:exchange2' on page 40 undefined on input line 
+1961.
+
+ [40]
+
+LaTeX Warning: Reference `append:exchange3' on page 41 undefined on input line 
+1972.
+
+No file diff.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+ [41] (diff.aux (newcommands.aux))
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ )
+(\end occurred inside a group at level 1)
+
+### simple group (level 1) entered at line 1705 ({)
+### bottom level 
+Here is how much of TeX's memory you used:
+ 6681 strings out of 480236
+ 99753 string characters out of 2880560
+ 391854 words of memory out of 3000000
+ 23131 multiletter control sequences out of 15000+200000
+ 546366 words of font info for 71 fonts, out of 3000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 72i,15n,77p,1671b,577s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\Users\quoct\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/
+ec/dpi600\tcrm1200.pk><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1
+/public/amsfonts/cm/cmbx10.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fo
+nts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/quoct/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/quoct/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/quoct/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/quo
+ct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/U
+sers/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.p
+fb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmr12.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmr17.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/amsfonts/cm/cmr6.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmr7.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/quoct/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmss12.pfb><C:/Users/quoct/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/quoct/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssi12.pfb><C:/Users
+/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+<C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+sy6.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmsy8.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/type1/publi
+c/amsfonts/cm/cmti10.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmti12.pfb><C:/Users/quoct/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmti7.pfb><C:/Users/quoct/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/latxfont/lasy6.pfb><C:/Users/quoct/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/latxfont/linew10.pfb>
+Output written on diff.pdf (44 pages, 24046644 bytes).
+PDF statistics:
+ 271 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 131 words of extra memory for PDF output out of 10000 (max. 10000000)
+
