@@ -642,8 +642,8 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             // Artifitical initial stress by gravity
             if (UI[38] > 0) {
                 if (time < UI[38]) {
-                    svarg[2] = 1000;
-                    svarg[3] = 80;
+                    svarg[2] = 50000;
+                    svarg[3] = 45;
                     svarg[33] = 0;
                 }
                 else {
