@@ -783,15 +783,17 @@ void MPMICE::scheduleInterpolateNCToCC_0(SchedulerP& sched,
                                                     Ghost::AroundCells, 1);
     t->requires(Task::OldDW, Ilb->sp_vol_CCLabel,   Ghost::None, 0); 
     t->requires(Task::OldDW, MIlb->temp_CCLabel,    Ghost::None, 0);
+    t->requires(Task::NewDW, Mlb->gStressVizualLabel, Ghost::AroundCells, 1);
 
     t->requires(Task::OldDW, Ilb->timeStepLabel);
     
     t->computes(MIlb->cMassLabel);
     t->computes(MIlb->vel_CCLabel);
     t->computes(MIlb->temp_CCLabel);
+    t->computes(MIlb->stress_CCLabel);
     t->computes(Ilb->sp_vol_CCLabel, mss);
     t->computes(Ilb->rho_CCLabel, mss); 
-   
+
     sched->addTask(t, patches, mpm_matls);
   }
 }
@@ -1352,14 +1354,17 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       constNCVariable<Vector> gvelocity;
       CCVariable<double> cmass,Temp_CC, sp_vol_CC, rho_CC;
       CCVariable<Vector> vel_CC;
+      CCVariable<Matrix3> stress_CC;
       constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
+      constCCVariable<Matrix3> gStress;
 
       new_dw->allocateAndPut(cmass,    MIlb->cMassLabel,     indx, patch);  
       new_dw->allocateAndPut(vel_CC,   MIlb->vel_CCLabel,    indx, patch);  
       new_dw->allocateAndPut(Temp_CC,  MIlb->temp_CCLabel,   indx, patch);  
       new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch); 
       new_dw->allocateAndPut(rho_CC,    Ilb->rho_CCLabel,    indx, patch);
-      
+      new_dw->allocateAndPut(stress_CC, MIlb->stress_CCLabel, indx, patch);
+
       double very_small_mass = d_TINY_RHO * cell_vol;
       cmass.initialize(very_small_mass);
 
@@ -1367,6 +1372,7 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       new_dw->get(gvolume,      Mlb->gVolumeLabel,      indx, patch,gac, 1);
       new_dw->get(gvelocity,    Mlb->gVelocityBCLabel,  indx, patch,gac, 1);
       new_dw->get(gtemperature, Mlb->gTemperatureLabel, indx, patch,gac, 1);
+      new_dw->get(gStress,      Mlb->gStressVizualLabel, indx, patch, gac, 1);
       new_dw->get(gSp_vol,      Mlb->gSp_volLabel,      indx, patch,gac, 1);
       old_dw->get(sp_vol_CC_ice,Ilb->sp_vol_CCLabel,    indx, patch,gn, 0); 
       old_dw->get(Temp_CC_ice,  MIlb->temp_CCLabel,     indx, patch,gn, 0);
@@ -1383,18 +1389,21 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
         double Temp_CC_mpm = 0.0;  
         double sp_vol_mpm = 0.0;   
         Vector vel_CC_mpm  = Vector(0.0, 0.0, 0.0);
-        
+        Matrix3 stress_CC_mpm(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
         for (int in=0;in<8;in++){
           double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
           cmass[c]    += NC_CCw_mass;
           sp_vol_mpm  += gSp_vol[nodeIdx[in]]      * NC_CCw_mass;
           vel_CC_mpm  += gvelocity[nodeIdx[in]]    * NC_CCw_mass;
           Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
+          stress_CC_mpm += gStress[nodeIdx[in]] * NC_CCw_mass;
         }
         double inv_cmass = 1.0/cmass[c];
         vel_CC_mpm  *= inv_cmass;    
         Temp_CC_mpm *= inv_cmass;
         sp_vol_mpm  *= inv_cmass;
+        stress_CC_mpm *= inv_cmass;
 
         //__________________________________
         // set *_CC = to either vel/Temp_CC_mpm or some safe values
@@ -1411,6 +1420,7 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
         sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_CC_ice[c]+one_or_zero*sp_vol_mpm;
 
         vel_CC[c]   =vel_CC_mpm;
+        stress_CC[c] = stress_CC_mpm;
         rho_CC[c]   = cmass[c]/cell_vol;
       }
 

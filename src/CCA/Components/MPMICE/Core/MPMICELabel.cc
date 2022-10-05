@@ -50,6 +50,8 @@ MPMICELabel::MPMICELabel()
                      CCVariable<double>::getTypeDescription() );
   press_NCLabel      = VarLabel::create("pressureNC",
                      NCVariable<double>::getTypeDescription());
+  stress_CCLabel     = VarLabel::create("stress_CC",
+                     CCVariable<Matrix3>::getTypeDescription());
   burnedMassCCLabel   = VarLabel::create("burnedMass",
                      CCVariable<double>::getTypeDescription());
   onSurfaceLabel      = VarLabel::create("onSurface",
@@ -99,6 +101,7 @@ MPMICELabel::~MPMICELabel()
   VarLabel::destroy(NC_CCweightLabel);
   VarLabel::destroy(gMassLabel);
   VarLabel::destroy(gVelocityLabel);
+  VarLabel::destroy(stress_CCLabel);
   //______ D U C T   T A P E__________
   //  WSB1 burn model
   VarLabel::destroy(TempGradLabel);

@@ -208,6 +208,10 @@ MPMLabel::MPMLabel()
   pStressLabel_preReloc = VarLabel::create( "p.stress+",
                         ParticleVariable<Matrix3>::getTypeDescription() );
 
+  pStressVizualLabel = VarLabel::create("p.stressVizual",
+      ParticleVariable<Matrix3>::getTypeDescription());
+
+
   pVolumeLabel_preReloc = VarLabel::create( "p.volume+",
                         ParticleVariable<double>::getTypeDescription());
   
@@ -409,6 +413,9 @@ MPMLabel::MPMLabel()
   gStressForSavingLabel   = VarLabel::create( "g.stressFS",
                    NCVariable<Matrix3>::getTypeDescription() );
 
+  gStressVizualLabel = VarLabel::create("g.stressVizual",
+      NCVariable<Matrix3>::getTypeDescription());
+
   gVolumeLabel     = VarLabel::create("g.volume",
                         NCVariable<double>::getTypeDescription());
 
@@ -567,6 +574,7 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(pVelGradLabel_preReloc);
   VarLabel::destroy(pStressLabel);
   VarLabel::destroy(pStressLabel_preReloc);
+  VarLabel::destroy(pStressVizualLabel);
   VarLabel::destroy(pVolumeLabel);
   VarLabel::destroy(pVolumeLabel_preReloc);
   VarLabel::destroy(pMassLabel);
@@ -670,6 +678,7 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(NC_CCweightLabel);
   VarLabel::destroy(gThermalContactTemperatureRateLabel);
   VarLabel::destroy(gStressForSavingLabel);
+  VarLabel::destroy(gStressVizualLabel);
   VarLabel::destroy(gVolumeLabel);
   VarLabel::destroy(gVolumeF0Label);
   VarLabel::destroy(gVolumeF1Label);
