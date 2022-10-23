@@ -49,7 +49,6 @@
 \usepackage{float}
 \usepackage[font={small,it}]{caption}
 \usepackage{subcaption}
-\RequirePackage{ulem}
 \graphicspath{{figures/}}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -389,10 +388,11 @@ The internal energy balance equation for the solid phase is:
 %
 \begin{equation}
     \label{solidenergy}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+     \frac{m_s}{V}  c_v \frac{D_s( T_s)}{Dt} = \pmb{\sigma}^\prime: \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
 \end {equation}
 %
 %
+where $c_v$ is the specific heat at constant volume of the solid materials.
 \underline{\hspace{5in}}\\
 Closing the systems of equations, the following additional models are needed: \\
 (1) A constitutive equation to describe the stress - strain behaviour of solid phase (computing effective stress $\pmb{\sigma}^\prime$). \\
@@ -903,7 +903,8 @@ The nodal internal temperature rate is computed based on the heat conduction mod
 \end {equation}
 %
 %
-where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate compted from the contact law due to the frictional sliding between solid materials. The nodal internal temperature is calculated by
+where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} $ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate compted from the contact law due to the frictional sliding between solid materials. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials.
+
 \begin{equation}
      T_{si}^L = T_{si}^n + dT_{si}^L
 \end {equation}
@@ -962,7 +963,7 @@ For the solid phase, the Lagrangian value of the linear momentum and energy of s
 \end {equation}
 %
 \begin{equation}
- (me)_{sc}^{L-} =  \sum{S_{ci} m_{si}^n T_{si}^L}
+ (me)_{sc}^{L-} =  \sum{S_{ci} m_{si}^n T_{si}^L} c_v
 \end {equation}
 %
 %
@@ -986,7 +987,7 @@ where the cell-centered intermediate velocity can be calculated by
 \end {equation}
 %
 %
-And the increment of the velocity can be computed by solving the linear equation with i,j = 1 : $N$ as:
+And the increment of the velocity $\pmb{U}_{fc}$, $\Delta \pmb{U}_{sc}$ can be computed by solving the linear equation with i,j = 1 : $N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -1158,7 +1159,7 @@ Then the boundary condition and contact forces are applied to the nodal velocity
 \subsection{\textsf{Update the particle variables}}
 %
 %
-The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ (velocity, position, velocity gradient, temperature, deformation gradient, volume) are updated here 
+The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1},  \nabla T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ (velocity, position, velocity gradient, temperature, temperature gradient, deformation gradient, volume) are updated here 
 %
 %
 \begin{equation}
@@ -1178,6 +1179,11 @@ The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\
 %
 \begin{equation}
      T_{sp}^{n+1} = T_{sp}^n + \sum{S_{sp} dT_{si}^n \delt} 
+\end {equation}
+%
+%
+\begin{equation}
+     \nabla T_{sp}^{n+1} = \sum{\nabla S_{sp} T_{sp}^n \delt} 
 \end {equation}
 %
 %
@@ -1628,29 +1634,43 @@ Combining equations (\ref{fluidmom}), (\ref{e1}), (\ref{e2}), we obtain the fina
 \end {equation}
 %
 %
-On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we begin with the total energy balance equation for the mixture based on \cite{Hassanizadeh} as:\\
+On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we introduce the rate of the internal energy  for the thermoelastic materials as a function of elastic strain tensor $\pmb{\epsilon}_s^e$ and temperature $T_s$:
+%
+%
+\begin{equation}
+   \frac{m_s}{V} \frac{D_s( e_s)}{Dt} = \pmb{\sigma}^\prime :\frac{D_s( \pmb{\epsilon}_s^e)}{Dt} + \frac{D_s( e_s)}{D_s (T_s)} \frac{D_s( T_s)}{Dt} = \pmb{\sigma}^\prime :\frac{D_s( \pmb{\epsilon}_s^e)}{Dt} + c_v \frac{D_s( T_s)}{Dt}
+\label{internalEnergy}
+\end {equation}
+%
+%
+$c_v$ is the specific heat at the constant volume of the solid materials. The total energy balance equation for the mixture based on \cite{Hassanizadeh} can be written as:\\
 %
 %
 \begin{equation}
 \label{e3}
 \begin{gathered}
      \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} + \frac{1}{V}\frac{D_s(m_s (e_s+0.5\pmb{U}_s^2))}{Dt} = \nabla \cdot (-\phi_f p_f\pmb{I}) \cdot \pmb{U}_f \\
-     + \nabla \cdot (\pmb{\sigma}^\prime-\phi_s p_f\pmb{I}) \cdot \pmb{U}_s + (-\phi_f p_f\pmb{I}) : \nabla \pmb{U}_f + (\pmb{\sigma}^\prime-\phi_s p_f\pmb{I}) : \nabla \pmb{U}_s \\
+     + \nabla \cdot (\pmb{\sigma}^\prime-\phi_s p_f\pmb{I}) \cdot \pmb{U}_s + (-\phi_f p_f\pmb{I}) : \nabla \pmb{U}_f + \pmb{\sigma}^\prime : \nabla \pmb{U}_s \\
      + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f + (\overline{\rho}_s \pmb{b}) \cdot \pmb{U}_s
      + \nabla \cdot \pmb{q}_f + \nabla \cdot \pmb{q}_s +  \sum \pmb{f}_{d} \cdot (\pmb{U}_f - \pmb{U}_s)  
 \end {gathered}
 \end {equation}
 %
 %
-Subtracting equation (\ref{e3}) to equations (\ref{e1}) and (\ref{solidmom}), we obtained the internal energy balance equation for solid phase as:
+Subtracting equation (\ref{e3}), (\ref{internalEnergy}) to equations (\ref{e1}) and (\ref{solidmom}), we obtained the internal energy balance equation for solid phase as:
 %
 %
 \begin{equation}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \Delta W_{s} +  \Delta W_{friction} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+      \pmb{\sigma}^\prime :\frac{D_s( \pmb{\epsilon}_s^e)}{Dt}  + \frac{m_s}{V} c_v \frac{D_s( T_s)}{Dt} = \Delta W_{s} +  \Delta W_{friction} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
 \end {equation}
 %
 %
-On the right hand side, the terms include the mechanical work rate $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, the work rate from frictional sliding between solid materials  $\Delta W_{friction}$, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
+On the right hand side, the terms include the work rate from frictional sliding between solid materials  $\Delta W_{friction}$, thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials, the mechanical work rate $\Delta W_{s} = \pmb{\sigma}^\prime :\frac{D_s( \pmb{\epsilon}_s)}{Dt}  = \pmb{\sigma}^\prime : (\frac{D_s( \pmb{\epsilon}_s^e)}{Dt}  + \frac{D_s( \pmb{\epsilon}_s^p)}{Dt}) $ computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain tensor, . By subtracting the term $\pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^e)}{Dt}$, we get the final form of the energy balance equation as:
+%
+%
+\begin{equation}
+      \frac{m_s}{V} c_v \frac{D_s( T_s)}{Dt} = \pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} +  \Delta W_{friction} + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+\end {equation}
 %
 %
 \subsection{\textsf{Advanced Fluid Pressure}}

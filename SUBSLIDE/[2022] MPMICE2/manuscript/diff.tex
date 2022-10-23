@@ -1,7 +1,7 @@
 %% 
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL MPMICE_v3.tex   Mon Sep 26 05:01:59 2022
-%DIF ADD MPMICE_v4.tex   Wed Sep 28 10:27:06 2022
+%DIF DEL MPMICE_v2.tex   Tue Sep 13 05:17:49 2022
+%DIF ADD MPMICE_v4.tex   Fri Oct 21 13:36:32 2022
 %% Copyright 2007-2020 Elsevier Ltd
 %% 
 %% This file is part of the 'Elsarticle Bundle'.
@@ -52,7 +52,6 @@
 \usepackage{float}
 \usepackage[font={small,it}]{caption}
 \usepackage{subcaption}
-\RequirePackage{ulem}
 \graphicspath{{figures/}}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -62,9 +61,12 @@
 %% for the whole article with \linenumbers.
 %% \usepackage{lineno}
 
-\journal{Arxiv}
+%DIF < \journal{Computer Methods in Applied Mechanics and Engineering          }
+%DIF -------
+\journal{Arxiv} %DIF > 
 %DIF PREAMBLE EXTENSION ADDED BY LATEXDIFF
 %DIF UNDERLINE PREAMBLE %DIF PREAMBLE
+\RequirePackage[normalem]{ulem} %DIF PREAMBLE
 \RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
@@ -178,7 +180,7 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{MPMICE: A hybrid MPM-CFD model for simulating coupled problems in porous media. Application to earthquake-induced submarine landslides}
+\title{MPMICE: A \DIFdelbegin \DIFdel{Lagrangian-Eulerian framework of multiphase flows }\DIFdelend \DIFaddbegin \DIFadd{hybrid MPM-CFD model for simulating coupled problems }\DIFaddend in \DIFdelbegin \DIFdel{deformable }\DIFdelend porous media\DIFaddbegin \DIFadd{. Application }\DIFaddend to \DIFdelbegin \DIFdel{model }\DIFdelend earthquake-induced submarine landslides}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -211,7 +213,10 @@
 In this paper, we describe a soil-fluid-structure interaction model that combines soil mechanics (saturated sediments), fluid mechanics (seawater or air), and solid mechanics (structures). The formulation combines the Material Point Method, which models large deformation of the porous media and the structure, with the Implicit Continuous-fluid Eulerian, which models complex fluid flows. We validate the model and simulate the whole process of earthquake-induced submarine landslides. We show that this model captures complex interactions between saturated sediment, seawater, and structure, so we can use the model to estimate the impact of potential submarine landslides on offshore structures.
 
 \end {abstract}
-%%Graphical abstract
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend %%Graphical abstract
 \begin{graphicalabstract}
 %\includegraphics{grabs}
 %
@@ -241,8 +246,14 @@ Material Point Method
 \sep MPMICE
 \sep submarine landslide.
 \end {keyword}
-\end {frontmatter}
-%
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend \end {frontmatter}
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend %
 %
 %
 %______________________________________________________________________
@@ -281,10 +292,14 @@ $\phi_s$				      &		  			& Solid volume fraction\\
 $\overline{\rho}_s$			&	$[ML^{-3}]$  	& Bulk Solid density\\
 $\pmb{x}_s$   			&  	$[L]$    			& Solid Position vector\\
 $\pmb{U}_s$   			&  	$[Lt^{-1}]$    	& Solid Velocity vector\\
-$\pmb{a}_s$   			&  	$[Lt^{-2}]$   	& Solid Acceleration vector\\
-$\pmb{\sigma}^\prime$ 	&  	$[ML^{-1}t^{-2}]$ 	& Effective Stress tensor\\
+\DIFdelbegin \DIFdel{$\pmb{U}_s$   			}%DIFDELCMD < &  	%%%
+\DIFdel{$[Lt^{-1}]$    	}%DIFDELCMD < & %%%
+\DIFdel{Solid Velocity gradient vector}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend $\pmb{a}_s$   			&  	$[Lt^{-2}]$   	& Solid Acceleration vector\\
+$\pmb{\sigma}^\prime$ 	&  	\DIFdelbegin \DIFdel{$[ML^{-2}]$ 	}\DIFdelend \DIFaddbegin \DIFadd{$[ML^{-1}t^{-2}]$ 	}\DIFaddend & Effective Stress tensor\\
 $ \pmb{\epsilon}_s$ 	&  			 	& Strain tensor\\
-$e_s$         				&  	$[L^2t^{-2}]$  	& Solid Internal energy per unit mass\\   
+$e_s$         				&  	$[L^2t^{-2}]$  	& Solid Internal energy \DIFaddbegin \DIFadd{per unit mass}\DIFaddend \\   
 $T_s$           			&  	$[T]$      		& Solid Temperature\\
 $\pmb{F}_s$     			&       	    			& Solid Deformation gradient\\
 $V_s$     				&  	$[L^3]$      		& Solid Volume\\
@@ -303,7 +318,7 @@ $\pmb{U}_f$   			&  $[Lt^{-1}]$    			& Fluid Velocity vector\\
 $\pmb{\sigma}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid stress tensor\\
 $p_f$ 				&  $[ML^{-1}t^{-2}]$ 	& Fluid isotropic pressure\\
 $\pmb{\tau}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid shear stress tensor\\
-$e_f$         				&  $[L^2t^{-2}]$  		& Fluid Internal energy per unit mass\\   
+$e_f$         				&  $[L^2t^{-2}]$  		& Fluid Internal energy \DIFaddbegin \DIFadd{per unit mass}\DIFaddend \\   
 $T_f$           				&  $[T]$      				& Fluid Temperature\\
 $\upsilon_f$    			&  $[L^3/M]$  			& Fluid Specific volume $\frac{1}{\rho_f}$\\
 $\alpha_f$    		    		&  $[1/T]$  				& Thermal expansion\\
@@ -418,15 +433,15 @@ The mass balance equations for both fluid (e.g., water, air) and solid phases ar
    \frac{1}{V}\frac{D_sm_s}{Dt} = 0    
 \end {equation}
 %
-Solving the mass balance equation leads to:
-%
-%
-\begin{equation}
-  \frac{D_s n}{Dt} = \phi_s \nabla \cdot \pmb{U}_s  
-\end {equation}
-%
-%
-%_______________________________
+\DIFaddbegin \DIFadd{Solving the mass balance equation leads to:
+%DIF > 
+%DIF > 
+}\begin{equation}
+  \DIFadd{\frac{D_s n}{Dt} = \phi_s \nabla \cdot }\pmb{U}\DIFadd{_s  
+}\end {equation}
+%DIF > 
+%DIF > 
+\DIFaddend %_______________________________
 % momentum
 %_______________________________
 \underline{\hspace{5in}}\\
@@ -435,17 +450,17 @@ The momentum balance equation for the fluid phases (e.g., water, air) are:\\
 %
 %
 \begin{equation}
-     \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = - \phi_f \nabla p_f  +  \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +  \sum \pmb{f}_{d}
+     \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = - \phi_f \nabla p_f  +  \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d}
 \end {equation}
 %
 %
-The momentum balance equation for the solid phases are:\\
+The momentum balance equation for the solid \DIFdelbegin \DIFdel{phase is}\DIFdelend \DIFaddbegin \DIFadd{phases are}\DIFaddend :\\
 %
 %
 \begin{equation}
      \frac{1}{V}\frac{D_s(m_s \pmb{U}_s)}{Dt} = 
     \nabla \cdot (\pmb{\sigma}^\prime) - \phi_s \nabla p_f 
-    + \overline{\rho}_s \pmb{b} +  \sum \pmb{f}_{fric}    -  \sum \pmb{f}_{d}
+    + \overline{\rho}_s \pmb{b} +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{fric}    -  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d}
 \end {equation}
 %
 %
@@ -460,7 +475,7 @@ The internal energy balance equation for the fluid phases (e.g., water, air) are
 \begin{equation}
     \label{fluidenergy}
      \frac{1}{V} \left[ \frac{\partial (m_f e_f)}{\partial t} + \nabla \cdot  (m_f e_f \pmb{U}_f) \right]  = 
-    -\overline{\rho}_f p_f  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f +  \sum q_{sf}
+    -\overline{\rho}_f p_f  \frac{D_f\upsilon_f}{Dt} + \pmb{\tau}_f : \nabla \pmb{U}_f + \nabla \cdot \pmb{q}_f +  \DIFaddbegin \DIFadd{\sum }\DIFaddend q_{sf}
 \end {equation}
 %
 %
@@ -469,32 +484,33 @@ The internal energy balance equation for the solid phase is:
 %
 \begin{equation}
     \label{solidenergy}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \pmb{\sigma}^\prime:\nabla \pmb{U}_s + \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+     \DIFdelbegin \DIFdel{\frac{1}{V}\frac{D_s(m_s e_s)}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{m_s}{V}  c_v \frac{D_s( T_s)}{Dt} }\DIFaddend = \pmb{\sigma}^\prime: \DIFdelbegin \DIFdel{\nabla }%DIFDELCMD < \pmb{U}%%%
+\DIFdel{_s }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_s( \pmb{\epsilon}_s^p)}{Dt} }\DIFaddend + \nabla \cdot \pmb{q}_s -  \DIFaddbegin \DIFadd{\sum }\DIFaddend q_{sf} 
 \end {equation}
 %
 %
-\underline{\hspace{5in}}\\
+\DIFaddbegin \DIFadd{where $c_v$ is the specific heat at constant volume of the solid materials.
+}\DIFaddend \underline{\hspace{5in}}\\
 Closing the systems of equations, the following additional models are needed: \\
 (1) A constitutive equation to describe the stress - strain behaviour of solid phase (computing effective stress $\pmb{\sigma}^\prime$). \\
 (2) Optional turbulent model to compute the viscous shear stress $\pmb{\tau}_f$.\\
-(3) Frictional forces $\pmb{f}_{fric}$ for the contact for soil-structure interaction between solid/porous materials with the friction coefficient $\mu_{fric}$. \\
-(4) Exchange momentum models (computing drag force $\pmb{f}_{d}$) for interaction between materials. \\
-(5) Energy exchange models (computing temerature exhange term $q_{sf}$) for interaction between materials. \\
-(6) An equation of state to establish relations between thermodynamics variables of each fluid materials $[P_{f}, \overline{\rho}_f, \upsilon_f, T_f, e_f]$. \\
-Four thermodynamic relations for the equation of states are:
+(3) Frictional \DIFdelbegin \DIFdel{force }\DIFdelend \DIFaddbegin \DIFadd{forces }\DIFaddend $\pmb{f}_{fric}$ for the contact \DIFdelbegin \DIFdel{between }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend soil-structure interaction \DIFaddbegin \DIFadd{between solid/porous materials }\DIFaddend with the friction coefficient $\mu_{fric}$. \\
+(4) Exchange momentum \DIFdelbegin \DIFdel{model }\DIFdelend \DIFaddbegin \DIFadd{models }\DIFaddend (computing drag force $\pmb{f}_{d}$) \DIFaddbegin \DIFadd{for interaction between materials}\DIFaddend . \\
+(5) Energy exchange \DIFdelbegin \DIFdel{model }\DIFdelend \DIFaddbegin \DIFadd{models }\DIFaddend (computing temerature exhange term $q_{sf}$) \DIFaddbegin \DIFadd{for interaction between materials}\DIFaddend . \\
+(6) An equation of state to establish relations between thermodynamics variables of each fluid materials \DIFdelbegin \DIFdel{$[P_{eq}, \overline{\rho}_f, \upsilon_f, T_f, e_f]$}\DIFdelend \DIFaddbegin \DIFadd{$[P_{f}, \overline{\rho}_f, \upsilon_f, T_f, e_f]$}\DIFaddend . \\
+\DIFdelbegin \DIFdel{Here, $P_{eq}$ is "equilibrium" pressure which is defined as pressure enables mass of fluid material to fills in an entire pore volume with no ongoing compression or expansion with given true density $\rho_f$ and temperature $T_f$.  }\DIFdelend Four thermodynamic relations for the equation of states are:
 %
 %
 \begin{equation}
 \begin{gathered}
   e_f =  e_f (T_f, \upsilon_f)\\
- P_f =  P_f(T_f, \upsilon_f)\\
+ \DIFdelbegin \DIFdel{\upsilon}\DIFdelend \DIFaddbegin \DIFadd{P}\DIFaddend _f =  \DIFdelbegin \DIFdel{\upsilon}\DIFdelend \DIFaddbegin \DIFadd{P}\DIFaddend _f(T_f, \DIFdelbegin \DIFdel{P_{eq}}\DIFdelend \DIFaddbegin \DIFadd{\upsilon_f}\DIFaddend )\\
   \phi_f = \upsilon_f \overline{\rho}_f\\
   0 = n - \sum_{f=1}^{N_f} \upsilon_f \overline{\rho}_f\\
 \end {gathered}
 \end {equation}
 %
 %
-%_______________________________
 \subsubsection{Constitutive soil model}
 As a result of the explicit MPM formulation, we can derive the constitutive law in the updated Lagrangian framework of "small strain - large deformation". Therefore, the rotation of the particles (representative element volume) is manipulated by rotating the Cauchy stress tensor. First, the deformation gradient is decomposed into the polar rotation tensor $\pmb{R}_s^{n+1}$ and sketch tensor $\pmb{V}_s^{n+1}$ as
 %
@@ -586,18 +602,17 @@ The contact determines whether the soil is sliding or sticking to the structure 
 \textrm{    if    }   \pmb{f}_{fric} <   \pmb{f}_{stick}   \textrm{    sliding occurs    }  
 \end {gathered}
 \end {equation}
-\DIFaddbegin \DIFadd{Sliding between solid materials also generates dissipation and the work rate generated from the sliding can be calculated as:
+\DIFaddbegin \DIFadd{Frictional sliding between solid materials also generates dissipation and the work rate generated from the sliding can be calculated as:
 %DIF > 
 }\begin{equation}
    \DIFadd{\Delta W_{friction} = }\pmb{f}\DIFadd{_{fric} d
-}
-\end {equation}
+}\end {equation}
 %DIF > 
 %DIF > 
 \DIFadd{where d is the sliding distance which can computed based on the sliding velocity between two materials. 
 }\DIFaddend %_______________________________
 \subsubsection{Momentum and Energy exchange model}
-Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. In all simulations, we assume $H_{sf}=1$.  Then the energy exchange can be written as:
+Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant for the sake of simplicity. \DIFdelbegin \DIFdel{In all simulations, we assume $H_{sf}=100$.  }\DIFdelend Then the energy exchange can be written as:
 %
 %
 \begin{equation}
@@ -605,15 +620,15 @@ Currently, the energy exchange coefficient $H_{sf}$ is assumed to be constant fo
 \end {equation}
 %
 %
-On the other hand, the drag force can be calculated as:
-%
-%
-\begin{equation}
-    f_{d} = K (\pmb{U}_s - \pmb{U}_f)  
-\end {equation}
-%
-%
-For the momentum exchange between fluid flows and porous media, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid vicosity $\mu_f$, and is propotional to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ \cite{Drag}. The drag force is given by: \\
+\DIFaddbegin \DIFadd{On the other hand, the drag force can be calculated as:
+%DIF > 
+%DIF > 
+}\begin{equation}
+    \DIFadd{f_{d} = K (}\pmb{U}\DIFadd{_s - }\pmb{U}\DIFadd{_f)  
+}\end {equation}
+%DIF > 
+%DIF > 
+\DIFaddend For the momentum exchange \DIFaddbegin \DIFadd{between fluid flows and porous media}\DIFaddend , we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid vicosity $\mu_f$, and is propotional to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ \cite{Drag}. The drag force is given by: \\
 %
 %
 \begin{equation}
@@ -687,10 +702,12 @@ where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous 
 %
 Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient depending on the different type of interactions (see Figure \ref{fig:K}) as for example: \\
 \begin{enumerate}
-\item The drag force is set to zero in soil-structure interactions, and instead the frictional force is computed.
-\item As a result of fluid-structure interaction, the momentum exchange coefficient should be extremely high when the solid material points are considered to be zero-porosity/zero-permeability.
-\item In the case of soil-fluid interaction, the drag force is calculated using the equation (\ref{fd}). Considering that air has a much lower viscosity than water, its drag force is much lower than the drag force of water in a pore.
-\item A momentum exchange coefficient of 1E5 is applied between multiphase flows. This value is far higher than reality \cite{Stewart1974}, but it is necessary to have enough numerical stability to conduct simulations in the numerical example.
+\item \DIFdelbegin \DIFdel{For soil-structure interaction, the }\DIFdelend \DIFaddbegin \DIFadd{The }\DIFaddend drag force is set to \DIFdelbegin \DIFdel{be zero and }\DIFdelend \DIFaddbegin \DIFadd{zero in soil-structure interactions, and instead }\DIFaddend the frictional force is computed\DIFdelbegin \DIFdel{instead}\DIFdelend .
+\item \DIFdelbegin \DIFdel{For }\DIFdelend \DIFaddbegin \DIFadd{As a result of }\DIFaddend fluid-structure interaction, the momentum exchange coefficient \DIFdelbegin \DIFdel{is set to }\DIFdelend \DIFaddbegin \DIFadd{should }\DIFaddend be extremely high \DIFdelbegin \DIFdel{which consider }\DIFdelend \DIFaddbegin \DIFadd{when }\DIFaddend the solid material points \DIFdelbegin \DIFdel{being the '}\DIFdelend \DIFaddbegin \DIFadd{are considered to be }\DIFaddend zero-porosity\DIFdelbegin \DIFdel{'}\DIFdelend /\DIFdelbegin \DIFdel{'zero permeability' materials}\DIFdelend \DIFaddbegin \DIFadd{zero-permeability}\DIFaddend .
+\item \DIFdelbegin \DIFdel{For }\DIFdelend \DIFaddbegin \DIFadd{In the case of }\DIFaddend soil-fluid interaction, the drag force is \DIFdelbegin \DIFdel{computed based on }\DIFdelend \DIFaddbegin \DIFadd{calculated using }\DIFaddend the equation (\ref{fd}). \DIFdelbegin \DIFdel{Since air has much lower vicosity }\DIFdelend \DIFaddbegin \DIFadd{Considering that air has a much lower viscosity }\DIFaddend than water, \DIFdelbegin \DIFdel{the drag force of air }\DIFdelend \DIFaddbegin \DIFadd{its drag force }\DIFaddend is much lower than the drag force of water in \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{a }\DIFaddend pore.
+\item \DIFdelbegin \DIFdel{For between multiphase flows, the }\DIFdelend \DIFaddbegin \DIFadd{A }\DIFaddend momentum exchange coefficient \DIFdelbegin \DIFdel{is set to be }\DIFdelend \DIFaddbegin \DIFadd{of }\DIFaddend 1E5 \DIFdelbegin \DIFdel{. That value is sufficient to increase the numerical stability for the }\DIFdelend \DIFaddbegin \DIFadd{is applied between multiphase flows. This value is far higher than reality \mbox{%DIFAUXCMD
+\cite{Stewart1974}}\hskip0pt%DIFAUXCMD
+, but it is necessary to have enough numerical stability to conduct }\DIFaddend simulations in the numerical example.
 \end {enumerate}
 Similar approach applied for the ernergy exchange term leading to:
 %
@@ -829,7 +846,7 @@ Then we need to find $P_{eq}$ which allows each fluid materials obey their equat
 %
 %
 \begin{equation}
-    0 = n - \sum_{f=1}^{N_f} \upsilon_f \overline{\rho}_f\\
+    0 = n - \sum_{f=1}^{N_f} \upsilon_f \overline{\rho}\DIFaddbegin \DIFadd{_f}\DIFaddend \\
 \label{n}
 \end {equation}
 %
@@ -985,8 +1002,11 @@ The nodal internal temperature rate is computed based on the heat conduction mod
 }\DIFaddend \end {equation}
 %
 %
-where \DIFdelbegin \DIFdel{$\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s$ }\DIFdelend \DIFaddbegin \DIFadd{$\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ }\DIFaddend is the mechanical work rate computed from the constitutive model with \DIFdelbegin \DIFdel{$\pmb{\epsilon}_s$ is the total strain}\DIFdelend \DIFaddbegin \DIFadd{$\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate compted from the contact law due to the sliding between solid materials}\DIFaddend . The nodal internal temperature is calculated by
-\begin{equation}
+where \DIFdelbegin \DIFdel{$\Delta W_{si}^n = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}^p_s$ }\DIFdelend \DIFaddbegin \DIFadd{$\Delta W_{si}^n = \pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} $ }\DIFaddend is the mechanical work rate computed from the constitutive model with \DIFdelbegin \DIFdel{$\pmb{\epsilon}^p_s$ }\DIFdelend \DIFaddbegin \DIFadd{$\pmb{\epsilon}_s^p$ }\DIFaddend is the plastic strain\DIFdelbegin \DIFdel{. The nodal internal temperature is calculated by
+}\DIFdelend \DIFaddbegin \DIFadd{, $ \Delta W_{fric,i}^n$ is the work rate compted from the contact law due to the frictional sliding between solid materials. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials.
+}
+
+\DIFaddend \begin{equation}
      T_{si}^L = T_{si}^n + dT_{si}^L
 \end {equation}
 %
@@ -1044,8 +1064,8 @@ For the solid phase, the Lagrangian value of the linear momentum and energy of s
 \end {equation}
 %
 \begin{equation}
- (me)_{sc}^{L-} =  \sum{S_{ci} m_{si}^n T_{si}^L}
-\end {equation}
+ (me)_{sc}^{L-} =  \sum{S_{ci} m_{si}^n T_{si}^L} \DIFaddbegin \DIFadd{c_v
+}\DIFaddend \end {equation}
 %
 %
 To consider the momentum exchange, the Lagrangian velocity is modified as
@@ -1068,7 +1088,7 @@ where the cell-centered intermediate velocity can be calculated by
 \end {equation}
 %
 %
-And the increment of the velocity can be computed by solving the linear equation with i,j = 1 : $N$ as:
+And the increment of the velocity \DIFaddbegin \DIFadd{$\pmb{U}_{fc}$, $\Delta \pmb{U}_{sc}$ }\DIFaddend can be computed by solving the linear equation with i,j = 1 : $N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -1240,7 +1260,7 @@ Then the boundary condition and contact forces are applied to the nodal velocity
 \subsection{\textsf{Update the particle variables}}
 %
 %
-The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ (velocity, position, velocity gradient, temperature, deformation gradient, volume) are updated here 
+The state variables of the solid phase \DIFdelbegin \DIFdel{$[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ }\DIFdelend \DIFaddbegin \DIFadd{$[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1},  \nabla T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ }\DIFaddend (velocity, position, velocity gradient, temperature, \DIFaddbegin \DIFadd{temperature gradient, }\DIFaddend deformation gradient, volume) are updated here 
 %
 %
 \begin{equation}
@@ -1264,7 +1284,12 @@ The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\
 %
 %
 \begin{equation}
-     \pmb{F}_{sp}^{n+1} = (\pmb{I} + \nabla \pmb{U}_{sp}^{n+1} \delt)\pmb{F}_{sp}^n
+     \DIFaddbegin \DIFadd{\nabla T_{sp}^{n+1} = \sum{\nabla S_{sp} T_{sp}^n \delt} 
+}\end {equation}
+%DIF > 
+%DIF > 
+\begin{equation}
+     \DIFaddend \pmb{F}_{sp}^{n+1} = (\pmb{I} + \nabla \pmb{U}_{sp}^{n+1} \delt)\pmb{F}_{sp}^n
 \end {equation}
 %
 %
@@ -1283,7 +1308,9 @@ Finally, the effective stress $(\pmb{\sigma}^\prime)^{n+1}$ is updated from the 
 %
 %_______________________________
 \section{\textsf{Numerical examples}}
-All input files and the analytical calculations in this section are provided in the Github repository for the reproduction of the numerical results.\\
+All input files and the analytical calculations in this section are provided in the Github repository \DIFdelbegin \footnote{\DIFdel{https://github.com/QuocAnh90/Uintah NTNU}} %DIFAUXCMD
+\addtocounter{footnote}{-1}%DIFAUXCMD
+\DIFdelend for the reproduction of the numerical results.\\
 %_______________________________
 \subsection{\textsf{Fluid Flow through isothermal porous media}}
 %
@@ -1426,7 +1453,7 @@ The numerical example is validated by Rzadkiewicz et al.'s experiment on submari
 \caption{Numerical parameters for the underwater submarine debris}
 \label{table2}
 \end {table}
-In the numerical model, the material properties are selected based on the experiment by Rzadkiewicz et al \cite{Rzadkiewicz}. Sand has a saturated density of 1985 $kg/m^3$ and yield stress of 200 Pa. Young's modulus has little effect on debris flow run-out because of the extreme large deformation of the debris. Therefore, we select 50 MPa Young's modulus with 0.25 Poisson's ratio. The rigid bed is much stiffer with bulk modulus and shear modulus of $117E^7$ Pa and $43.8E^7$ Pa. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45E^{-3}$  mPa s and 1  mPa s respectively. The numerical parameters used in this example are presented in Table \ref{table2}.   \\
+In the numerical model, the material properties are selected based on the experiment by Rzadkiewicz et al \cite{Rzadkiewicz}. Sand has a saturated density of 1985 \DIFdelbegin \DIFdel{kg/m3 }\DIFdelend \DIFaddbegin \DIFadd{$kg/m^3$ }\DIFaddend and yield stress of 200 Pa. Young's modulus has little effect on debris flow run-out because of the extreme large deformation of the debris. Therefore, we select 50 MPa Young's modulus with 0.25 Poisson's ratio. The rigid bed is much stiffer with bulk modulus and shear modulus of $117E^7$ Pa and $43.8E^7$ Pa. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45E^{-3}$  mPa s and 1  mPa s respectively. The numerical parameters used in this example are presented in Table \ref{table2}.   \\
 On all boundary faces, the Dirichlet boundary condition is imposed for velocity (u = 0 m/s) and temperature (T = 5 Celcius degrees), while the Neuman boundary condition is imposed at the top boundary for pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). For the background mesh, there are 700 x 400 = 280.000 cells. In each cell of the debris flow and rigid bed, there are 2 x 2 material points. \\
 %
 %
@@ -1532,7 +1559,7 @@ The solid plane is modeled as a rigid body acted as a shaking table. The contact
 %
 We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water ressure in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be charaterized as the progressive failure mechanism. Here are some numerical observation:\\
 \begin{enumerate}
-\item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 4 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3m towards the slide direction.
+\item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 4 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3m towards the slide \DIFdelbegin \DIFdel{direaction}\DIFdelend \DIFaddbegin \DIFadd{direction}\DIFaddend .
 %
 \begin{figure}[H]
 \center
@@ -1607,7 +1634,7 @@ Solving the solid mass balance equation (\ref{massbalance}) with the definition 
 %
 %
 \begin{equation}
-   \frac{D_sm_s}{Dt} = \frac{D_s(\phi_s \rho_s V)}{Dt} = \rho_s V \frac{D_s \phi_s}{Dt} + \phi_s V \frac{D_s \rho_s}{Dt} + \phi_s \rho_s  \frac{D_s V}{Dt} = 0  
+   \frac{D_sm_s}{Dt} = \DIFdelbegin \DIFdel{\frac{D_s((1-n) \rho_s V)}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_s(\phi_s \rho_s V)}{Dt} }\DIFaddend = \rho_s V \DIFdelbegin \DIFdel{\frac{D_s(1-n)}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_s \phi_s}{Dt} }\DIFaddend + \DIFdelbegin \DIFdel{(1-n) }\DIFdelend \DIFaddbegin \DIFadd{\phi_s }\DIFaddend V \frac{D_s \rho_s}{Dt} + \DIFdelbegin \DIFdel{(1-n) }\DIFdelend \DIFaddbegin \DIFadd{\phi_s }\DIFaddend \rho_s  \frac{D_s V}{Dt} = 0  
 \end {equation}
 %
 %
@@ -1615,7 +1642,7 @@ The soil grains are assumed to be incompressible, therefore, term 2 in the right
 %
 %
 \begin{equation}
-  V \frac{D_s \phi_s}{Dt} + \phi_s \frac{D_s V}{Dt} = 0  
+  V \DIFdelbegin \DIFdel{\frac{D_s(1-n)}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_s \phi_s}{Dt} }\DIFaddend + \DIFdelbegin \DIFdel{(1-n) }\DIFdelend \DIFaddbegin \DIFadd{\phi_s }\DIFaddend \frac{D_s V}{Dt} = 0  
 \end {equation}
 %
 %
@@ -1624,11 +1651,25 @@ Dividing all terms with $V$ with the equation \DIFdelbegin \DIFdel{(\ref{fluidvo
 %
 \begin{equation}
   \frac{D_s n}{Dt} = \frac{\partial n}{\partial t} + \pmb{U}_s \cdot \nabla n = 
-  \phi_s \nabla \cdot \pmb{U}_s  
-\end {equation}
+  \DIFdelbegin \DIFdel{(1-n) \nabla \cdot }%DIFDELCMD < \pmb{U}%%%
+\DIFdel{_s }%DIFDELCMD < \end {%%%
+\DIFdel{equation}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+\DIFdel{Finally, we get:
+%DIF < 
+%DIF < 
+}%DIFDELCMD < \begin{equation}
+%DIFDELCMD < \label{p1}
+%DIFDELCMD < %%%
+\DIFdel{\frac{\partial n}{\partial t} = (1-n) }\DIFdelend \DIFaddbegin \DIFadd{\phi_s }\DIFaddend \nabla \cdot \pmb{U}_s  
+\DIFdelbegin \DIFdel{- }%DIFDELCMD < \pmb{U}%%%
+\DIFdel{_s \cdot \nabla n
+}\DIFdelend \end {equation}
 %
 %
-\subsection{\textsf{Momentum conservation}}
+\DIFdelend \subsection{\textsf{Momentum conservation}}
 \label{Momentum}
 %
 %
@@ -1637,7 +1678,7 @@ The linear momentum balance equation for the fluid phases based on mixture theor
 %
 \begin{equation}
     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} = 
-    \nabla \cdot (-\phi_f p_f\pmb{I}) + \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +  \sum \pmb{f}_{d} + \pmb{f}_b
+    \nabla \cdot (-\phi_f p_f\pmb{I}) + \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d} + \pmb{f}_b
 \end {equation}
 %
 %
@@ -1654,7 +1695,7 @@ As a result, the linear momentum balance equation for the fluid phases becomes:
 %
 \begin{equation}
     \label{fluidmom}
-     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} =  \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = -\phi_f \nabla p_f + \nabla \cdot \pmb{\tau}_f +  \overline{\rho}_f \pmb{b} +  \sum  \pmb{f}_{d}
+     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} =  \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = -\phi_f \nabla p_f + \nabla \cdot \pmb{\tau}_f +  \overline{\rho}_f \pmb{b} +  \DIFaddbegin \DIFadd{\sum  }\DIFaddend \pmb{f}_{d}
 \end {equation}
 %
 %
@@ -1677,18 +1718,18 @@ Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with e
     \label{solidmom}
      \frac{1}{V}\frac{D_s(m_s \pmb{U}_s)}{Dt} = 
     \nabla \cdot (\pmb{\sigma}^\prime) - \phi_s \nabla p_f 
-    + \overline{\rho}_s \pmb{b}   -  \sum \pmb{f}_{d} +  \sum \pmb{f}_{fric}
+    + \overline{\rho}_s \pmb{b}   -  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d} +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{fric}
 \end {equation}
 %
 %
-Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure interaces.
+Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law \DIFdelbegin \DIFdel{in the soil-structure interace}\DIFdelend \DIFaddbegin \DIFadd{between the soil/structure interaces}\DIFaddend .
 \subsection{\textsf{Energy conservation}}
 We adopt the general form of the total energy balance equation for the porous media from \cite{Hassanizadeh}, the total energy balance equations for the fluid phases are:
 %
 %
 \begin{equation}
 \label{e1}
-     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} = \nabla \cdot (-np_f\pmb{I}) \cdot \pmb{U}_f + \nabla \cdot \pmb{q}_f + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f +  \sum \pmb{f}_{d} \cdot \pmb{U}_f +  \sum q_{sf}
+     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} = \nabla \cdot (-np_f\pmb{I}) \cdot \pmb{U}_f + \nabla \cdot \pmb{q}_f + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d} \cdot \pmb{U}_f +  \DIFaddbegin \DIFadd{\sum }\DIFaddend q_{sf}
 \end {equation}
 %
 %
@@ -1706,34 +1747,51 @@ Combining equations (\ref{fluidmom}), (\ref{e1}), (\ref{e2}), we obtain the fina
 %
 \begin{equation}
      \frac{1}{V}\frac{D_f(m_f e_f)}{Dt} = \frac{1}{V} \left[ \frac{\partial (m_f e_f)}{\partial t} + \nabla \cdot  (m_f e_f \pmb{U}_f) \right] 
-   = \overline{\rho}_f p_f  \frac{D_f\upsilon_f}{Dt} + \nabla \cdot \pmb{q}_f +  \sum q_{sf}
+   \DIFdelbegin \DIFdel{-}\DIFdelend \DIFaddbegin \DIFadd{= }\DIFaddend \overline{\rho}_f p_f  \frac{D_f\upsilon_f}{Dt} + \nabla \cdot \pmb{q}_f +  \DIFaddbegin \DIFadd{\sum }\DIFaddend q_{sf}
 \end {equation}
 %
 %
-On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we begin with the total energy balance equation for the mixture based on \cite{Hassanizadeh} as:\\
+On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we \DIFdelbegin \DIFdel{begin with the }\DIFdelend \DIFaddbegin \DIFadd{introduce the rate of the internal energy  for the thermoelastic materials as a function of elastic strain tensor $\pmb{\epsilon}_s^e$ and temperature $T_s$:
+%DIF > 
+%DIF > 
+}\begin{equation}
+   \DIFadd{\frac{m_s}{V} \frac{D_s( e_s)}{Dt} = }\pmb{\sigma}\DIFadd{^\prime :\frac{D_s( \pmb{\epsilon}_s^e)}{Dt} + \frac{D_s( e_s)}{D_s (T_s)} \frac{D_s( T_s)}{Dt} = }\pmb{\sigma}\DIFadd{^\prime :\frac{D_s( \pmb{\epsilon}_s^e)}{Dt} + c_v \frac{D_s( T_s)}{Dt}
+}\label{internalEnergy}
+\end {equation}
+%DIF > 
+%DIF > 
+\DIFadd{$c_v$ is the specific heat at the constant volume of the solid materials. The }\DIFaddend total energy balance equation for the mixture based on \cite{Hassanizadeh} \DIFaddbegin \DIFadd{can be written }\DIFaddend as:\\
 %
 %
 \begin{equation}
 \label{e3}
 \begin{gathered}
-     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} + \frac{1}{V}\frac{D_s(m_s (e_s+0.5\pmb{U}_s^2))}{Dt} = \nabla \cdot (-\phi_f p_f\pmb{I}) \cdot \pmb{U}_f \\
-     + \nabla \cdot (\pmb{\sigma}^\prime-\phi_s p_f\pmb{I}) \cdot \pmb{U}_s + (-\phi_f p_f\pmb{I}) : \nabla \pmb{U}_f + (\pmb{\sigma}^\prime-\phi_s p_f\pmb{I}) : \nabla \pmb{U}_s \\
+     \frac{1}{V}\frac{D_f(m_f (e_f+0.5\pmb{U}_f^2))}{Dt} + \frac{1}{V}\frac{D_s(m_s (e_s+0.5\pmb{U}_s^2))}{Dt} = \nabla \cdot (\DIFdelbegin \DIFdel{-np_f }\DIFdelend \DIFaddbegin \DIFadd{-\phi_f p_f}\DIFaddend \pmb{I}) \cdot \pmb{U}_f \\
+     + \nabla \cdot (\pmb{\sigma}^\prime-\DIFdelbegin \DIFdel{(1-n)}\DIFdelend \DIFaddbegin \DIFadd{\phi_s }\DIFaddend p_f\pmb{I}) \cdot \pmb{U}_s + (\DIFdelbegin \DIFdel{-np_f }\DIFdelend \DIFaddbegin \DIFadd{-\phi_f p_f}\DIFaddend \pmb{I}) : \nabla \pmb{U}_f + \DIFdelbegin \DIFdel{(}\DIFdelend \pmb{\sigma}^\prime \DIFdelbegin \DIFdel{-(1-n)p_f}%DIFDELCMD < \pmb{I}%%%
+\DIFdel{) }\DIFdelend : \nabla \pmb{U}_s \\
      + (\overline{\rho}_f \pmb{b}) \cdot \pmb{U}_f + (\overline{\rho}_s \pmb{b}) \cdot \pmb{U}_s
-     + \nabla \cdot \pmb{q}_f + \nabla \cdot \pmb{q}_s +  \sum \pmb{f}_{d} \cdot (\pmb{U}_f - \pmb{U}_s)  
+     + \nabla \cdot \pmb{q}_f + \nabla \cdot \pmb{q}_s +  \DIFaddbegin \DIFadd{\sum }\DIFaddend \pmb{f}_{d} \cdot (\pmb{U}_f - \pmb{U}_s)  
 \end {gathered}
 \end {equation}
 %
 %
-Subtracting equation (\ref{e3}) to equations (\ref{e1}) and (\ref{solidmom}), we obtained the internal energy balance equation for solid phase as:
+Subtracting equation (\ref{e3})\DIFaddbegin \DIFadd{, (\ref{internalEnergy}) }\DIFaddend to equations (\ref{e1}) and (\ref{solidmom}), we obtained the internal energy balance equation for solid phase as:
 %
 %
 \begin{equation}
-     \frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = \Delta W_{s} +  \DIFaddbegin \DIFadd{\Delta W_{friction} + }\DIFaddend \nabla \cdot \pmb{q}_s -  \sum q_{sf} 
+      \DIFdelbegin \DIFdel{\frac{1}{V}\frac{D_s(m_s e_s)}{Dt} = }\DIFdelend \pmb{\sigma}^\prime :\DIFdelbegin \DIFdel{\nabla }%DIFDELCMD < \pmb{U}%%%
+\DIFdel{_s
+    }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_s( \pmb{\epsilon}_s^e)}{Dt}  }\DIFaddend + \DIFaddbegin \DIFadd{\frac{m_s}{V} c_v \frac{D_s( T_s)}{Dt} = \Delta W_{s} +  \Delta W_{friction} + }\DIFaddend \nabla \cdot \pmb{q}_s -  \DIFaddbegin \DIFadd{\sum }\DIFaddend q_{sf} 
 \end {equation}
 %
 %
-On the right hand side, the terms include the \DIFdelbegin \DIFdel{rate of the mechanical work $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s$ }\DIFdelend \DIFaddbegin \DIFadd{mechanical work rate $\Delta W_{s} = \pmb{\sigma}^\prime : \Delta \pmb{\epsilon}_s^p$ }\DIFaddend computed from the constitutive model with \DIFdelbegin \DIFdel{$\pmb{\epsilon}_s$ is the total strain}\DIFdelend \DIFaddbegin \DIFadd{$\pmb{\epsilon}_s^p$ is the plastic strain, the work rate from relative sliding between solid materials  $\Delta W_{friction}$}\DIFaddend , thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials
-%
+On the right hand side, the terms include the \DIFdelbegin \DIFdel{mechanical work }\DIFdelend \DIFaddbegin \DIFadd{work rate from frictional sliding between solid materials  $\Delta W_{friction}$}\DIFaddend , thermal transport and energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials\DIFaddbegin \DIFadd{, the mechanical work rate $\Delta W_{s} = \pmb{\sigma}^\prime :\frac{D_s( \pmb{\epsilon}_s)}{Dt}  = \pmb{\sigma}^\prime : (\frac{D_s( \pmb{\epsilon}_s^e)}{Dt}  + \frac{D_s( \pmb{\epsilon}_s^p)}{Dt}) $ computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain tensor, . By subtracting the term $\pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^e)}{Dt}$, we get the final form of the energy balance equation as:
+%DIF > 
+%DIF > 
+}\begin{equation}
+      \DIFadd{\frac{m_s}{V} c_v \frac{D_s( T_s)}{Dt} = }\pmb{\sigma}\DIFadd{^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} +  \Delta W_{friction} + \nabla \cdot }\pmb{q}\DIFadd{_s -  \sum q_{sf} 
+}\end {equation}
+\DIFaddend %
 %
 \subsection{\textsf{Advanced Fluid Pressure}}
 The discretization of the pressure equation begins with the Lagrangian face-centered velocity and the equation for the pressure
