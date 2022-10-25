@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 41;
+    d_NBASICINPUTS = 43;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -362,8 +362,11 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
 
     cm_ps->appendElement("Intial_Stress", UI[38]);
 
-    cm_ps->appendElement("Use_pressure_dependence", UI[39]);
+    cm_ps->appendElement("Usetransition1", UI[39]);
     cm_ps->appendElement("m", UI[40]);
+
+    cm_ps->appendElement("Usetransition1", UI[41]);
+    cm_ps->appendElement("A_rate", UI[42]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -950,6 +953,9 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
     ps->getWithDefault("Use_pressure_dependence", UI[39], 0.0);
     ps->getWithDefault("m", UI[40], 0.0);
+
+    ps->getWithDefault("Usetransition1", UI[41], 0.0);
+    ps->getWithDefault("A_rate", UI[42], 0.0);
 }
 
 void
@@ -1005,6 +1011,9 @@ MohrCoulomb::initializeLocalMPMLabels()
 
     ISVNames.push_back("Use_pressure_dependence");
     ISVNames.push_back("m");
+
+    ISVNames.push_back("Usetransition1");
+    ISVNames.push_back("A_rate");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1145,6 +1154,19 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         }
         else {
             c = St * a1 * pow(W, -b1);
+        }
+    }
+
+    double Usetransition1 = UI[41];
+    double A_rate = UI[42];
+
+    if (Usetransition1 > 0)
+    {
+        if (shear_strain_rate_nonlocal > strain_ref) {
+            c = St * a1 * A_rate * (1 + ( 1 / A_rate - 1) * pow(shear_strain_rate_nonlocal / strain_ref, beta_rate));
+        }
+        else {
+            c = St * a1;
         }
     }
 
