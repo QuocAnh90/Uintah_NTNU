@@ -1062,6 +1062,9 @@
     <beta_rate         spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <strain_ref        spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
+	  <Usetransition1     spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <A_rate                spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  
     <Usemodul  		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<m_modul  		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	<nuy      		   spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
