@@ -4083,8 +4083,8 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
 
       // critical density and volume
       double rho_0 = mpm_matl->getInitialDensity();
-      double rho_critical_lowerbound = 0.9 * rho_0;
-      double rho_critical_upperbound = 1.1 * rho_0;
+      double rho_critical_lowerbound = 0.5 * rho_0;
+      double rho_critical_upperbound = 1.5 * rho_0;
 
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
