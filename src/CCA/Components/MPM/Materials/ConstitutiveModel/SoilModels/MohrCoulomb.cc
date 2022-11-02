@@ -534,7 +534,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         // Create array for the particle position
         ParticleSubset* pset = old_dw->getParticleSubset(dwi, patch);
         constParticleVariable<Matrix3> deformationGradient, pstress;
-        ParticleVariable<Matrix3> pstress_new;
+        ParticleVariable<Matrix3> pstress_new, pStressVizual;
         constParticleVariable<Matrix3> deformationGradient_new, velGrad;
         constParticleVariable<double> pmass, pvolume, ptemperature;
         constParticleVariable<double> pvolume_new;
@@ -562,6 +562,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         ParticleVariable<double> pdTdt, p_q;
 
         new_dw->allocateAndPut(pstress_new, lb->pStressLabel_preReloc, pset);
+        new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel, pset);
         new_dw->allocateAndPut(pdTdt, lb->pdTdtLabel, pset);
         new_dw->allocateAndPut(p_q, lb->p_qLabel_preReloc, pset);
         new_dw->get(deformationGradient_new,
@@ -612,6 +613,8 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             // unrotated tensorSig=R^T*pstress*R
             Matrix3 tensorSig = (tensorR.Transpose()) * (pstress[idx] * tensorR);
 
+            Matrix3 tensorSigFilter = pStressVizual[idx];
+
             // Load into 1-D array for the fortran code
             double sigarg[6];
             sigarg[0] = tensorSig(0, 0);
@@ -620,6 +623,15 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             sigarg[3] = tensorSig(0, 1);
             sigarg[4] = tensorSig(1, 2);
             sigarg[5] = tensorSig(2, 0);
+
+            // Load into 1-D array for the fortran code
+            double sigargFilter[6];
+            sigargFilter[0] = tensorSigFilter(0, 0);
+            sigargFilter[1] = tensorSigFilter(1, 1);
+            sigargFilter[2] = tensorSigFilter(2, 2);
+            sigargFilter[3] = tensorSigFilter(0, 1);
+            sigargFilter[4] = tensorSigFilter(1, 2);
+            sigargFilter[5] = tensorSigFilter(2, 0);
 
             // UNROTATE D: S=R^T*D*R
             D = (tensorR.Transpose()) * (D * tensorR);
@@ -713,7 +725,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             svarg[32] = volumetric_strain;
 
             // Calling the external model here
-            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal);
+            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, sigargFilter);
 
             // Unload ISVs from 1D array into ISVs_new
             for (int i = 0; i < d_NINSV; i++) {
@@ -1026,7 +1038,7 @@ MohrCoulomb::initializeLocalMPMLabels()
 //CODE ADDED BY WTS FOR SHENGMOHRCOULOMB BELOW
 void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double UI[], double stress[], double D[],
-    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal)
+    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double stressFilter[])
 
 
     /*
