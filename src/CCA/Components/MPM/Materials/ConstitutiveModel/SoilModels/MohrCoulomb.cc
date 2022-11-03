@@ -533,8 +533,8 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         int dwi = matl->getDWIndex();
         // Create array for the particle position
         ParticleSubset* pset = old_dw->getParticleSubset(dwi, patch);
-        constParticleVariable<Matrix3> deformationGradient, pstress;
-        ParticleVariable<Matrix3> pstress_new, pStressVizual;
+        constParticleVariable<Matrix3> deformationGradient, pstress, pStressVizual;
+        ParticleVariable<Matrix3> pStressVizual;
         constParticleVariable<Matrix3> deformationGradient_new, velGrad;
         constParticleVariable<double> pmass, pvolume, ptemperature;
         constParticleVariable<double> pvolume_new;
@@ -546,6 +546,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
         old_dw->get(px, lb->pXLabel, pset);
         old_dw->get(pstress, lb->pStressLabel, pset);
+        new_dw->get(pStressVizual, lb->pStressVizualLabel, pset);
         old_dw->get(pmass, lb->pMassLabel, pset);
         old_dw->get(pvolume, lb->pVolumeLabel, pset);
         old_dw->get(pvelocity, lb->pVelocityLabel, pset);
@@ -562,7 +563,6 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         ParticleVariable<double> pdTdt, p_q;
 
         new_dw->allocateAndPut(pstress_new, lb->pStressLabel_preReloc, pset);
-        new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel, pset);
         new_dw->allocateAndPut(pdTdt, lb->pdTdtLabel, pset);
         new_dw->allocateAndPut(p_q, lb->p_qLabel_preReloc, pset);
         new_dw->get(deformationGradient_new,
