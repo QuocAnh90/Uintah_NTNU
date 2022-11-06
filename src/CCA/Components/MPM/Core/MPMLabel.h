@@ -239,6 +239,7 @@ namespace Uintah {
       const VarLabel* pPorePressureFilterLabel;
 
       const VarLabel* pStressVizualLabel;
+      const VarLabel* pStressVizualLabel_preReloc;
       const VarLabel* pStressRateLabel;
       const VarLabel* pStressRateLabel_preReloc;
       const VarLabel* gFluidMassBarLabel;

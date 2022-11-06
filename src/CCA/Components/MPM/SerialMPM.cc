@@ -1335,7 +1335,7 @@ void SerialMPM::scheduleInterpolateToParticlesAndUpdate(SchedulerP& sched,
   t->computes(lb->pTempPreviousLabel_preReloc); // for thermal stress
   t->computes(lb->pMassLabel_preReloc);
   t->computes(lb->pSizeLabel_preReloc);
-  t->computes(lb->pStressVizualLabel);
+  t->computes(lb->pStressVizualLabel_preReloc);
 
   if(flags->d_doScalarDiffusion) {
     t->requires(Task::OldDW, lb->diffusion->pConcentration,     gnone     );
@@ -3666,7 +3666,7 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       new_dw->get(gTemperatureRate,lb->gTemperatureRateLabel,dwi,patch,gac,NGP);
       new_dw->get(frictionTempRate,lb->frictionalWorkLabel,  dwi,patch,gac,NGP);
       new_dw->get(gStress,         lb->gStressVizualLabel, dwi, patch, gac, NGP);
-      new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel, pset);
+      new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel_preReloc, pset);
 
       if(flags->d_with_ice){
         new_dw->get(dTdt,          lb->dTdt_NCLabel,         dwi,patch,gac,NGP);

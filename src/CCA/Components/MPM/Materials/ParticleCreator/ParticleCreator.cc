@@ -1168,6 +1168,9 @@ void ParticleCreator::registerPermanentParticleState(MPMMaterial* matl)
   particle_state.push_back(d_lb->pStressLabel);
   particle_state_preReloc.push_back(d_lb->pStressLabel_preReloc);
 
+  particle_state.push_back(d_lb->pStressVizualLabel);
+  particle_state_preReloc.push_back(d_lb->pStressLabel_preReloc);
+
   particle_state.push_back(d_lb->pLocalizedMPMLabel);
   particle_state_preReloc.push_back(d_lb->pLocalizedMPMLabel_preReloc);
 

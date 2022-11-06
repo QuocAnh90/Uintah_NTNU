@@ -211,6 +211,8 @@ MPMLabel::MPMLabel()
   pStressVizualLabel = VarLabel::create("p.stressVizual",
       ParticleVariable<Matrix3>::getTypeDescription());
 
+  pStressVizualLabel_preReloc = VarLabel::create("p.stressVizual+",
+      ParticleVariable<Matrix3>::getTypeDescription());
 
   pVolumeLabel_preReloc = VarLabel::create( "p.volume+",
                         ParticleVariable<double>::getTypeDescription());
@@ -575,6 +577,7 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(pStressLabel);
   VarLabel::destroy(pStressLabel_preReloc);
   VarLabel::destroy(pStressVizualLabel);
+  VarLabel::destroy(pStressVizualLabel_preReloc);
   VarLabel::destroy(pVolumeLabel);
   VarLabel::destroy(pVolumeLabel_preReloc);
   VarLabel::destroy(pMassLabel);

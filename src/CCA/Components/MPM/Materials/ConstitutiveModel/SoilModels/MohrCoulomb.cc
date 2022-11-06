@@ -534,7 +534,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         // Create array for the particle position
         ParticleSubset* pset = old_dw->getParticleSubset(dwi, patch);
         constParticleVariable<Matrix3> deformationGradient, pstress, pStressVizual;
-        ParticleVariable<Matrix3> pStressVizual;
+        ParticleVariable<Matrix3> pstress_new;
         constParticleVariable<Matrix3> deformationGradient_new, velGrad;
         constParticleVariable<double> pmass, pvolume, ptemperature;
         constParticleVariable<double> pvolume_new;
