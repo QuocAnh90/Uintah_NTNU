@@ -546,7 +546,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
         old_dw->get(px, lb->pXLabel, pset);
         old_dw->get(pstress, lb->pStressLabel, pset);
-        new_dw->get(pStressVizual, lb->pStressVizualLabel, pset);
+        new_dw->get(pStressVizual, lb->pStressVizualLabel_preReloc, pset);
         old_dw->get(pmass, lb->pMassLabel, pset);
         old_dw->get(pvolume, lb->pVolumeLabel, pset);
         old_dw->get(pvelocity, lb->pVelocityLabel, pset);

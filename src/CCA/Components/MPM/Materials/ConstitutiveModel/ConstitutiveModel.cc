@@ -92,11 +92,12 @@ ConstitutiveModel::initSharedDataForExplicit(const Patch* patch,
   ParticleSubset* pset = new_dw->getParticleSubset(matl->getDWIndex(), patch);
 
   ParticleVariable<double>  pdTdt;
-  ParticleVariable<Matrix3> pDefGrad, pStress;
+  ParticleVariable<Matrix3> pDefGrad, pStress, pStressFilter;
 
   new_dw->allocateAndPut(pdTdt,       lb->pdTdtLabel,               pset);
   new_dw->allocateAndPut(pDefGrad,    lb->pDeformationMeasureLabel, pset);
   new_dw->allocateAndPut(pStress,     lb->pStressLabel,             pset);
+  new_dw->allocateAndPut(pStressFilter, lb->pStressVizualLabel, pset);
 
   // To fix : For a material that is initially stressed we need to
   // modify the stress tensors to comply with the initial stress state
@@ -106,6 +107,7 @@ ConstitutiveModel::initSharedDataForExplicit(const Patch* patch,
     pdTdt[idx] = 0.0;
     pDefGrad[idx] = I;
     pStress[idx] = zero;
+    pStressFilter[idx] = zero;
   }
 }
 
