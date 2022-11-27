@@ -106,7 +106,8 @@ namespace ExchangeModels{
                           std::vector<constCCVariable<double> >& sp_vol_CC,
                           std::vector< constSFC>               & vel_FC,
                           std::vector< SFC >                   & sp_vol_FC,
-                          std::vector< SFC >                   & vel_FCME);
+                          std::vector< SFC >                   & vel_FCME,
+                          double time);
 
     void addExch_Vel_Temp_CC_1matl(const ProcessorGroup * pg,
                                    const PatchSubset    * patches,
@@ -136,7 +137,8 @@ namespace ExchangeModels{
         std::vector<constCCVariable<double> >& vol_frac_CC,
         FastMatrix& difvelnorm,
         FastMatrix& K,
-        std::string model);
+        std::string model,
+        double time);
 
     template<class constSFC, class SFC>
     void Reynolds_model_FC(IntVector c,
@@ -145,7 +147,8 @@ namespace ExchangeModels{
         std::vector<constCCVariable<double> >& vol_frac_CC,
         std::vector< constSFC>& vel_FC,
         FastMatrix& K,
-        std::string model);
+        std::string model,
+        double time);
 
   };
 }

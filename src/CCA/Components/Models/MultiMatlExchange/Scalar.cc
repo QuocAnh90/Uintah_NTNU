@@ -179,7 +179,8 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
                                   std::vector<constCCVariable<double> >& sp_vol_CC,
                                   std::vector< constSFC>               & vel_FC,
                                   std::vector< SFC >                   & sp_vol_FC,
-                                  std::vector< SFC >                   & vel_FCME)
+                                  std::vector< SFC >                   & vel_FCME,
+                                  double time)
 {
   //__________________________________
   //          Single Material
@@ -235,7 +236,7 @@ void ScalarExch::vel_FC_exchange( CellIterator    iter,
       else if (model == "Reynolds" || model == "Carman-Kozeny") {
 
           Reynolds_model_FC <constSFC, SFC >
-              (c, adj, numMatls, vol_frac_CC, vel_FC, K, model);
+              (c, adj, numMatls, vol_frac_CC, vel_FC, K, model, time);
       }
 
       for(int m = 0; m < numMatls; m++)  {
@@ -351,6 +352,12 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     Ghost::GhostType  gaf_Y = Ghost::AroundFacesY;
     Ghost::GhostType  gaf_Z = Ghost::AroundFacesZ;
 
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, Ilb->simulationTimeLabel);
+    double time = simTimeVar;
+
+
     for(int m = 0; m < d_numMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
       int indx = matl->getDWIndex();
@@ -393,19 +400,19 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
                     (XFC_iterator,
                     adj_offset[0],  d_numMatls,    K,
                     delT,           vol_frac_CC, sp_vol_CC,
-                    uvel_FC,        sp_vol_XFC,  uvel_FCME);
+                    uvel_FC,        sp_vol_XFC,  uvel_FCME, time);
 
     vel_FC_exchange<constSFCYVariable<double>, SFCYVariable<double> >
                     (YFC_iterator,
                     adj_offset[1],  d_numMatls,    K,
                     delT,           vol_frac_CC, sp_vol_CC,
-                    vvel_FC,        sp_vol_YFC,  vvel_FCME);
+                    vvel_FC,        sp_vol_YFC,  vvel_FCME, time);
 
     vel_FC_exchange<constSFCZVariable<double>, SFCZVariable<double> >
                     (ZFC_iterator,
                     adj_offset[2],  d_numMatls,    K,
                     delT,           vol_frac_CC, sp_vol_CC,
-                    wvel_FC,        sp_vol_ZFC,  wvel_FCME);
+                    wvel_FC,        sp_vol_ZFC,  wvel_FCME, time);
 
     //________________________________
     //  Boundary Conditons
@@ -580,6 +587,12 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
 
     d_exchCoeff->getConstantExchangeCoeff( K, H);
 
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, Ilb->simulationTimeLabel);
+    double time = simTimeVar;
+
+
     for (int m = 0; m < numALLMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
       ICEMaterial* ice_matl = dynamic_cast<ICEMaterial*>(matl);
@@ -643,7 +656,7 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
               }
           }
 
-          Reynolds_model_CC(c, numALLMatls, vol_frac_CC, difvelnorm, K, model);
+          Reynolds_model_CC(c, numALLMatls, vol_frac_CC, difvelnorm, K, model, time);
       }
 
       //---------- M O M E N T U M   E X C H A N G E
@@ -1196,7 +1209,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
     std::vector<constCCVariable<double> >& vol_frac_CC,
     std::vector< constSFC>& vel_FC,
     FastMatrix& K,
-    std::string model) {
+    std::string model,
+    double time) {
 
     double Porosity_FC[MAX_MATLS];
     double vol_frac_FC[MAX_MATLS];
@@ -1217,6 +1231,9 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
         double d_grain1 = 0;
         double d_grain2 = 0;
 
+        double d_TimeForConsolidation1 = 0;
+        double d_TimeForConsolidation2 = 0;
+
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
             ICE_density1 = ice_matl1->getInitialDensity();
@@ -1225,7 +1242,10 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
         if (mpm_matl1) {
             vol_frac_FC[m] = 0.5 * (vol_frac_CC[m][adj] + vol_frac_CC[m][c]);
             Porosity_FC[m] = 1 - vol_frac_FC[m];
-            d_grain1 = mpm_matl1->getGrainSize();
+            //d_grain1 = mpm_matl1->getGrainSize();
+            d_TimeForConsolidation1 = mpm_matl1->getTimeForConsolidation();
+            if (time < d_TimeForConsolidation1) { d_grain1 = 0.1; }
+            else { d_grain1 = mpm_matl1->getGrainSize(); }
         }
 
         for (int n = 0; n < numMatls; n++) {
@@ -1246,6 +1266,7 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                 vol_frac_FC[n] = 0.5 * (vol_frac_CC[n][adj] + vol_frac_CC[n][c]);
                 Porosity_FC[n] = 1 - vol_frac_FC[n];
                 d_grain2 = mpm_matl2->getGrainSize();
+                d_TimeForConsolidation2 = mpm_matl2->getTimeForConsolidation();
             }
 
             if (ice_matl1) {
@@ -1408,7 +1429,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
     std::vector<constCCVariable<double> >& vol_frac_CC,
     FastMatrix& difvelnorm,
     FastMatrix& K,
-    std::string model) {
+    std::string model,
+    double time) {
 
     double K_safe = 1e15;
 
@@ -1427,6 +1449,9 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
         double d_grain1 = 0;
         double d_grain2 = 0;
 
+        double d_TimeForConsolidation1 = 0;
+        double d_TimeForConsolidation2 = 0;
+
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
             ICE_density1 = ice_matl1->getInitialDensity();
@@ -1435,7 +1460,11 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
         double Porosity1 = 0;
         if (mpm_matl1) {
             Porosity1 = (1 - vol_frac_CC[m][c]);
-            d_grain1 = mpm_matl1->getGrainSize();
+            //d_grain1 = mpm_matl1->getGrainSize();
+            d_TimeForConsolidation1 = mpm_matl1->getTimeForConsolidation();
+
+            if (time < d_TimeForConsolidation1) { d_grain1 = 0.1; }
+            else { d_grain1 = mpm_matl1->getGrainSize(); }
         }
 
         for (int n = 0; n < numALLMatls; n++) {
@@ -1454,8 +1483,11 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
 
             double Porosity2 = 0;
             if (mpm_matl2) {
-                Porosity2 = (1 - vol_frac_CC[n][c]);
-                d_grain2 = mpm_matl2->getGrainSize();
+                Porosity2 = (1 - vol_frac_CC[n][c]);           
+                //d_grain2 = mpm_matl2->getGrainSize();
+                d_TimeForConsolidation2 = mpm_matl2->getTimeForConsolidation();
+                if (time < d_TimeForConsolidation2) { d_grain2 = 0.1; }
+                else { d_grain2 = mpm_matl2->getGrainSize(); }
             }
 
             if (ice_matl1) {
