@@ -145,6 +145,8 @@ void ScalarExch::sched_AddExch_VelFC( SchedulerP            & sched,
     pNewDW  = Task::ParentNewDW;
   }
 
+  t->requires(Task::OldDW, Ilb->simulationTimeLabel);
+
   // All matls
   t->requires( pNewDW,      Ilb->sp_vol_CCLabel,  gac,   1);
   t->requires( pNewDW,      Ilb->vol_frac_CCLabel,gac,   1);
@@ -323,6 +325,11 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     delt_vartype delT;
     pOldDW->get(delT, Ilb->delTLabel, level);
 
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    pOldDW->get(simTimeVar, Ilb->simulationTimeLabel);
+    double time = simTimeVar;
+
     std::vector< constCCVariable<double> >   sp_vol_CC(d_numMatls);
     std::vector< constCCVariable<double> >   vol_frac_CC(d_numMatls);
     std::vector< constSFCXVariable<double> > uvel_FC(d_numMatls);
@@ -351,12 +358,6 @@ void ScalarExch::addExch_VelFC( const ProcessorGroup * pg,
     Ghost::GhostType  gaf_X = Ghost::AroundFacesX;
     Ghost::GhostType  gaf_Y = Ghost::AroundFacesY;
     Ghost::GhostType  gaf_Z = Ghost::AroundFacesZ;
-
-    // Get the current simulation time
-    simTime_vartype simTimeVar;
-    old_dw->get(simTimeVar, Ilb->simulationTimeLabel);
-    double time = simTimeVar;
-
 
     for(int m = 0; m < d_numMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
@@ -463,6 +464,7 @@ void ScalarExch::sched_AddExch_Vel_Temp_CC( SchedulerP           & sched,
 
   t->requires(Task::OldDW, Ilb->timeStepLabel);
   t->requires(Task::OldDW, Ilb->delTLabel,getLevel(patches));
+  t->requires(Task::OldDW, Ilb->simulationTimeLabel);
 
   if(d_exchCoeff->convective() && mpm_matls ){
     t->requires( Task::NewDW, d_isSurfaceCellLabel, d_zero_matl, gac, 1 );
@@ -546,7 +548,11 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
 
     delt_vartype delT;
     old_dw->get(delT, Ilb->delTLabel, level);
-    //Vector zero(0.,0.,0.);
+
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, Ilb->simulationTimeLabel);
+    double time = simTimeVar;
 
     // Create arrays for the grid data
     std::vector<CCVariable<double> > cv(numALLMatls);
@@ -586,12 +592,6 @@ void ScalarExch::addExch_Vel_Temp_CC( const ProcessorGroup * pg,
     a.zero();
 
     d_exchCoeff->getConstantExchangeCoeff( K, H);
-
-    // Get the current simulation time
-    simTime_vartype simTimeVar;
-    old_dw->get(simTimeVar, Ilb->simulationTimeLabel);
-    double time = simTimeVar;
-
 
     for (int m = 0; m < numALLMatls; m++) {
       Material* matl = d_matlManager->getMaterial( m );
