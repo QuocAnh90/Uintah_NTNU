@@ -1265,8 +1265,10 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
             if (mpm_matl2) {
                 vol_frac_FC[n] = 0.5 * (vol_frac_CC[n][adj] + vol_frac_CC[n][c]);
                 Porosity_FC[n] = 1 - vol_frac_FC[n];
-                d_grain2 = mpm_matl2->getGrainSize();
+                //d_grain2 = mpm_matl2->getGrainSize();
                 d_TimeForConsolidation2 = mpm_matl2->getTimeForConsolidation();
+                if (time < d_TimeForConsolidation2) { d_grain2 = 0.1; }
+                else { d_grain2 = mpm_matl2->getGrainSize(); }
             }
 
             if (ice_matl1) {
