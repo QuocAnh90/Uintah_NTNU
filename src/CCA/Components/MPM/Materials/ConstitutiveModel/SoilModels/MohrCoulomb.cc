@@ -655,6 +655,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             }
 
             // Artifitical initial stress by gravity
+            /*
             if (UI[38] > 0) {
                 if (time < UI[38]) {
                     svarg[2] = 50000;
@@ -667,6 +668,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
                     svarg[33] = UI[33];
                 }
             }
+            */
 
             // Shear strain and shear strain rate
             double shear_strain_local = 0;
@@ -725,7 +727,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             svarg[32] = volumetric_strain;
 
             // Calling the external model here
-            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, sigargFilter);
+            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, sigargFilter, time);
 
             // Unload ISVs from 1D array into ISVs_new
             for (int i = 0; i < d_NINSV; i++) {
@@ -1038,7 +1040,7 @@ MohrCoulomb::initializeLocalMPMLabels()
 //CODE ADDED BY WTS FOR SHENGMOHRCOULOMB BELOW
 void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double UI[], double stress[], double D[],
-    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double stressFilter[])
+    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double stressFilter[], double time)
 
 
     /*
@@ -1208,22 +1210,27 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     }
 
     double mu = 0;
-    if (Use_friction > 0)
-    {
-        if (shear_strain_nonlocal < strain1) {
-            mu = tan(Phi_P * 3.1415 / 180);
-        }
-        if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+    double ConsolidationTime = UI[38];
+
+    // We do not want to apply softening during Consolidation time
+    if (time > ConsolidationTime) {
+        if (Use_friction > 0)
         {
-            mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+            if (shear_strain_nonlocal < strain1) {
+                mu = tan(Phi_P * 3.1415 / 180);
+            }
+            if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+            {
+                mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+            }
+            else if (shear_strain_nonlocal > strain2)
+            {
+                mu = tan(Phi_CS * 3.1415 / 180);
+            }
+            Phi = atan(mu) * 180 / 3.1415;
+            double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180) * sin(Phi_CS * 3.1415 / 180));
+            Psi = sinh(sinPSi) * 180 / 3.1415;
         }
-        else if (shear_strain_nonlocal > strain2)
-        {
-            mu = tan(Phi_CS * 3.1415 / 180);
-        }
-        Phi = atan(mu) * 180 / 3.1415;
-        double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180)*sin(Phi_CS * 3.1415 / 180));
-        Psi = sinh(sinPSi) * 180 / 3.1415;
     }
 
     svarg[0] = G;
