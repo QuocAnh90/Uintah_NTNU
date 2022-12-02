@@ -14,3 +14,5 @@ Publication
 5. Q. A. Tran, A. Rogstad, G. Grimstad, S. Nordal, G. H. Alene. Preliminary study of 3D large deformation modeling of the Gjerdrum 2020 sensitive clay landslide.  Proceedings in the 8th Canadian Conference on Geotechnique and Natural Hazards 12-15 June 2022, Quebec, Canada.
 
 6. Q. A. Tran. Coupled CFD-MPM for soil-water-structure interaction. The 3rd International Conference on Natural Hazards & Infrastructure  5-7July 2022, Athens, Greece.
+
+7. Q. A. Tran, G. Grimstad, S. A. G. Amiri. MPMICE: A hybrid MPM-CFD model for simulating coupled problems in porous media. Application to earthquake-induced submarine landslides. arXiv preprint arXiv:2211.12761
