@@ -1201,19 +1201,25 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         K = E / 3 / (1 - 2 * nuy);
     }
 
-    if (Use_softening > 0)
-    {
-        if (shear_strain_nonlocal > c / G)
-        {
-            c = c * (1.0 / St + (1.0 - 1.0 / St) * pow(2.71, (-3.0 * shear_strain_nonlocal / strain_95)));
-        }
-    }
-
     double mu = 0;
     double ConsolidationTime = UI[38];
 
     // We do not want to apply softening during Consolidation time
+    if (time < ConsolidationTime) {
+        // high cohesion to initialize stress
+        c = 100000;
+    }
+
     if (time > ConsolidationTime) {
+
+        if (Use_softening > 0)
+        {
+            if (shear_strain_nonlocal > c / G)
+            {
+                c = c * (1.0 / St + (1.0 - 1.0 / St) * pow(2.71, (-3.0 * shear_strain_nonlocal / strain_95)));
+            }
+        }
+
         if (Use_friction > 0)
         {
             if (shear_strain_nonlocal < strain1) {
