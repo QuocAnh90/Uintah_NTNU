@@ -1212,14 +1212,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
 
     if (time > ConsolidationTime) {
 
-        if (Use_softening > 0)
-        {
-            if (shear_strain_nonlocal > c / G)
-            {
-                c = c * (1.0 / St + (1.0 - 1.0 / St) * pow(2.71, (-3.0 * shear_strain_nonlocal / strain_95)));
-            }
-        }
-
         if (Use_friction > 0)
         {
             if (shear_strain_nonlocal < strain1) {
@@ -1239,7 +1231,15 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
             double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180) * sin(Phi_CS * 3.1415 / 180));
             Psi = sinh(sinPSi) * 180 / 3.1415;
 
-            c = 0; // Reset cohesion = 0
+            c = svarg[2]; // Reset cohesion to input 
+        }
+
+        if (Use_softening > 0)
+        {
+            if (shear_strain_nonlocal > c / G)
+            {
+                c = c * (1.0 / St + (1.0 - 1.0 / St) * pow(2.71, (-3.0 * shear_strain_nonlocal / strain_95)));
+            }
         }
     }
 
