@@ -159,6 +159,7 @@ WARNING
    // For MPMICE2
    double getGrainSize() const;
    double getTimeForConsolidation() const;
+   double getDGrainForConsolidation() const;
 
    // For MPMICE
    double getGamma() const;
@@ -213,6 +214,7 @@ WARNING
    // Parameters related to MPMICE2
    double d_grain;
    double d_TimeForConsolidation;
+   double d_DGrainForConsolidation;
 
    // for autocycleflux boundary condtions
    bool d_do_conc_reduction;

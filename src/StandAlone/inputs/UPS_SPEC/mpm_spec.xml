@@ -176,6 +176,7 @@
 		  <initial_pore_pressure spec="OPTIONAL DOUBLE"/>
 		  <grain_size spec="OPTIONAL DOUBLE 'positive'"/>
 		  <TimeForConsolidation spec="OPTIONAL DOUBLE 'positive'"/>
+		  <DGrainForConsolidation spec="OPTIONAL DOUBLE 'positive'"/>
 		  
         <include href="constitutive_models.xml" />
         <!--__________________________________-->

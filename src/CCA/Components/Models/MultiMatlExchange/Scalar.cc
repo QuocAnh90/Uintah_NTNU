@@ -1233,6 +1233,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
 
         double d_TimeForConsolidation1 = 0;
         double d_TimeForConsolidation2 = 0;
+        double grain_consolidation1 = 0.1;
+        double grain_consolidation2 = 0.1;
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
@@ -1244,7 +1246,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
             Porosity_FC[m] = 1 - vol_frac_FC[m];
             //d_grain1 = mpm_matl1->getGrainSize();
             d_TimeForConsolidation1 = mpm_matl1->getTimeForConsolidation();
-            if (time < d_TimeForConsolidation1) { d_grain1 = 0.1; }
+            grain_consolidation1 = mpm_matl1->getDGrainForConsolidation();
+            if (time < d_TimeForConsolidation1) { d_grain1 = grain_consolidation1; }
             else { d_grain1 = mpm_matl1->getGrainSize(); }
         }
 
@@ -1267,7 +1270,8 @@ void ScalarExch::Reynolds_model_FC(IntVector c,
                 Porosity_FC[n] = 1 - vol_frac_FC[n];
                 //d_grain2 = mpm_matl2->getGrainSize();
                 d_TimeForConsolidation2 = mpm_matl2->getTimeForConsolidation();
-                if (time < d_TimeForConsolidation2) { d_grain2 = 0.1; }
+                grain_consolidation2 = mpm_matl2->getDGrainForConsolidation();
+                if (time < d_TimeForConsolidation2) { d_grain2 = grain_consolidation2; }
                 else { d_grain2 = mpm_matl2->getGrainSize(); }
             }
 
@@ -1453,6 +1457,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
 
         double d_TimeForConsolidation1 = 0;
         double d_TimeForConsolidation2 = 0;
+        double grain_consolidation1 = 0.1;
+        double grain_consolidation2 = 0.1;
 
         if (ice_matl1) {
             visc1 = ice_matl1->getViscosity();
@@ -1464,8 +1470,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
             Porosity1 = (1 - vol_frac_CC[m][c]);
             //d_grain1 = mpm_matl1->getGrainSize();
             d_TimeForConsolidation1 = mpm_matl1->getTimeForConsolidation();
-
-            if (time < d_TimeForConsolidation1) { d_grain1 = 0.1; }
+            grain_consolidation1 = mpm_matl1->getDGrainForConsolidation();
+            if (time < d_TimeForConsolidation1) { d_grain1 = grain_consolidation1; }
             else { d_grain1 = mpm_matl1->getGrainSize(); }
         }
 
@@ -1488,7 +1494,8 @@ void ScalarExch::Reynolds_model_CC(IntVector c,
                 Porosity2 = (1 - vol_frac_CC[n][c]);           
                 //d_grain2 = mpm_matl2->getGrainSize();
                 d_TimeForConsolidation2 = mpm_matl2->getTimeForConsolidation();
-                if (time < d_TimeForConsolidation2) { d_grain2 = 0.1; }
+                grain_consolidation2 = mpm_matl2->getDGrainForConsolidation();
+                if (time < d_TimeForConsolidation2) { d_grain2 = grain_consolidation2; }
                 else { d_grain2 = mpm_matl2->getGrainSize(); }
             }
 

@@ -131,6 +131,7 @@ MPMMaterial::standardInitialization(ProblemSpecP& ps,
   if (flags->d_UseMPMICE2) {
       ps->get("grain_size", d_grain);
       ps->get("TimeForConsolidation", d_TimeForConsolidation);
+      ps->get("DGrainForConsolidation", d_DGrainForConsolidation);
   }
 
   // For MPM hydro-mechanical coupling
@@ -275,6 +276,7 @@ ProblemSpecP MPMMaterial::outputProblemSpec(ProblemSpecP& ps)
   // Also use for Reynolds momentum exchange model
   mpm_ps->appendElement("grain_size", d_grain);
   mpm_ps->appendElement("TimeForConsolidation", d_TimeForConsolidation);
+  mpm_ps->appendElement("DGrainForConsolidation", d_DGrainForConsolidation);
 
   // For MPM hydro-mechanical coupling
       // Rigid material does not require porosity and permeability
@@ -322,6 +324,7 @@ MPMMaterial::copyWithoutGeom(ProblemSpecP& ps,const MPMMaterial* mat,
   if (flags->d_UseMPMICE2) {
   d_grain = mat->d_grain;
   d_TimeForConsolidation = mat->d_TimeForConsolidation;
+  d_DGrainForConsolidation = mat->d_DGrainForConsolidation;
   }
 
 
@@ -462,6 +465,11 @@ double MPMMaterial::getPermeability() const
 double MPMMaterial::getGrainSize() const
 {
     return d_grain;
+}
+
+double MPMMaterial::getDGrainForConsolidation() const
+{
+    return d_DGrainForConsolidation;
 }
 
 double MPMMaterial::getTimeForConsolidation() const
