@@ -3831,7 +3831,7 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           // Prevent the seismic plate moving!
           if (mpm_matl->getSeismicPlate()) {
               pxnew[idx] = px[idx];
-              //pvelnew[idx] = (0.0, 0.0, 0.0);
+              pvelnew[idx] = (0.0, 0.0, 0.0);  // aplly velocity but reset to 0 at the end of the time step to avoid instability
           }
 
           if (flags->d_doScalarDiffusion) {
