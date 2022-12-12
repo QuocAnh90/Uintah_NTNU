@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 43;
+    d_NBASICINPUTS = 46;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -367,6 +367,10 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
 
     cm_ps->appendElement("Usetransition1", UI[41]);
     cm_ps->appendElement("A_rate", UI[42]);
+
+    cm_ps->appendElement("Use_dilation", UI[43]);
+    cm_ps->appendElement("Psi_CS", UI[44]);
+    cm_ps->appendElement("Psi_P", UI[45]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -970,6 +974,10 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
 
     ps->getWithDefault("Usetransition1", UI[41], 0.0);
     ps->getWithDefault("A_rate", UI[42], 0.0);
+
+    ps->getWithDefault("Use_dilation", UI[43], 0.0);
+    ps->getWithDefault("Psi_CS", UI[44], 0.0);
+    ps->getWithDefault("Psi_P", UI[45], 0.0);
 }
 
 void
@@ -1028,6 +1036,10 @@ MohrCoulomb::initializeLocalMPMLabels()
 
     ISVNames.push_back("Usetransition1");
     ISVNames.push_back("A_rate");
+
+    ISVNames.push_back("Use_dilation");
+    ISVNames.push_back("Psi_CS");
+    ISVNames.push_back("Psi_P");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1108,13 +1120,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double Use_softening = UI[12];
     double St = UI[13];
     double strain_95 = UI[26];
-
-    double Use_friction = UI[33];
-    double strain1 = UI[34];
-    double strain2 = UI[35];
-    double Phi_CS = UI[36];
-    double Phi_P = UI[37];
-
     double Use_pressure_dependence = UI[39];
     double m = UI[40];
 
@@ -1212,6 +1217,12 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
 
     if (time > ConsolidationTime) {
 
+        double Use_friction = UI[33];
+        double strain1 = UI[34];
+        double strain2 = UI[35];
+        double Phi_CS = UI[36];
+        double Phi_P = UI[37];
+
         if (Use_friction > 0)
         {
             if (shear_strain_nonlocal < strain1) {
@@ -1230,7 +1241,26 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
             // Row dilatancy law
             double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180) * sin(Phi_CS * 3.1415 / 180));
             Psi = sinh(sinPSi) * 180 / 3.1415;
+            c = svarg[2]; // Reset cohesion to input 
+        }
 
+        double Use_dilation = UI[33];
+        double Psi_P = UI[36];
+        double Psi_CS = UI[37];
+
+        if (Use_dilation > 0)
+        {
+            if (shear_strain_nonlocal < strain1) {
+                Psi = Psi_P;
+            }
+            if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+            {
+                Psi = Psi_P - (shear_strain_nonlocal - strain1) * (Psi_P - Psi_CS) / (strain2 - strain1);
+            }
+            else if (shear_strain_nonlocal > strain2)
+            {
+                Psi = Psi_CS;
+            }
             c = svarg[2]; // Reset cohesion to input 
         }
 
