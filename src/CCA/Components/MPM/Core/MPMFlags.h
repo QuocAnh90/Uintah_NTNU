@@ -134,6 +134,7 @@ class Output;
     double      d_soliddampingCoeff;
     bool		d_PorePressureFilter;						 // Pore Water Pressure filter option
     bool		d_UseMPMICE2;						         // Turn on MPMICE2
+    std::string d_initial_Su_file;                         // File containing Su linear with depth
 
    //********** Start Reactive Flow Section *********************
     bool        d_doScalarDiffusion;

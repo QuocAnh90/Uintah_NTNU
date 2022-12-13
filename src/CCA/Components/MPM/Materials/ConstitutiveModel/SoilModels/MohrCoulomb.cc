@@ -391,6 +391,46 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
     std::vector<ParticleVariable<double> > ISVs(d_NINSV + 1);
 
     cout << "In initializeCMData" << endl;
+
+    double x_ref[10];
+    double y_ref[10];
+    double dSu[10];
+    double Su_ref[10];
+
+    // Right now every partile needs to read the file so Need to find the way to put this reading out of the loop
+    if (flag->d_initial_stress == "linearSu") {
+
+        //ps->get("Su_reference_line_file", flag->d_initial_Su_file);
+
+        if (flag->d_initial_Su_file != "") {
+            std::ifstream is(flag->d_initial_Su_file.c_str());
+
+            if (!is) {
+                throw ProblemSetupException("ERROR: opening Su_reference_line_file '" + flag->d_initial_Su_file + "'\nFailed to find profile file",
+                    __FILE__, __LINE__);
+            }
+            
+            double x_min = -999;
+            double y_min = -999;
+            int j = 0;
+            while (is && j<11) {
+                //double x_ref, y_ref, dSu, Su_ref;
+                double read1, read2, read3, read4;
+                is >> read1 >> read2 >> read3 >> read4;
+                x_ref[j] = read1; y_ref[j] = read2; dSu[j] = read3; Su_ref[j] = read4;
+                if (is) {
+                    if (x_ref[j] < x_min || y_ref[j] < y_min) {
+                        throw ProblemSetupException("ERROR: profile file is not monotomically increasing", __FILE__, __LINE__);
+                    }
+                }
+                x_min = x_ref[j] ;
+                y_min = y_ref[j];
+                j = j + 1;
+            }
+        }
+    }
+
+
     for (int i = 0; i < d_NINSV; i++) {
         new_dw->allocateAndPut(ISVs[i], ISVLabels[i], pset);
         ParticleSubset::iterator iter = pset->begin();
@@ -406,19 +446,14 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         for (; iter != pset->end(); iter++) {
             ISVs[i][*iter] = rinit[i];
 
-            // Linear cohesion with depth (this code is run in actuallyinitialize in SericalCC before constructor)
+            // Linear cohesion with depth (this code is run in actuallyinitialize in SericalCC before constructor)        
+            if (i == 2) { // If cohesion
 
-            if (flag->d_initial_stress == "Gjerdrum3D") {
-                if (i == 2) {
-
-                    ISVs[2][*iter] = pColor[*iter]*1000;
+                if (flag->d_initial_stress == "Gjerdrum3D") {
+                    ISVs[2][*iter] = pColor[*iter] * 1000;
                 }
-            }
 
-            
-            if (flag->d_initial_stress == "Gjerdrum2D") {
-                if (i == 2) {
-
+                if (flag->d_initial_stress == "Gjerdrum2D") {             
                     double x = px[*iter](0);
                     double y = px[*iter](1);
                     double y_ref1 = 0;
@@ -435,8 +470,22 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
                     if (y <= y_ref1) ISVs[2][*iter] = 68000 + 3000 * (y_ref1 - y);   
                 }
-            }
-            
+
+                if (flag->d_initial_stress == "linearSu") {
+                    double x = px[*iter](0);
+                    double y = px[*iter](1);
+                    double y_ref2 = 0;
+
+                    while (i<11) {
+                        if (x_ref[i] <= x < x_ref[i + 1]) {
+                            double A = (y_ref[i + 1] - y_ref[i]) / (x_ref[i + 1] - x_ref[i]);
+                            y_ref2 = A * (x - x_ref[i]) + y_ref[i];
+                            ISVs[2][*iter] = Su_ref[i] + dSu[i] * (y_ref2 - y);
+                            //cerr << "c " << ISVs[2][*iter] << endl;
+                        }
+                    }
+                }
+            }          
         }
     }
 

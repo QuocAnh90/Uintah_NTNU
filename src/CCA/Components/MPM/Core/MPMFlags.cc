@@ -229,8 +229,8 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("solid_damping_coef", d_soliddampingCoeff);
   mpm_flag_ps->get("water_damping_coef", d_waterdampingCoeff);
   mpm_flag_ps->get("PorePressureFilter", d_PorePressureFilter);
-
   mpm_flag_ps->get("Use_MPMICE2", d_UseMPMICE2);
+  mpm_flag_ps->require("Su_reference_line_file", d_initial_Su_file);
 
   if(d_artificial_viscosity && d_integrator_type == "implicit"){
     if (d_myworld->myRank() == 0){
@@ -467,8 +467,8 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("water_damping_coef", d_waterdampingCoeff);
   ps->appendElement("solid_damping_coef", d_soliddampingCoeff);
   ps->appendElement("PorePressureFilter", d_PorePressureFilter);
-
   ps->appendElement("Use_MPMICE2", d_UseMPMICE2);
+  ps->appendElement("Su_reference_line_file", d_initial_Su_file);
 
   if(d_prescribeDeformation){
     ps->appendElement("PrescribedDeformationFile",d_prescribedDeformationFile);

@@ -5,7 +5,7 @@
     <MPM                                  spec="OPTIONAL NO_DATA" >
       <artificial_damping_coeff           spec="OPTIONAL DOUBLE 'positive'"/>
       <artificial_viscosity               spec="OPTIONAL BOOLEAN" />
-		<initial_stress                   spec="OPTIONAL STRING 'Gjerdrum3D, Gjerdrum2D, Erik'" />
+	  <initial_stress                   spec="OPTIONAL STRING 'Gjerdrum3D, Gjerdrum2D, Erik, linearSu'" />
       <artificial_viscosity_heating       spec="OPTIONAL BOOLEAN" />
       <artificial_viscosity_coeff1        spec="OPTIONAL DOUBLE" />
       <artificial_viscosity_coeff2        spec="OPTIONAL DOUBLE" />
@@ -81,6 +81,7 @@
 		<solid_damping_coef spec="OPTIONAL DOUBLE" />
 		<PorePressureFilter spec="OPTIONAL BOOLEAN" />
 		<Use_MPMICE2 spec="OPTIONAL BOOLEAN" />
+		<Su_reference_line_file                spec="OPTIONAL STRING" />
 		
     </MPM>
     <PhysicalBC                   spec="OPTIONAL NO_DATA" >
