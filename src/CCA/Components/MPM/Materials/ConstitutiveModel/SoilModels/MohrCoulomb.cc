@@ -419,7 +419,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                 is >> read1 >> read2 >> read3 >> read4;
                 x_ref[j] = read1; y_ref[j] = read2; dSu[j] = read3; Su_ref[j] = read4;
                 if (is) {
-                    if (x_ref[j] < x_min || y_ref[j] < y_min) {
+                    if (x_ref[j] < x_min) {
                         throw ProblemSetupException("ERROR: profile file is not monotomically increasing", __FILE__, __LINE__);
                     }
                 }
@@ -476,16 +476,23 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                     double y = px[*iter](1);
                     double y_ref2 = 0;
 
-                    while (i<11) {
-                        if (x_ref[i] <= x < x_ref[i + 1]) {
-                            double A = (y_ref[i + 1] - y_ref[i]) / (x_ref[i + 1] - x_ref[i]);
-                            y_ref2 = A * (x - x_ref[i]) + y_ref[i];
-                            ISVs[2][*iter] = Su_ref[i] + dSu[i] * (y_ref2 - y);
-                            //cerr << "c " << ISVs[2][*iter] << endl;
+                    int j = 0;
+
+                    while (j<11) {
+                        if (x_ref[j] <= x && x < x_ref[j + 1]) {
+                            double A = (y_ref[j + 1] - y_ref[j]) / (x_ref[j + 1] - x_ref[j]);
+                            y_ref2 = A * (x - x_ref[j]) + y_ref[j];
+
+                            if (y >= y_ref2) { ISVs[2][*iter] = Su_ref[j]; }
+
+                            if (y < y_ref2) { ISVs[2][*iter] = Su_ref[j] + dSu[j] * (y_ref2 - y); }
+                            
+                            break;
                         }
+                        j = j + 1;
                     }
-                }
-            }          
+                } // End loop linearSu
+            } // End loop cohesion        
         }
     }
 
