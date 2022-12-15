@@ -123,8 +123,8 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_waterdampingCoeff = 0.0;
   d_soliddampingCoeff = 0.0;
   d_PorePressureFilter = false;
-
   d_UseMPMICE2 = false;
+  d_initial_Su_file = "";
 
   //******* Reactive Flow Component
   d_doScalarDiffusion   =  false;  // for diffusion component found  in ReactiveFlow
@@ -230,7 +230,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("water_damping_coef", d_waterdampingCoeff);
   mpm_flag_ps->get("PorePressureFilter", d_PorePressureFilter);
   mpm_flag_ps->get("Use_MPMICE2", d_UseMPMICE2);
-  mpm_flag_ps->require("Su_reference_line_file", d_initial_Su_file);
+  mpm_flag_ps->get("Su_reference_line_file", d_initial_Su_file);
 
   if(d_artificial_viscosity && d_integrator_type == "implicit"){
     if (d_myworld->myRank() == 0){
