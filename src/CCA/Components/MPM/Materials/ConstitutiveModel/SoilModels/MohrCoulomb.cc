@@ -1179,6 +1179,12 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double Use_pressure_dependence = UI[39];
     double m = UI[40];
 
+    double Use_friction = UI[33];
+    double strain1 = UI[34];
+    double strain2 = UI[35];
+    double Phi_CS = UI[36];
+    double Phi_P = UI[37];
+
     /*
     Flavour
     1- classic Mohr - Coulomb,
@@ -1273,12 +1279,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
 
     if (time > ConsolidationTime) {
 
-        double Use_friction = UI[33];
-        double strain1 = UI[34];
-        double strain2 = UI[35];
-        double Phi_CS = UI[36];
-        double Phi_P = UI[37];
-
         if (Use_friction > 0)
         {
             if (shear_strain_nonlocal < strain1) {
@@ -1301,8 +1301,8 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         }
 
         double Use_dilation = UI[33];
-        double Psi_P = UI[36];
-        double Psi_CS = UI[37];
+        double Psi_P = UI[45];
+        double Psi_CS = UI[44];
 
         if (Use_dilation > 0)
         {
