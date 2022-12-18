@@ -1282,18 +1282,21 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         if (Use_friction > 0)
         {
             if (shear_strain_nonlocal < strain1) {
-                mu = tan(Phi_P * 3.1415 / 180);
+                Phi = Phi_P;
             }
             if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
             {
-                mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+                // linear function for Phi
+                Phi = Phi_P - (shear_strain_nonlocal - strain1) * (Phi_P - Phi_CS) / (strain2 - strain1);
+                // linear function for tan(Phi)
+                //mu = tan(Phi_P * 3.1415 / 180) - (shear_strain_nonlocal - strain1) * (tan(Phi_P * 3.1415 / 180) - tan(Phi_CS * 3.1415 / 180)) / (strain2 - strain1);
+                //Phi = atan(mu) * 180 / 3.1415;
             }
             else if (shear_strain_nonlocal > strain2)
             {
-                mu = tan(Phi_CS * 3.1415 / 180);
+                Phi = Phi_CS;
             }
-            Phi = atan(mu) * 180 / 3.1415;
-
+            
             // Row dilatancy law
             double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180) * sin(Phi_CS * 3.1415 / 180));
             Psi = sinh(sinPSi) * 180 / 3.1415;
