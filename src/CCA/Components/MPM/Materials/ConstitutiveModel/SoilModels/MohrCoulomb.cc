@@ -752,12 +752,17 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             double tFE = UI[28];
             double tShear = UI[29];
 
-            strain11 += e11 * dt;
-            strain22 += e22 * dt;
-            strain33 += e33 * dt;
-            strain12 += e12 * dt;
-            strain23 += e23 * dt;
-            strain13 += e13 * dt;
+            double ConsolidationTime = UI[38];
+
+            // Only calculate strain after the consolidation time
+            if (time < ConsolidationTime) {
+                strain11 += e11 * dt;
+                strain22 += e22 * dt;
+                strain33 += e33 * dt;
+                strain12 += e12 * dt;
+                strain23 += e23 * dt;
+                strain13 += e13 * dt;
+            }
 
             volumetric_strain = (strain11 + strain22 + strain33) / 3;
             shear_strain_local = 1.0 / 2.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0 * (pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));
