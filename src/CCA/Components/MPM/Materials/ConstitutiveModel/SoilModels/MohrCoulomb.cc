@@ -755,7 +755,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             double ConsolidationTime = UI[38];
 
             // Only calculate strain after the consolidation time
-            if (time < ConsolidationTime) {
+            if (time > ConsolidationTime) {
                 strain11 += e11 * dt;
                 strain22 += e22 * dt;
                 strain33 += e33 * dt;
