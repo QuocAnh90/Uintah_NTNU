@@ -106,6 +106,7 @@ class Matrix3x3
 
         void polarRotationRMB(Matrix3x3 *R) const;
         void polarDecompositionRMB(Matrix3x3 *U, Matrix3x3 *R) const;
+        void singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Singma, Matrix3x3 *V) const;
         private:
                 double _values[9];
                 /* add your private declarations */
@@ -118,5 +119,8 @@ int SolveQuadratic(double *c, double *s);
 int SolveCubic  (       double c[4],
                                         double s[3]      
                                 );
+
+void makeUpperBidiag(Matrix3x3 B, Matrix3x3 *U, Matrix3x3 *V) ;
+
 
 #endif /* MATRIX3X3_H */ 

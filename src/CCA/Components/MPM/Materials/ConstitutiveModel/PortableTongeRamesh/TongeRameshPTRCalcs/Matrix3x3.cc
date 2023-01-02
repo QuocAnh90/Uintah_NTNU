@@ -599,3 +599,49 @@ void Matrix3x3::polarRotationRMB(Matrix3x3 *R) const
   // Load converged rotation into R;
   *R=A;
 }
+
+/*
+
+Implementation of the singular value decomposition of 3 x 3 matrices from
+
+Implicit-shifted Symmetric QR Singular Value Decomposition of 3z3 Matrices
+Theodore Gast, Chuyuan Fu, Chenfanfu Jiang and Joseph Teran
+
+*/
+
+void makeUpperBidiag(Matrix3x3 B, Matrix3x3 *U, Matrix3x3 *V) {
+    Matrix3x3 I;
+    I.identity();
+    *U = I; *V = I;
+
+    /**
+      Reduce H to of form
+                          x x x
+                          x x x
+                          0 x x
+    */
+
+
+}
+
+void Matrix3x3::singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Sigma, Matrix3x3 *V) const {
+    
+    // input
+  // -----
+  //    F: the 3x3 matrix to be decomposed into the form F=U Sigma V
+  //
+  // output
+  // -----
+  //    U and V: rotation tensor
+  //    Sigma: singular value tensor
+
+
+    Matrix3x3 F = *this;
+    Matrix3x3 I;
+    I.identity();
+
+    Matrix3x3 B = F;
+    *U = I; *V = I;
+
+    makeUpperBidiag(B, U, V);
+}
