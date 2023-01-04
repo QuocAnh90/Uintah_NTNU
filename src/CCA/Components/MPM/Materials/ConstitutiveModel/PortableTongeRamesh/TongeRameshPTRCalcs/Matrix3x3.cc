@@ -610,7 +610,7 @@ Theodore Gast, Chuyuan Fu, Chenfanfu Jiang and Joseph Teran
 
 */
 template <class T>
-void Matrix3x3::singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Sigma, Matrix3x3 *V) const {
+void inline Matrix3x3::singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Sigma, Matrix3x3 *V) const {
     
     // input
   // -----
@@ -629,46 +629,5 @@ void Matrix3x3::singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Sigma, Matri
     Matrix3x3 H = F;
     *U = I; *V = I;
 
-    /**
-        Reduce H to of form
-        x x +
-        0 x x
-        0 0 x
-        */
-    GivensRotation<T> r1(H._values[0], H._values[3], 0, 1);
-    /**
-        Reduce H to of form
-        x x 0
-        0 x x
-        0 + x
-        Can calculate r2 without multiplying by r1 since both entries are in first
-       two rows thus no need to divide by sqrt(a^2+b^2)
-        */
-    GivensRotation<T> r2(1, 2);
-    if (H._values[3] != 0)
-        r2.compute(H._values[0] * H._values[1] + H._values[3] * H._values[4],
-            H._values[0] * H._values[2] + H._values[3] * H._values[5]);
-    else
-        r2.compute(H._values[1], H._values[2]);
-
-    r1.rowRotation(H);
-
-    /* GivensRotation<T> r2(H._values[1], H._values[2], 1, 2); */
-    r2.columnRotation(H);
-    r2.columnRotation(V);
-
-    /**
-        Reduce H to of form
-        x x 0
-        0 x x
-        0 0 x
-        */
-    GivensRotation<T> r3(H._values[4], H._values[7], 1, 2);
-    r3.rowRotation(H);
-
-    // Save this till end for better cache coherency
-    // r1.rowRotation(u_transpose);
-    // r3.rowRotation(u_transpose);
-    r1.columnRotation(U);
-    r3.columnRotation(U);  
+    Uintah::makeUpperBidiag(H, U, V);
 }
