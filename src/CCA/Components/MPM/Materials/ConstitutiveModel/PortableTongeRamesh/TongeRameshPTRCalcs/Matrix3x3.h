@@ -47,6 +47,7 @@
 #include <cmath>                // sqrt
 //#include "Givens.h"
 
+
 class Matrix3x3
 {
         public:
@@ -108,14 +109,10 @@ class Matrix3x3
         void polarRotationRMB(Matrix3x3 *R) const;
         void polarDecompositionRMB(Matrix3x3 *U, Matrix3x3 *R) const;
 
-
-        template <class T> void singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Singma, Matrix3x3 *V) const;
-        
-
         private:
                 double _values[9];
                 /* add your private declarations */
-};
+}; // end class
 
 std::ostream& operator<<(std::ostream& out, const Matrix3x3 rhs);
 

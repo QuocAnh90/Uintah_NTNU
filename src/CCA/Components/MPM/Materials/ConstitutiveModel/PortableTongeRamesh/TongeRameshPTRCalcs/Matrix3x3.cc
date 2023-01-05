@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <sstream>                                      // std::cerr, std::cout, std::endl
 #include <iostream>
-#include "Givens.h"
+//#include "Givens.h"
 
 Matrix3x3::Matrix3x3()
 {
@@ -601,33 +601,17 @@ void Matrix3x3::polarRotationRMB(Matrix3x3 *R) const
   *R=A;
 }
 
-/*
+/**
+ Matrix3x3
 
-Implementation of the singular value decomposition of 3 x 3 matrices from
-
-Implicit-shifted Symmetric QR Singular Value Decomposition of 3z3 Matrices
-Theodore Gast, Chuyuan Fu, Chenfanfu Jiang and Joseph Teran
-
-*/
-template <class T>
-void inline Matrix3x3::singularValueDecomposition(Matrix3x3 *U, Matrix3x3 *Sigma, Matrix3x3 *V) const {
-    
-    // input
-  // -----
-  //    F: the 3x3 matrix to be decomposed into the form F=U Sigma V
-  //
-  // output
-  // -----
-  //    U and V: rotation tensor
-  //    Sigma: singular value tensor
-
-
-    Matrix3x3 F = *this;
-    Matrix3x3 I;
-    I.identity();
-
-    Matrix3x3 H = F;
-    *U = I; *V = I;
-
-    Uintah::makeUpperBidiag(H, U, V);
-}
+ Tensor
+ [0,0] = 0
+ [0,1] = 1
+ [0,2] = 2
+ [1,0] = 3
+ [1,1] = 4
+ [1,2] = 5
+ [2,0] = 6
+ [2,1] = 7
+ [2,2] = 8
+ */
