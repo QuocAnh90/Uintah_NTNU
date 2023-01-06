@@ -44,6 +44,10 @@ MPMICELabel::MPMICELabel()
   // Cell centered variables
   cMassLabel         = VarLabel::create( "c.mass",
                      CCVariable<double>::getTypeDescription() );
+  cVolumeLabel       = VarLabel::create("c.volume",
+                     CCVariable<double>::getTypeDescription());
+  sp_vol_MPM_CCLabel = VarLabel::create("sp_vol_MPM_CC",
+                     CCVariable<double>::getTypeDescription());
   vel_CCLabel        = VarLabel::create( "vel_CC",
                      CCVariable<Vector>::getTypeDescription() );
   temp_CCLabel       = VarLabel::create("temp_CC",
@@ -87,6 +91,8 @@ MPMICELabel::~MPMICELabel()
 {
   
   VarLabel::destroy(cMassLabel);
+  VarLabel::destroy(cVolumeLabel);
+  VarLabel::destroy(sp_vol_MPM_CCLabel);
   VarLabel::destroy(vel_CCLabel);
   VarLabel::destroy(temp_CCLabel);
   VarLabel::destroy(press_NCLabel);

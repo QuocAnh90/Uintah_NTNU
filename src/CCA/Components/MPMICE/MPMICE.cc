@@ -788,6 +788,8 @@ void MPMICE::scheduleInterpolateNCToCC_0(SchedulerP& sched,
     t->requires(Task::OldDW, Ilb->timeStepLabel);
     
     t->computes(MIlb->cMassLabel);
+    t->computes(MIlb->cVolumeLabel);
+    t->computes(MIlb->sp_vol_MPM_CCLabel);
     t->computes(MIlb->vel_CCLabel);
     t->computes(MIlb->temp_CCLabel);
     t->computes(MIlb->stress_CCLabel);
@@ -1031,7 +1033,7 @@ void MPMICE::scheduleComputePressure(SchedulerP& sched,
   t->requires(Task::NewDW,MIlb->temp_CCLabel,      mpm_matls, gn);  
   t->requires(Task::NewDW,Ilb->rho_CCLabel,        mpm_matls, gn);  
   t->requires(Task::NewDW,Ilb->sp_vol_CCLabel,     mpm_matls, gn);  
-
+  t->requires(Task::NewDW, MIlb->sp_vol_MPM_CCLabel, mpm_matls, gn);
   t->requires(Task::OldDW,Ilb->press_CCLabel,      press_matl, gn);
   t->requires(Task::OldDW,Ilb->vel_CCLabel,        ice_matls,  gn);
   t->requires(Task::NewDW,MIlb->vel_CCLabel,       mpm_matls,  gn);
@@ -1352,16 +1354,24 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       // Create arrays for the grid data
       constNCVariable<double> gmass, gvolume, gtemperature, gSp_vol;
       constNCVariable<Vector> gvelocity;
-      CCVariable<double> cmass,Temp_CC, sp_vol_CC, rho_CC;
+      CCVariable<double> cmass, cvolume,Temp_CC, sp_vol_CC, sp_vol_MPM_CC, rho_CC;
       CCVariable<Vector> vel_CC;
       CCVariable<Matrix3> stress_CC;
       constCCVariable<double> Temp_CC_ice, sp_vol_CC_ice;
       constCCVariable<Matrix3> gStress;
 
       new_dw->allocateAndPut(cmass,    MIlb->cMassLabel,     indx, patch);  
+      new_dw->allocateAndPut(cvolume, MIlb->cVolumeLabel, indx, patch);
       new_dw->allocateAndPut(vel_CC,   MIlb->vel_CCLabel,    indx, patch);  
       new_dw->allocateAndPut(Temp_CC,  MIlb->temp_CCLabel,   indx, patch);  
       new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch); 
+
+      // This specific volume computed either initial density if no cmass_MPM or sp_vol_CC from ICE
+      new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
+      // This specific volume computed directly from MPM material volume
+      new_dw->allocateAndPut(sp_vol_MPM_CC, MIlb->sp_vol_MPM_CCLabel, indx, patch);
+
+      new_dw->allocateAndPut(sp_vol_CC, Ilb->sp_vol_CCLabel, indx, patch);
       new_dw->allocateAndPut(rho_CC,    Ilb->rho_CCLabel,    indx, patch);
       new_dw->allocateAndPut(stress_CC, MIlb->stress_CCLabel, indx, patch);
 
@@ -1369,10 +1379,12 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
       cmass.initialize(very_small_mass);
 
       new_dw->get(gmass,        Mlb->gMassLabel,        indx, patch,gac, 1);
+      // This volume is associated with the current density
       new_dw->get(gvolume,      Mlb->gVolumeLabel,      indx, patch,gac, 1);
       new_dw->get(gvelocity,    Mlb->gVelocityBCLabel,  indx, patch,gac, 1);
       new_dw->get(gtemperature, Mlb->gTemperatureLabel, indx, patch,gac, 1);
       new_dw->get(gStress,      Mlb->gStressVizualLabel, indx, patch, gac, 1);
+      // This volume is associated with the initial density
       new_dw->get(gSp_vol,      Mlb->gSp_volLabel,      indx, patch,gac, 1);
       old_dw->get(sp_vol_CC_ice,Ilb->sp_vol_CCLabel,    indx, patch,gn, 0); 
       old_dw->get(Temp_CC_ice,  MIlb->temp_CCLabel,     indx, patch,gn, 0);
@@ -1388,21 +1400,26 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
  
         double Temp_CC_mpm = 0.0;  
         double sp_vol_mpm = 0.0;   
+        double sp_vol_mpm_true = 0.0;
         Vector vel_CC_mpm  = Vector(0.0, 0.0, 0.0);
         Matrix3 stress_CC_mpm(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
         for (int in=0;in<8;in++){
           double NC_CCw_mass = NC_CCweight[nodeIdx[in]] * gmass[nodeIdx[in]];
-          cmass[c]    += NC_CCw_mass;
+          //double NC_CCw_volume = NC_CCweight[nodeIdx[in]] * gvolume[nodeIdx[in]];
+          cmass[c] += NC_CCw_mass;
+          //cvolume[c]    += NC_CCw_volume;
+          sp_vol_mpm_true  += gvolume[nodeIdx[in]]      * NC_CCw_mass;
           sp_vol_mpm  += gSp_vol[nodeIdx[in]]      * NC_CCw_mass;
           vel_CC_mpm  += gvelocity[nodeIdx[in]]    * NC_CCw_mass;
           Temp_CC_mpm += gtemperature[nodeIdx[in]] * NC_CCw_mass;
-          stress_CC_mpm += gStress[nodeIdx[in]] * NC_CCw_mass;
+          stress_CC_mpm += gStress[nodeIdx[in]]    * NC_CCw_mass;
         }
         double inv_cmass = 1.0/cmass[c];
         vel_CC_mpm  *= inv_cmass;    
         Temp_CC_mpm *= inv_cmass;
         sp_vol_mpm  *= inv_cmass;
+        sp_vol_mpm_true *= inv_cmass;
         stress_CC_mpm *= inv_cmass;
 
         //__________________________________
@@ -1411,13 +1428,23 @@ void MPMICE::interpolateNCToCC_0(const ProcessorGroup*,
         // a well defined vel/temp_CC even if there isn't any mass
         // If you change this you must also change 
         // MPMICE::computeLagrangianValuesMPM
+
+        // one if there is cmass, zero if there is no cmass
         double one_or_zero = (cmass[c] - very_small_mass)/cmass[c];
 
 //        Temp_CC[c]  =(1.0-one_or_zero)*999.        + one_or_zero*Temp_CC_mpm;
 //        sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_orig + one_or_zero*sp_vol_mpm;
 
+        // If there is no cmass, using sp_vol_CC _ice, otherwise using sp_vol_mpm
         Temp_CC[c]  =(1.0-one_or_zero)*Temp_CC_ice[c]  +one_or_zero*Temp_CC_mpm;
         sp_vol_CC[c]=(1.0-one_or_zero)*sp_vol_CC_ice[c]+one_or_zero*sp_vol_mpm;
+
+        // If there is no cmass, using sp_vol_CC _ice, otherwise using sp_vol_CC_MPM
+        // gvolume diffused and make very low sp_vol_MPM_CC
+        //sp_vol_MPM_CC[c] = (1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm_true;
+        
+        // Cap at 0.9 * sp_vol_mpm_true
+        sp_vol_MPM_CC[c] = std::max((1.0 - one_or_zero) * sp_vol_CC_ice[c] + one_or_zero * sp_vol_mpm_true, 0.9 * sp_vol_CC_ice[c]);
 
         vel_CC[c]   =vel_CC_mpm;
         stress_CC[c] = stress_CC_mpm;
@@ -2044,6 +2071,7 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
     std::vector<constCCVariable<double> > cv(numALLMatls);
     std::vector<constCCVariable<double> > gamma(numALLMatls);
     std::vector<constCCVariable<double> > sp_vol_CC(numALLMatls); 
+    std::vector<constCCVariable<double> > sp_vol_MPM_CC(numALLMatls);
     std::vector<constCCVariable<double> > Temp(numALLMatls);
     std::vector<constCCVariable<double> > rho_CC_old(numALLMatls);
     std::vector<constCCVariable<double> > mass_CC(numALLMatls);
@@ -2097,7 +2125,10 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
       if(mpm_matl[m]){                    // M P M
         new_dw->get( Temp[m],     MIlb->temp_CCLabel, indx, patch, gn,0 );
         new_dw->get( vel_CC[m],   MIlb->vel_CCLabel,  indx, patch, gn,0 );
+        // This specific volume computed either initial density if no cmass_MPM or sp_vol_CC from ICE
         new_dw->get( sp_vol_CC[m],Ilb->sp_vol_CCLabel,indx, patch, gn,0 ); 
+        // This specific volume computed directly from MPM material volume
+        new_dw->get(sp_vol_MPM_CC[m], MIlb->sp_vol_MPM_CCLabel, indx, patch, gn, 0);
         new_dw->get( rho_CC_old[m],Ilb->rho_CCLabel,  indx, patch, gn,0 );
         new_dw->allocateTemporary(rho_CC_new[m],  patch);
       }
@@ -2129,6 +2160,9 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
 
                 // Incompressible MPM material in MPMICE2
                 rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
+
+                // Incompressible porous MPM material in MPMICE2 computing directly from material MPM volume
+                //rho_micro[m][c] = 1.0 / sp_vol_MPM_CC[m][c];
             }
             else{
                 rho_micro[m][c] = mpm_matl[m]->getConstitutiveModel()->
@@ -2242,6 +2276,9 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
            if (d_mpm->flags->d_UseMPMICE2) {
                // Incompressible MPM material in MPMICE2
                rho_micro[m][c] = mpm_matl[m]->getInitialDensity();
+
+               // Incompressible porous MPM material in MPMICE2 computing directly from material MPM volume
+               //rho_micro[m][c] = 1.0 / sp_vol_MPM_CC[m][c];
            }
            else {
                rho_micro[m][c] =
@@ -2476,7 +2513,9 @@ void MPMICE::computeEquilibrationPressure(const ProcessorGroup*,
                   kappa[m][c] = sp_vol_new[m][c] / (speedSound[m][c] * speedSound[m][c]);
               }
               if (mpm_matl[m]) {
+                  
                   kappa[m][c] = 0;
+                  //kappa[m][c]=mpm_matl[m]->getConstitutiveModel()->getCompressibility();
               }
           }
           else {
