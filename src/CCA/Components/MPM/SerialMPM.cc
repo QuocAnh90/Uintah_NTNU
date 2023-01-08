@@ -4082,9 +4082,11 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
       }
 
       // critical density and volume
-      double rho_0 = mpm_matl->getInitialDensity();
-      double rho_critical_lowerbound = 0.9 * rho_0;
-      double rho_critical_upperbound = 1.1 * rho_0;
+          //double rho_0 = mpm_matl->getInitialDensity();
+          //double rho_critical_lowerbound = lowerbound * rho_0;
+          //double rho_critical_upperbound = upperbound * rho_0;
+          double lowerbound = flags->d_lowerboundDensity;
+          double upperbound = flags->d_upperboundDensity;
 
       for(ParticleSubset::iterator iter = pset->begin();
           iter != pset->end(); iter++){
@@ -4152,8 +4154,11 @@ void SerialMPM::computeParticleGradients(const ProcessorGroup*,
           double J = pFNew[idx].Determinant();
           double JOld = pFOld[idx].Determinant();
           double pvolume_trial = pVolumeOld[idx] * (J / JOld) * (pmassNew[idx] / pmass[idx]);
-          double pvolume_critical_upperbound = pmass[idx] / rho_critical_lowerbound;
-          double pvolume_critical_lowerbound = pmass[idx] / rho_critical_upperbound;
+          //double pvolume_critical_upperbound = pmass[idx] / rho_critical_lowerbound;
+          //double pvolume_critical_lowerbound = pmass[idx] / rho_critical_upperbound;
+
+          double pvolume_critical_upperbound = upperbound * pVolumeOld[idx];
+          double pvolume_critical_lowerbound = lowerbound * pVolumeOld[idx];
 
           if (flags->d_doCapDensity) {
               if (pvolume_trial < pvolume_critical_upperbound && pvolume_trial > pvolume_critical_lowerbound) {

@@ -102,6 +102,8 @@ class Output;
     bool        d_deleteGeometryObjects;
     bool        d_doPressureStabilization;
     bool        d_doCapDensity;
+    double      d_lowerboundDensity;
+    double      d_upperboundDensity;
     bool        d_gDisplacement;
     bool        d_computeNormals;
     bool        d_useLogisticRegression;
