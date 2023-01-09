@@ -90,8 +90,8 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_deleteGeometryObjects              =  false;
   d_doPressureStabilization            =  false;
   d_doCapDensity                       = false;
-  d_lowerboundDensity                  = 0.9;
-  d_upperboundDensity                  = 1.1;
+  d_lowerboundDensity                  = 1.0;
+  d_upperboundDensity                  = 1.0;
   d_gDisplacement                      = false;
   d_computeNodalHeatFlux               =  false;
   d_computeScaleFactor                 =  false;
