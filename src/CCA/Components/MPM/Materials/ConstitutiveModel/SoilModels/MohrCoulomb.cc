@@ -1181,7 +1181,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double Use_softening = UI[12];
     double St = UI[13];
     double strain_95 = UI[26];
-    double Use_pressure_dependence = UI[39];
     double m = UI[40];
 
     /*
@@ -1217,56 +1216,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
         StrainIncrement[i] = -D[i] * dt;
     }
 
-    double UseRemould = UI[31];
-    double Su_re = UI[30];
-    double c_ini = UI[2]; //cohesion [stress units]
-    if (UseRemould > 0)
-    {
-        St = c_ini / Su_re;
-        svarg[13] = St;
-    }
-
-    double Usetransition = UI[14];
-    if (Usetransition > 0)
-    {
-        if (shear_strain_rate_nonlocal > strain_ref) {
-            c = St * a1 * pow(W, -b1) * pow(shear_strain_rate_nonlocal / strain_ref, beta_rate);
-        }
-        else {
-            c = St * a1 * pow(W, -b1);
-        }
-    }
-
-    double Usetransition1 = UI[41];
-    double A_rate = UI[42];
-
-    if (Usetransition1 > 0)
-    {
-        if (shear_strain_rate_nonlocal > strain_ref) {
-            c = St * a1 * A_rate * (1 + ( 1 / A_rate - 1) * pow(shear_strain_rate_nonlocal / strain_ref, beta_rate));
-        }
-        else {
-            c = St * a1;
-        }
-    }
-
-    double Usemodul = UI[21];
-    if (Usemodul > 0)
-    {
-        G = m_modul * c / 2.0 / (1.0 + nuy);
-        K = m_modul * c / 3.0 / (1.0 - 2 * nuy);
-    }
-
-    if (Use_pressure_dependence > 0)
-    {
-        double E0 = (9 * K * G) / (3 * K + G);
-        double mean_stress = (stress[0] + stress[1] + stress[2]) / 3;
-        double E = std::min(10000.0, E0 * pow((fabs(mean_stress) / 101325), m));
-
-        G = E / 2 / (1 + nuy);
-        K = E / 3 / (1 - 2 * nuy);
-    }
-
     double mu = 0;
     double ConsolidationTime = UI[38];
 
@@ -1280,9 +1229,59 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double strain1 = UI[34];
     double strain2 = UI[35];
     double Phi_CS = UI[36];
-    double Phi_P = UI[37];
+    double Phi_P = UI[37];  
+    double Su_re = UI[30];
+    double c_ini = UI[2]; //cohesion [stress units]
 
     if (time > ConsolidationTime) {
+    
+        double UseRemould = UI[31];
+        if (UseRemould > 0)
+        {
+            St = c_ini / Su_re;
+            svarg[13] = St;
+        }
+
+        double Usetransition = UI[14];
+        if (Usetransition > 0)
+        {
+            if (shear_strain_rate_nonlocal > strain_ref) {
+                c = St * a1 * pow(W, -b1) * pow(shear_strain_rate_nonlocal / strain_ref, beta_rate);
+            }
+            else {
+                c = St * a1 * pow(W, -b1);
+            }
+        }
+
+        double Usetransition1 = UI[41];
+        double A_rate = UI[42];
+        if (Usetransition1 > 0)
+        {
+            if (shear_strain_rate_nonlocal > strain_ref) {
+                c = c * A_rate * (1 + (1 / A_rate - 1) * pow(shear_strain_rate_nonlocal / strain_ref, beta_rate));
+            }
+            else {
+                c = c;
+            }
+        }
+
+        double Usemodul = UI[21];
+        if (Usemodul > 0)
+        {
+            G = m_modul * c / 2.0 / (1.0 + nuy);
+            K = m_modul * c / 3.0 / (1.0 - 2 * nuy);
+        }
+
+        double Use_pressure_dependence = UI[39];
+        if (Use_pressure_dependence > 0)
+        {
+            double E0 = (9 * K * G) / (3 * K + G);
+            double mean_stress = (stress[0] + stress[1] + stress[2]) / 3;
+            double E = std::min(10000.0, E0 * pow((fabs(mean_stress) / 101325), m));
+
+            G = E / 2 / (1 + nuy);
+            K = E / 3 / (1 - 2 * nuy);
+        }
 
         if (Use_friction > 0)
         {
