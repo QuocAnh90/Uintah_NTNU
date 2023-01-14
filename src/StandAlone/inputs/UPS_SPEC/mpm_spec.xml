@@ -23,6 +23,8 @@
       <DeleteGeometryObjects              spec="OPTIONAL BOOLEAN" />
       <DoPressureStabilization            spec="OPTIONAL BOOLEAN" />
 	  <DoCapDensity                       spec="OPTIONAL BOOLEAN" />
+	  <lowerboundDensity                  spec="OPTIONAL DOUBLE 'positive'"/>
+	  <upperboundDensity                  spec="OPTIONAL DOUBLE 'positive'"/>
 	  <GetNodalDisplacement               spec="OPTIONAL BOOLEAN" />
       <DoDefGradAveraging                 spec="OPTIONAL BOOLEAN" /> 
       <DoThermalExpansion                 spec="OPTIONAL BOOLEAN" />  <!-- FIXME: default is? -->

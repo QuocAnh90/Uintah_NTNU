@@ -255,7 +255,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("DoPressureStabilization",           d_doPressureStabilization);
   mpm_flag_ps->get("DoCapDensity",                      d_doCapDensity);
   mpm_flag_ps->get("lowerboundDensity",                 d_lowerboundDensity);
-  mpm_flag_ps->get("pperboundDensity",                  d_upperboundDensity);
+  mpm_flag_ps->get("upperboundDensity",                  d_upperboundDensity);
   mpm_flag_ps->get("GetNodalDisplacement",              d_gDisplacement);
   mpm_flag_ps->get("DoThermalExpansion",                d_doThermalExpansion);
   mpm_flag_ps->getWithDefault("UseGradientEnhancedVelocityProjection",  d_GEVelProj,false);
