@@ -29,7 +29,7 @@
 #  define _CPP_CMATH
 #endif
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/PragerKinematicHardening.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/PragerKinematicHardening.h>
 #include <cmath>
 
 

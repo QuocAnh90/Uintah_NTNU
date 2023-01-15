@@ -29,7 +29,7 @@
 #  define _CPP_CMATH
 #endif
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/ZAFlow.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/ZAFlow.h>
 
 #include <cmath>
 

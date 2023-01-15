@@ -23,7 +23,7 @@
  */
 
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/BrittleDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/BrittleDamage.h>
 
 using namespace Uintah;
 using std::cout;

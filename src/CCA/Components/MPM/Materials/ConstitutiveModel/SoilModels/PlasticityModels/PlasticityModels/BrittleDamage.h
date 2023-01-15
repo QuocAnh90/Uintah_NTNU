@@ -26,7 +26,7 @@
 #define __BRITTLE_DAMAGE_MODEL_H__
 
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/DamageModel.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/DamageModel.h>
 #include <Core/ProblemSpec/ProblemSpecP.h>
 
 namespace Uintah {

@@ -23,7 +23,7 @@
  */
 
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/ThresholdDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/ThresholdDamage.h>
 #include <Core/Exceptions/ProblemSetupException.h>
 #include <Core/Math/Gaussian.h>
 #include <Core/Math/Weibull.h>

@@ -23,7 +23,7 @@
  */
 
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/HancockMacKenzieDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/HancockMacKenzieDamage.h>
 #include <Core/Grid/Variables/VarTypes.h>
 #include <Core/Math/Gaussian.h>
 #include <cmath>

@@ -29,7 +29,7 @@
 #  define _CPP_CMATH
 #endif
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/NoKinematicHardening.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/NoKinematicHardening.h>
 
 
 using namespace Uintah;

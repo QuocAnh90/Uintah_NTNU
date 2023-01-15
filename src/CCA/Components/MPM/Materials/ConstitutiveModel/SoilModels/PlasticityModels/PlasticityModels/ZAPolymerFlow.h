@@ -25,7 +25,7 @@
 #ifndef __ZERILLI_ARMSTRONG_POLYMER_MODEL_H__
 #define __ZERILLI_ARMSTRONG_POLYMER_MODEL_H__
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/FlowModel.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/FlowModel.h>
 #include <Core/ProblemSpec/ProblemSpecP.h>
 #include <Core/Exceptions/InternalError.h>
 

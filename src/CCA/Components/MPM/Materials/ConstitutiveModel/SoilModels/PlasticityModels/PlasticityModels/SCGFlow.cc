@@ -29,7 +29,7 @@
 #  define _CPP_CMATH
 #endif
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/SCGFlow.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/SCGFlow.h>
 #include <cmath>
 #include <iostream>
 

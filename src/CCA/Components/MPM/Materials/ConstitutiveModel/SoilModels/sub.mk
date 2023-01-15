@@ -39,5 +39,7 @@ SRCS   += \
 		$(SRCDIR)/QADamage.cc                   \
 		$(SRCDIR)/BBMPoint.cc                   \
 
-     
+SUBDIRS := \
+        $(SRCDIR)/PlasticityModels \
+
 		

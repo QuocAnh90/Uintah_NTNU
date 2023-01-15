@@ -22,12 +22,12 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef __ELASTIC_PLASTICHP_H__
-#define __ELASTIC_PLASTICHP_H__
+#ifndef __ELASTO_PLASTIC_H__
+#define __ELASTO_PLASTIC_H__
 
 
-#include "ConstitutiveModel.h"
-#include "ImplicitCM.h"
+#include "CCA/Components/MPM/Materials/ConstitutiveModel/ConstitutiveModel.h"
+#include "CCA/Components/MPM/Materials/ConstitutiveModel/ImplicitCM.h"
 #include "PlasticityModels/YieldCondition.h"
 #include "PlasticityModels/StabilityCheck.h"
 #include "PlasticityModels/FlowModel.h"
@@ -50,7 +50,7 @@ namespace Uintah {
 
   /////////////////////////////////////////////////////////////////////////////
   /*!
-    \class ElasticPlasticHP
+    \class ElastoPlastic
     \brief High-strain rate Hypo-Elastic Plastic Constitutive Model
     \author Biswajit Banerjee \n
     C-SAFE and Department of Mechanical Engineering \n
@@ -76,7 +76,7 @@ namespace Uintah {
   */
   /////////////////////////////////////////////////////////////////////////////
 
-  class ElasticPlasticHP : public ConstitutiveModel, public ImplicitCM {
+  class ElastoPlastic : public ConstitutiveModel, public ImplicitCM {
 
   public:
     // Create datatype for storing model parameters
@@ -150,7 +150,7 @@ namespace Uintah {
   private:
     // Prevent copying of this class
     // copy constructor
-    ElasticPlasticHP& operator=(const ElasticPlasticHP &cm);
+    ElastoPlastic& operator=(const ElastoPlastic &cm);
 
     void bulletProofingError(const std::string methodName
                             ,const std::string responsibleParty);
@@ -160,18 +160,18 @@ namespace Uintah {
     ////////////////////////////////////////////////////////////////////////
     /*! \brief constructors */
     ////////////////////////////////////////////////////////////////////////
-    ElasticPlasticHP(ProblemSpecP& ps,MPMFlags* flag);
-    //    ElasticPlasticHP(const ElasticPlasticHP* cm);
+    ElastoPlastic(ProblemSpecP& ps,MPMFlags* flag);
+    //    ElastoPlastic(const ElastoPlastic* cm);
          
     ////////////////////////////////////////////////////////////////////////
     /*! \brief destructor  */
     ////////////////////////////////////////////////////////////////////////
-    virtual ~ElasticPlasticHP();
+    virtual ~ElastoPlastic();
 
     virtual void outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag = true);
 
     // clone
-    ElasticPlasticHP* clone();
+    ElastoPlastic* clone();
          
     ////////////////////////////////////////////////////////////////////////
     /*! \brief Put documentation here. */
@@ -430,4 +430,4 @@ namespace Uintah {
 
 } // End namespace Uintah
 
-#endif  // __ELASTIC_PLASTICHP_H__ 
+#endif  // __ELASTO_PLASTIC_H__ 

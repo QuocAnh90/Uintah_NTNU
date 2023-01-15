@@ -30,7 +30,7 @@
 #include <Core/ProblemSpec/ProblemSpecP.h>
 #include <Core/ProblemSpec/ProblemSpec.h>
 #include <Core/Math/TangentModulusTensor.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/PlasticityState.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/PlasticityState.h>
 
 namespace Uintah {
 

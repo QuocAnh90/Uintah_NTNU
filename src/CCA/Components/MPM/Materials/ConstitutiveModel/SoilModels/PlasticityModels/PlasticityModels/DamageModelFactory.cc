@@ -22,12 +22,12 @@
  * IN THE SOFTWARE.
  */
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/DamageModelFactory.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/NullDamage.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/JohnsonCookDamage.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/HancockMacKenzieDamage.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/ThresholdDamage.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/BrittleDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/DamageModelFactory.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/NullDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/JohnsonCookDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/HancockMacKenzieDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/ThresholdDamage.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/BrittleDamage.h>
 #include <Core/Exceptions/ProblemSetupException.h>
 #include <Core/ProblemSpec/ProblemSpec.h>
 #include <Core/Malloc/Allocator.h>

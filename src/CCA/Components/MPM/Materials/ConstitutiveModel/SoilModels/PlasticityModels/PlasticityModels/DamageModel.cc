@@ -23,7 +23,7 @@
  */
 
 
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/PlasticityModels/DamageModel.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/PlasticityModels/DamageModel.h>
 
 using namespace Uintah;
 static DebugStream dbg("DamageModel", false);
