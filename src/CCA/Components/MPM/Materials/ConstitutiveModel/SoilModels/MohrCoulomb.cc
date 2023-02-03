@@ -259,7 +259,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 46;
+    d_NBASICINPUTS = 47;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -371,6 +371,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Use_dilation", UI[43]);
     cm_ps->appendElement("Psi_CS", UI[44]);
     cm_ps->appendElement("Psi_P", UI[45]);
+
+    cm_ps->appendElement("strain0", UI[46]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -1039,6 +1041,8 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("Use_dilation", UI[43], 0.0);
     ps->getWithDefault("Psi_CS", UI[44], 0.0);
     ps->getWithDefault("Psi_P", UI[45], 0.0);
+
+    ps->getWithDefault("strain0", UI[46], 0.0);
 }
 
 void
@@ -1101,6 +1105,8 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Use_dilation");
     ISVNames.push_back("Psi_CS");
     ISVNames.push_back("Psi_P");
+
+    ISVNames.push_back("strain 0");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -1226,6 +1232,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     }
 
     double Use_friction = UI[33];
+    double strain0 = UI[46];
     double strain1 = UI[34];
     double strain2 = UI[35];
     double Phi_CS = UI[36];
@@ -1313,10 +1320,13 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
 
         if (Use_dilation > 0)
         {
-            if (shear_strain_nonlocal < strain1) {
+            if (shear_strain_nonlocal <= strain0) {
+                Psi = 0;
+            }
+            if (shear_strain_nonlocal > strain0 && shear_strain_nonlocal <= strain1) {
                 Psi = Psi_P;
             }
-            if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal < strain2)
+            if (shear_strain_nonlocal > strain1 && shear_strain_nonlocal <= strain2)
             {
                 Psi = Psi_P - (shear_strain_nonlocal - strain1) * (Psi_P - Psi_CS) / (strain2 - strain1);
             }

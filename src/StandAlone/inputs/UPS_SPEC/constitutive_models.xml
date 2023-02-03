@@ -1076,6 +1076,7 @@
 	<Su_re		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 
 	<Use_friction	       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
+	  <strain0		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <strain1		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <strain2		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	  <Phi_CS		       spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
