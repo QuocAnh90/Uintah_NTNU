@@ -48,7 +48,7 @@
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/MWViscoElastic.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/ProgramBurn.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/ShellMaterial.h>
-#include <CCA/Components/MPM/Materials/ConstitutiveModel/ElasticPlasticHP.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/ElasticPlasticHP.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/MurnaghanMPM.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/IdealGasMP.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/P_Alpha.h>
@@ -78,7 +78,7 @@
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/HypoplasticB.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/MohrCoulomb.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/QADamage.h>
-//#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/ElastoPlastic.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/ElastoPlastic.h>
 #include <CCA/Components/MPM/Core/MPMFlags.h>
 
 #include <Core/Exceptions/ProblemSetupException.h>
@@ -261,10 +261,10 @@ ConstitutiveModel* ConstitutiveModelFactory::create(ProblemSpecP& ps,
     computes_pLocalizedMPM = true;
     return(scinew ElasticPlasticHP(child,flags));
   }
-  //else if (cm_type == "elasto_plastic") {
-  //computes_pLocalizedMPM = true;
-  //return(scinew ElastoPlastic(child, flags));
-  //}
+  else if (cm_type == "elasto_plastic") {
+  computes_pLocalizedMPM = true;
+  return(scinew ElastoPlastic(child, flags));
+  }
   else if (cm_type ==  "soil_foam"){
     return(scinew SoilFoam(child,flags));
   }

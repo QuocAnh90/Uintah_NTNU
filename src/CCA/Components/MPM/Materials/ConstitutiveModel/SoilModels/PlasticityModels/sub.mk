@@ -31,6 +31,7 @@
 SRCDIR := CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels
 
 SRCS   += \
+        $(SRCDIR)/ElasticPlasticHP.cc           \
         $(SRCDIR)/ElastoPlastic.cc           \
 
 SUBDIRS := \
