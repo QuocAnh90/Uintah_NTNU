@@ -261,10 +261,10 @@ ConstitutiveModel* ConstitutiveModelFactory::create(ProblemSpecP& ps,
     computes_pLocalizedMPM = true;
     return(scinew ElasticPlasticHP(child,flags));
   }
-  else if (cm_type == "elasto_plastic") {
-  computes_pLocalizedMPM = true;
-  return(scinew ElastoPlastic(child, flags));
-  }
+  //else if (cm_type == "elasto_plastic") {
+  //computes_pLocalizedMPM = true;
+  //return(scinew ElastoPlastic(child, flags));
+  //}
   else if (cm_type ==  "soil_foam"){
     return(scinew SoilFoam(child,flags));
   }
