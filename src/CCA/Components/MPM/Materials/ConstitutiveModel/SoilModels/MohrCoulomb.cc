@@ -1309,7 +1309,9 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
             }
             
             // Row dilatancy law
-            double sinPSi = (sin(Phi * 3.1415 / 180) - sin(Phi_CS * 3.1415 / 180)) / (1 - sin(Phi * 3.1415 / 180) * sin(Phi_CS * 3.1415 / 180));
+            double sinPhi = sin(Phi * 3.1415 / 180);
+            double sinPhi_CS = sin(Phi_CS * 3.1415 / 180);
+            double sinPSi = (sinPhi - sinPhi_CS) / (1 - sinPhi * sinPhi_CS);
             Psi = sinh(sinPSi) * 180 / 3.1415;
             c = svarg[2]; // Reset cohesion to input 
         }
@@ -1334,6 +1336,13 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
             {
                 Psi = Psi_CS;
             }
+
+            // Row dilatancy law
+            double sinPSi = sin(Psi * 3.1415 / 180);
+            double sinPhi_CS = sin(Phi_CS * 3.1415 / 180);
+            double sinPhi = (sinPhi_CS + sinPSi)/(1+ sinPhi_CS * sinPSi);
+            
+            Phi = sinh(sinPhi) * 180 / 3.1415;
             c = svarg[2]; // Reset cohesion to input 
         }
 
