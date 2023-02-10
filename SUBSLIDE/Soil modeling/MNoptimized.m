@@ -9,7 +9,10 @@ M = 2 * sqrt(2) * tan (30/180*pi());            % Friction parameters
 N0 = -0.2;
 
 % Intial stress
-Sigma = [150 0 0; 0 150 0;0 0 150];        
+Sigma = [150 0 0; 0 150 0;0 0 150];  
+sig0 =  [Sigma(1,1); Sigma(2,2); Sigma(3,3); Sigma(1,2); Sigma(1,3); Sigma(2,3)];
+sig = sig0;
+
 % 3 x 3 Stress tensor
 Sigma1(1,1) = 150; Sigma1(1,2) = 0;
 % Elastic matrix
@@ -21,48 +24,101 @@ D = E/(1+nuy)/(1-2*nuy)*[ 1-nuy nuy nuy 0 0 0 ...
                         ; 0 0 0 0 0 (1-2*nuy)/2];
 % Strain controled
 Epsilon(:,1) = zeros(6,1);
-% deps = [0.0001; -0.00005; -0.00005; 0; 0; 0];
+deps = [0.0001; -0.00005; -0.00005; 0; 0; 0];
 N=N0;
 Nk(1,1) = N0;
 
 for k = 2:5000
     k
-% Plastic multiplier 
-lambda = 0;    
-N = N0;
-% Elastic trial
-sig0 =  [Sigma(1,1); Sigma(2,2); Sigma(3,3); Sigma(1,2); Sigma(1,3); Sigma(2,3)];
-
-if k < 4000
-    deps = [0.0001; -0.00005; -0.00005; 0; 0; 0];
-else
-    deps = [0.0001; 0; -0; 0; 0; 0];
+    
+    x = deps(1);
+    options = optimoptions('fsolve','Display','none');
+    deps(1) = fsolve(@mob_one,x,options);
+  
+    sig0 = sig;
+    N0 = N;
+    Sigma = [sig(1) sig(4) sig(5); sig(4) sig(2) sig(6);sig(5) sig(6) sig(3)];     
+    Epsilon(:,k) = Epsilon(:,k-1)+deps;
+    % Mean stress
+    Sigma1(1,k) = (sig(1)+sig(2)+sig(3))/3;   
+    % Deviatoric stress
+    Sigma1(2,k) = sqrt(((sig(2)-sig(1))^2 + (sig(3)-sig(1))^2 + (sig(2)-sig(3))^2) / 2 + 3*(sig(4)^2+sig(5)^2+sig(6)^2));
+%     Sigma1(2,k) = sig(2);
+    
+    % Volume strain 
+    Epsilon1(1,k) = (Epsilon(1,k)+Epsilon(2,k)+Epsilon(3,k))/3; 
+    % Deviatoric stress
+    Epsilon1(2,k) = 1/3*sqrt(((Epsilon(2,k)-Epsilon(1,k))^2 + (Epsilon(3,k)-Epsilon(1,k))^2 + (Epsilon(2,k)-Epsilon(3,k))^2) * 2 + 3*(Epsilon(4,k)^2+Epsilon(5,k)^2+Epsilon(6,k)^2));
+    Nk(1,k) = N;
+%     yk(1,k) = y;
+          
 end
 
-sig = sig0 + D * deps;        % Stress vector
+figure (1)    
+subplot(2,2,1); hold on;
+plot(Sigma1(1,:),Sigma1(2,:)); axis equal;
+xlim([0 500]);
+ylim([0 500]);
+xlabel('$p$','interpreter','latex')
+ylabel('$q$','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,2); hold on;
+plot(Epsilon1(2,:),Sigma1(2,:))
+xlabel('${\varepsilon_q}$','interpreter','latex')
+ylabel('$q$','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,3); hold on; axis ij;
+plot(Sigma1(1,:),Epsilon1(1,:))
+xlabel('$p$','interpreter','latex')
+ylabel('${\varepsilon_p}$','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,4); hold on; axis ij
+plot(Epsilon1(2,:),Epsilon1(1,:))
+xlabel('${\varepsilon_q}$','interpreter','latex')
+ylabel('${\varepsilon_p}$','interpreter','latex')
+set(gca,'TickLabelInterpreter','latex')
 
-Sigma = [sig(1) sig(4) sig(5); sig(4) sig(2) sig(6);sig(5) sig(6) sig(3)];     
-I1 = trace(Sigma);
-I2 = 0.5*(trace(Sigma)^2 - trace(Sigma^2));
-I3 = det (Sigma);
-X = sqrt (I1*I2/I3 - 9);
-y = X - (M+N);                % Yield function
+% figure (2)
+% plot(Epsilon1(2,:),yk(1,:))
+% xlabel('${\varepsilon_q}$','interpreter','latex')
+% ylabel('$y$','interpreter','latex')
+% set(gca,'TickLabelInterpreter','latex')
+% 
+% figure (3)
+% plot(Epsilon1(2,:),Nk(1,:))
+% xlabel('${\varepsilon_q}$','interpreter','latex')
+% ylabel('$N$','interpreter','latex')
+% set(gca,'TickLabelInterpreter','latex')
 
-        if I3 == 0
-                y = 0;
-                sig(1:6) = 0;
-        end
-        
-        if I1*I2/I3 <= 9
-                y = 0;
-                sig(1:6) = 0;
-        end
-            
-if y > 0
+function [r] = mob_one(x)
+    deps(1) = x;
+    
+    % Plastic multiplier 
+    lambda = 0;    
+    N = N0;
+    % Elastic trial
+    sig0 =  [Sigma(1,1); Sigma(2,2); Sigma(3,3); Sigma(1,2); Sigma(1,3); Sigma(2,3)];
+
+    if k < 4000
+        deps = [0.0001; -0.00005; -0.00005; 0; 0; 0];
+    else
+        deps = [0.0001; 0; -0; 0; 0; 0];
+    end
+
+    sig = sig0 + D * deps;        % Stress vector
+
+    Sigma = [sig(1) sig(4) sig(5); sig(4) sig(2) sig(6);sig(5) sig(6) sig(3)];     
+    I1 = trace(Sigma);
+    I2 = 0.5*(trace(Sigma)^2 - trace(Sigma^2));
+    I3 = det (Sigma);
+    X = sqrt (I1*I2/I3 - 9);
+    y = X - (M+N);                % Yield function
+
+    if y > 0
         i = 0;
-        while abs(y) > 0.00000000001
+        while abs(y) > 1d-6
             i = i + 1
-            
+
             % Vector B
             Sigma_Inverse = inv(Sigma);
             Sigma_Inverse_Dev = Sigma_Inverse - 1/3*eye(3,3)*trace(Sigma_Inverse);
@@ -92,7 +148,6 @@ if y > 0
             dYdSigma = [dYdSigma(1,1) dYdSigma(2,2) dYdSigma(3,3) dYdSigma(1,2) dYdSigma(1,3) dYdSigma(2,3)];
             
             dlambda = y / (A - dYdSigma * D * B);
-%             dlambda = y / (-dYdSigma * D * B);
             
             lambda = lambda + dlambda;
             
@@ -102,6 +157,7 @@ if y > 0
             % Update stress
             depse = deps - depsp;
             sig = sig0 + D * depse;
+            
             
             % Update state variables
             Epsilon_v_plastic = depsp(1) + depsp(2) + depsp(3);
@@ -142,60 +198,9 @@ if y > 0
                 y = 0;
                 sig(1:6) = 0;
             end
-        end
-        
+         end
+    end
+    % strain controlled
+    r = 0;                     
 end
-
-    sig0 = sig;
-    N0 = N;
-    Sigma = [sig(1) sig(4) sig(5); sig(4) sig(2) sig(6);sig(5) sig(6) sig(3)];     
-    Epsilon(:,k) = Epsilon(:,k-1)+deps;
-    % Mean stress
-    Sigma1(1,k) = (sig(1)+sig(2)+sig(3))/3;   
-    % Deviatoric stress
-    Sigma1(2,k) = sqrt(((sig(2)-sig(1))^2 + (sig(3)-sig(1))^2 + (sig(2)-sig(3))^2) / 2 + 3*(sig(4)^2+sig(5)^2+sig(6)^2));
-%     Sigma1(2,k) = sig(2);
-    
-    % Volume strain 
-    Epsilon1(1,k) = (Epsilon(1,k)+Epsilon(2,k)+Epsilon(3,k))/3; 
-    % Deviatoric stress
-    Epsilon1(2,k) = 1/3*sqrt(((Epsilon(2,k)-Epsilon(1,k))^2 + (Epsilon(3,k)-Epsilon(1,k))^2 + (Epsilon(2,k)-Epsilon(3,k))^2) * 2 + 3*(Epsilon(4,k)^2+Epsilon(5,k)^2+Epsilon(6,k)^2));
-    Nk(1,k) = N;
-    yk(1,k) = y;
 end
-
-figure (1)    
-subplot(2,2,1); hold on;
-plot(Sigma1(1,:),Sigma1(2,:)); axis equal;
-xlim([0 500]);
-ylim([0 500]);
-xlabel('$p$','interpreter','latex')
-ylabel('$q$','interpreter','latex')
-set(gca,'TickLabelInterpreter','latex')
-subplot(2,2,2); hold on;
-plot(Epsilon1(2,:),Sigma1(2,:))
-xlabel('${\varepsilon_q}$','interpreter','latex')
-ylabel('$q$','interpreter','latex')
-set(gca,'TickLabelInterpreter','latex')
-subplot(2,2,3); hold on; axis ij;
-plot(Sigma1(1,:),Epsilon1(1,:))
-xlabel('$p$','interpreter','latex')
-ylabel('${\varepsilon_p}$','interpreter','latex')
-set(gca,'TickLabelInterpreter','latex')
-subplot(2,2,4); hold on; axis ij
-plot(Epsilon1(2,:),Epsilon1(1,:))
-xlabel('${\varepsilon_q}$','interpreter','latex')
-ylabel('${\varepsilon_p}$','interpreter','latex')
-set(gca,'TickLabelInterpreter','latex')
-
-% figure (2)
-% plot(Epsilon1(2,:),yk(1,:))
-% xlabel('${\varepsilon_q}$','interpreter','latex')
-% ylabel('$y$','interpreter','latex')
-% set(gca,'TickLabelInterpreter','latex')
-% 
-% figure (3)
-% plot(Epsilon1(2,:),Nk(1,:))
-% xlabel('${\varepsilon_q}$','interpreter','latex')
-% ylabel('$N$','interpreter','latex')
-% set(gca,'TickLabelInterpreter','latex')
