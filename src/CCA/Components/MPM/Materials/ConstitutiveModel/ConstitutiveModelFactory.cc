@@ -77,6 +77,7 @@
 // Geomaterials
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/HypoplasticB.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/MohrCoulomb.h>
+#include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/MatsuokaNakai.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/QADamage.h>
 #include <CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels/PlasticityModels/ElastoPlastic.h>
 #include <CCA/Components/MPM/Core/MPMFlags.h>
@@ -318,6 +319,10 @@ else if (cm_type == "HypoplasticB") {
 
   else if (cm_type == "MohrCoulomb") {
 	  return(scinew MohrCoulomb(child, flags));
+  }
+
+  else if (cm_type == "MatsuokaNakai") {
+  return(scinew MatsuokaNakai(child, flags));
   }
 
   else if (cm_type == "QADamage") {

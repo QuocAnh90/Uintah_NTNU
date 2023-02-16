@@ -28,19 +28,32 @@
 # Makefile fragment for this subdirectory 
 
 
-SRCDIR := CCA/Components/MPM/Materials/ConstitutiveModel/SoilModels
+#########################################################################
+#
+#  WARNING: This library has been combined with the Math library to
+#           avoid a circular dependency...  The (empty) lib is still
+#           created until we determine whether it should be officially
+#           merged into the Math directory, or if a better split
+#           can be arranged.
+#
+#
 
-SRCS   += \
-        $(SRCDIR)/HypoplasticB.cc               \
-		$(SRCDIR)/MohrCoulomb.cc                \
-		$(SRCDIR)/MatsuokaNakai.cc              \
-		$(SRCDIR)/ClassicMohrCoulomb.cc         \
-		$(SRCDIR)/ShengMohrCoulomb.cc           \
-		$(SRCDIR)/BBMMatrix.cc                  \
-		$(SRCDIR)/QADamage.cc                   \
-		$(SRCDIR)/BBMPoint.cc                   \
+include $(SCIRUN_SCRIPTS)/smallso_prologue.mk
 
-SUBDIRS := \
-        $(SRCDIR)/PlasticityModels \
+SRCDIR   := Core/Disclosure
 
-		
+SRCS += \
+        $(SRCDIR)/dummy.cc
+
+#	$(SRCDIR)/TypeDescription.cc \
+#	$(SRCDIR)/TypeUtils.cc
+
+PSELIBS := 
+#	Core/Exceptions \
+#	Core/Util       \
+#	Core/Geometry
+
+LIBS := $(XML2_LIBRARY) $(MPI_LIBRARY)
+
+include $(SCIRUN_SCRIPTS)/smallso_epilogue.mk
+

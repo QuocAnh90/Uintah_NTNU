@@ -45,6 +45,7 @@
                                                                              Kelvin_Voigt,
                                                                              Maxwell_Weichert,
 									     MohrCoulomb,
+										 MatsuokaNakai,
 									     HypoplasticB,
 									     QADamage">
 
@@ -1041,6 +1042,18 @@
 	<yield_stress          spec="OPTIONAL DOUBLE" need_applies_to="type QADamage"/>
 	<hardening_modulus     spec="OPTIONAL DOUBLE" need_applies_to="type QADamage"/>
 
+	  <!--______________________________________________________________________ -->
+	  <!-- The following are for the MatsuokaNakai model -->
+	  <!-- G - shear modulus, K - bulk modulus, Phi - friction angle, N - dilation 
+	note - some are repeated, but apparently there is no problem with that
+	as some of the names are already twice in the file-->
+
+	  <G        spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  <K        spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  <Phi      spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  <N      spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  <lamda_c  spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  
 	 <!--______________________________________________________________________ -->
     <!-- The following are for the Mohr-Coulomb model -->
     <!-- G - shear modulus, K - bulk modulus, c-cohesion [all stress units]
