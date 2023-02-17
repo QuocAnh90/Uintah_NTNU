@@ -64,7 +64,7 @@ namespace Uintah {
 
     void CheckModel(double UI[]);
 
-    void Calculate_Stress(int& nblk, int& ninsv, double& dt,
+    void Calculate_Stress(int& ninsv, double& dt,
         double UI[], double stress[], double D[], double svarg[], double& USM);
 
 

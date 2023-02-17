@@ -45,6 +45,7 @@
 #include <string>
 
 #include <unistd.h>
+#include <Core/Exceptions/InvalidValue.h>
 
 using namespace std; using namespace Uintah;
 
@@ -110,22 +111,21 @@ void MatsuokaNakai::CheckModel(double UI[])
     if (UI[4] < 0.0) cerr << "lamda_c in the Matsuoka Nakai Model is set to: " << UI[4] << " This will cause the code to malfuncion. Any results obtained are invalid." << endl;
 }
 
-void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
+void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
     double UI[], double stress[], double D[], double svarg[], double& USM)
 
     /*
     copied from DIAMM, giving the input required
 
-    int &nblk, int &ninsv, double &dt,double UI[], double stress[], double D[],
+    int &ninsv, double &dt,double UI[], double stress[], double D[],
     double svarg[], double &USM
     C
     C     input arguments
     C     ===============
-    C      NBLK       int                   Number of blocks to be processed
     C      NINSV      int                   Number of internal state vars
     C      DTARG      dp                    Current time increment
     C      UI       dp,ar(nprop)            User inputs
-    C      D          dp,ar(6)              Strain increment
+    C      D          dp,ar(6)              Strain rate
     C
     C     input output arguments
     C     ======================
@@ -135,47 +135,52 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
     C     output arguments
     C     ================
     C      USM      dp                      uniaxial strain modulus
-    C
     C***********************************************************************
     C
     C      stresss and strains, plastic strain tensors
     C          11, 22, 33, 12, 23, 13
     C
     C***********************************************************************
-
     */
-
 {
-
     double deps[6]; // Strain increment (it needs to change the sign as the MN code read compression as possitive)
     for (int i = 0; i < 6; i++) {
-        deps[i] = -D[i] * dt;;
+        deps[i] = -D[i] * dt;
     }
 
     double K = UI[1];                                       // Bulk modulus
     double G = UI[0];                                       // Shear modulus
+    USM = 1 * (G + 0.3 * K) / 3.0;                          // uniaxial strain modulus
     double Phi = svarg[2];                                  // Friction angle
     double M = 2 * sqrt(2) * tan(Phi * 3.1415 / 180);       // Friction state variable
     double N_ini = svarg[3];                                // Dilatancy
     double N = N_ini;
     double lamda_c = UI[4];                                 // Dilatancy parameter
 
+    //double Plastic_Multiplier = 0;                          // Plastic multiplier
+    double deps_plastic[6];                                 // plastic strain
+    double deps_elastic[6];                                 // elastic strain
+
+    for (int i = 0; i < 6; i++) {
+        deps_plastic[i] = 0;
+    }
+
     double K43G = K + 4.0 * G / 3.0;
     double K23G = K - 2.0 * G / 3.0;
 
-    double ds[6]; // Stress increment 
-    ds[0] = K43G * deps[0] + K23G * (deps[1] + deps[2]);
-    ds[1] = K43G * deps[1] + K23G * (deps[0] + deps[2]);
-    ds[2] = K43G * deps[2] + K23G * (deps[0] + deps[1]);
-    ds[3] = 2 * G * deps[3];
-    ds[4] = 2 * G * deps[4];
-    ds[5] = 2 * G * deps[5];
+    double ds_trial[6]; // Stress increment 
+    ds_trial[0] = K43G * deps[0] + K23G * (deps[1] + deps[2]);
+    ds_trial[1] = K43G * deps[1] + K23G * (deps[0] + deps[2]);
+    ds_trial[2] = K43G * deps[2] + K23G * (deps[0] + deps[1]);
+    ds_trial[3] = G * deps[3];
+    ds_trial[4] = G * deps[4];
+    ds_trial[5] = G * deps[5];
 
     // Trial stress (it needs to change the sign of previous stress as the MN code read compression as possitive)
-    double stress_inter[6];
+    double stress_trial[6];
     //[0] xx // [1] yy // [2] zz // [3] xy // [4] yz // [5] xz
     for (int i = 0; i < 6; i++) {
-        stress_inter[i] = -stress[i] + ds[i];
+        stress_trial[i] = -stress[i] + ds_trial[i];
     }
 
     // Definition
@@ -183,9 +188,9 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
     //  double v10, double v11, double v12,
     //  double v20, double v21, double v22);
 
-    Matrix3 Stress_Tensor(  stress_inter[0], stress_inter[3], stress_inter[5],
-                            stress_inter[3], stress_inter[1], stress_inter[4],
-                            stress_inter[5], stress_inter[4], stress_inter[2]);
+    Matrix3 Stress_Tensor(stress_trial[0], stress_trial[3], stress_trial[5],
+        stress_trial[3], stress_trial[1], stress_trial[4],
+        stress_trial[5], stress_trial[4], stress_trial[2]);
 
     Matrix3 Stress_Tensor_power_2 = Stress_Tensor * Stress_Tensor;
 
@@ -195,35 +200,28 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
    
    double X = sqrt(I1 * I2 / I3 - 9);
 
-   double f = X - (M + N);      // Yield function
+   double f_trial = X - (M + N);      // Yield function
 
    // Cut off condition
-   if (I3 <= 0 || I1 * I2 / I3 <= 9)
+   if (I3 <= 0.000 || I1 * I2 / I3 <= 9.000)
    {
-       f = 0;
+       f_trial = 0;
        for (int i = 0; i < 6; i++) {
-           stress_inter[i] = 0;
+           stress_trial[i] = 0;
        }
 
-       cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
+       //cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
    }
 
-   if (f > 0)  // Elasto-plastic
+   if (f_trial > 0)  // Elasto-plastic
    {
        // interate
-       int count = 0;
-       double Plastic_Multiplier = 0;       // Plastic multiplier
-       double deps_plastic[6];              // plastic strain
-
-       for (int i = 0; i < 6; i++) {
-           deps_plastic[i] = 0;
-       }
-
-       double deps_elastic[6];              // elastic strain
-       double N = N_ini;
+       int count = 0;      
+       double stress_inter[6];
+       double f = 0;
        do {
-           ++count;
-
+           ++count;        
+          
            // Stress Tensor Inverse
            Matrix3 Stress_Tensor_Inverse = Stress_Tensor.Inverse();
            Matrix3 Identity; Identity.Identity();
@@ -256,15 +254,39 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
            Matrix3 dI1dSigma = Identity;
 
            Matrix3 S = Stress_Tensor; // Reduce Notation
-           Matrix3 dI2dSigma(S(1, 1) + S(2, 2), -2 * S(0, 1), -2 * S(0, 2),
-               -2 * S(0, 1), S(0, 0) + S(2, 2), -2 * S(1, 2),
-               -2 * S(0, 2), -2 * S(1, 2), S(1, 1) + S(0, 0));
+           Matrix3 dI2dSigma(S(1, 1) + S(2, 2)      , -2 * S(0, 1)              , -2 * S(0, 2),
+               -2 * S(0, 1)                         , S(0, 0) + S(2, 2)         , -2 * S(1, 2),
+               -2 * S(0, 2)                         , -2 * S(1, 2)              , S(1, 1) + S(0, 0));
 
-           Matrix3 dI3dSigma = (S(1, 1) * S(2, 2) - S(1, 2) * S(1, 2), 2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)), 2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)),
-               2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)), S(0, 0) * S(2, 2) - S(0, 2) * S(0, 2), 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)),
-               2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)), 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)), S(1, 1) * S(0, 0) - S(0, 2) * S(0, 2));
+           Matrix3 dI3dSigma (S(1, 1) * S(2, 2) - S(1, 2) * S(1, 2),      2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1))         , 2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)),
+               2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)),                 S(0, 0) * S(2, 2) - S(0, 2) * S(0, 2)               , 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)),
+               2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)),                 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2))         , S(1, 1) * S(0, 0) - S(0, 2) * S(0, 2));
+
+           if (I1 > 5000) {
+               //cerr << count << endl;
+
+               //cerr << " dI3dSigma(0,0) " << dI3dSigma(0, 0) << endl;
+
+               //cerr << " dI3dSigma " << dI3dSigma << endl;
+
+               //cerr << " S(1, 1) * S(2, 2) - S(1, 2) * S(1, 2) " << dI3dSigma_xx << endl;
+               //cerr << " S(0, 0) * S(2, 2) - S(0, 2) * S(0, 2)  " << dI3dSigma_yy << endl;
+               //cerr << " S(1, 1) * S(0, 0) - S(0, 2) * S(0, 2) " << dI3dSigma_zz << endl;
+               //cerr << " 2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)) " << dI3dSigma_xy << endl;
+              // cerr << " 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)) " << dI3dSigma_yz << endl;
+               //cerr << " 2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)) " << dI3dSigma_xz << endl;
+           }
 
            Matrix3 dYdSigma = dYdI1 * dI1dSigma + dYdI2 * dI2dSigma + dYdI3 * dI3dSigma;
+
+           if (I1 > 5000) {
+               cerr << count << endl;
+
+               cerr << " dYdI1 * dI1dSigma  " << dYdI1 * dI1dSigma << endl;
+               cerr << "  dYdI2 * dI2dSigma " << dYdI2 * dI2dSigma << endl;
+               cerr << " dYdI3 * dI3dSigma " << dYdI3 * dI3dSigma << endl;
+               cerr << " dYdSigma " << dYdSigma << endl;
+           }
 
            double dYdSigma_Vector[6];
            dYdSigma_Vector[0] = dYdSigma(0, 0);
@@ -279,9 +301,9 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
            dYdSigma_x_ElasticMatrix[0] = K43G * dYdSigma_Vector[0] + K23G * (dYdSigma_Vector[1] + dYdSigma_Vector[2]);
            dYdSigma_x_ElasticMatrix[1] = K43G * dYdSigma_Vector[1] + K23G * (dYdSigma_Vector[0] + dYdSigma_Vector[2]);
            dYdSigma_x_ElasticMatrix[2] = K43G * dYdSigma_Vector[2] + K23G * (dYdSigma_Vector[0] + dYdSigma_Vector[1]);
-           dYdSigma_x_ElasticMatrix[3] = 2 * G * dYdSigma_Vector[3];
-           dYdSigma_x_ElasticMatrix[4] = 2 * G * dYdSigma_Vector[4];
-           dYdSigma_x_ElasticMatrix[5] = 2 * G * dYdSigma_Vector[5];
+           dYdSigma_x_ElasticMatrix[3] = G * dYdSigma_Vector[3];
+           dYdSigma_x_ElasticMatrix[4] = G * dYdSigma_Vector[4];
+           dYdSigma_x_ElasticMatrix[5] = G * dYdSigma_Vector[5];
 
            double B = 0; // dYdSigma_x_ElasticMatrix_x_dQdSigma 
            for (int i = 0; i < 6; i++) {
@@ -290,6 +312,23 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
 
            double Plastic_Multiplier_increment = f / (A + B);
 
+           if (I1 > 5000) {
+
+               for (int i = 0; i < 6; i++) {
+                   cerr << " dQdSigma[i] " << dQdSigma[i] << endl;
+                   cerr << " deps[i] " << deps[i] << endl;
+                   cerr << " stress[i] " << -stress[i] << endl;
+               }
+
+               cerr << " X " << X << endl;
+               cerr << " I1 " << I1 << endl;
+               cerr << " N " << N << endl;
+               cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
+               cerr << " B " << B << endl;
+
+               throw InvalidValue("Stop to check", __FILE__, __LINE__);
+           }
+
            // Update plastic strain
            for (int i = 0; i < 6; i++) {
                deps_plastic[i] = deps_plastic[i] + Plastic_Multiplier_increment * dQdSigma[i];
@@ -297,14 +336,14 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
            }
 
            // Update stress
+           double ds[6]; // Stress increment 
            ds[0] = K43G * deps_elastic[0] + K23G * (deps_elastic[1] + deps_elastic[2]);
            ds[1] = K43G * deps_elastic[1] + K23G * (deps_elastic[0] + deps_elastic[2]);
            ds[2] = K43G * deps_elastic[2] + K23G * (deps_elastic[0] + deps_elastic[1]);
-           ds[3] = 2 * G * deps_elastic[3];
-           ds[4] = 2 * G * deps_elastic[4];
-           ds[5] = 2 * G * deps_elastic[5];
-
-           double stress_inter[6];
+           ds[3] = G * deps_elastic[3];
+           ds[4] = G * deps_elastic[4];
+           ds[5] = G * deps_elastic[5];
+          
            //[0] xx // [1] yy // [2] zz // [3] xy // [4] yz // [5] xz
            for (int i = 0; i < 6; i++) {
                stress_inter[i] = -stress[i] + ds[i];
@@ -329,39 +368,75 @@ void MatsuokaNakai::Calculate_Stress(int& nblk, int& ninsv, double& dt,
 
            f = X - (M + N);      // Yield function
 
+
+           if (count > 100) {
+               //cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
+               for (int i = 0; i < 4; i++) {
+
+                   cerr << " deps_plastic[i] " << deps_plastic[i] << endl;
+                   cerr << " deps_elastic[i] " << deps_elastic[i] << endl;
+                   cerr << " stress_inter[i] " << stress_inter[i] << endl;
+                   cerr << " stress_trial[i] " << stress_trial[i] << endl;
+                   
+               }
+               cerr << " f_trial " << f_trial << endl;
+
+               cerr << " f " << f << endl;
+               cerr << " X " << X << endl;
+               cerr << " N " << N << endl;
+               cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
+               cerr << " B " << B << endl;
+
+               for (int i = 0; i < 6; i++) {
+                   cerr << " dYdSigma_x_ElasticMatrix[i] " << dYdSigma_x_ElasticMatrix[i] << endl;
+               }
+           }
+
+           if (count > 110) {             
+               throw InvalidValue("More than 100 interations", __FILE__, __LINE__);
+           }
+
            // Cut off condition
-           if (I3 <= 0 || I1 * I2 / I3 <= 9)
+           if (I3 <= 0.000 || I1 * I2 / I3 <= 9.000)
            {
                f = 0;
                for (int i = 0; i < 6; i++) {
                    stress_inter[i] = 0;
                }
 
-               cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
+               //cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
            }
 
            // Liquefraction cut-ogg
-           if (I1 <= 0)
+           if (I1 <= 1000.000)
            {
                f = 0;
                for (int i = 0; i < 6; i++) {
                    stress_inter[i] = 0;
                }
 
-               cerr << "Cut off condition for liquefraction " << I1 << endl;
+               //cerr << "Cut off condition for liquefraction " << I1 << endl;
            }
 
        } while (abs(f)>0.001);
+
+       // Update stress and state variables
+       svarg[2] = Phi;  // Friction
+       svarg[3] = N;    // Dilatancy
+
+       // Update stress (it needs to change the sign of previous stress as the MN code read compression as possitive)
+       for (int i = 0; i < 6; i++) {
+           stress[i] = -stress_inter[i];
+       }
    }
-
-   // Update stress and state variables
-   svarg[2] = Phi;  // Friction
-   svarg[3] = N;    // Dilatancy
-
+   else {
    // Update stress (it needs to change the sign of previous stress as the MN code read compression as possitive)
    for (int i = 0; i < 6; i++) {
-       stress[i] = -stress_inter[i];
+       stress[i] = -stress_trial[i];
    }
+    }
+
+
 }
 
 
@@ -575,14 +650,13 @@ void MatsuokaNakai::computeStressTensor(const PatchSubset* patches,
       double svarg[d_NINSV];
       double USM=9e99;
       double dt = delT;
-      int nblk = 1;
 
       // Load ISVs into a 1D array for fortran code
       for(int i=0;i<d_NINSV;i++){
         svarg[i]=ISVs[i][idx];
       }
 
-      Calculate_Stress(nblk, d_NINSV, dt, UI, sigarg, Darray, svarg, USM);
+      Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM);
 
       // Unload ISVs from 1D array into ISVs_new
       for(int i=0;i<d_NINSV;i++){

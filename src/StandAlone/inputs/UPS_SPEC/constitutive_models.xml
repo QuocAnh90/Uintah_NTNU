@@ -44,10 +44,10 @@
                                                                              ArrudaBoyce8,
                                                                              Kelvin_Voigt,
                                                                              Maxwell_Weichert,
-									     MohrCoulomb,
-										 MatsuokaNakai,
-									     HypoplasticB,
-									     QADamage">
+									                                         MohrCoulomb,
+										                                     MatsuokaNakai,
+									                                         HypoplasticB,
+									                                         QADamage">
 
 	<!-- input parameters for Kelvin_voigt model -->
 	<elastic_shear				   spec="REQUIRED DOUBLE 'positive'" need_applies_to = "type Kelvin_Voigt" />
