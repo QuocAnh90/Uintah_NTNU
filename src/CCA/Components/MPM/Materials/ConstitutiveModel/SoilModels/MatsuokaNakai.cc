@@ -112,7 +112,7 @@ void MatsuokaNakai::CheckModel(double UI[])
 }
 
 void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
-    double UI[], double stress[], double D[], double svarg[], double& USM)
+    double UI[], double stress[], double D[], double svarg[], double& USM, particleIndex idx)
 
     /*
     copied from DIAMM, giving the input required
@@ -218,7 +218,7 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
        // interate
        int count = 0;      
        double stress_inter[6];
-       double f = 0;
+       double f = f_trial;
        do {
            ++count;        
           
@@ -262,31 +262,7 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
                2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)),                 S(0, 0) * S(2, 2) - S(0, 2) * S(0, 2)               , 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)),
                2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)),                 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2))         , S(1, 1) * S(0, 0) - S(0, 2) * S(0, 2));
 
-           if (I1 > 5000) {
-               //cerr << count << endl;
-
-               //cerr << " dI3dSigma(0,0) " << dI3dSigma(0, 0) << endl;
-
-               //cerr << " dI3dSigma " << dI3dSigma << endl;
-
-               //cerr << " S(1, 1) * S(2, 2) - S(1, 2) * S(1, 2) " << dI3dSigma_xx << endl;
-               //cerr << " S(0, 0) * S(2, 2) - S(0, 2) * S(0, 2)  " << dI3dSigma_yy << endl;
-               //cerr << " S(1, 1) * S(0, 0) - S(0, 2) * S(0, 2) " << dI3dSigma_zz << endl;
-               //cerr << " 2 * (S(1, 2) * S(0, 2) - S(2, 2) * S(0, 1)) " << dI3dSigma_xy << endl;
-              // cerr << " 2 * (S(0, 2) * S(0, 1) - S(0, 0) * S(1, 2)) " << dI3dSigma_yz << endl;
-               //cerr << " 2 * (S(1, 2) * S(0, 1) - S(1, 1) * S(0, 2)) " << dI3dSigma_xz << endl;
-           }
-
            Matrix3 dYdSigma = dYdI1 * dI1dSigma + dYdI2 * dI2dSigma + dYdI3 * dI3dSigma;
-
-           if (I1 > 5000) {
-               cerr << count << endl;
-
-               cerr << " dYdI1 * dI1dSigma  " << dYdI1 * dI1dSigma << endl;
-               cerr << "  dYdI2 * dI2dSigma " << dYdI2 * dI2dSigma << endl;
-               cerr << " dYdI3 * dI3dSigma " << dYdI3 * dI3dSigma << endl;
-               cerr << " dYdSigma " << dYdSigma << endl;
-           }
 
            double dYdSigma_Vector[6];
            dYdSigma_Vector[0] = dYdSigma(0, 0);
@@ -311,29 +287,50 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
            }
 
            double Plastic_Multiplier_increment = f / (A + B);
-
-           if (I1 > 5000) {
+           
+           // Debug
+           /*
+           if (idx == 27) {
+               cerr << count << endl;
+               cerr << " I1  " << I1 << endl;
+               cerr << " I2 " << I2 << endl;
+               cerr << " I3 " << I3 << endl;
+               cerr << " X " << X << endl;
+               cerr << " dYdI1  " << dYdI1 << endl;
+               cerr << "  dYdI2 " << dYdI2 << endl;
+               cerr << " dYdI3 " << dYdI3 << endl;
+               cerr << " dI1dSigma  " << dI1dSigma << endl;
+               cerr << " dI2dSigma " << dI2dSigma << endl;
+               cerr << " dI3dSigma " << dI3dSigma << endl;
+               cerr << " dYdI1 * dI1dSigma  " << dYdI1 * dI1dSigma << endl;
+               cerr << "  dYdI2 * dI2dSigma " << dYdI2 * dI2dSigma << endl;
+               cerr << " dYdI3 * dI3dSigma " << dYdI3 * dI3dSigma << endl;
+               cerr << " dYdSigma " << dYdSigma << endl;
 
                for (int i = 0; i < 6; i++) {
+                   cerr << " stress[i] " << -stress[i] << endl;
+                   cerr << " dYdSigma_Vector[i] " << dYdSigma_Vector[i] << endl;
+                   cerr << " dYdSigma_x_ElasticMatrix[i] " << dYdSigma_x_ElasticMatrix[i] << endl;
                    cerr << " dQdSigma[i] " << dQdSigma[i] << endl;
                    cerr << " deps[i] " << deps[i] << endl;
-                   cerr << " stress[i] " << -stress[i] << endl;
                }
-
+               
                cerr << " X " << X << endl;
                cerr << " I1 " << I1 << endl;
                cerr << " N " << N << endl;
                cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
                cerr << " B " << B << endl;
 
-               throw InvalidValue("Stop to check", __FILE__, __LINE__);
+               //throw InvalidValue("Stop to check", __FILE__, __LINE__);
            }
+           */
 
            // Update plastic strain
            for (int i = 0; i < 6; i++) {
                deps_plastic[i] = deps_plastic[i] + Plastic_Multiplier_increment * dQdSigma[i];
                deps_elastic[i] = deps[i] - deps_plastic[i];
            }
+          
 
            // Update stress
            double ds[6]; // Stress increment 
@@ -354,47 +351,51 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
            double N = N_ini + lamda_c * (M + N) * deps_volume;
 
            // Recompute yield function
-           Matrix3 Stress_Tensor(   stress_inter[0], stress_inter[3], stress_inter[5],
-                                    stress_inter[3], stress_inter[1], stress_inter[4],
-                                    stress_inter[5], stress_inter[4], stress_inter[2]);
+           Matrix3 Stress_Tensor_new(   stress_inter[0], stress_inter[3], stress_inter[5],
+                                        stress_inter[3], stress_inter[1], stress_inter[4],
+                                        stress_inter[5], stress_inter[4], stress_inter[2]);
 
+           // Update stress tensor
+           Stress_Tensor = Stress_Tensor_new;
            Stress_Tensor_power_2 = Stress_Tensor * Stress_Tensor;
 
            I1 = Stress_Tensor.Trace();                                       // First stress invariants
            I2 = 0.5 * (I1 * I1 - Stress_Tensor_power_2.Trace());             // Second stress invariants     
            I3 = Stress_Tensor.Determinant();                                 // Third stress invariants
-
            X = sqrt(I1 * I2 / I3 - 9);
 
            f = X - (M + N);      // Yield function
 
-
-           if (count > 100) {
-               //cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
+           // Debug
+           /*
+           if (idx == 27) {
                for (int i = 0; i < 4; i++) {
-
+                   cerr << " stress[i] " << -stress[i] << endl;
+                   cerr << " deps[i] " << deps[i] << endl;
                    cerr << " deps_plastic[i] " << deps_plastic[i] << endl;
                    cerr << " deps_elastic[i] " << deps_elastic[i] << endl;
                    cerr << " stress_inter[i] " << stress_inter[i] << endl;
-                   cerr << " stress_trial[i] " << stress_trial[i] << endl;
-                   
+                   cerr << " stress_trial[i] " << stress_trial[i] << endl;            
+                   cerr << " dYdSigma_x_ElasticMatrix[i] " << dYdSigma_x_ElasticMatrix[i] << endl;
                }
-               cerr << " f_trial " << f_trial << endl;
 
+               cerr << " f_trial " << f_trial << endl;
                cerr << " f " << f << endl;
                cerr << " X " << X << endl;
                cerr << " N " << N << endl;
+               cerr << " N_ini " << N_ini << endl;
+               cerr << " deps_volume " << deps_volume << endl;
+               cerr << " lamda_c * (M + N) * deps_volume " << lamda_c * (M + N) * deps_volume << endl;
                cerr << " Plastic_Multiplier_increment " << Plastic_Multiplier_increment << endl;
                cerr << " B " << B << endl;
-
-               for (int i = 0; i < 6; i++) {
-                   cerr << " dYdSigma_x_ElasticMatrix[i] " << dYdSigma_x_ElasticMatrix[i] << endl;
-               }
            }
+           */
 
-           if (count > 110) {             
-               throw InvalidValue("More than 100 interations", __FILE__, __LINE__);
+           if (count > 1000) {             
+               cerr << " Particle id " << idx << endl;
+               throw InvalidValue("More than 1000 interations", __FILE__, __LINE__);
            }
+           
 
            // Cut off condition
            if (I3 <= 0.000 || I1 * I2 / I3 <= 9.000)
@@ -403,18 +404,16 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
                for (int i = 0; i < 6; i++) {
                    stress_inter[i] = 0;
                }
-
                //cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
            }
 
            // Liquefraction cut-ogg
-           if (I1 <= 1000.000)
+           if (I1 <= 0.0)
            {
                f = 0;
                for (int i = 0; i < 6; i++) {
                    stress_inter[i] = 0;
                }
-
                //cerr << "Cut off condition for liquefraction " << I1 << endl;
            }
 
@@ -435,8 +434,6 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
        stress[i] = -stress_trial[i];
    }
     }
-
-
 }
 
 
@@ -656,7 +653,7 @@ void MatsuokaNakai::computeStressTensor(const PatchSubset* patches,
         svarg[i]=ISVs[i][idx];
       }
 
-      Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM);
+      Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM, idx);
 
       // Unload ISVs from 1D array into ISVs_new
       for(int i=0;i<d_NINSV;i++){
