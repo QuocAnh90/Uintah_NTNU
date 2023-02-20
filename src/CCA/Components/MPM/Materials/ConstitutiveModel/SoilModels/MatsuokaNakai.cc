@@ -447,7 +447,7 @@ void MatsuokaNakai::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
 
   cm_ps->appendElement("G",UI[0]);          // initial shear modulus 
   cm_ps->appendElement("K",UI[1]);          // initial bulk modulus 
-  cm_ps->appendElement("Phi",UI[2]);        // initial friction angle 
+  cm_ps->appendElement("Phi_friction",UI[2]);        // initial friction angle 
 
   cm_ps->appendElement("N",UI[3]);          // initial dilatancy state variable 
   cm_ps->appendElement("lamda_c",UI[4]);    // parameter for dilatancy
@@ -841,7 +841,7 @@ MatsuokaNakai::getInputParameters(ProblemSpecP& ps)
 {
   ps->getWithDefault("G",UI[0],0.0);              // initial shear modulus 
   ps->getWithDefault("K",UI[1],0.0);              // initial bulk modulus
-  ps->getWithDefault("Phi",UI[2],0.0);            // initial friction angle modulus 
+  ps->getWithDefault("Phi_friction",UI[2],0.0);            // initial friction angle modulus 
   ps->getWithDefault("N",UI[3],0.0);              // initial dilatancy state variable 
   ps->getWithDefault("lamda_c",UI[4],0.0);        // parameter for dilatancy
 }
@@ -853,7 +853,7 @@ MatsuokaNakai::initializeLocalMPMLabels()
 
   ISVNames.push_back("G");
   ISVNames.push_back("K");
-  ISVNames.push_back("Phi");
+  ISVNames.push_back("Phi_friction");
   ISVNames.push_back("N");
   ISVNames.push_back("lamda_c");
 

@@ -1050,7 +1050,7 @@
 
 	  <G        spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
 	  <K        spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
-	  <Phi      spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
+	  <Phi_friction      spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
 	  <N      spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
 	  <lamda_c  spec="OPTIONAL DOUBLE" need_applies_to="type MatsuokaNakai"/>
 	  
