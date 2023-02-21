@@ -74,10 +74,6 @@ namespace Uintah {
 
     void CheckModel(double UI[]);
 
-    double GetSr (double UseWaterRetention, double Suction, double * WTRParam);
-    double GetSuction (double UseWaterRetention, double Sr, double * WTRParam);
-
-
   public:
     // constructors
     MohrCoulomb(ProblemSpecP& ps, MPMFlags* flag);
@@ -145,8 +141,6 @@ namespace Uintah {
 
     virtual void addParticleState(std::vector<const VarLabel*>& from,
                                   std::vector<const VarLabel*>& to);
-
-
 
   };
 
