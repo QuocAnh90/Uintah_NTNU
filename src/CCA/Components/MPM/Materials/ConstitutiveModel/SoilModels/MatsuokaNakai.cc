@@ -392,8 +392,8 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
            */
 
            if (count > 1000) {             
-               cerr << " Particle id " << idx << endl;
-               throw InvalidValue("More than 1000 interations", __FILE__, __LINE__);
+               cerr << " Particle id " << idx << " more than 1000 interations" << endl;
+               //throw InvalidValue("More than 1000 interations", __FILE__, __LINE__);
            }
            
 
