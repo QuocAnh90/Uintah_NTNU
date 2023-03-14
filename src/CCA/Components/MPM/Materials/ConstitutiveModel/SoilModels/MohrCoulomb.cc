@@ -51,8 +51,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <unistd.h>
 
-//sets of external variables for the Sheng Mohr Coulomb algorithm by WTS. Some are redundant.
-
 double ALFACHECK, ALFACHANGE, ALFARATIO, MAXITER, YIELDTOL, TOL_METHOD, INCREMENT_TYPE, BETA_FACT;
 double DRIFT_CORRECTION, EULER_ITERATIONS, CRITICAL_STEP_SIZE;
 double STEP_MAX, STEP_MIN, ERROR_DEF, USE_ERROR_STEP, MIN_DIVISION_SIZE;
