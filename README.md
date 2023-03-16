@@ -17,7 +17,9 @@ Conference
  
 4. Q. A. Tran, A. Rogstad, G. Grimstad, S. Nordal, G. H. Alene. Preliminary study of 3D large deformation modeling of the Gjerdrum 2020 sensitive clay landslide.  Proceedings in the 8th Canadian Conference on Geotechnique and Natural Hazards 12-15 June 2022, Quebec, Canada.
 
-5. Q. A. Tran. Coupled CFD-MPM for soil-water-structure interaction. The 3rd International Conference on Natural Hazards & Infrastructure  5-7July 2022, Athens, Greece.
+5. Q. A. Tran. Coupled CFD-MPM for soil-water-structure interaction. The 3rd International Conference on Natural Hazards & Infrastructure  5-7 July 2022, Athens, Greece.
+
+6. Q. A. Tran. A hybrid MPM-CFD model for simulating earthquake-induced submarine landslides. EGU General Assembly 2023 23-28 April 2023
 -----------------------------------
 Master thesis
 1. A. Rogstad. Empirical and Numerical Analysis of the Retrogression in the Gjerdrum Landslide. (2022). Master thesis in Norwegian University of Science and technology.
