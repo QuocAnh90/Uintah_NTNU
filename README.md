@@ -19,7 +19,9 @@ Conference
 
 5. Q. A. Tran. Coupled CFD-MPM for soil-water-structure interaction. The 3rd International Conference on Natural Hazards & Infrastructure  5-7 July 2022, Athens, Greece.
 
-6. Q. A. Tran. A hybrid MPM-CFD model for simulating earthquake-induced submarine landslides. EGU General Assembly 2023 23-28 April 2023
+6. E. R. Sørlie, L. O. Hartnik, Q. A. Tran, G. R. Eiksund. Rheological parameters for submarine landslide materials. 10th International Conference on Physical Modelling in Geotechnics 2022, Daejeon, Korea.
+
+7. Q. A. Tran. A hybrid MPM-CFD model for simulating earthquake-induced submarine landslides. EGU General Assembly 2023 23-28 April 2023
 -----------------------------------
 Master thesis
 1. A. Rogstad. Empirical and Numerical Analysis of the Retrogression in the Gjerdrum Landslide. (2022). Master thesis in Norwegian University of Science and technology.
