@@ -6,7 +6,9 @@ Publication
 Journal
 1. H. Vicardi, Q. A. Tran, S. Nordal, V. Thakur. (2022). MPM modelling of debris flow entrainment and interaction with an upstream flexible barrier. Landslides 2022. https://link.springer.com/article/10.1007/s10346-022-01886-8
 
-2. Q. A. Tran, G. Grimstad, S. A. G. Amiri. (2022). MPMICE: A hybrid MPM-CFD model for simulating coupled problems in porous media. Application to earthquake-induced submarine landslides. arXiv preprint arXiv:2211.12761
+2. Q. A. Tran, G. Grimstad, S. A. G. Amiri. (2023). MPMICE: A hybrid MPM-CFD model for simulating coupled problems in porous media. Application to earthquake-induced submarine landslides. arXiv preprint arXiv:2211.12761
+
+3. E.R. Sørlie, L.O. Hartnik, Q.A. Tran, G.R. Eiksund, V. Thakur, H. Kjennbakken, S. Degago. (2023). Physical model tests of clay-rich submarine landslides and resulting impact forces on offshore foundations. Ocean Engineering 273, 113966.
 -----------------------------------
 Conference
 1. Q. A. Tran, G. Grimstad, S. A, G. Amiri. Coupled CFD-MPM simulation of soil-fluid interaction in geotechnics. The 7th International Conference on Particle-based Methods 04-05 October 2021, Hamburg, Germany.
