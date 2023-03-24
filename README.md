@@ -27,3 +27,5 @@ Conference
 -----------------------------------
 Master thesis
 1. A. Rogstad. Empirical and Numerical Analysis of the Retrogression in the Gjerdrum Landslide. (2022). Master thesis in Norwegian University of Science and technology.
+
+2. LO Hartnik. Experimental Study of Submarine Landslides and Impact Forces on Offshore Constructions. (2022). Master thesis in Norwegian University of Science and technology.
