@@ -67,7 +67,6 @@
 #include <errno.h>
 #include <fenv.h>
 
-
 using namespace Uintah;
 using namespace std;
 //__________________________________
@@ -751,8 +750,11 @@ void MPMICE::scheduleInterpolatePAndGradP(SchedulerP& sched,
   t->requires(Task::NewDW, MIlb->cMassLabel,          mpm_matl,  gac, 1);
   t->requires(Task::OldDW, Mlb->pXLabel,              mpm_matl,  Ghost::None);
   t->requires(Task::NewDW, Mlb->pCurSizeLabel,        mpm_matl,  Ghost::None);
+  t->requires(Task::OldDW, Mlb->pPressureIniLabel,    mpm_matl, Ghost::None);
 
   t->computes(Mlb->pPressureLabel,   mpm_matl);
+  t->computes(Mlb->pPressureExcessLabel, mpm_matl);
+  t->computes(Mlb->pPressureIniLabel_preReloc, mpm_matl);
   sched->addTask(t, patches, all_matls);
 }
 
@@ -1289,6 +1291,11 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
     Ghost::GhostType  gac = Ghost::AroundCells;
     new_dw->get(pressNC, MIlb->press_NCLabel,  0, patch, gac, NGN);
 
+    // Get the current simulation time
+        simTime_vartype simTimeVar;
+        old_dw->get(simTimeVar, Mlb->simulationTimeLabel);
+        double time = simTimeVar;
+
     for(unsigned int m = 0; m < m_materialManager->getNumMatls( "MPM" ); m++){
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int indx = mpm_matl->getDWIndex();
@@ -1301,6 +1308,12 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
       new_dw->get(psize,                Mlb->pCurSizeLabel,  pset);     
       old_dw->get(px,                   Mlb->pXLabel,        pset);     
       new_dw->allocateAndPut(pPressure, Mlb->pPressureLabel, pset);     
+
+      constParticleVariable<double> pPressureIni;
+      ParticleVariable<double> pPressureExcess, pPressureIni_preReloc;
+      new_dw->allocateAndPut(pPressureExcess, Mlb->pPressureExcessLabel, pset);
+      old_dw->get(pPressureIni, Mlb->pPressureIniLabel, pset);
+      new_dw->allocateAndPut(pPressureIni_preReloc, Mlb->pPressureIniLabel_preReloc, pset);
 
      //__________________________________
      // Interpolate NC pressure to particles
@@ -1315,8 +1328,20 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
         for (int k = 0; k < NN; k++) {
           press += pressNC[ni[k]] * S[k];
         }
-        pPressure[idx] = press-p_ref;
+        pPressure[idx] = press-p_ref;   
+
+        // Setup Initial pore water pressure
+        double ConsolidationTime = d_mpm->flags->d_Consolidation_Time;
+
+        pPressureExcess[idx] = 0;
+        if (time < ConsolidationTime) {
+            pPressureIni_preReloc[idx] = pPressure[idx];
+        }
+        else {
+            pPressureIni_preReloc[idx] = pPressureIni[idx];
+        }
       }
+
     }  // numMPMMatls
     delete interpolator;
   } //patches

@@ -128,6 +128,8 @@ namespace Uintah {
     ParticleVariable<double> pFluidMass, pSolidMass, pPorePressure, pPorosity;
     ParticleVariable<Vector> pFluidVelocity, pfluidacceleration;
     ParticleVariable<Vector> pPrescribedPorePressure;
+
+    ParticleVariable<double> pPressureIni;
     } ParticleVars;
 
   protected:

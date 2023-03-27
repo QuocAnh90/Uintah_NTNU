@@ -134,9 +134,11 @@ class Output;
     bool        d_coupledflow_contact;                         // Contact formulation for fluid
     double      d_waterdampingCoeff;
     double      d_soliddampingCoeff;
-    bool		d_PorePressureFilter;						 // Pore Water Pressure filter option
-    bool		d_UseMPMICE2;						         // Turn on MPMICE2
-    std::string d_initial_Su_file;                         // File containing Su linear with depth
+    bool		d_PorePressureFilter;					 	  // Pore Water Pressure filter option
+    bool		d_UseMPMICE2;						          // Turn on MPMICE2
+    std::string d_initial_Su_file;                            // File containing Su linear with depth
+
+    double		d_Consolidation_Time;						  // Consolidation Time
 
    //********** Start Reactive Flow Section *********************
     bool        d_doScalarDiffusion;

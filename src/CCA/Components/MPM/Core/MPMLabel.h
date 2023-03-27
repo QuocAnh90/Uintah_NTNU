@@ -56,6 +56,9 @@ namespace Uintah {
 
       //non PermanentParticleState
       const VarLabel* pPressureLabel;
+      const VarLabel* pPressureExcessLabel;
+      const VarLabel* pPressureIniLabel;
+      const VarLabel* pPressureIniLabel_preReloc;
       const VarLabel* pScratchVecLabel;
       const VarLabel* pScratchLabel;
       const VarLabel* pVolumeDeformedLabel;

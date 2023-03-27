@@ -51,6 +51,8 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <unistd.h>
 
+#include <Core/Exceptions/InvalidValue.h>
+
 double ALFACHECK, ALFACHANGE, ALFARATIO, MAXITER, YIELDTOL, TOL_METHOD, INCREMENT_TYPE, BETA_FACT;
 double DRIFT_CORRECTION, EULER_ITERATIONS, CRITICAL_STEP_SIZE;
 double STEP_MAX, STEP_MIN, ERROR_DEF, USE_ERROR_STEP, MIN_DIVISION_SIZE;
@@ -429,6 +431,14 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         new_dw->get(pvolume_new, lb->pVolumeLabel_preReloc, pset);
         new_dw->get(pxnew, lb->pXLabel_preReloc, pset);
 
+        constParticleVariable<double> p_pressureIni_preReloc, p_pressure;
+        ParticleVariable<double>  p_pressureExcess;
+        if (flag->d_UseMPMICE2) {
+            new_dw->get(p_pressure, lb->pPressureLabel, pset);
+            new_dw->allocateAndPut(p_pressureExcess, lb->pPressureExcessLabel, pset);
+            new_dw->get(p_pressureIni_preReloc, lb->pPressureIniLabel_preReloc, pset);
+        }
+
         std::vector<constParticleVariable<double> > ISVs(d_NINSV + 1);
         for (int i = 0; i < d_NINSV; i++) {
             old_dw->get(ISVs[i], ISVLabels[i], pset);
@@ -551,17 +561,23 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             double tShear = UI[29];
 
             double ConsolidationTime = UI[38];
-
             // Only calculate strain after the consolidation time
             if (time > ConsolidationTime) {
+
+                // Store strain tensor
                 strain11 += e11 * dt;
                 strain22 += e22 * dt;
                 strain33 += e33 * dt;
                 strain12 += e12 * dt;
                 strain23 += e23 * dt;
                 strain13 += e13 * dt;
-            }
 
+                // Store porewater pressure
+                if (flag->d_UseMPMICE2) {
+                    p_pressureExcess[idx] = p_pressure[idx] - p_pressureIni_preReloc[idx];
+                }
+            }
+            
             volumetric_strain = (strain11 + strain22 + strain33) / 3;
             shear_strain_local = 1.0 / 3.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0 * (pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));
             shear_strain_rate = 1.0 / 3.0 * sqrt(2 * (pow((e11 - e22), 2) + pow((e11 - e33), 2) + pow((e22 - e33), 2)) + 3 * (pow(e12, 2) + pow(e13, 2) + pow(e23, 2)));
