@@ -1334,6 +1334,7 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
         double ConsolidationTime = d_mpm->flags->d_Consolidation_Time;
 
         pPressureExcess[idx] = 0;
+
         if (time < ConsolidationTime) {
             pPressureIni_preReloc[idx] = pPressure[idx];
         }

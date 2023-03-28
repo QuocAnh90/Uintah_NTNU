@@ -435,7 +435,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
         ParticleVariable<double>  p_pressureExcess;
         if (flag->d_UseMPMICE2) {
             new_dw->get(p_pressure, lb->pPressureLabel, pset);
-            new_dw->allocateAndPut(p_pressureExcess, lb->pPressureExcessLabel, pset);
+            new_dw->getModifiable(p_pressureExcess, lb->pPressureExcessLabel, pset);
             new_dw->get(p_pressureIni_preReloc, lb->pPressureIniLabel_preReloc, pset);
         }
 
