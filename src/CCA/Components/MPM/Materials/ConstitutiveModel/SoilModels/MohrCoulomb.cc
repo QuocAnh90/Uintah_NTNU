@@ -578,7 +578,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
                 // Store porewater pressure
                 // Subtract initial pressure and coordinate change due to the change of reference line
                 if (flag->d_UseMPMICE2) {
-                    p_pressureExcess[idx] = p_pressure[idx] - p_pressureIni_preReloc[idx] + pdispnew[idx].(y) * 1000;
+                    p_pressureExcess[idx] = p_pressure[idx] - p_pressureIni_preReloc[idx] + pdispnew[idx][1] * 1000;
                 }
             }
             
