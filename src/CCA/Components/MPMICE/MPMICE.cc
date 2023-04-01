@@ -1291,11 +1291,6 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
     Ghost::GhostType  gac = Ghost::AroundCells;
     new_dw->get(pressNC, MIlb->press_NCLabel,  0, patch, gac, NGN);
 
-    // Get the current simulation time
-        simTime_vartype simTimeVar;
-        old_dw->get(simTimeVar, Mlb->simulationTimeLabel);
-        double time = simTimeVar;
-
     for(unsigned int m = 0; m < m_materialManager->getNumMatls( "MPM" ); m++){
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int indx = mpm_matl->getDWIndex();
@@ -1308,12 +1303,6 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
       new_dw->get(psize,                Mlb->pCurSizeLabel,  pset);     
       old_dw->get(px,                   Mlb->pXLabel,        pset);     
       new_dw->allocateAndPut(pPressure, Mlb->pPressureLabel, pset);     
-
-      constParticleVariable<double> pPressureIni;
-      ParticleVariable<double> pPressureExcess, pPressureIni_preReloc;
-      new_dw->allocateAndPut(pPressureExcess, Mlb->pPressureExcessLabel, pset);
-      old_dw->get(pPressureIni, Mlb->pPressureIniLabel, pset);
-      new_dw->allocateAndPut(pPressureIni_preReloc, Mlb->pPressureIniLabel_preReloc, pset);
 
      //__________________________________
      // Interpolate NC pressure to particles
@@ -1329,18 +1318,6 @@ void MPMICE::interpolatePAndGradP(const ProcessorGroup*,
           press += pressNC[ni[k]] * S[k];
         }
         pPressure[idx] = press-p_ref;   
-
-        // Setup Initial pore water pressure
-        double ConsolidationTime = d_mpm->flags->d_Consolidation_Time;
-
-        pPressureExcess[idx] = 0;
-
-        if (time < ConsolidationTime) {
-            pPressureIni_preReloc[idx] = pPressure[idx];
-        }
-        else {
-            pPressureIni_preReloc[idx] = pPressureIni[idx];
-        }
       }
 
     }  // numMPMMatls

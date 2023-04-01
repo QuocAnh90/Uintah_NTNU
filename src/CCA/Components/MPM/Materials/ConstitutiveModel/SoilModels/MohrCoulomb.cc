@@ -437,9 +437,6 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
         if (flag->d_UseMPMICE2) {
             new_dw->get(p_pressure, lb->pPressureLabel, pset);
-            new_dw->getModifiable(p_pressureExcess, lb->pPressureExcessLabel, pset);
-            new_dw->get(p_pressureIni_preReloc, lb->pPressureIniLabel_preReloc, pset);
-            new_dw->get(pdispnew, lb->pDispLabel_preReloc, pset);
         }
 
         std::vector<constParticleVariable<double> > ISVs(d_NINSV + 1);
@@ -574,12 +571,6 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
                 strain12 += e12 * dt;
                 strain23 += e23 * dt;
                 strain13 += e13 * dt;
-
-                // Store porewater pressure
-                // Subtract initial pressure and coordinate change due to the change of reference line
-                if (flag->d_UseMPMICE2) {
-                    p_pressureExcess[idx] = p_pressure[idx] - p_pressureIni_preReloc[idx] + pdispnew[idx][1] * 1000;
-                }
             }
             
             volumetric_strain = (strain11 + strain22 + strain33) / 3;
