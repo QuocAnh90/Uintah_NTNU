@@ -128,8 +128,6 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_UseMPMICE2 = false;
   d_initial_Su_file = "";
 
-  d_Consolidation_Time = 0.0;
-
   //******* Reactive Flow Component
   d_doScalarDiffusion   =  false;  // for diffusion component found  in ReactiveFlow
   d_doAutoCycleBC       =  false;  // for scalar flux boundary conditions
@@ -235,8 +233,6 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("PorePressureFilter", d_PorePressureFilter);
   mpm_flag_ps->get("Use_MPMICE2", d_UseMPMICE2);
   mpm_flag_ps->get("Su_reference_line_file", d_initial_Su_file);
-
-  mpm_flag_ps->get("ConsolidationTime", d_Consolidation_Time);
 
   if(d_artificial_viscosity && d_integrator_type == "implicit"){
     if (d_myworld->myRank() == 0){

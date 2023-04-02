@@ -138,8 +138,6 @@ class Output;
     bool		d_UseMPMICE2;						          // Turn on MPMICE2
     std::string d_initial_Su_file;                            // File containing Su linear with depth
 
-    double		d_Consolidation_Time;						  // Consolidation Time
-
    //********** Start Reactive Flow Section *********************
     bool        d_doScalarDiffusion;
     bool        d_doAutoCycleBC;

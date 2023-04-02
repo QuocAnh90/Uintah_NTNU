@@ -83,7 +83,6 @@
 		<solid_damping_coef spec="OPTIONAL DOUBLE" />
 		<PorePressureFilter spec="OPTIONAL BOOLEAN" />
 		<Use_MPMICE2 spec="OPTIONAL BOOLEAN" />
-		<ConsolidationTime spec="OPTIONAL DOUBLE" />
 		<Su_reference_line_file                spec="OPTIONAL STRING" />
 		
     </MPM>
