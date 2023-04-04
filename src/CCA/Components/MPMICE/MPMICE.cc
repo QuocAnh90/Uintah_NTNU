@@ -750,11 +750,8 @@ void MPMICE::scheduleInterpolatePAndGradP(SchedulerP& sched,
   t->requires(Task::NewDW, MIlb->cMassLabel,          mpm_matl,  gac, 1);
   t->requires(Task::OldDW, Mlb->pXLabel,              mpm_matl,  Ghost::None);
   t->requires(Task::NewDW, Mlb->pCurSizeLabel,        mpm_matl,  Ghost::None);
-  t->requires(Task::OldDW, Mlb->pPressureIniLabel,    mpm_matl, Ghost::None);
 
   t->computes(Mlb->pPressureLabel,   mpm_matl);
-  t->computes(Mlb->pPressureExcessLabel, mpm_matl);
-  t->computes(Mlb->pPressureIniLabel_preReloc, mpm_matl);
   sched->addTask(t, patches, all_matls);
 }
 

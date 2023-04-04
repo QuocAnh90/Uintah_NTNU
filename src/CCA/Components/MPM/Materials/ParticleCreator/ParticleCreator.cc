@@ -598,11 +598,6 @@ ParticleCreator::allocateVariables(particleIndex numParticles,
           subset);
   }
 
-  if (d_flags->d_UseMPMICE2) {
-      new_dw->allocateAndPut(pvars.pPressureIni, d_lb->pPressureIniLabel,
-          subset);
-  }
-
   if(d_withGaussSolver){
      new_dw->allocateAndPut(pvars.pPosCharge,
                                           d_Al->pPosChargeLabel,    subset);
@@ -810,10 +805,6 @@ ParticleCreator::initializeParticle(const Patch* patch,
       pvars.pvelGrad[i]  = Matrix3(0.0);
     }
     pvars.pTempGrad[i] = Vector(0.0);
-  
-    if (d_flags->d_UseMPMICE2) {
-        pvars.pPressureIni[i] = 0;
-    }
 
     if (d_coupledflow &&
         !matl->getIsRigid()) {  // mass is determined by incoming porosity
@@ -1129,11 +1120,6 @@ void ParticleCreator::registerPermanentParticleState(MPMMaterial* matl)
           particle_state.push_back(d_Hlb->pFluidVelocityLabel);
           particle_state_preReloc.push_back(d_Hlb->pFluidVelocityLabel_preReloc);
       }
-  }
-
-  if (d_flags->d_UseMPMICE2) {
-      particle_state.push_back(d_lb->pPressureIniLabel);
-      particle_state_preReloc.push_back(d_lb->pPressureIniLabel_preReloc);
   }
 
   if(d_withGaussSolver){

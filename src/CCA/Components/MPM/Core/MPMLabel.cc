@@ -70,15 +70,6 @@ MPMLabel::MPMLabel()
   pPressureLabel  = VarLabel::create( "p.pressure",
                         ParticleVariable<double>::getTypeDescription() );
 
-  pPressureIniLabel = VarLabel::create("p.pressureIni",
-      ParticleVariable<double>::getTypeDescription());
-  
-  pPressureIniLabel_preReloc = VarLabel::create("p.pressureIni+",
-      ParticleVariable<double>::getTypeDescription());
-
-  pPressureExcessLabel = VarLabel::create("p.pressureExcess",
-      ParticleVariable<double>::getTypeDescription());
-  
   pScratchVecLabel  = VarLabel::create( "p.scratchvec",
                         ParticleVariable<Vector>::getTypeDescription() );
   
@@ -619,9 +610,6 @@ MPMLabel::~MPMLabel()
   VarLabel::destroy(pParticleIDLabel);
   VarLabel::destroy(pParticleIDLabel_preReloc);
   VarLabel::destroy(pPressureLabel);
-  VarLabel::destroy(pPressureIniLabel);
-  VarLabel::destroy(pPressureIniLabel_preReloc);
-  VarLabel::destroy(pPressureExcessLabel);
   VarLabel::destroy(pScratchVecLabel);
   VarLabel::destroy(pScratchLabel);
   VarLabel::destroy(pScaleFactorLabel);
