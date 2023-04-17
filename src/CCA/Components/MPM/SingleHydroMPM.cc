@@ -992,6 +992,8 @@ void SingleHydroMPM::scheduleInterpolateParticlesToGrid(SchedulerP& sched,
   t->computes(lb->gTemperatureRateLabel);
   t->computes(lb->gExternalHeatRateLabel);
 
+  t->computes(lb->gStressVizualLabel);
+
   if(flags->d_with_ice){
     t->computes(lb->gVelocityBCLabel);
   }
@@ -1398,6 +1400,7 @@ void SingleHydroMPM::scheduleInterpolateToParticlesAndUpdate(SchedulerP& sched,
   t->requires(Task::NewDW, lb->gVelocityStarLabel,              gac,NGN);
   t->requires(Task::NewDW, lb->gTemperatureRateLabel,           gac,NGN);
   t->requires(Task::NewDW, lb->frictionalWorkLabel,             gac,NGN);
+  t->requires(Task::NewDW, lb->gStressVizualLabel, gac, NGN);
   if(flags->d_XPIC2){
     t->requires(Task::NewDW, lb->gVelSPSSPLabel,                gac,NGN);
     t->requires(Task::NewDW, lb->pVelocitySSPlusLabel,          gnone);
@@ -1425,6 +1428,7 @@ void SingleHydroMPM::scheduleInterpolateToParticlesAndUpdate(SchedulerP& sched,
   t->computes(lb->pTempPreviousLabel_preReloc); // for thermal stress
   t->computes(lb->pMassLabel_preReloc);
   t->computes(lb->pSizeLabel_preReloc);
+  t->computes(lb->pStressVizualLabel_preReloc);
 
   if(flags->d_doScalarDiffusion) {
     t->requires(Task::OldDW, lb->diffusion->pConcentration,     gnone     );
@@ -2397,12 +2401,14 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
 //    NCVariable<double> gColor;
       NCVariable<double> gTemperatureNoBC;
       NCVariable<double> gTemperatureRate;
+      NCVariable<Matrix3> gStress;
 
       new_dw->allocateAndPut(gmass,            lb->gMassLabel,       dwi,patch);
 //    new_dw->allocateAndPut(gColor,           lb->gColorLabel,      dwi,patch);
       new_dw->allocateAndPut(gSp_vol,          lb->gSp_volLabel,     dwi,patch);
       new_dw->allocateAndPut(gvolume,          lb->gVolumeLabel,     dwi,patch);
       new_dw->allocateAndPut(gvelocity,        lb->gVelocityLabel,   dwi,patch);
+      new_dw->allocateAndPut(gStress, lb->gStressVizualLabel, dwi, patch);
       new_dw->allocateAndPut(gTemperature,     lb->gTemperatureLabel,dwi,patch);
       new_dw->allocateAndPut(gTemperatureNoBC, lb->gTemperatureNoBCLabel,
                              dwi,patch);
@@ -2423,6 +2429,7 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
       gTemperatureRate.initialize(0);
       gexternalheatrate.initialize(0);
       gSp_vol.initialize(0.);
+      gStress.initialize(Matrix3(0.0));
 
       // JBH -- Scalar diffusion related
       NCVariable<double>  gConcentration, gConcentrationNoBC;
@@ -2476,6 +2483,7 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
            interpolator->findCellAndWeights(px[idx],ni,S,psize[idx]);
         Vector pmom = pvelocity[idx]*pmass[idx];
         double ptemp_ext = pTemperature[idx];
+        Matrix3 stressvol = pStress[idx] * pvolume[idx];
         total_mom += pmom;
 
         Vector pfluidmom(0.0);
@@ -2502,6 +2510,7 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
             gmass[node]          += pmass[idx]                     * S[k];
             gvelocity[node]      += pmom                           * S[k];
             gvolume[node]        += pvolume[idx]                   * S[k];
+            gStress[ni[k]] += stressvol * S[k];
 //            gColor[node]         += pColor[idx]*pmass[idx]         * S[k];
             if (!flags->d_useCBDI) {
               gexternalforce[node] += pexternalforce[idx]          * S[k];
@@ -2591,6 +2600,7 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
 //        gColor[c]         /= gmass[c];
         gTemperatureNoBC[c] = gTemperature[c];
         gSp_vol[c]        /= gmass[c];
+        gStress[c] /= gvolume[c];
 
         if (flags->d_coupledflow) {
             gfluidmassglobal[c] += gfluidmass[c];
@@ -3604,6 +3614,7 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       ParticleVariable<Matrix3> psizeNew;
       ParticleVariable<double> pmassNew,pTempNew;
       ParticleVariable<long64> pids_new;
+      ParticleVariable<Matrix3> pStressVizual;
 
       // Hydro mechanical coupling
       constParticleVariable<double> pfluidmass, psolidmass, porosity;
@@ -3652,6 +3663,8 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       new_dw->allocateAndPut(pmassNew,   lb->pMassLabel_preReloc,         pset);
       new_dw->allocateAndPut(pTempPreNew,lb->pTempPreviousLabel_preReloc, pset);
       new_dw->allocateAndPut(pTempNew,   lb->pTemperatureLabel_preReloc,  pset);
+      new_dw->get(gStress, lb->gStressVizualLabel, dwi, patch, gac, NGP);
+      new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel_preReloc, pset);
 
       //Carry forward ParticleID and pSize
       old_dw->get(pids,                lb->pParticleIDLabel,          pset);
@@ -3821,12 +3834,14 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           double tempRate = 0.0;
           double concRate = 0.0;
           double burnFraction = 0.0;
+          Matrix3 stress(0.0);
 
           // Accumulate the contribution from each surrounding vertex
           for (int k = 0; k < NN; k++) {
             IntVector node = ni[k];
             vel      += gvelocity_star[node]  * S[k];
             acc      += gacceleration[node]   * S[k];
+            stress += gStress[node] * S[k];
             //if (hasFluid(m)) 
                 fluidacc += gfluidacceleration[node] * S[k];
 
@@ -3840,6 +3855,7 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           pxnew[idx]   = px[idx]        + vel*delT;
           pdispnew[idx]= pdisp[idx]     + vel*delT;
           pvelnew[idx] = pvelocity[idx] + acc*delT;
+          pStressVizual[idx] = stress;
 
           pTempNew[idx]    = pTemperature[idx] + tempRate*delT;
           pTempPreNew[idx] = pTemperature[idx]; // for thermal stress
