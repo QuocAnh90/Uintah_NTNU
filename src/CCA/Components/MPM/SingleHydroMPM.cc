@@ -940,8 +940,9 @@ void SingleHydroMPM::scheduleInterpolateParticlesToGrid(SchedulerP& sched,
     t->requires(Task::NewDW,  lb->pExternalForceCorner4Label,gan,NGP);
     t->requires(Task::OldDW,  lb->pLoadCurveIDLabel,gan,NGP);
   }
+
+  t->requires(Task::OldDW, lb->pStressLabel, gan, NGP);
   if (flags->d_doScalarDiffusion) {
-    t->requires(Task::OldDW, lb->pStressLabel,              gan, NGP);
     t->requires(Task::OldDW, lb->diffusion->pConcentration, gan, NGP);
     if (flags->d_GEVelProj) {
       t->requires(Task::OldDW, lb->diffusion->pGradConcentration, gan, NGP);
@@ -991,9 +992,7 @@ void SingleHydroMPM::scheduleInterpolateParticlesToGrid(SchedulerP& sched,
   t->computes(lb->gTemperatureNoBCLabel);
   t->computes(lb->gTemperatureRateLabel);
   t->computes(lb->gExternalHeatRateLabel);
-
   t->computes(lb->gStressVizualLabel);
-
   if(flags->d_with_ice){
     t->computes(lb->gVelocityBCLabel);
   }
@@ -2349,10 +2348,10 @@ void SingleHydroMPM::interpolateParticlesToGrid(const ProcessorGroup*,
       constParticleVariable<double> pConcentration, pExternalScalarFlux;
       constParticleVariable<Vector> pConcGrad;
       constParticleVariable<Matrix3> pStress;
+      old_dw->get(pStress, lb->pStressLabel, pset);
       if (flags->d_doScalarDiffusion) {
         new_dw->get(pExternalScalarFlux, lb->diffusion->pExternalScalarFlux_preReloc, pset);
-        old_dw->get(pConcentration,      lb->diffusion->pConcentration,   pset);
-        old_dw->get(pStress,             lb->pStressLabel,                pset);
+        old_dw->get(pConcentration,      lb->diffusion->pConcentration,   pset);    
         if (flags->d_GEVelProj) {
           old_dw->get(pConcGrad, lb->diffusion->pGradConcentration, pset);
         }
@@ -3615,6 +3614,7 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       ParticleVariable<double> pmassNew,pTempNew;
       ParticleVariable<long64> pids_new;
       ParticleVariable<Matrix3> pStressVizual;
+      constNCVariable<Matrix3> gStress;
 
       // Hydro mechanical coupling
       constParticleVariable<double> pfluidmass, psolidmass, porosity;
@@ -3663,7 +3663,7 @@ void SingleHydroMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
       new_dw->allocateAndPut(pmassNew,   lb->pMassLabel_preReloc,         pset);
       new_dw->allocateAndPut(pTempPreNew,lb->pTempPreviousLabel_preReloc, pset);
       new_dw->allocateAndPut(pTempNew,   lb->pTemperatureLabel_preReloc,  pset);
-      new_dw->get(gStress, lb->gStressVizualLabel, dwi, patch, gac, NGP);
+      new_dw->get(gStress, lb->gStressVizualLabel, dwi, patch, Ghost::AroundCells, NGP);
       new_dw->allocateAndPut(pStressVizual, lb->pStressVizualLabel_preReloc, pset);
 
       //Carry forward ParticleID and pSize

@@ -466,6 +466,9 @@ MPMLabel::MPMLabel()
   gStressLabel   = VarLabel::create( "g.stress",
                    NCVariable<Matrix3>::getTypeDescription() );
 
+  gStressVizualLabel = VarLabel::create("g.stressVizual",
+      NCVariable<Matrix3>::getTypeDescription());
+
   gStressF0Label   = VarLabel::create( "g.stressF0",
                    NCVariable<Matrix3>::getTypeDescription() );
 
