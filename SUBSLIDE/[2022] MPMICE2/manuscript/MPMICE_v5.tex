@@ -491,7 +491,7 @@ and the effective viscosity is sum of molecular viscosity and turbulent viscosit
 \end {equation}
 %
 %
-where $C_s$ is the Smagorinsky constant and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
+where $C_s$ is the Smagorinsky constant with the value of 0.1 and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
 %_______________________________
 \subsubsection{Frictional force for soil-structure interaction}
 MPMICE includes a contact law for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $ \pmb{f}_{norm}$  computed from the projection of the contact force  in the normal direction.
@@ -568,7 +568,39 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 \end {equation}
 %
 %
-When validating the model with analytical solution, it requires to know the hydraulic conductivity. In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, then the hydraulic conductivity will be expressed as  $D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
+When validating the model with analytical solution, it requires to know the hydraulic conductivity $K$. In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, leading to 
+%
+%
+\begin{equation}
+     \pmb{f}_{d} = \frac{180 \phi_s^2\mu_f}{D_p^2 (1-\phi_s)} (\pmb{U}_s - \pmb{U}_f)  
+\label{fd}
+\end {equation}
+%
+%
+Then, the draging force following the Darcy law is given by:
+%
+%
+\begin{equation}
+     \pmb{f}_{d} =  \frac{n^2 \mu_f}{ \kappa}(\pmb{U}_s - \pmb{U}_f)  
+\end {equation}
+%
+%
+where $\kappa$ being intrinsic permeability of soil which can be written as:
+%
+%
+\begin{equation}
+     \kappa  =  \frac{K \mu_f}{\rho_f  g}
+\end {equation}
+%
+%
+As such, the hydraulic conductivity will be expressed as:
+%
+%
+\begin{equation}
+    K = \frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} \rho_f  g
+\end {equation}
+%
+%
 
 \subsubsection{Solving momentum and energy exchange with an implicit solver}
 %
@@ -610,7 +642,7 @@ where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous 
 Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient depending on the different type of interactions (see Figure \ref{fig:K}) as for example: \\
 \begin{enumerate}
 \item The drag force is set to zero in soil-structure interactions, and instead the frictional force is computed.
-\item As a result of fluid-structure interaction, the momentum exchange coefficient should be extremely high when the solid material points are considered to be zero-porosity/zero-permeability.
+\item As a result of fluid-structure interaction, the momentum exchange coefficient should be extremely high (1E15) when the solid material points are considered to be zero-porosity/zero-permeability.
 \item In the case of soil-fluid interaction, the drag force is calculated using the equation (\ref{fd}). Considering that air has a much lower viscosity than water, its drag force is much lower than the drag force of water in a pore.
 \item A momentum exchange coefficient of 1E5 is applied between multiphase flows. This value is far higher than reality \cite{Stewart1974}, but it is necessary to have enough numerical stability to conduct simulations in the numerical example.
 \end {enumerate}
@@ -1242,16 +1274,16 @@ Fluid flow through porous media is important in many engineering disciplines, li
 \end {equation}
 %
 %
-If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraulic conductivity will be expressed as  $K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$. Then, the analytical formula of average velocity in one dimension through the porous media is:\\
+If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraulic conductivity will be expressed as  $K = D_p^2 (1-\phi_s)^3 \rho_f  g / 180 \phi_s^2  \mu_f $. Then, the analytical formula of average velocity in one dimension through the porous media is:\\
 %
 %
 \begin{equation}
-  {U}_f  = \frac{1}{n} \frac{d^2 (1-\phi_s)^3}{180 \mu \phi_s^2} \frac{\Delta p_f}{L}
+  {U}_f  = \frac{1}{n} \frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} \frac{\Delta p_f}{L}
 \end {equation}
 
 %
 %
-Our numerical model is validated by modeling fluid flow through a 1m long porous media. This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1mPa s). The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is [0.6, 0.62, 0.66, 0.68, 0.7] and the average grain diameter $d$ is 1mm. The model is discretized in 20 finite element and the porous media in 10 finite element with 1 material point per element. The pressure gradient is applied with three different value [0.25, 0.5, 1] atm. Figure \ref{fig:porousflow} shows a good agreement of fluid flow prediction between the theory and the model. \\
+Our numerical model is validated by modeling fluid flow through a 1m long porous media. This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity $\mu_f$ is 1mPa s). The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is [0.6, 0.62, 0.66, 0.68, 0.7] and the average grain diameter $d$ is 1mm. The model is discretized in 20 finite element and the porous media in 10 finite element with 1 material point per element. The pressure gradient is applied with three different value [0.25, 0.5, 1] atm. Figure \ref{fig:porousflow} shows a good agreement of fluid flow prediction between the theory and the model. \\
 %
 %_______________________________
 \subsection{\textsf{Isothermal consolidation}}
@@ -1428,7 +1460,7 @@ We also explore the difference between underwater debris flow and saturated debr
 \caption{Ground acceleration profile, frequency of 2Hz and magnitude of 1g}
 \label{groundacceleration}
 \end {figure}
-In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the peak ground acceleration of 1g and the frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). The earthquake of this magnitude can occured typically for the earthquake of magnitude of more than 6. \\
+In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the peak ground acceleration of 1g and the frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). The earthquake of this magnitude can occur typically for the earthquake of magnitude of more than 6. \\
 %
 %
 \begin{figure}[H]
@@ -1457,7 +1489,7 @@ The solid plane is modeled as a rigid body acted as a shaking table. The contact
 \end {figure}
 %
 %
-We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water ressure in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be charaterized as the progressive failure mechanism. Here are some numerical observation:\\
+We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water pressure in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be characterized as the progressive failure mechanism. Here are some numerical observation:\\
 \begin{enumerate}
 \item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 4 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3m towards the slide direction.
 %
@@ -1473,7 +1505,7 @@ We demonstrate the entire process and the mechanism of the earthquake-induced su
 \item  When the seismic loading ends at 23 seconds, the last shear band is mobilized and the slope soon reaches to the final deposition. No more progressive failure developed in the slope. The turbulent flow developed as the interaction between debris flow and seawater.
 \end {enumerate}
 %
-Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the delvelopment of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
+Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the development of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
 %
 %
 \begin{figure}[H]
@@ -1608,7 +1640,7 @@ Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with e
 \end {equation}
 %
 %
-Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure interaces.
+Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure interfaces.
 \subsection{\textsf{Energy conservation}}
 We adopt the general form of the total energy balance equation for the porous media from \cite{Hassanizadeh}, the total energy balance equations for the fluid phases are:
 %
