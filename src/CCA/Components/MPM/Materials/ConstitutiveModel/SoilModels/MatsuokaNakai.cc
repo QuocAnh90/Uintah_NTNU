@@ -112,7 +112,7 @@ void MatsuokaNakai::CheckModel(double UI[])
 }
 
 void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
-    double UI[], double stress[], double D[], double svarg[], double& USM, particleIndex idx)
+    double UI[], double stress[], double D[], double svarg[], double& USM, particleIndex idx, double time, double Consolidationtime)
 
     /*
     copied from DIAMM, giving the input required
@@ -160,6 +160,11 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
     //double Plastic_Multiplier = 0;                          // Plastic multiplier
     double deps_plastic[6];                                 // plastic strain
     double deps_elastic[6];                                 // elastic strain
+
+    if (time < Consolidationtime) {
+        // high friction to initialize stress
+        double Phi = 90;                                  // Friction angle
+    }
 
     for (int i = 0; i < 6; i++) {
         deps_plastic[i] = 0;
@@ -209,8 +214,6 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
        for (int i = 0; i < 6; i++) {
            stress_trial[i] = 0;
        }
-
-       //cerr << "Cut off condition for I3 " << I3 << " and I1 * I2 / I3 <= 9 " << I1 * I2 / I3 << endl;
    }
 
    if (f_trial > 0)  // Elasto-plastic
@@ -537,6 +540,12 @@ void MatsuokaNakai::computeStressTensor(const PatchSubset* patches,
                                   DataWarehouse* new_dw)
 {
   double rho_orig = matl->getInitialDensity();
+  double ConsolidationTime = matl->getTimeForConsolidation();
+  // Get the current simulation time
+  simTime_vartype simTimeVar;
+  old_dw->get(simTimeVar, lb->simulationTimeLabel);
+  double time = simTimeVar;
+
   for(int p=0;p<patches->size();p++){
     double se = 0.0;
     const Patch* patch = patches->get(p);
@@ -652,8 +661,20 @@ void MatsuokaNakai::computeStressTensor(const PatchSubset* patches,
       for(int i=0;i<d_NINSV;i++){
         svarg[i]=ISVs[i][idx];
       }
+     
+      // Only calculate strain after the consolidation time
+      if (time > ConsolidationTime) {
 
-      Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM, idx);
+          // Store strain tensor
+          //strain11 += e11 * dt;
+          //strain22 += e22 * dt;
+          //strain33 += e33 * dt;
+          //strain12 += e12 * dt;
+          //strain23 += e23 * dt;
+          //strain13 += e13 * dt;
+      }
+
+      Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM, idx,time, ConsolidationTime);
 
       // Unload ISVs from 1D array into ISVs_new
       for(int i=0;i<d_NINSV;i++){
@@ -806,9 +827,9 @@ double MatsuokaNakai::computeRhoMicroCM(double pressure,
 
   return rho_cur;
 
-#if 1
-  cout << "NO VERSION OF computeRhoMicroCM EXISTS YET FOR MatsuokaNakai" << endl;
-#endif
+//#if 1
+//  cout << "NO VERSION OF computeRhoMicroCM EXISTS YET FOR MatsuokaNakai" << endl;
+//#endif
 }
 
 void MatsuokaNakai::computePressEOSCM(double rho_cur, double& pressure,
