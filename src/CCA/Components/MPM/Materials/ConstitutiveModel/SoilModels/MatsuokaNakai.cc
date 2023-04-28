@@ -482,6 +482,30 @@ void MatsuokaNakai::initializeCMData(const Patch* patch,
     }
   }
 
+  if (flag->d_initial_stress == "Erik") {
+      ParticleVariable<Matrix3> pStress;
+      new_dw->getModifiable(pStress, lb->pStressLabel, pset);
+
+      ParticleVariable<Point> px;
+      new_dw->getModifiable(px, lb->pXLabel, pset);
+
+      double rho_orig = matl->getInitialDensity();
+
+      ParticleSubset::iterator iter = pset->begin();
+      for (; iter != pset->end(); ++iter)
+      {
+          particleIndex idx = *iter;
+
+          double p = rho_orig * (px[idx](1) - 20);
+
+          Matrix3 stressInitial(p, 0.0, 0.0,
+              0.0, p, 0.0,
+              0.0, 0.0, p);
+
+          pStress[idx] = stressInitial;
+      }
+  }
+
   computeStableTimeStep(patch, matl, new_dw);
 }
 
