@@ -47,6 +47,10 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
+%%\usepackage{wrapfig}
+\usepackage{lscape}
+\usepackage{rotating}
+%%\usepackage{epstopdf}
 \usepackage[font={small,it}]{caption}
 \usepackage{subcaption}
 \graphicspath{{figures/}}
@@ -728,6 +732,14 @@ The characteristic function is the Heaviside function as $\chi_p = 1  \text{  if
 The time discretization are solved using the following steps:
 %
 %
+\begin{sidewaysfigure}
+\center
+\includegraphics[scale=0.9]{MPMICE_chart.jpg}
+\caption{Numerical implementation of MPMICE}
+\label{fig:MPMICE_chart}
+\end {sidewaysfigure}
+%
+%
 \subsection{\textsf{Interpolation from Solid Particle to Grid}}
 %
 %
@@ -753,7 +765,7 @@ The nodal internal forces is calculated by
 \end {equation}
 %
 %
-The nodal external forces $f_{si}^{ext,n}$ and extra momentum from contact forces are computed here. The nodal velocity and nodal temperature are applied boundary conditions.\\
+The nodal external forces $f_{si}^{ext,n}$ and the nodal frictional forces $f_{si}^{fric}$ from contact between materials are computed here.\\
 Then we compute the solid cell variables as:
 %
 %
@@ -1183,7 +1195,7 @@ First we interpolate the acceleration, velocity and temperature rate to the node
 \end {equation}
 %
 %
-Then the boundary condition and contact forces are applied to the nodal velocity and the acceleration is modified by
+Then the boundary condition and contact forces $f_{si}^{fric}$ are applied to the nodal velocity and the acceleration is modified by
 %
 %
 \begin{equation}
@@ -1242,7 +1254,7 @@ Finally, the effective stress $(\pmb{\sigma}^\prime)^{n+1}$ is updated from the 
 %
 %_______________________________
 \section{\textsf{Numerical examples}}
-All input files and the analytical calculations in this section are provided in the Github repository for the reproduction of the numerical results.\\
+All input files and the analytical calculations in this section are provided in the Github repository $(https://github.com/QuocAnh90/Uintah_NTNU)$ for the reproduction of the numerical results.\\
 %_______________________________
 \subsection{\textsf{Fluid Flow through isothermal porous media}}
 %
@@ -1408,7 +1420,7 @@ On all boundary faces, the Dirichlet boundary condition is imposed for velocity 
 \end {figure}
 %
 %
-Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results \cite{Zhang2019}. Unlike other computational models based on total stress analysis, the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
+Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results \cite{Zhang2019}. Unlike other computational models based on total stress analysis  \cite{Tran2019, Capone2010,Zhang2019, Dey2016}, the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
 %
 %
 \begin{figure}
@@ -1460,7 +1472,7 @@ We also explore the difference between underwater debris flow and saturated debr
 \caption{Ground acceleration profile, frequency of 2Hz and magnitude of 1g}
 \label{groundacceleration}
 \end {figure}
-In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the peak ground acceleration of 1g and the frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). The earthquake of this magnitude can occur typically for the earthquake of magnitude of more than 6. \\
+In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the constanct ground acceleration of 1g and a constant frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). An earthquake of this magnitude is possible. For instance, in the case of the 2023 Turkey-Syria Earthquake, significant ground shaking with peak ground acceleration exceeding 1g was observed at numerous locations. This serves as an example of the practical occurrence of such high levels of ground acceleration during seismic events. \\
 %
 %
 \begin{figure}[H]
@@ -1471,7 +1483,7 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end {figure}
 %
 %
-A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the density of 2650 kg/$m^3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is governed following the softening curve (see Figure \ref{fig:model}) with the peak friction angle $\phi^\prime_p$ of 45 degrees and the residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is 0.3 and the average grain size of the soil is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the Row-stress dilatancy as follow:
+A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the density of 2650 kg/$m^3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is governed following the softening curve (see Figure \ref{fig:model}) with the peak friction angle $\phi^\prime_p$ of 45 degrees and the residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is 0.3 and the average grain size of the soil is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the Rowe's stress dilatancy theory  \cite{Wood} as follow:
 %
 %
 \begin{equation}
