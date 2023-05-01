@@ -390,14 +390,15 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 {
 
     double rho_orig = matl->getInitialDensity();
+    double ConsolidationTime = matl->getTimeForConsolidation();
+    // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, lb->simulationTimeLabel);
+    double time = simTimeVar;
+
     for (int p = 0; p < patches->size(); p++) {
         double se = 0.0;
         const Patch* patch = patches->get(p);
-
-        // Get the current simulation time
-        simTime_vartype simTimeVar;
-        old_dw->get(simTimeVar, lb->simulationTimeLabel);
-        double time = simTimeVar;
 
         Matrix3 Identity; Identity.Identity();
         double c_dil = 0.0;
@@ -558,7 +559,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             double tFE = UI[28];
             double tShear = UI[29];
 
-            double ConsolidationTime = UI[38];
+            //double ConsolidationTime = UI[38];
             // Only calculate strain after the consolidation time
             if (time > ConsolidationTime) {
 
