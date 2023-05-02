@@ -451,9 +451,16 @@ void MatsuokaNakai::outputProblemSpec(ProblemSpecP& ps,bool output_cm_tag)
   cm_ps->appendElement("G",UI[0]);          // initial shear modulus 
   cm_ps->appendElement("K",UI[1]);          // initial bulk modulus 
   cm_ps->appendElement("Phi_friction",UI[2]);        // initial friction angle 
-
   cm_ps->appendElement("N",UI[3]);          // initial dilatancy state variable 
   cm_ps->appendElement("lamda_c",UI[4]);    // parameter for dilatancy
+
+  cm_ps->appendElement("strain11", UI[5]);
+  cm_ps->appendElement("strain22", UI[6]);
+  cm_ps->appendElement("strain33", UI[7]);
+  cm_ps->appendElement("strain12", UI[8]);
+  cm_ps->appendElement("strain23", UI[9]);
+  cm_ps->appendElement("strain13", UI[10]);
+  cm_ps->appendElement("shear_strain", UI[11]);
 }
 
 MatsuokaNakai* MatsuokaNakai::clone()
@@ -686,17 +693,43 @@ void MatsuokaNakai::computeStressTensor(const PatchSubset* patches,
         svarg[i]=ISVs[i][idx];
       }
      
+      double shear_strain_local = 0;
+      double strain11 = svarg[5];
+      double strain22 = svarg[6];
+      double strain33 = svarg[7];
+      double strain12 = svarg[8];
+      double strain23 = svarg[9];
+      double strain13 = svarg[10];
+
+      double e11 = Darray[0];
+      double e22 = Darray[1];
+      double e33 = Darray[2];
+      double e12 = Darray[3];
+      double e23 = Darray[4];
+      double e13 = Darray[5];
+
       // Only calculate strain after the consolidation time
       if (time > ConsolidationTime) {
 
           // Store strain tensor
-          //strain11 += e11 * dt;
-          //strain22 += e22 * dt;
-          //strain33 += e33 * dt;
-          //strain12 += e12 * dt;
-          //strain23 += e23 * dt;
-          //strain13 += e13 * dt;
+          strain11 += e11 * dt;
+          strain22 += e22 * dt;
+          strain33 += e33 * dt;
+          strain12 += e12 * dt;
+          strain23 += e23 * dt;
+          strain13 += e13 * dt;
       }
+
+      shear_strain_local = 1.0 / 2.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0 * (pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));
+
+      // Store strain tensor
+      svarg[5] = strain11;
+      svarg[6] = strain22;
+      svarg[7] = strain33;
+      svarg[8] = strain12;
+      svarg[9] = strain23;
+      svarg[10] = strain13;
+      svarg[11] = shear_strain_local;
 
       Calculate_Stress(d_NINSV, dt, UI, sigarg, Darray, svarg, USM, idx,time, ConsolidationTime);
 
@@ -889,6 +922,14 @@ MatsuokaNakai::getInputParameters(ProblemSpecP& ps)
   ps->getWithDefault("Phi_friction",UI[2],0.0);            // initial friction angle modulus 
   ps->getWithDefault("N",UI[3],0.0);              // initial dilatancy state variable 
   ps->getWithDefault("lamda_c",UI[4],0.0);        // parameter for dilatancy
+
+  ps->getWithDefault("strain11", UI[5], 0.0);
+  ps->getWithDefault("strain22", UI[6], 0.0);
+  ps->getWithDefault("strain33", UI[7], 0.0);
+  ps->getWithDefault("strain12", UI[8], 0.0);
+  ps->getWithDefault("strain23", UI[9], 0.0);
+  ps->getWithDefault("strain13", UI[10], 0.0);
+  ps->getWithDefault("shear_strain", UI[11], 0.0);
 }
 
 void
@@ -901,6 +942,15 @@ MatsuokaNakai::initializeLocalMPMLabels()
   ISVNames.push_back("Phi_friction");
   ISVNames.push_back("N");
   ISVNames.push_back("lamda_c");
+
+  ISVNames.push_back("strain11");
+  ISVNames.push_back("strain22");
+  ISVNames.push_back("strain33");
+  ISVNames.push_back("strain12");
+  ISVNames.push_back("strain23");
+  ISVNames.push_back("strain13");
+  ISVNames.push_back("shear_strain");
+
 
   for(int i=0;i<d_NINSV;i++){
     ISVLabels.push_back(VarLabel::create(ISVNames[i],
