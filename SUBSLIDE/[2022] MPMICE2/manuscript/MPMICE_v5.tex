@@ -1352,8 +1352,7 @@ Our numerical model is validated by modeling the consolidation of a 1m column. T
 \end {figure}
 %
 %
-Another benchmark is the thermal induced cavity flow in porous media. Temperature and velocity distributions are calculated for a square non-deformable saturated porous media The top and bottom walls are insulated, and the left and right walls are at fixed temperature gradient of 1 degree. The fluid motion at stead state are cavity flow due to the temperature induced density variation. \\
-The numerical is validated by comparing with the numerical solution of the finite element method. The porous media is modeled by non deformable material, and density is 2500 kg/m3. The specific heat capacity of the water and porous skeleton are 4181 J/kg.K and 835 J/kg.K respectively. The thermal conductivity of the water and porous skeleton are 0.598 W/m.K and 0.4 W/m.K. The volume fraction of porous media $\phi_s$ is 0.6 which is equivalent to the porosity of 0.4 and the average grain diameter $d$ is 1mm. The model is discretized in 20 x 20 finite element with 4 material point per element. Figure \ref{fig:thermal} shows a good agreement of numerical results of the model compared with the numerical solution of the finite element method.
+Another benchmark is the thermal induced cavity flow in porous media. Temperature and velocity distributions are calculated for a square non-deformable saturated porous media The top and bottom walls are insulated, and the left and right walls are at fixed temperature gradient of 1 degree. The fluid motion at stead state are cavity flow due to the temperature induced density variation. The numerical is validated by comparing with the numerical solution of the finite element method. The porous media is modeled by non deformable material, and density is 2500 kg/m3. The specific heat capacity of the water and porous skeleton are 4181 J/kg.K and 835 J/kg.K respectively. The thermal conductivity of the water and porous skeleton are 0.598 W/m.K and 0.4 W/m.K. The volume fraction of porous media $\phi_s$ is 0.6 which is equivalent to the porosity of 0.4 and the average grain diameter $d$ is 1mm. The model is discretized in 20 x 20 finite element with 4 material point per element. Figure \ref{fig:thermal} shows a good agreement of numerical results of the model compared with the numerical solution of the finite element method.
 %_______________________________
 \subsection{\textsf{Underwater debris flow}}
 %
@@ -1366,46 +1365,49 @@ The numerical is validated by comparing with the numerical solution of the finit
 \end {figure}
 %
 %
-The numerical example is validated by Rzadkiewicz et al.'s experiment on submarine debris flow \cite{Rzadkiewicz}. During the experiment, sand in a triangular box is released and then slides along a rigid bed inclined 45 degrees under water, see Figure \ref{fig:SandBoxModel}.\\
+
+The numerical example is validated using the experimental work of Rzadkiewicz et al. on submarine debris flow \cite{Rzadkiewicz}. In their experiment, sand within a triangular box is released and slides along a rigid bed inclined at 45 degrees under water (see Figure \ref{fig:SandBoxModel}). The material properties in the numerical model are selected based on the experiment by Rzadkiewicz et al. \cite{Rzadkiewicz}. The sand is characterized by a saturated density of 1985 $kg/m^3$ and a friction angle of 10 degrees. The effect of Young's modulus on debris flow run-out is negligible due to the extreme deformation of the debris, so a Young's modulus of 50 MPa with a Poisson's ratio of 0.25 is chosen. The rigid bed, being much stiffer, has bulk modulus and shear modulus values of $117E^7$ Pa and $43.8E^7$ Pa, respectively. The numerical parameters used in this example are presented in Table \ref{table2}.\\
+The boundary conditions imposed in the numerical model are as follows: on all boundary faces, the velocity is set to zero (U = 0 m/s) and the temperature is set to 5 degrees Celsius (T = 5°C). At the top boundary, the pressure has a Neumann boundary condition of dp/dx = 0 kPa, and the density has a Neumann boundary condition of d$\rho$/dx = 0 $kg/m^3$. The background mesh consists of 700 x 400 cells, resulting in a total of 280,000 cells. Each cell in the debris flow and rigid bed contains 2 x 2 material points.\\
+Figure \ref{saturatedflowb} illustrates snapshots of the underwater debris flow sliding, demonstrating that the model captures the typical hydroplaning mechanism of the debris flow. Hydroplaning refers to the lifting of the debris flow, causing it to lose contact with the bottom layer. The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Our computed results align well with the experimental results \cite{Zhang2019}.\\
+Unlike other computational models that rely on total stress analysis \cite{Tran2019, Capone2010, Zhang2019, Dey2016}, our proposed model utilizes effective stress analysis, enabling the analysis of water pressure and temperature within the debris flow. Additionally, we investigate the differences between underwater debris flow and saturated debris flow in terms of their interaction with obstacles. Figure \ref{saturatedflow} presents snapshots of simulations of both underwater and saturated debris flow. The saturated debris flow (Figure \ref{saturatedflowa}) exhibits behavior similar to frictional flow, where grains have contact forces with each other. Conversely, the underwater debris flow (Figure \ref{saturatedflowb}) behaves like turbulent flow, with grains being separated from each other and exhibiting no contact forces (as reflected by the near-zero effective stress in the turbulence domain).
 %
 %
-\begin{figure}
-\center
+%\begin{figure}
+%\center
 %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
 %(or a blank line to force the subfigure onto a new line)
-\begin{subfigure}[c]{0.5\linewidth}
-\includegraphics[width=\linewidth]{1.jpg}
-\caption{0.4 seconds}
-\label{0.4s}
-\end {subfigure}\hfill    
-\begin{subfigure}[d]{0.5\linewidth}
-\includegraphics[width=\linewidth]{2.jpg}
-\caption{0.8 seconds}
-\label{0.8s}
-\end {subfigure}
-\caption{Simulation of underwater debris flow}
-\label{fig:debris}
-\end {figure}
+%\begin{subfigure}[c]{0.5\linewidth}
+%\includegraphics[width=\linewidth]{1.jpg}
+%\caption{0.4 seconds}
+%\label{0.4s}
+%\end {subfigure}\hfill    
+%\begin{subfigure}[d]{0.5\linewidth}
+%\includegraphics[width=\linewidth]{2.jpg}
+%\caption{0.8 seconds}
+%\label{0.8s}
+%\end {subfigure}
+%\caption{Simulation of underwater debris flow}
+%\label{fig:debris}
+%\end {figure}
 %
 %
 \begin{table}[h]
 \center
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-\textbf{Materials}                                                 & \textbf{\begin{tabular}[c]{@{}c@{}}Bulk \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Shear \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Density\\ (kg/m3)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Temp\\ (C)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Dynamic \\ vicosity\\ (Pa s)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Yield \\ stress\\ (Pa)\end {tabular}} \\ \hline
+\textbf{Materials}                                                 & \textbf{\begin{tabular}[c]{@{}c@{}}Bulk \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Shear \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Density\\ (kg/m3)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Temp\\ (C)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Dynamic \\ vicosity\\ (Pa s)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Friction \\ angle\\ (degrees)\end {tabular}} \\ \hline
 \begin{tabular}[c]{@{}c@{}}Water\\ (at surface)\end {tabular}       & 2.15e9                                                                  & -                                                                        & 999.8                                                              & 5                                                           & 855e-6                                                                        & -                                                                       \\ \hline
 \begin{tabular}[c]{@{}c@{}}Air\\ (at top \\ boundary)\end {tabular} & -                                                                       & -                                                                        & 1.177                                                              & 5                                                           & 18.45e-6                                                                      & -                                                                       \\ \hline
-\begin{tabular}[c]{@{}c@{}}Sand\\ (porous \\ media)\end {tabular}   & 8.33e6                                                                  & 20e6                                                                     & 1985                                                               & 5                                                           & -                                                                             & 200                                                                     \\ \hline
+\begin{tabular}[c]{@{}c@{}}Sand\\ (porous \\ media)\end {tabular}   & 8.33e6                                                                  & 20e6                                                                     & 1985                                                               & 5                                                           & -                                                                             & 10                                                                     \\ \hline
 \begin{tabular}[c]{@{}c@{}}Rigid bed\\ (solid)\end {tabular}        & 117e7                                                                 & 43.8e7                                                                   & 8900                                                               & 5                                                           & -                                                                             & -                                                                       \\ \hline
 \end {tabular}
 \caption{Numerical parameters for the underwater submarine debris}
 \label{table2}
 \end {table}
-In the numerical model, the material properties are selected based on the experiment by Rzadkiewicz et al \cite{Rzadkiewicz}. Sand has a saturated density of 1985 $kg/m^3$ and yield stress of 200 Pa. Young's modulus has little effect on debris flow run-out because of the extreme large deformation of the debris. Therefore, we select 50 MPa Young's modulus with 0.25 Poisson's ratio. The rigid bed is much stiffer with bulk modulus and shear modulus of $117E^7$ Pa and $43.8E^7$ Pa. The numerical parameters used in this example are presented in Table \ref{table2}.   \\
-On all boundary faces, the Dirichlet boundary condition is imposed for velocity (u = 0 m/s) and temperature (T = 5 Celcius degrees), while the Neuman boundary condition is imposed at the top boundary for pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). For the background mesh, there are 700 x 400 = 280.000 cells. In each cell of the debris flow and rigid bed, there are 2 x 2 material points. \\
+
 %
 %
-\begin{figure}
+\begin{figure}[H]
 \center
 %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
 %(or a blank line to force the subfigure onto a new line)
@@ -1419,15 +1421,14 @@ On all boundary faces, the Dirichlet boundary condition is imposed for velocity 
 \caption{0.8 seconds}
 \label{0.8swater}
 \end {subfigure}
-\caption{Simulation of underwater debris flow}
+\caption{Evolution of water level in the simulation of underwater debris flow}
 \label{watersurface}
 \end {figure}
 %
 %
-Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results \cite{Zhang2019}. Unlike other computational models based on total stress analysis  \cite{Tran2019, Capone2010,Zhang2019, Dey2016}, the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
 %
 %
-\begin{figure}
+\begin{figure}[]
 \center
 %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
 %(or a blank line to force the subfigure onto a new line)
@@ -1441,12 +1442,19 @@ Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in t
 \caption{underwater debris flow using MPMICE}
 \label{saturatedflowb}
 \end {subfigure}
-\caption{Simulation of underwater debris flow}
+\caption{Simulation of Debris Flow: Mean Effective Stress Distribution (Green Color Indicates Near-Zero Effective Stress)}
 \label{saturatedflow}
 \end {figure}
 %
 %
-We also explore the difference between underwater debris flow and saturated debris flow in terms of interacting with obstacle. Figure \ref{saturatedflow} shows the snapshot of the simulations of underwater and saturated debris flow. The saturated debris flow (see Figure \ref{saturatedflowa}) behaves like frictional flow as grain have contact forces with each other. On the other hand, the underwater debris flow (see Figure \ref{saturatedflowb}) behaves like turbulent flow as grains are separated from each other and exhibit no contact forces between grains. 
+
+%_______________________________
+\subsection{\textsf{Validation of soil response to the seismic loading}}
+
+
+
+
+
 %_______________________________
 \subsection{\textsf{Earthquake-induced submarine landslides}}
 %
