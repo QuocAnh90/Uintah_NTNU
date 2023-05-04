@@ -1,7 +1,7 @@
 %% 
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL MPMICE_v5.tex   Fri Apr 28 10:22:05 2023
-%DIF ADD MPMICE_v4.tex   Tue Apr 18 12:53:11 2023
+%DIF DEL MPMICE_v4.tex   Tue Apr 18 12:53:11 2023
+%DIF ADD MPMICE_v5.tex   Wed May  3 13:53:55 2023
 %% Copyright 2007-2020 Elsevier Ltd
 %% 
 %% This file is part of the 'Elsarticle Bundle'.
@@ -50,19 +50,19 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
-%DIF 50-53d50
-%DIF < %%\usepackage{wrapfig}
-%DIF < \usepackage{lscape}
-%DIF < \usepackage{rotating}
-%DIF < %%\usepackage{epstopdf}
+%DIF 50a50-53
+%%\usepackage{wrapfig} %DIF > 
+\usepackage{lscape} %DIF > 
+\usepackage{rotating} %DIF > 
+%%\usepackage{epstopdf} %DIF > 
 %DIF -------
 \usepackage[font={small,it}]{caption}
 \usepackage{subcaption}
 \graphicspath{{figures/}}
 \usepackage{lineno}
 \linenumbers
-%DIF 59d55
-%DIF < 
+%DIF 55a59
+ %DIF > 
 %DIF -------
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -237,7 +237,7 @@ In this paper, we describe a soil-fluid-structure interaction model that combine
 \begin{highlights}
 \item MPMICE is introduced for multiphase flow in porous media.
 \item Material Point method allows to model large deformation of non-isothermal porous media.
-\item ICE (compressible multi-material CFD formulation) allows \DIFdelbegin \DIFdel{stabilizing }\DIFdelend \DIFaddbegin \DIFadd{to stablize }\DIFaddend pore water pressure and turbulent flow.
+\item ICE (compressible multi-material CFD formulation) allows \DIFdelbegin \DIFdel{to stablize }\DIFdelend \DIFaddbegin \DIFadd{stabilizing }\DIFaddend pore water pressure and turbulent flow.
 \item MPMICE is validated and apply to simulate the earthquake-induced submarine landslide.
 \end {highlights}
 
@@ -330,7 +330,7 @@ $n+1$         			&             &    Next time step\\
 $c$           			&             &    Cell-centered quantity\\
 $p$           			&             &    Particle quantity\\
 $i$           			&             &    Node quantity\\
-$FC$           			&             &    Face-centered quantity\\
+$FC$           			&             &    \DIFdelbegin \DIFdel{Face-centered }\DIFdelend \DIFaddbegin \DIFadd{Cell face }\DIFaddend quantity\\
 $L, R $       			&             &    Left and Right cell faces\\
 \end {tabular}
 
@@ -343,7 +343,7 @@ $L, R $       			&             &    Left and Right cell faces\\
 
  Many geological natural processes and their interactions with man-made structures are influenced by soil-fluid-structure interactions. The prediction of these processes requires a tool that can capture complex interactions between soil, fluid, and structure, such as the process of submarine landslides. Indeed, The offshore infrastructure as well as coastal communities may be vulnerable to submarine landslides. Submarine landslides contain three stages: triggering, failure, and post-failure. Erosion or earthquakes can trigger slope failures in the first stage. Following the failure, sediments move quickly after the post-failure stage. In other words, solid-like sediments will behave like a fluid after failure. This phase transition makes the simulation of submarine landslides a challeging task.\\
 
-Due to this phase transition, submarine landslide can be modeled by either the Computational Fluid Dynamics (CFD) or the particle-based methods. For simulating submarine slides, CFD methods solve governing equations in a full-Eulerian framework \cite{CFD1, CFD2,CFD3, CFD4} with interface capturing techniques. While CFD can handle complex flows (such as turbulent flows), it cannot account for the triggering mechanism of submarine landslides because it is not \DIFdelbegin \DIFdel{straightforward }\DIFdelend \DIFaddbegin \DIFadd{straightforwad }\DIFaddend to consider 'soil constitutive laws' of sediment materials in the Eulerian framework. In contrast, particle-based methods can overcome this problem by using the Lagrangian framework. These methods have been extensively used to simulate landslides, like Material Point Method (MPM) \cite{Tran2019}, Smooth Particle Hydro Dynamics \cite{Capone2010}, Particle Finite Element Method \cite{Zhang2019}, or Coupled Eulerian Lagrangian Method \cite{Dey2016}. For simplicity, these simulations adopt total stress analysis which neglects the pore pressure development which is key factor triggering slope failures. \\
+Due to this phase transition, submarine landslide can be modeled by either the Computational Fluid Dynamics (CFD) or the particle-based methods. For simulating submarine slides, CFD methods solve governing equations in a full-Eulerian framework \cite{CFD1, CFD2,CFD3, CFD4} with interface capturing techniques. While CFD can handle complex flows (such as turbulent flows), it cannot account for the triggering mechanism of submarine landslides because it is not \DIFdelbegin \DIFdel{straightforwad }\DIFdelend \DIFaddbegin \DIFadd{straightforward }\DIFaddend to consider 'soil constitutive laws' of sediment materials in the Eulerian framework. In contrast, particle-based methods can overcome this problem by using the Lagrangian framework. These methods have been extensively used to simulate landslides, like Material Point Method (MPM) \cite{Tran2019}, Smooth Particle Hydro Dynamics \cite{Capone2010}, Particle Finite Element Method \cite{Zhang2019}, or Coupled Eulerian Lagrangian Method \cite{Dey2016}. For simplicity, these simulations adopt total stress analysis which neglects the pore pressure development which is key factor triggering slope failures. \\
 
 Recent developments in particle-based methods model the coupling of fluid flows in porous media by sets of Lagrangian particles. For the MPM family, it is the double-point MPM (\cite{Bandara2015, Tampubolon2017, Baumgarten2019}) where fluid particles and solid particles are overlapped in a single computational grid. Even if fluid flows are considered, particle-based methods have numerical instability in modeling the fluid flow, which requires additional numerical treatments such as the B-bar method \cite{Bandara2015}, null-space filter \cite{nullspace}, or least square approximation \cite{Zheng2021, CPLS}. Indeed, CFD is a more optimal option for complex fluid flows especially dealing with large distortions of continuum fluid media. Therefore, it could be ideal to combine the CFD with particle-based methods. More than 50 particle-based methods have been developed to solve large deformations of solids over the last two decades \cite{Chen2017}, but the MPM appears to be the best candidate for coupling with the CFD. Because MPM incorporates a stationary mesh during computation, just like CFD. As such, both MPM and CFD can be coupled naturally in a unified computational mesh.\\
 %
@@ -368,11 +368,11 @@ Recent developments in particle-based methods model the coupling of fluid flows 
 %
 %
 
-A numerical method for simulating soil-fluid-structure interaction (Figure \ref{fig:3phases}) involving large deformations, is presented in this work in order to simulate the interaction between sediment (soil), seawater (fluid) and offshore structures (structure) namely MPMICE (Figure \ref{fig:MPMICE}). In the MPMICE, the Material Point Method (MPM) is coupled with the Implicit Continuous Eulerian (ICE). The MPM method is a particle method that allows the porous soil to undergo arbitrary distortions. The ICE method, on the other hand, is a conservative finite volume technique with all state variables located at the cell center (temperature, velocity, mass, pressure). An initial technical report \cite{Kashiwa} at Los Alamos National Laboratory provided the theoretical and algorithmic foundation for the MPMICE, followed by the MPMICE development and implementation in the high-performance Uintah computational framework for simulating fluid-structure interactions \cite{MPMICE}. This paper primarily contributes \DIFdelbegin \DIFdel{further }\DIFdelend \DIFaddbegin \DIFadd{futher }\DIFaddend to the development of the MPMICE for analyzing the \textbf{soil}-fluid-structure interaction, since sediment should be considered as a porous media (soil) and not as a solid to capture the evolution of the pore water pressure. Baumgarten et al. \cite{Baumgarten2021} made the first attempt at coupling the Finite Volume Method with the MPM for the simulation of soil-fluid interaction. In contrast to the mentioned work, we use implicit time integration for the multi phase flows instead of explicit time integration for the single-phase flow.
+A numerical method for simulating soil-fluid-structure interaction (Figure \ref{fig:3phases}) involving large deformations, is presented in this work in order to simulate the interaction between sediment (soil), seawater (fluid) and offshore structures (structure) namely MPMICE (Figure \ref{fig:MPMICE}). In the MPMICE, the Material Point Method (MPM) is coupled with the Implicit Continuous Eulerian (ICE). The MPM method is a particle method that allows the porous soil to undergo arbitrary distortions. The ICE method, on the other hand, is a conservative finite volume technique with all state variables located at the cell center (temperature, velocity, mass, pressure). An initial technical report \cite{Kashiwa} at Los Alamos National Laboratory provided the theoretical and algorithmic foundation for the MPMICE, followed by the MPMICE development and implementation in the high-performance Uintah computational framework for simulating fluid-structure interactions \cite{MPMICE}. This paper primarily contributes \DIFdelbegin \DIFdel{futher }\DIFdelend \DIFaddbegin \DIFadd{further }\DIFaddend to the development of the MPMICE for analyzing the \textbf{soil}-fluid-structure interaction, since sediment should be considered as a porous media (soil) and not as a solid to capture the evolution of the pore water pressure. Baumgarten et al. \cite{Baumgarten2021} made the first attempt at coupling the Finite Volume Method with the MPM for the simulation of soil-fluid interaction. In contrast to the mentioned work, we use implicit time integration for the multi phase flows instead of explicit time integration for the single-phase flow.
 
 %_______________________________
 \section{\textsf{Theory and formulation}}
-This section lay out the theoretical framework for the MPMICE model. We use the common notation of the continuum \DIFdelbegin \DIFdel{mechanics }\DIFdelend \DIFaddbegin \DIFadd{mechaniccs }\DIFaddend with vector and tensor denoted simply by using bold font and scalar denoted by using normal font. The notation are shown in Nomenclature.
+This section lay out the theoretical framework for the MPMICE model. We use the common notation of the continuum \DIFdelbegin \DIFdel{mechaniccs }\DIFdelend \DIFaddbegin \DIFadd{mechanics }\DIFaddend with vector and tensor denoted simply by using bold font and scalar denoted by using normal font. The notation are shown in Nomenclature.
 %_______________________________
 \subsection{\textsf{Assumptions}}
 The following assumptions are made for the MPMICE model.
@@ -442,16 +442,20 @@ Solving the mass balance equation leads to:
 %_______________________________
 \underline{\hspace{5in}}\\
 \underline{\textsf{Momentum Conservation}}\\
-The momentum balance equation for the fluid phases (e.g., water, air) are:\\
-%
+The momentum balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the fluid phases (e.g., water, air) are:
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %
 %
 \begin{equation}
      \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = - \phi_f \nabla p_f  +  \nabla \cdot \pmb{\tau}_f + \overline{\rho}_f \pmb{b} +  \sum \pmb{f}_{d}
 \end {equation}
 %
 %
-The momentum balance equation for the solid phases are:\\
-%
+The momentum balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the solid phases are:
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %
 %
 \begin{equation}
      \frac{1}{V}\frac{D_s(m_s \pmb{U}_s)}{Dt} = 
@@ -465,7 +469,7 @@ The momentum balance equation for the solid phases are:\\
 %_______________________________
 \underline{\hspace{5in}}\\
 \underline{\textsf{Energy Conservation}}\\
-The internal energy balance equation for the fluid phases (e.g., water, air) are:
+The internal energy balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the fluid phases (e.g., water, air) are:
 %
 %
 \begin{equation}
@@ -475,7 +479,7 @@ The internal energy balance equation for the fluid phases (e.g., water, air) are
 \end {equation}
 %
 %
-The internal energy balance equation for the solid phase is:
+The internal energy balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the solid phase \DIFdelbegin \DIFdel{is}\DIFdelend \DIFaddbegin \DIFadd{are}\DIFaddend :
 %
 %
 \begin{equation}
@@ -508,16 +512,16 @@ Four thermodynamic relations for the equation of states are:
 %
 %_______________________________
 \subsubsection{Constitutive soil model}
-As a result of the explicit MPM formulation, we can derive the constitutive law in the updated Lagrangian framework of "small strain - large deformation". Therefore, the rotation of the particles (representative element volume) is manipulated by rotating the Cauchy stress tensor. First, the deformation gradient is decomposed into the polar rotation tensor $\pmb{R}_s^{n+1}$ and \DIFdelbegin \DIFdel{stretch }\DIFdelend \DIFaddbegin \DIFadd{sketch }\DIFaddend tensor $\pmb{V}_s^{n+1}$ as
-%
+As a result of the explicit MPM formulation, we can derive the constitutive law in the updated Lagrangian framework of "small strain - large deformation". Therefore, the rotation of the particles (representative element volume) is manipulated by rotating the Cauchy stress tensor. First, the deformation gradient is decomposed into the polar rotation tensor $\pmb{R}_s^{n+1}$ and \DIFdelbegin \DIFdel{sketch }\DIFdelend \DIFaddbegin \DIFadd{stretch }\DIFaddend tensor $\pmb{V}_s^{n+1}$ as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{F}_s^{n+1} = \pmb{V}_s^{n+1} \pmb{R}_s^{n+1}
 \end {equation}
 %
 %
-Then, before calling the constitutive model, the stress and strain rate tensor are rotated to the reference configuration as
-%
+Then, before calling the constitutive model, the stress and strain rate tensor are rotated to the reference configuration as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{\sigma}^{\prime,n*} =  (\pmb{R}_s^{n+1})^T \pmb{\sigma}^{\prime,n*} \pmb{R}_s^{n+1}
@@ -529,8 +533,8 @@ Then, before calling the constitutive model, the stress and strain rate tensor a
 \end {equation}
 %
 %
-Using the constitutive model with the input tensors $\pmb{\sigma}^{\prime,n*}, \delta \pmb{\epsilon}^{n*}$ to compute the Cauchy stress tensor at the advanced time step $\pmb{\sigma}^{\prime,n+1*}$ then rotating it back to current configuration
-%
+Using the constitutive model with the input tensors $\pmb{\sigma}^{\prime,n*}, \delta \pmb{\epsilon}^{n*}$ to compute the Cauchy stress tensor at the advanced time step $\pmb{\sigma}^{\prime,n+1*}$ then rotating it back to current configuration \DIFaddbegin \DIFadd{as:
+}\DIFaddend %
 %
 \begin{equation}
     \pmb{\sigma}^{\prime,n+1} =  \pmb{R}_s^{n+1} \pmb{\sigma}^{\prime,n+1*} (\pmb{R}_s^{n+1})^T
@@ -559,38 +563,38 @@ where $\lambda$ and $\mu$ are bulk and shear modulus ad J is the determinant of 
 where the $c^{\prime}$, $\phi^{\prime}$ and $\psi^{\prime}$ are cohesion and friction angle and dilation angle. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ are maximum and minimum principal stress.
 %_______________________________
 \subsubsection{Turbulent model}
-The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky \DIFdelbegin \DIFdel{model}\DIFdelend \DIFaddbegin \DIFadd{mode}\DIFaddend , the residual stress tensor is:
+The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky \DIFdelbegin \DIFdel{mode}\DIFdelend \DIFaddbegin \DIFadd{model}\DIFaddend , the residual stress tensor is:
 %
 \begin{equation}
      \tau_{ij} = 2 \mu_{eff} (\overline{S}_{ij} - \frac{1}{3} \delta_{ij} \overline{S}_{kk}) + \frac{1}{3} \delta_{ij} \tau_{kk}
 \end {equation}
 %
 %
-where the the strain rate tensor is given by
-%
+where the the strain rate tensor is given by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
      \overline{S}_{ij} = \frac{1}{2} (\frac{\delta \overline{\pmb{U}}_i}{\delta x_j} + \frac{\delta \overline{\pmb{U}}_j}{\delta x_i})
 \end {equation}
 %
 %
-and the effective viscosity is sum of molecular viscosity and turbulent viscosity $\mu_{eff} = \mu + \mu_t$ in which the turbulent viscosity $\mu_t$ is calculated by
-%
+and the effective viscosity is sum of molecular viscosity and turbulent viscosity $\mu_{eff} = \mu + \mu_t$ in which the turbulent viscosity $\mu_t$ is calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
     \mu_t = (C_s \triangle)^2 \sqrt{2 \overline{S}_{ij} \overline{S}_{ij}}
 \end {equation}
 %
 %
-where $C_s$ is the Smagorinsky constant \DIFdelbegin \DIFdel{with the value of 0.1 }\DIFdelend and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
+where $C_s$ is the Smagorinsky constant \DIFaddbegin \DIFadd{with the value of 0.1 }\DIFaddend and $\triangle = \sqrt[3]{dx dy dz}$ is the grid size that defines the subgrid length scale.
 %_______________________________
 \subsubsection{Frictional force for soil-structure interaction}
-MPMICE includes a \DIFdelbegin \DIFdel{contact law }\DIFdelend \DIFaddbegin \DIFadd{contactlaw }\DIFaddend for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $ \pmb{f}_{norm}$  computed from the projection of the contact force  in the normal direction.
+MPMICE includes a \DIFdelbegin \DIFdel{contactlaw }\DIFdelend \DIFaddbegin \DIFadd{contact law }\DIFaddend for the interaction between soil and structure using the first Coulomb friction contact for MPM presented by Bardenhagen et al. (\cite{MPMcontact}).  The magnitude of the friction force at the contact depends on the friction coefficient $\mu_{fric}$ and the normal force  $ \pmb{f}_{norm}$  computed from the projection of the contact force  in the normal direction.
 %
 \begin{equation}
    \pmb{f}_{fric} = \mu_{fric}  \pmb{f}_{norm}
 \end {equation}
 %
 %
-The contact determines whether the soil is sliding or sticking to the structure by comparing the friction force with the sticking force $\pmb{f}_{stick}$  computed from the projection of the contact force in the tangent direction:
+The contact determines whether the soil is sliding or sticking to the structure by comparing the friction force with the sticking force $\pmb{f}_{stick}$  computed from the projection of the contact force in the tangent direction \DIFaddbegin \DIFadd{as}\DIFaddend :
 %
 \begin{equation}
 \begin{gathered}
@@ -624,7 +628,7 @@ On the other hand, the drag force can be calculated as:
 \end {equation}
 %
 %
-For the momentum exchange between fluid flows and porous media, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid \DIFdelbegin \DIFdel{viscosity }\DIFdelend \DIFaddbegin \DIFadd{vicosity }\DIFaddend $\mu_f$, and is \DIFdelbegin \DIFdel{proportional }\DIFdelend \DIFaddbegin \DIFadd{propotional }\DIFaddend to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ \cite{Drag}. The drag force is given by: \\
+For the momentum exchange between fluid flows and porous media, we assume that the drag force $\pmb{f}_{d}$ depends on the average grain size of the grains $D_p$, the porosity $n$, the fluid \DIFdelbegin \DIFdel{vicosity }\DIFdelend \DIFaddbegin \DIFadd{viscosity }\DIFaddend $\mu_f$, and is \DIFdelbegin \DIFdel{propotional }\DIFdelend \DIFaddbegin \DIFadd{proportional }\DIFaddend to the relative velocities of soil grains and fluid $(\pmb{U}_s - \pmb{U}_f)$. Based on recent investigation of CFD simulations of fluid flow around mono- and bi-disperse packing of spheres for $0.1 < \phi_s < 0.6$ and $Re < 1000$ \cite{Drag}. The drag force is given by: \\
 %
 %
 \begin{equation}
@@ -657,71 +661,44 @@ where the low Reynold coefficient $ F(\phi_s, Re\rightarrow0)$ is:
 \end {equation}
 %
 %
-When validating the model with analytical solution, it requires to know the hydraulic conductivity\DIFdelbegin \DIFdel{$K$}\DIFdelend . In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, \DIFdelbegin \DIFdel{leading to 
-%DIF < 
-%DIF < 
-}%DIFDELCMD < 
-\begin{equation}
-%DIFDELCMD <      
-\pmb{f}%%%
-\DIFdel{_{d} = \frac{180 \phi_s^2\mu_f}{D_p^2 (1-\phi_s)} (}%DIFDELCMD < 
-\pmb{U}%%%
-\DIFdel{_s - }%DIFDELCMD < \pmb{U}%%%
-\DIFdel{_f)  
-}%DIFDELCMD < 
-\label{fd}
-%DIFDELCMD <
- \end {%%%
-\DIFdel{equation}%DIFDELCMD < }
-%DIFDELCMD < %%%
-%DIF < 
-%DIF < 
-\DIFdel{Then, the draging force following the Darcy law is given by:
-%DIF < 
-%DIF < 
-}%DIFDELCMD < 
-\begin{equation}
-%DIFDELCMD <      
-\pmb{f}%%%
-\DIFdel{_{d} =  \frac{n^2 \mu_f}{ \kappa}(}%DIFDELCMD < 
-\pmb{U}%%%
-\DIFdel{_s - }%DIFDELCMD < 
-\pmb{U}%%%
-\DIFdel{_f)  
-}%DIFDELCMD < 
-\end {%%%
-\DIFdel{equation}%DIFDELCMD < }
-%DIFDELCMD < %%%
-%DIF < 
-%DIF < 
-\DIFdel{where $\kappa$ being intrinsic permeability of soil which can be written as:
-%DIF < 
-%DIF < 
-}%DIFDELCMD < 
-\begin{equation}
-%DIFDELCMD <      %%%
-\DIFdel{\kappa  =  \frac{K \mu_f}{\rho_f  g}
-}%DIFDELCMD < 
-\end {%%%
-\DIFdel{equation}%DIFDELCMD < }
-%DIFDELCMD < %%%
-%DIF < 
-%DIF < 
-\DIFdel{As such, the }\DIFdelend \DIFaddbegin \DIFadd{then the }\DIFaddend hydraulic conductivity will be expressed as  \DIFdelbegin \DIFdel{:
-%DIF < 
-%DIF < 
-}%DIFDELCMD < 
-\begin{equation}
-%DIFDELCMD <     %%%
-\DIFdel{K = \frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} \rho_f  g
-}%DIFDELCMD < 
-\end {%%%
-\DIFdel{equation}%DIFDELCMD < }
-%DIFDELCMD < %%%
-%DIF < 
-%DIF < 
-\DIFdelend \DIFaddbegin \DIFadd{$D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
-}
+When validating the model with analytical solution, it requires to know the hydraulic conductivity \DIFaddbegin \DIFadd{$K$}\DIFaddend . In such case, we convert the equation (\ref{fd}) to Kozeny-Carman formula by assuming $F(\phi_s, Re) = 10\phi_s/(1-\phi_s)^2$, \DIFdelbegin \DIFdel{then the }\DIFdelend \DIFaddbegin \DIFadd{leading to 
+%DIF > 
+%DIF > 
+}\begin{equation}
+     \pmb{f}\DIFadd{_{d} = \frac{180 \phi_s^2\mu_f}{D_p^2 (1-\phi_s)} (}\pmb{U}\DIFadd{_s - }\pmb{U}\DIFadd{_f)  
+}\label{fd}
+\end {equation}
+{\DIFadd{equation}}
+%DIF > 
+%DIF > 
+\DIFadd{Then, the draging force following the Darcy law is given by:
+%DIF > 
+%DIF > 
+}\begin{equation}
+     \pmb{f}\DIFadd{_{d} =  \frac{n^2 \mu_f}{ \kappa}(}\pmb{U}\DIFadd{_s - }\pmb{U}\DIFadd{_f)  
+}\end {equation}
+{\DIFadd{equation}}
+%DIF > 
+%DIF > 
+\DIFadd{where $\kappa$ being intrinsic permeability of soil which can be written as:
+%DIF > 
+%DIF > 
+}\begin{equation}
+     \DIFadd{\kappa  =  \frac{K \mu_f}{\rho_f  g}
+}\end {equation}
+{\DIFadd{equation}}
+%DIF > 
+%DIF > 
+\DIFadd{As such, the }\DIFaddend hydraulic conductivity will be expressed as\DIFdelbegin \DIFdel{$D_p^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$.
+}\DIFdelend \DIFaddbegin \DIFadd{:
+%DIF > 
+%DIF > 
+}\begin{equation}
+    \DIFadd{K = \frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} \rho_f  g
+}\end {equation}
+{\DIFadd{equation}}
+%DIF > 
+%DIF > 
 \DIFaddend 
 
 \subsubsection{Solving momentum and energy exchange with an implicit solver}
@@ -736,7 +713,7 @@ When validating the model with analytical solution, it requires to know the hydr
 %
 %
 The derivation of the implicit integration for the momentum exchange is presented in the Appendix's section 'Momentum and energy exchange with an implicit solver'. The linear equations for multi phases i,j=1:$N$
-has the form:
+has the form \DIFaddbegin \DIFadd{as}\DIFaddend :
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
                   -\beta_{ji}       &  (1 + \beta_{ji})
@@ -751,8 +728,8 @@ has the form:
 \]
 %
 %
-where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous phases s=1:$N_s$ can be calculated by
-%
+where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous phases s=1:$N_s$ can be calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
 \pmb{U}_{f}^{*} = \pmb{U}_{f}^{n} + \delt (-\frac{\nabla P_{f}^{n+1}}{\rho_f^n}  + \frac{\nabla \cdot \pmb{\tau}_f^{n}}{\overline{\rho}^n_{f}} + \pmb{b}) \\
@@ -764,7 +741,7 @@ where the intermediate velocity for fluid phases f=1:$N_f$ and for solid/porous 
 Also, the momentum exchange coefficient can be computed at every time step as $\beta_{12} = K/\overline{\rho}_{f}^n$ and $\beta_{21} = K/\overline{\rho}_{s}^n$ with the coefficient depending on the different type of interactions (see Figure \ref{fig:K}) as for example: \\
 \begin{enumerate}
 \item The drag force is set to zero in soil-structure interactions, and instead the frictional force is computed.
-\item As a result of fluid-structure interaction, the momentum exchange coefficient should be extremely high \DIFdelbegin \DIFdel{(1E15) }\DIFdelend when the solid material points are considered to be zero-porosity/zero-permeability.
+\item As a result of fluid-structure interaction, the momentum exchange coefficient should be extremely high \DIFaddbegin \DIFadd{(1E15) }\DIFaddend when the solid material points are considered to be zero-porosity/zero-permeability.
 \item In the case of soil-fluid interaction, the drag force is calculated using the equation (\ref{fd}). Considering that air has a much lower viscosity than water, its drag force is much lower than the drag force of water in a pore.
 \item A momentum exchange coefficient of 1E5 is applied between multiphase flows. This value is far higher than reality \cite{Stewart1974}, but it is necessary to have enough numerical stability to conduct simulations in the numerical example.
 \end {enumerate}
@@ -782,8 +759,10 @@ Similar approach applied for the ernergy exchange term leading to:
                     \eta_{ji}(T_{j}^{n} - T_i^{n})
     \end {vmatrix}                
 \]
-with $\eta$ is the energy exchange coefficient.\\
-%_______________________________
+with $\eta$ \DIFdelbegin \DIFdel{is }\DIFdelend \DIFaddbegin \DIFadd{being }\DIFaddend the energy exchange coefficient.
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %_______________________________
 \subsubsection{Equation of state for fluid plases}
 %
 %
@@ -822,11 +801,11 @@ where reference pressure $P_{ref}$ = 1 atm = 101325 Pa, reference temperature $T
 \begin{figure}[H]
 \center
 \includegraphics[scale=.5]{GIMPshape.jpg}
-\caption{GIMP weighting function (red as a convolution of the linear basis shape function (green) and the \DIFdelbegin \DIFdel{characteristic }\DIFdelend \DIFaddbegin \DIFadd{charateristic }\DIFaddend function (blue)}
+\caption{GIMP weighting function (red as a convolution of the linear basis shape function (green) and the \DIFdelbegin \DIFdel{charateristic }\DIFdelend \DIFaddbegin \DIFadd{characteristic }\DIFaddend function (blue)}
 \label{fig:GIMP}
 \end {figure}
 %
-The fluid phases are discretized in the grid with the state variables stored at the centroid of the cells $[\rho_{fc},\pmb{U}_{fc},T_{fc},\upsilon_{fc}]$ while the solid phase is discretized in the particles with the state variables $[m_{sp},\pmb{U}_{sp},T_{sp},\pmb{\sigma}^\prime_{sp}]$. In the Material Point Method, we use the generalized interpolation technique \cite{GIMP} using the weight function as a convolution of a grid shape function $N_i(\pmb{x})$ in a nodal domain $\Omega_i$ and a characteristic function $\chi_p (\pmb{x})$ in a particle domain $\Omega_p$ with the volume $V_p (\pmb{x})$ as follows:
+The fluid phases are discretized in the grid with the state variables stored at the centroid of the cells \DIFdelbegin \DIFdel{$[\rho_{fc},\pmb{U}_{fc},T_{fc},\upsilon_{fc}]$ }\DIFdelend \DIFaddbegin \DIFadd{$[\rho_{f,c},\pmb{U}_{f,c},T_{f,c},\upsilon_{f,c}]$ }\DIFaddend while the solid phase is discretized in the particles with the state variables $[m_{sp},\pmb{U}_{sp},T_{sp},\pmb{\sigma}^\prime_{sp}]$. In the Material Point Method, we use the generalized interpolation technique \cite{GIMP} using the weight function as a convolution of a grid shape function $N_i(\pmb{x})$ in a nodal domain $\Omega_i$ and a characteristic function $\chi_p (\pmb{x})$ in a particle domain $\Omega_p$ with the volume $V_p (\pmb{x})$ as follows:
 %
 %
 \begin{equation}
@@ -841,30 +820,27 @@ where the volume $V_p (\pmb{x})$ of the material point p can be calculated as:
      V_{p} = \int_{\Omega_p} \chi_p (\pmb{x}) d\pmb{x}
 \end {equation}
 %
-The \DIFdelbegin \DIFdel{characteristic }\DIFdelend \DIFaddbegin \DIFadd{charateristic }\DIFaddend function is the Heaviside function as $\chi_p = 1  \text{  if  } \pmb{x} \in \Omega_p$, otherwise 0 (see Figure \ref{fig:GIMP}). For the interpolation of the centroid of the cell, the linear basis function is used as:
+The \DIFdelbegin \DIFdel{charateristic }\DIFdelend \DIFaddbegin \DIFadd{characteristic }\DIFaddend function is the Heaviside function as $\chi_p = 1  \text{  if  } \pmb{x} \in \Omega_p$, otherwise 0 (see Figure \ref{fig:GIMP}). For the interpolation of the centroid of the cell, the linear basis function is used as:
 %
 \begin{equation}
      S_{ci}  = N_i(\pmb{x_c}) 
 \end {equation}
 %
-The time discretization are solved using the following steps:
+The time discretization are solved using the following steps\DIFdelbegin \DIFdel{:
+}\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend %
 %
-%
-\DIFdelbegin %DIFDELCMD < \begin{sidewaysfigure}
-%DIFDELCMD < \center
-%DIFDELCMD < \includegraphics[scale=0.9]{MPMICE_chart.jpg}
-%DIFDELCMD < %%%
-%DIFDELCMD < \caption{%
-{%DIFAUXCMD
-\DIFdel{Numerical implementation of MPMICE}}
-%DIFAUXCMD
-%DIFDELCMD < \label{fig:MPMICE_chart}
-%DIFDELCMD < \end {%%%
-\DIFdel{sidewaysfigure}%DIFDELCMD < }
-%DIFDELCMD < %%%
-%DIF < 
-%DIF < 
-\DIFdelend \subsection{\textsf{Interpolation from Solid Particle to Grid}}
+\DIFaddbegin 
+\begin{sidewaysfigure}
+\center
+\includegraphics[scale=0.9]{MPMICE_chart.jpg}
+\caption{\DIFadd{Numerical implementation of MPMICE}}
+\label{fig:MPMICE_chart}
+\end {sidewaysfigure}
+{\DIFadd{sidewaysfigure}}
+%DIF > 
+%DIF > 
+\DIFaddend \subsection{\textsf{Interpolation from Solid Particle to Grid}}
 %
 %
 The nodal values of the solid state (mass, velocity, temperature, volume) are:
@@ -881,15 +857,15 @@ The nodal values of the solid state (mass, velocity, temperature, volume) are:
 \end {equation}
 %
 %
-The nodal internal forces is calculated by
-%
+The nodal internal forces is calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{f}_{si}^{int,n} = -\sum{\nabla S_{ip} (\sigma_{sp}^\prime)^n V_{sp}^n}
 \end {equation}
 %
 %
-The nodal external forces $f_{si}^{ext,n}$ and \DIFdelbegin \DIFdel{the nodal frictional forces $f_{si}^{fric}$ from contact between materials }\DIFdelend \DIFaddbegin \DIFadd{extra momentum from contact forces }\DIFaddend are computed here. \DIFaddbegin \DIFadd{The nodal velocity and nodal temperature are applied boundary conditions.}\DIFaddend \\
+The nodal external forces $f_{si}^{ext,n}$ and \DIFdelbegin \DIFdel{extra momentum from contact forces }\DIFdelend \DIFaddbegin \DIFadd{the nodal frictional forces $f_{si}^{fric}$ from contact between materials }\DIFaddend are computed here.\DIFdelbegin \DIFdel{The nodal velocity and nodal temperature are applied boundary conditions.}\DIFdelend \\
 Then we compute the solid cell variables as:
 %
 %
@@ -906,7 +882,7 @@ Then we compute the solid cell variables as:
 %
 %
 \subsection{\textsf{Compute equation of state for fluid phase}}
-Considering the total fluid \DIFdelbegin \DIFdel{material }\DIFdelend \DIFaddbegin \DIFadd{materal }\DIFaddend volume of a cell is:
+\DIFdelbegin \DIFdel{Considering the total fluid materal }\DIFdelend \DIFaddbegin \DIFadd{The total fluid material }\DIFaddend volume of a cell is:
 %
 %
 \begin{equation}
@@ -915,7 +891,7 @@ Considering the total fluid \DIFdelbegin \DIFdel{material }\DIFdelend \DIFaddbeg
 \end {equation}
 %
 %
-Then we need to find $P_{eq}$ which allows each fluid materials obey their equation of states $[P_f, \rho_f, \upsilon_f, T_f, e_f]$ but also allow mass of all fluid materials to fill the entire the pore volume without ongoing compression or expansion following the condition:
+\DIFdelbegin \DIFdel{Then we }\DIFdelend \DIFaddbegin \DIFadd{We }\DIFaddend need to find \DIFdelbegin \DIFdel{$P_{eq}$ }\DIFdelend \DIFaddbegin \DIFadd{$P_{f,c}^n$ }\DIFaddend which allows each fluid materials obey their equation of states $[P_f, \rho_f, \upsilon_f, T_f, e_f]$ but also allow mass of all fluid materials to fill the entire the pore volume without ongoing compression or expansion following the condition \DIFaddbegin \DIFadd{as follows}\DIFaddend :
 %
 %
 \begin{equation}
@@ -924,47 +900,50 @@ Then we need to find $P_{eq}$ which allows each fluid materials obey their equat
 \end {equation}
 %
 %
-Then, we can use \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{he }\DIFaddend Newton-Raphson interation to find the value of $P_{eq}$ which satisfies the equation (\ref{V}, \ref{n}) and each equation of states of each fluid materials.
-\subsection{\textsf{Compute faced-centered velocity}}
-Following the derivation in the Appendix: Advanced Fluid Pressure, we first compute the fluid face-centered velocity as\\
-%
+Then, we can use \DIFdelbegin \DIFdel{he }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend Newton-Raphson interation to find the value of \DIFdelbegin \DIFdel{$P_{eq}$ }\DIFdelend \DIFaddbegin \DIFadd{$P_{f,c}^n$ }\DIFaddend which satisfies the equation (\ref{V}, \ref{n}) and each equation of states of each fluid materials.
+\subsection{\DIFdelbegin \textsf{\DIFdel{Compute faced-centered velocity}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textsf{\DIFadd{Compute cell face velocity}}\DIFaddend }
+Following the derivation in the Appendix: Advanced Fluid Pressure, we first compute the fluid \DIFdelbegin \DIFdel{face-centered velocity as}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{cell face velocity as:
+}\DIFaddend %
 %
 \begin{equation}
 \label{faced_vel_fluid}
-    \pmb{U}_{f,FC}^{*} = \frac{(\overline{\rho} \pmb{U})_{f,FC}^n}{\overline{\rho}_{f,FC}^n} + \delt (-\frac{\nabla^{FC} P_{eq}}{\rho_{f,FC}^n}  +\frac{\nabla^{FC} \cdot \pmb{\tau}^{n}}{\overline{\rho}_{s,FC}}+ \pmb{b})
+    \pmb{U}_{f,FC}^{\DIFdelbegin \DIFdel{*}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } = \frac{(\overline{\rho} \pmb{U})_{f,FC}^n}{\overline{\rho}_{f,FC}^n} + \delt (-\DIFdelbegin \DIFdel{\frac{\nabla^{FC} P_{eq}}{\rho_{f,FC}^n}  }\DIFdelend \DIFaddbegin \DIFadd{\frac{\nabla^{FC} P_{f,c}^n}{\rho_{f,FC}^n}  }\DIFaddend +\frac{\nabla^{FC} \cdot \pmb{\tau}^{n}}{\overline{\rho}_{s,FC}}+ \pmb{b})
 \end {equation}
 %
 %
-The equation (\ref{faced_vel_fluid}) is discretized in three dimension (noted that $\nabla^{FC} \cdot \pmb{\tau} = 0$), for example the discretized equation in the x direction is
-%
+The equation (\ref{faced_vel_fluid}) is discretized in three dimension (noted that $\nabla^{FC} \cdot \pmb{\tau} = 0$), for example the discretized equation in the x direction is\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
-U_{fx}^{*} = \frac{(\overline{\rho} U)_{fx,R}^n + (\overline{\rho} U)_{fx,L}^n}{\overline{\rho}_{fx,L}^n + \overline{\rho}_{fx,R}^n} + \delt (-\frac{2(\upsilon_{fx,L}^n \upsilon_{fx,R}^n)}{\upsilon_{fx,L}^n + \upsilon_{fx,R}^n} \frac{P_{eqx,R} - P_{eqx,L}}{\Delta x} + b_x)
+U_{fx}^{L-} = \frac{(\overline{\rho} U)_{fx,R}^n + (\overline{\rho} U)_{fx,L}^n}{\overline{\rho}_{fx,L}^n + \overline{\rho}_{fx,R}^n} + \delt (-\frac{2(\upsilon_{fx,L}^n \upsilon_{fx,R}^n)}{\upsilon_{fx,L}^n + \upsilon_{fx,R}^n} \frac{P_{f,cx,R}^n - P_{f,cx,L}^n}{\Delta x} + b_x)
 \end {equation}
 %
 %
-The face-centered solid velocity can be calculated as
-\begin{equation}
+The \DIFdelbegin \DIFdel{face-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend solid velocity can be calculated as\DIFaddbegin \DIFadd{:
+}\DIFaddend \begin{equation}
 \label{faced_vel_solid}
-\pmb{U}_{s,FC}^{*} = \frac{(\overline{\rho} \pmb{U})_{s,FC}^n}{\overline{\rho}_{s,FC}^n} + \delt ( \frac{\nabla^{FC} \cdot \pmb{\sigma}_c^{'n}}{\overline{\rho}_{s,FC}}    - \frac{\nabla^{FC} P_{eq}}{\rho_s}   + \pmb{b})
+\pmb{U}_{s,FC}^{\DIFdelbegin \DIFdel{*}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } = \frac{(\overline{\rho} \pmb{U})_{s,FC}^n}{\overline{\rho}_{s,FC}^n} + \delt ( \frac{\nabla^{FC} \cdot \pmb{\sigma}_c^{'n}}{\overline{\rho}_{s,FC}}    - \DIFdelbegin \DIFdel{\frac{\nabla^{FC} P_{eq}}{\rho_s}   }\DIFdelend \DIFaddbegin \DIFadd{\frac{\nabla^{FC} P_{f,c}^n}{\rho_s}   }\DIFaddend + \pmb{b})
 \end {equation}
-The equation (\ref{faced_vel_solid}) is discretized in three dimension(noted that $\nabla^{FC} \cdot \sigma_{ij} = 0$ with $i \neq j$), for example the discretized equation in the x direction is
-%
+The equation (\ref{faced_vel_solid}) is discretized in three dimension (noted that $\nabla^{FC} \cdot \sigma_{ij} = 0$ with $i \neq j$), for example the discretized equation in the x direction is\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
-U_{sx}^{*} = \frac{(\overline{\rho} U)_{sx,R}^n + (\overline{\rho} U)_{sx,L}^n}{\overline{\rho}_{sx,L}^n + \overline{\rho}_{sx,R}^n} + \delt (\frac{2(\sigma_{xx,R} - \sigma_{xx,L})}{(\overline{\rho}_{sx,L}^n + \overline{\rho}_{sx,R}^n)\Delta x}-\frac{P_{eqx,R} - P_{eqx,L}}{\rho_s \Delta x} + b_x)
+U_{sx}^{L-} = \frac{(\overline{\rho} U)_{sx,R}^n + (\overline{\rho} U)_{sx,L}^n}{\overline{\rho}_{sx,L}^n + \overline{\rho}_{sx,R}^n} + \delt (\frac{2(\sigma_{xx,R} - \sigma_{xx,L})}{(\overline{\rho}_{sx,L}^n + \overline{\rho}_{sx,R}^n)\Delta x}-\frac{P_{f,cx,R}^n - P_{f,cx,L}^n}{\rho_s \Delta x} + b_x)
 \end {equation}
 %
 %
-Computing the modified faced-centered velocity $\pmb{U}_{FC}^{L}$ considering the momentum exchange (see the Appendix: Momentum exchange with an implicit solve)
-%
+\DIFdelbegin \DIFdel{Computing the modified faced-centered }\DIFdelend \DIFaddbegin \DIFadd{Then, we compute the modified cell face }\DIFaddend velocity $\pmb{U}_{FC}^{L}$ considering the momentum exchange (see the Appendix: Momentum exchange with an implicit solve) \DIFaddbegin \DIFadd{as follows:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-   \pmb{U}_{f,FC}^{L} = \pmb{U}_{f,FC}^{*} + \Delta \pmb{U}_{f,FC}\\
-   \pmb{U}_{s,FC}^{L} = \pmb{U}_{s,FC}^{*} + \Delta \pmb{U}_{s,FC}
+   \pmb{U}_{f,FC}^{L} = \pmb{U}_{f,FC}^{\DIFdelbegin \DIFdel{*}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } + \Delta \pmb{U}_{f,FC}\\
+   \pmb{U}_{s,FC}^{L} = \pmb{U}_{s,FC}^{\DIFdelbegin \DIFdel{*}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } + \Delta \pmb{U}_{s,FC}
 \end {gathered}
 \end {equation}
 %
 %
-Solving the linear equation below to obtain the increment of velocity with i,j = 1 : $N$ as:
+\DIFdelbegin \DIFdel{Solving the }\DIFdelend \DIFaddbegin \DIFadd{The }\DIFaddend linear equation below \DIFaddbegin \DIFadd{is solved }\DIFaddend to obtain the increment of velocity with i,j = 1 : $N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -974,31 +953,37 @@ Solving the linear equation below to obtain the increment of velocity with i,j =
                     \Delta \pmb{U}_{j,FC}
     \end {vmatrix}
     =
-    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,FC}^{*} - \pmb{U}_{j,FC}^{*}) \\
-                    \beta_{ji}(\pmb{U}_{j,FC}^{*} - \pmb{U}_{i,FC}^{*})
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,FC}\DIFdelbegin \DIFdel{^{*} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - \pmb{U}_{j,FC}\DIFdelbegin \DIFdel{^{*}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend ) \\
+                    \beta_{ji}(\pmb{U}_{j,FC}\DIFdelbegin \DIFdel{^{*} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - \pmb{U}_{i,FC}\DIFdelbegin \DIFdel{^{*}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend )
     \end {vmatrix}                
 \]
 %
 %
-\subsection{\textsf{Compute faced-centered temperature}}
-Similar to the velocity, the faced temperature is computed as:
+\subsection{\DIFdelbegin \textsf{\DIFdel{Compute faced-centered temperature}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textsf{\DIFadd{Compute cell face temperature}}\DIFaddend }
+Similar to the velocity, the faced temperature is computed\DIFaddbegin \DIFadd{, for example in x direction, }\DIFaddend as:
 %
 \begin{equation}
-T_{fx}^{n} = \frac{(\overline{\rho} T)_{fx,R}^n + (\overline{\rho} T)_{fx,L}^n}{\overline{\rho}_{fx,L}^n + \overline{\rho}_{fx,R}^n} 
-\end {equation}
+\DIFdelbegin \DIFdel{T_{fx}}\DIFdelend \DIFaddbegin \begin{gathered}
+\DIFadd{T_{fx}}\DIFaddend ^{\DIFdelbegin \DIFdel{n}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } = \frac{(\overline{\rho} T)_{fx,R}^n + (\overline{\rho} T)_{fx,L}^n}{\overline{\rho}_{fx,L}^n + \overline{\rho}_{fx,R}^n} \DIFaddbegin \\
+\DIFadd{T_{sx}^{L-} = \frac{(\overline{\rho} T)_{sx,R}^n + (\overline{\rho} T)_{sx,L}^n}{\overline{\rho}_{sx,L}^n + \overline{\rho}_{sx,R}^n} 
+}\DIFaddend \end{gathered}
+ {\DIFaddbegin \DIFadd{gathered}}
+\end{equation}
+{\DIFaddend equation}
 %
 %
-Computing the modified faced-centered temperature $T_{FC}^{L}$ considering the energy exchange (see the Appendix: Momentum and energy exchange with an implicit solver)
-%
+\DIFdelbegin \DIFdel{Computing the modified faced-centered }\DIFdelend \DIFaddbegin \DIFadd{Then, we compute the modified cell face }\DIFaddend temperature $T_{FC}^{L}$ considering the energy exchange (see the Appendix: Momentum and energy exchange with an implicit solver) \DIFaddbegin \DIFadd{as follows:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-   T_{f,FC}^{L} = T_{f,FC}^{n} + \Delta T_{f,FC}\\
-   T_{s,FC}^{L} = T_{s,FC}^{n} + \Delta T_{s,FC}
+   T_{f,FC}^{L} = T_{f,FC}^{\DIFdelbegin \DIFdel{n}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } + \Delta T_{f,FC}\\
+   T_{s,FC}^{L} = T_{s,FC}^{\DIFdelbegin \DIFdel{n}\DIFdelend \DIFaddbegin \DIFadd{L-}\DIFaddend } + \Delta T_{s,FC}
 \end {gathered}
 \end {equation}
 %
 %
-Solving the linear equation below to obtain the increment of velocity with i,j = 1 : $N$ as:
+\DIFdelbegin \DIFdel{Solving the }\DIFdelend \DIFaddbegin \DIFadd{The }\DIFaddend linear equation below \DIFdelbegin \DIFdel{to obtain }\DIFdelend \DIFaddbegin \DIFadd{is solved to determine }\DIFaddend the increment of velocity with i,j = 1 : $N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
@@ -1008,8 +993,8 @@ Solving the linear equation below to obtain the increment of velocity with i,j =
                     \Delta T_{j,FC}
     \end {vmatrix}
     =
-    \begin{vmatrix}  \eta_{ij}(T_{i,FC}^{n} - T_{j,FC}^{n}) \\
-                    \eta_{ji}(T_{j,FC}^{n} - T_{i,FC}^{n})
+    \begin{vmatrix}  \eta_{ij}(T_{i,FC}\DIFdelbegin \DIFdel{^{n} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - T_{j,FC}\DIFdelbegin \DIFdel{^{n}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend ) \\
+                    \eta_{ji}(T_{j,FC}\DIFdelbegin \DIFdel{^{n} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - T_{i,FC}\DIFdelbegin \DIFdel{^{n}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend )
     \end {vmatrix}                
 \]
 %
@@ -1030,7 +1015,7 @@ For multi-phase flows, the increment of the fluid pressure of the mixture can be
 where $\kappa =  \sum_{f=1}^{N_f}  (\phi_{f,FC} \kappa_f) / \sum_{f=1}^{N_f}  (\phi_{f,FC})$. Then, the fluid pressure at cell center is:
 
 \begin{equation}
-  P_c^{n+1} = P_{eq} + \Delta P_c^{n}
+  P_c^{n+1} =  P\DIFdelbegin \DIFdel{_{eq} }\DIFdelend \DIFaddbegin \DIFadd{_c^{n} }\DIFaddend + \Delta P_c^{n}
 \end {equation}
 %
 %
@@ -1051,8 +1036,8 @@ where $\kappa =  \sum_{f=1}^{N_f}  (\phi_{f,FC} \kappa_f) / \sum_{f=1}^{N_f}  (\
 %\end {equation}
 %
 %
-Finally, the faced-centered advanced fluid pressure is
-%
+Finally, the \DIFdelbegin \DIFdel{faced-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend advanced fluid pressure is\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
     P_{FC}^{n+1} = (\frac{P_{c,L}^{n+1}}{\overline{\rho}_{f,L}^n} + \frac{P_{c,R}^{n+1}}{\overline{\rho}_{f,R}^n}) / (\frac{1}{\overline{\rho}_{f,L}^n} + \frac{1}{\overline{\rho}_{f,R}^n}) = (\frac{P_{c,L}^{n+1} \overline{\rho}_{f,R}^n + P_{c,R}^{n+1} \overline{\rho}_{f,L}^n}{\overline{\rho}_{f,L}^n \overline{\rho}_{f,R}^n})
@@ -1060,30 +1045,31 @@ Finally, the faced-centered advanced fluid pressure is
 %
 %
 \subsection{\textsf{Compute viscous shear stress term of the fluid phase}}
-This part compute the viscous shear stress $\Delta (m \pmb{U})_{_{fc},\tau}$ for a single \DIFdelbegin \DIFdel{viscous }\DIFdelend \DIFaddbegin \DIFadd{vicous }\DIFaddend compressible Newtonian fluid and optionally shear stress induced by the turbulent model.
+This part compute the viscous shear stress \DIFdelbegin \DIFdel{$\Delta (m \pmb{U})_{_{fc},\tau}$ }\DIFdelend \DIFaddbegin \DIFadd{$\Delta (m \pmb{U})_{_{f,c},\tau}$ }\DIFaddend for a single \DIFdelbegin \DIFdel{vicous }\DIFdelend \DIFaddbegin \DIFadd{viscous }\DIFaddend compressible Newtonian fluid and optionally shear stress induced by the turbulent model.
 %
 %
 \subsection{\textsf{Compute nodal internal temperature of the solid phase}}
 %
 %
-The nodal internal temperature rate is computed based on the heat conduction model
-%
+The nodal internal temperature rate is computed based on the heat conduction model \DIFaddbegin \DIFadd{as below:
+}\DIFaddend %
 %
 \begin{equation}
-     dT_{si}^L = \frac{(\Delta W_{si}^n + \Delta W_{fric,i}^n + \nabla^i \cdot \pmb{q}_{si}^n)}{m_{si}^n c_v}
+     dT_{si}\DIFdelbegin \DIFdel{^L }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend = \frac{(\Delta W_{si}^n + \Delta W_{fric,i}^n + \nabla^i \cdot \pmb{q}_{si}^n)}{m_{si}^n c_v}
 \end {equation}
 %
 %
-where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} $ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate \DIFdelbegin \DIFdel{computed }\DIFdelend \DIFaddbegin \DIFadd{compted }\DIFaddend from the contact law due to the frictional sliding between solid materials. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials.
+where $\Delta W_{si}^n = \pmb{\sigma}^\prime : \frac{D_s( \pmb{\epsilon}_s^p)}{Dt} $ is the mechanical work rate computed from the constitutive model with $\pmb{\epsilon}_s^p$ is the plastic strain, $ \Delta W_{fric,i}^n$ is the work rate \DIFdelbegin \DIFdel{compted }\DIFdelend \DIFaddbegin \DIFadd{computed }\DIFaddend from the contact law due to the frictional sliding between solid materials. The heat flux is $\pmb{q}_s = \overline{\rho}_s \beta_s \nabla T_s$ with $\beta_s$ being the thermal conductivity of the solid materials.
 
 \begin{equation}
-     T_{si}^L = T_{si}^n + dT_{si}^L
-\end {equation}
+     T_{si}\DIFdelbegin \DIFdel{^L }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend = T_{si}^n + dT_{si}\DIFdelbegin \DIFdel{^L
+}\DIFdelend \DIFaddbegin \DIFadd{^{L-}
+}\DIFaddend \end {equation}
 %
 %
 \subsection{\textsf{Compute and integrate acceleration of the solid phase}}
-After interpolating from material points to the nodes, the nodal acceleration and velocity are calculate by
-%
+After interpolating from material points to the nodes, the nodal acceleration and velocity are \DIFdelbegin \DIFdel{calculate by}\DIFdelend \DIFaddbegin \DIFadd{calculated by:
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{a}_{si}^{L-} = \frac{\pmb{f}_{si}^{int,n} + \pmb{f}_{si}^{ext,n}}{m_{si}^n} + \pmb{g}
@@ -1094,43 +1080,43 @@ After interpolating from material points to the nodes, the nodal acceleration an
 %
 %
 \subsection{\textsf{Compute Lagrangian value (mass, momentum and energy)}}
-For the fluid phase, the linear momentum rate, the energy rate are
-\begin{equation}
- \Delta (m \pmb{U})_{fc} = V n_c^n \nabla^c P_{c}^{n+1} +\Delta (m \pmb{U})_{_{fc},\tau} + V \overline{\rho}_{fc}^n g
+For the fluid phase, the linear momentum rate, the energy rate are\DIFaddbegin \DIFadd{:
+}\DIFaddend \begin{equation}
+ \Delta (m \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } = V n_c^n \nabla^c P_{c}^{n+1} +\Delta (m \pmb{U})_{\DIFdelbegin \DIFdel{_{fc}}\DIFdelend \DIFaddbegin \DIFadd{_{f,c}}\DIFaddend ,\tau} + V \overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n g
 \end {equation}
 %
 %
 \begin{equation}
- \Delta (me)_{fc} = V n_c^n P_{c}^{n+1} \nabla^c \cdot \pmb{U}_{f,FC}^{*} + \nabla^c \cdot \pmb{q}_{fc}^n
+ \Delta (me)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } = V n_c^n P_{c}^{n+1} \nabla^c \cdot \pmb{U}_{f,FC}^{*} + \nabla^c \cdot \pmb{q}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n
 \end {equation}
 %
 %
-The Lagrangian value of the mass, linear momentum and energy of fluid phases without momentum exchange are
-%
-%
-\begin{equation}
- m_{fc}^L = V \overline{\rho}_{fc}^n 
-\end {equation}
-%
+The Lagrangian value of the mass, linear momentum and energy of fluid phases without momentum exchange are\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
- (m \pmb{U})_{fc}^{L-} = V \overline{\rho}_{fc}^n \pmb{U}_{fc}^n + \Delta (m \pmb{U})_{fc} 
+ m_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L = V \overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n 
 \end {equation}
 %
 %
 \begin{equation}
- (me)_{fc}^{L-} = V \overline{\rho}_{fc}^n T_{fc}^n    c_v + \Delta (me)_{fc} 
+ (m \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} = V \overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n \pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n + \Delta (m \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } 
 \end {equation}
 %
 %
-For the solid phase, the Lagrangian value of the linear momentum and energy of solid phase are
+\begin{equation}
+ (me)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} = V \overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n    c_v + \Delta (me)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } 
+\end {equation}
 %
+%
+For the solid phase, the Lagrangian value of the linear momentum and energy of solid phase are\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
  m_{sc}^L = m_{sc}^n
 \end {equation}
 %
 \begin{equation}
- (m \pmb{U})_{sc}^{L-} = \sum{S_{ci} m_{si}^n \pmb{U}_{si}^{L-}} + V (1-n_c^n) \nabla^c P_{fc}^{n+1}
+ (m \pmb{U})_{sc}^{L-} = \sum{S_{ci} m_{si}^n \pmb{U}_{si}^{L-}} + V (1-n_c^n) \nabla^c P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1}
 \end {equation}
 %
 \begin{equation}
@@ -1138,27 +1124,27 @@ For the solid phase, the Lagrangian value of the linear momentum and energy of s
 \end {equation}
 %
 %
-To consider the momentum exchange, the Lagrangian velocity is modified as
-%
+To consider the momentum exchange, the Lagrangian velocity is modified as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-\pmb{U}_{fc}^{L} = \pmb{U}_{fc}^{L-} + \Delta \pmb{U}_{fc} \\
+\pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L} = \pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} + \Delta \pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } \\
 \pmb{U}_{sc}^{L} = \pmb{U}_{sc}^{L-} + \Delta \pmb{U}_{sc}
 \end {gathered}
 \end {equation}
 %
 %
-where the cell-centered intermediate velocity can be calculated by
-%
+where the cell-centered intermediate velocity can be calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-\pmb{U}_{fc}^{L-} = \frac{(m \pmb{U})_{fc}^{L-}}{m_{fc}^L} \\
+\pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} = \DIFdelbegin \DIFdel{\frac{(m \pmb{U})_{fc}^{L-}}{m_{fc}^L} }\DIFdelend \DIFaddbegin \DIFadd{\frac{(m \pmb{U})_{f,c}^{L-}}{m_{f,c}^L} }\DIFaddend \\
 \pmb{U}_{sc}^{L-} = \frac{(m \pmb{U})_{sc}^{L-}}{m_{sc}^L} 
 \end {gathered}
 \end {equation}
 %
 %
-And the increment of the velocity $\pmb{U}_{fc}$, $\Delta \pmb{U}_{sc}$ can be computed by solving the linear equation with i,j = 1 : $N$ as:
+And the increment of the velocity \DIFdelbegin \DIFdel{$\pmb{U}_{fc}$}\DIFdelend \DIFaddbegin \DIFadd{$\pmb{U}_{f,c}$}\DIFaddend , $\Delta \pmb{U}_{sc}$ can be computed by solving the linear equation with i,j = 1 : $N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -1168,27 +1154,27 @@ And the increment of the velocity $\pmb{U}_{fc}$, $\Delta \pmb{U}_{sc}$ can be c
                     \Delta \pmb{U}_{j,c}
     \end {vmatrix}
     =
-    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,c}^{*} - \pmb{U}_{j,c}^{*}) \\
-                    \beta_{ji}(\pmb{U}_{j,c}^{*} - \pmb{U}_{i,c}^{*})
+    \begin{vmatrix}  \beta_{ij}(\pmb{U}_{i,c}\DIFdelbegin \DIFdel{^{*} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - \pmb{U}_{j,c}\DIFdelbegin \DIFdel{^{*}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend ) \\
+                    \beta_{ji}(\pmb{U}_{j,c}\DIFdelbegin \DIFdel{^{*} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - \pmb{U}_{i,c}\DIFdelbegin \DIFdel{^{*}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend )
     \end {vmatrix}                
 \]
 %
 %
-To consider the energy exchange, the Lagrangian temperature  is modified as
-%
+To consider the energy exchange, the Lagrangian temperature  is modified as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-T_{fc}^{L} = T_{fc}^{L-} + \Delta T_{fc} \\
+T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L} = T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} + \Delta T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } \\
 T_{sc}^{L} = T_{sc}^{L-} + \Delta T_{sc}
 \end {gathered}
 \end {equation}
 %
 %
-where the cell-centered intermediate temperature can be calculated by
-%
+where the cell-centered intermediate temperature can be calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-T_{fc}^{L-} = \frac{(m T)_{fc}^{L-}}{m_{fc}^L c_v} \\
+T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{L-} = \DIFdelbegin \DIFdel{\frac{(m T)_{fc}^{L-}}{m_{fc}^L c_v} }\DIFdelend \DIFaddbegin \DIFadd{\frac{(m T)_{f,c}^{L-}}{m_{f,c}^L c_v} }\DIFaddend \\
 T_{sc}^{L-} = \frac{(m T)_{sc}^{L-}}{m_{sc}^L c_v} 
 \end {gathered}
 \end {equation}
@@ -1204,14 +1190,14 @@ And the increment of the velocity can be computed by solving the linear equation
                     \Delta T_{j,c}
     \end {vmatrix}
     =
-    \begin{vmatrix}  \eta_{ij}(T_{i,c}^{n} - T_{j,c}^{n}) \\
-                    \eta_{ji}(T_{j,c}^{n} - T_{i,c}^{n})
+    \begin{vmatrix}  \eta_{ij}(T_{i,c}\DIFdelbegin \DIFdel{^{n} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - T_{j,c}\DIFdelbegin \DIFdel{^{n}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend ) \\
+                    \eta_{ji}(T_{j,c}\DIFdelbegin \DIFdel{^{n} }\DIFdelend \DIFaddbegin \DIFadd{^{L-} }\DIFaddend - T_{i,c}\DIFdelbegin \DIFdel{^{n}}\DIFdelend \DIFaddbegin \DIFadd{^{L-}}\DIFaddend )
     \end {vmatrix}                
 \]
 %
 %
-Finally, we obtain the cell-centered solid  acceleration and temperature rate as
-%
+Finally, we obtain the cell-centered solid  acceleration and temperature rate as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
  d\pmb{U}_{sc}^L = \frac{(m \pmb{U})_{sc}^L - (m \pmb{U})_{sc}^n}{m_{sc}^L \delt}
@@ -1223,33 +1209,35 @@ Finally, we obtain the cell-centered solid  acceleration and temperature rate as
 %
 %
 \subsection{\textsf{Compute Lagrangian specific volume of the fluid phase}}
-To compute the Lagrangian value of the specific volume of the fluid phase, we need to compute the Lagrangian temperature rate as below
+To compute the Lagrangian value of the specific volume of the fluid phase, we need to compute the Lagrangian temperature rate as below\DIFaddbegin \DIFadd{:
+}\DIFaddend %
+%
+\begin{equation}
+ T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = \DIFdelbegin \DIFdel{\frac{(me)_{fc}^L}{m_{fc}^L c_v}
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{(me)_{f,c}^L}{m_{f,c}^L c_v}
+}\DIFaddend \end {equation}
 %
 %
 \begin{equation}
- T_{fc}^{n+1} = \frac{(me)_{fc}^L}{m_{fc}^L c_v}
-\end {equation}
-%
-%
-\begin{equation}
- \frac{D_f T_{fc}}{Dt} =  \frac{T_{fc}^{n+1} - T_{fc}^{n}}{\delt}
-\end {equation}
+ \DIFdelbegin \DIFdel{\frac{D_f T_{fc}}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_f T_{f,c}}{Dt} }\DIFaddend =  \DIFdelbegin \DIFdel{\frac{T_{fc}^{n+1} - T_{fc}^{n}}{\delt}
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{T_{f,c}^{n+1} - T_{f,c}^{n}}{\delt}
+}\DIFaddend \end {equation}
 %
 %
 As such, the Lagrangian specific volume rate is:
 %
 %
 \begin{equation}
- \Delta (m \upsilon)_{fc} = V f_{fc}^{\phi} \nabla \cdot \pmb{U} + (\phi_{fc} \alpha_{fc} \frac{D_f T_{fc}}{Dt} - f_{fc}^{\phi} \sum_{n=1}^{N} \phi_{nc} \alpha_{nc} \frac{D_n T_{nc}}{Dt})
+ \Delta (m \upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } = V f_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{\phi} \nabla \cdot \pmb{U} + (\phi_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } \alpha_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } \DIFdelbegin \DIFdel{\frac{D_f T_{fc}}{Dt} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_f T_{f,c}}{Dt} }\DIFaddend - f_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{\phi} \sum_{n=1}^{N} \phi_{nc} \alpha_{nc} \DIFdelbegin \DIFdel{\frac{D_n T_{nc}}{Dt}}\DIFdelend \DIFaddbegin \DIFadd{\frac{D_n T_{n,c}}{Dt}}\DIFaddend )
 \end {equation}
 %
 %
-where $ f_f^{\phi} = (\phi_f  \kappa_f ) / (\sum_{n=1}^{N} \phi_n \kappa_n)$ and  $\pmb{U} = \nabla \cdot (\sum_{s=1}^{N_s} \phi_{sc} \pmb{U}_{sc} + \sum_{f=1}^{N_f}  \phi_{fc} \pmb{U}_{fc})$.
+where $ f_f^{\phi} = (\phi_f  \kappa_f ) / (\sum_{n=1}^{N} \phi_n \kappa_n)$ and  \DIFdelbegin \DIFdel{$\pmb{U} = \nabla \cdot (\sum_{s=1}^{N_s} \phi_{sc} \pmb{U}_{sc} + \sum_{f=1}^{N_f}  \phi_{fc} \pmb{U}_{fc})$}\DIFdelend \DIFaddbegin \DIFadd{$\pmb{U} = \nabla \cdot (\sum_{s=1}^{N_s} \phi_{sc} \pmb{U}_{sc} + \sum_{f=1}^{N_f}  \phi_{fc} \pmb{U}_{f,c})$}\DIFaddend .
 %
 %
-Finally, the Lagrangian specific volume is
-\begin{equation}
- (m \upsilon)_{fc}^L = V \overline{\rho}_{f,c}^n \upsilon_{fc}^n + \Delta (m\upsilon)_{fc} 
+Finally, the Lagrangian specific volume is\DIFaddbegin \DIFadd{:
+}\DIFaddend \begin{equation}
+ (m \upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L = V \overline{\rho}_{f,c}^n \upsilon_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^n + \Delta (m\upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend } 
 \end {equation}
 %
 %
@@ -1258,52 +1246,56 @@ The time advanced mass, linear momentum, energy and specific volume are:
 %
 %
 \begin{equation}
- m_{fc}^{n+1} = m_{fc}^L - \delt  \nabla \cdot (\overline{\rho}_{fc}^L,\pmb{U}_{f,FC}^{L})
+ m_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = m_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L - \delt  \nabla \cdot (\overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L,\pmb{U}_{f,FC}^{L})
 \end {equation}
 %
 %
 \begin{equation}
- (m \pmb{U})_{fc}^{n+1} = (m \pmb{U})_{fc}^L - \delt  \nabla \cdot ((\overline{\rho} \pmb{U})_{fc}^L,\pmb{U}_{f,FC}^{L})
+ (m \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = (m \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L - \delt  \nabla \cdot ((\overline{\rho} \pmb{U})_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L,\pmb{U}_{f,FC}^{L})
 \end {equation}
 %
 %
 \begin{equation}
- (me)_{fc}^{n+1} = (me)_{fc}^L - \delt  \nabla \cdot ((\overline{\rho} c_v T)_{fc}^L,\pmb{U}_{f,FC}^{L})
+ (me)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = (me)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L - \delt  \nabla \cdot ((\overline{\rho} c_v T)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L,\pmb{U}_{f,FC}^{L})
 \end {equation}
 %
 %
 \begin{equation}
- (m \upsilon)_{fc}^{n+1} = (m \upsilon)_{fc}^L - \delt  \nabla \cdot ((\overline{\rho} \upsilon)_{fc}^L,\pmb{U}_{f,FC}^{L})
+ (m \upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = (m \upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L - \delt  \nabla \cdot ((\overline{\rho} \upsilon)_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^L,\pmb{U}_{f,FC}^{L})
 \end {equation}
 %
 %
-Finally, the state variables of the fluid phases of the next time step are
+Finally, the state variables of the fluid phases of the next time step are\DIFaddbegin \DIFadd{:
+}\DIFaddend %
+%
+\begin{equation}
+\overline{\rho}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = \DIFdelbegin \DIFdel{\frac{m_{fc}^{n+1}}{V}
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{m_{f,c}^{n+1}}{V}
+}\DIFaddend \end {equation}
 %
 %
 \begin{equation}
-\overline{\rho}_{fc}^{n+1} = \frac{m_{fc}^{n+1}}{V}
-\end {equation}
+ \pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = \DIFdelbegin \DIFdel{\frac{(m \pmb{U})_{fc}^{n+1}}{m_{fc}^{n+1}} 
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{(m \pmb{U})_{f,c}^{n+1}}{m_{f,c}^{n+1}} 
+}\DIFaddend \end {equation}
 %
 %
 \begin{equation}
- \pmb{U}_{fc}^{n+1} = \frac{(m \pmb{U})_{fc}^{n+1}}{m_{fc}^{n+1}} 
-\end {equation}
+ T_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = \DIFdelbegin \DIFdel{\frac{(me)_{fc}^{n+1}}{m_{fc}^{n+1}}
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{(me)_{f,c}^{n+1}}{m_{f,c}^{n+1}}
+}\DIFaddend \end {equation}
 %
 %
 \begin{equation}
- T_{fc}^{n+1} = \frac{(me)_{fc}^{n+1}}{m_{fc}^{n+1}}
-\end {equation}
-%
-%
-\begin{equation}
- \upsilon_{fc}^{n+1} = \frac{(m \upsilon)_{fc}^{n+1}}{m_{fc}^{n+1}}
-\end {equation}
+ \upsilon_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} = \DIFdelbegin \DIFdel{\frac{(m \upsilon)_{fc}^{n+1}}{m_{fc}^{n+1}}
+}\DIFdelend \DIFaddbegin \DIFadd{\frac{(m \upsilon)_{f,c}^{n+1}}{m_{f,c}^{n+1}}
+}\DIFaddend \end {equation}
 %
 %
 \subsection{\textsf{Interpolate from cell to node of the solid phase}}
 %
-First we interpolate the acceleration, velocity and temperature rate to the node
-%
+First we interpolate the acceleration, velocity and temperature rate to the node \DIFaddbegin \DIFadd{as below:
+}\DIFaddend %
 %
 \begin{equation}
  \pmb{a}_{si}^n = \sum{S_{ci} d\pmb{U}_{sc}^L}
@@ -1319,8 +1311,8 @@ First we interpolate the acceleration, velocity and temperature rate to the node
 \end {equation}
 %
 %
-Then the boundary condition and contact forces \DIFdelbegin \DIFdel{$f_{si}^{fric}$ }\DIFdelend are applied to the nodal velocity and the acceleration is modified by
-%
+Then the boundary condition and contact forces \DIFaddbegin \DIFadd{$f_{si}^{fric}$ }\DIFaddend are applied to the nodal velocity and the acceleration is modified by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{a}_{si}^n = \frac{\pmb{v}_{si}^{n+1} - \pmb{v}_{si}^n}{\delt}
@@ -1330,8 +1322,9 @@ Then the boundary condition and contact forces \DIFdelbegin \DIFdel{$f_{si}^{fri
 \subsection{\textsf{Update the particle variables}}
 %
 %
-The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1},  \nabla T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ (velocity, position, velocity gradient, temperature, temperature gradient, deformation gradient, volume) are updated here 
-%
+The state variables of the solid phase $[\pmb{U}_{sp}^{n+1},\pmb{x}_{sp}^{n+1},\nabla \pmb{U}_{sp}^{n+1}, T_{sp}^{n+1},  \nabla T_{sp}^{n+1}, \pmb{F}_{sp}^{n+1},V_{sp}^{n+1}]$ (velocity, position, velocity gradient, temperature, temperature gradient, deformation gradient, volume) are updated \DIFdelbegin \DIFdel{here 
+}\DIFdelend \DIFaddbegin \DIFadd{as: 
+}\DIFaddend %
 %
 \begin{equation}
      \pmb{U}_{sp}^{n+1} = \pmb{U}_{sp}^n + \sum{S_{sp} \pmb{a}_{si}^n \delt} 
@@ -1378,8 +1371,9 @@ Finally, the effective stress $(\pmb{\sigma}^\prime)^{n+1}$ is updated from the 
 %
 %_______________________________
 \section{\textsf{Numerical examples}}
-All input files and the analytical calculations in this section are provided in the Github repository \DIFdelbegin \DIFdel{$(https://github.com/QuocAnh90/Uintah_NTNU)$ }\DIFdelend for the reproduction of the numerical results.\\
-%_______________________________
+All input files and the analytical calculations in this section are provided in the Github repository \DIFaddbegin \DIFadd{(https://github.com/QuocAnh90/Uintah\textunderscore NTNU) }\DIFaddend for the reproduction of the numerical results.\\
+\DIFaddbegin \DIFadd{To prevent repetition, we present the parameters of water and air, which remain consistent across all simulations. The water has a bulk modulus of 2 GPa, a density of 998 kg/m3 at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1atm), a dynamic viscosity $\mu_f$ of 1 mPa s).  The air has a ideal gas with a density of 1.17 kg/m3 at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1atm), a dynamic viscosity $\mu_f$ of $18.45E^{-3}$ mPa s). 
+}\DIFaddend %_______________________________
 \subsection{\textsf{Fluid Flow through isothermal porous media}}
 %
 %
@@ -1394,7 +1388,7 @@ All input files and the analytical calculations in this section are provided in 
 \end {subfigure}\hfill    
 \begin{subfigure}[d]{0.5\linewidth}
 \includegraphics[width=\linewidth]{porousflow.jpg}
-\caption{\DIFdelbegin \DIFdel{Comparison }\DIFdelend \DIFaddbegin \DIFadd{Comparision }\DIFaddend between analytical model and simulation}
+\caption{\DIFdelbegin \DIFdel{Comparision }\DIFdelend \DIFaddbegin \DIFadd{Comparison }\DIFaddend between analytical model and simulation}
 \label{fig:3d}
 \end {subfigure}
 \caption{Numerical results of the fluid flow through isothermal porous media}
@@ -1410,17 +1404,19 @@ Fluid flow through porous media is important in many engineering disciplines, li
 \end {equation}
 %
 %
-If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraulic conductivity will be expressed as  \DIFdelbegin \DIFdel{$K = D_p^2 (1-\phi_s)^3 \rho_f  g / 180 \phi_s^2  \mu_f $}\DIFdelend \DIFaddbegin \DIFadd{$K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$}\DIFaddend . Then, the analytical formula of average velocity in one dimension through the porous media is:\\
+If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraulic conductivity will be expressed as  \DIFdelbegin \DIFdel{$K = d^2 (1-\phi_s)^3 / 180 \mu \phi_s^2$}\DIFdelend \DIFaddbegin \DIFadd{$K = D_p^2 (1-\phi_s)^3 \rho_f  g / 180 \phi_s^2  \mu_f $}\DIFaddend . Then, the analytical formula of average velocity in one dimension through the porous media is:\\
 %
 %
 \begin{equation}
-  {U}_f  = \frac{1}{n} \DIFdelbegin \DIFdel{\frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} }\DIFdelend \DIFaddbegin \DIFadd{\frac{d^2 (1-\phi_s)^3}{180 \mu \phi_s^2} }\DIFaddend \frac{\Delta p_f}{L}
+  {U}_f  = \frac{1}{n} \DIFdelbegin \DIFdel{\frac{d^2 (1-\phi_s)^3}{180 \mu \phi_s^2} }\DIFdelend \DIFaddbegin \DIFadd{\frac{D_p^2 (1-\phi_s)^3}{180 \phi_s^2 \mu_f} }\DIFaddend \frac{\Delta p_f}{L}
 \end {equation}
 
 %
 %
-Our numerical model is validated by modeling fluid flow through a 1m long porous media. This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity \DIFdelbegin \DIFdel{$\mu_f$ }\DIFdelend \DIFaddbegin \DIFadd{$\mu$ }\DIFaddend is 1mPa s). The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is [0.6, 0.62, 0.66, 0.68, 0.7] and the average grain diameter $d$ is 1mm. The model is discretized in 20 finite element and the porous media in 10 finite element with 1 material point per element. The pressure gradient is applied with three different value [0.25, 0.5, 1] atm. Figure \ref{fig:porousflow} shows a good agreement of fluid flow prediction between the theory and the model. \\
-%
+Our numerical model is validated by modeling fluid flow through a 1m long porous media. \DIFdelbegin \DIFdel{This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1mPa s). }\DIFdelend The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is [0.6, 0.62, 0.66, 0.68, 0.7] and the average grain diameter $d$ is 1mm. The model is discretized in 20 finite element and the porous media in 10 finite element with 1 material point per element. The pressure gradient is applied with three different value [0.25, 0.5, 1] atm. Figure \ref{fig:porousflow} shows a good agreement of fluid flow prediction between the theory and the model.
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %
 %_______________________________
 \subsection{\textsf{Isothermal consolidation}}
 %
@@ -1433,7 +1429,7 @@ Our numerical model is validated by modeling fluid flow through a 1m long porous
 \end {figure}
 %
 %
-A common benchmark \DIFdelbegin \DIFdel{for }\DIFdelend \DIFaddbegin \DIFadd{fo }\DIFaddend a fully saturated porous \DIFdelbegin \DIFdel{media }\DIFdelend \DIFaddbegin \DIFadd{meida }\DIFaddend is the simulation of one-dimensional consolidation. Using the Carman-Kozeny formula, the time-dependent pressure can be \DIFdelbegin \DIFdel{calculated }\DIFdelend \DIFaddbegin \DIFadd{caluated }\DIFaddend as:
+A common benchmark \DIFdelbegin \DIFdel{fo }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend a fully saturated porous \DIFdelbegin \DIFdel{meida }\DIFdelend \DIFaddbegin \DIFadd{media }\DIFaddend is the simulation of one-dimensional consolidation. Using the Carman-Kozeny formula, the time-dependent pressure can be \DIFdelbegin \DIFdel{caluated }\DIFdelend \DIFaddbegin \DIFadd{calculated }\DIFaddend as:
 %
 %
 \begin{equation}
@@ -1442,8 +1438,10 @@ A common benchmark \DIFdelbegin \DIFdel{for }\DIFdelend \DIFaddbegin \DIFadd{fo 
 %
 %
 where the consolidation rate $T_v =C_vt/H^2$, the consolidation coefficient $C_v = E_v n^3 d^2/(180(1-n)^2\mu) $ and the Oedometer modulus $E_v = E(1-\upsilon)/(1+\upsilon)/(1-2\upsilon)$.
-Our numerical model is validated by modeling the consolidation of a 1m column. This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 101325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1mPa s). The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is 0.7 which is equivalent to the porosity of 0.3 and the average grain diameter $d$ is 1mm. The model is discretized in 100 finite element with 1 material point per element. The external pressure applies to the top of the column is 10 kPa. Figure \ref{fig:consolidation} shows a good agreement of fluid flow prediction between the theory and the model. \\
-%_______________________________
+Our numerical model is validated by modeling the consolidation of a 1m column. \DIFdelbegin \DIFdel{This fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 101325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1mPa s). }\DIFdelend The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is 0.7 which is equivalent to the porosity of 0.3 and the average grain diameter $d$ is 1mm. The model is discretized in 100 finite element with 1 material point per element. The external pressure applies to the top of the column is 10 kPa. Figure \ref{fig:consolidation} shows a good agreement of fluid flow prediction between the theory and the model.
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %_______________________________
 \subsection{\textsf{Thermal induced cavity flow}}
 %
 %
@@ -1467,14 +1465,17 @@ Our numerical model is validated by modeling the consolidation of a 1m column. T
 \includegraphics[width=\linewidth]{velocity_thermal-1.jpg}
 \caption{FEM model \cite{Ali}}
 \end {subfigure}
-\caption{\DIFdelbegin \DIFdel{Comparison }\DIFdelend \DIFaddbegin \DIFadd{Comparision }\DIFaddend between MPMICE model and FEM model}
+\caption{\DIFdelbegin \DIFdel{Comparision }\DIFdelend \DIFaddbegin \DIFadd{Comparison }\DIFaddend between MPMICE model and FEM model}
 \label{fig:thermal}
 \end {figure}
 %
 %
-Another \DIFdelbegin \DIFdel{benchmark }\DIFdelend \DIFaddbegin \DIFadd{benchkmark }\DIFaddend is the thermal induced cavity flow in porous media. Temperature and velocity distributions are calculated for a square non-deformable saturated porous media The top and bottom walls are insulated, and the left and right walls are at fixed \DIFdelbegin \DIFdel{temperature gradient of }\DIFdelend \DIFaddbegin \DIFadd{temperatures differing by }\DIFaddend 1 degree. The fluid motion at stead state are cavity flow due to the temperature induced density variation. \\
-The numerical is validated by comparing with the numerical solution of the finite element method. The fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1 mPa s). The porous media is modeled by non deformable material, and density is 2500 kg/m3. The specific heat capacity of the water and porous skeleton are 4181 J/kg.K and 835 J/kg.K respectively. The thermal conductivity of the water and porous skeleton are 0.598 W/m.K and 0.4 W/m.K. The volume fraction of porous media $\phi_s$ is 0.6 which is equivalent to the porosity of 0.4 and the average grain diameter $d$ is 1mm. The model is discretized in 20 x 20 finite element with 4 material point per element. Figure \ref{fig:thermal} shows a good agreement of numerical results of the model compared with the numerical solution of the finite element method. \\
-%_______________________________
+Another \DIFdelbegin \DIFdel{benchkmark }\DIFdelend \DIFaddbegin \DIFadd{benchmark }\DIFaddend is the thermal induced cavity flow in porous media. Temperature and velocity distributions are calculated for a square non-deformable saturated porous media The top and bottom walls are insulated, and the left and right walls are at fixed \DIFdelbegin \DIFdel{temperatures differing by }\DIFdelend \DIFaddbegin \DIFadd{temperature gradient of }\DIFaddend 1 degree. The fluid motion at stead state are cavity flow due to the temperature induced density variation. \DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend The numerical is validated by comparing with the numerical solution of the finite element method. The \DIFdelbegin \DIFdel{fluid has water properties (bulk modulus is 2GPa, density is 998 kg/m3 at 5 degrees Celsius and 10325 Pa (1atm) pressure, dynamic viscosity $\mu$ is 1 mPa s). The }\DIFdelend porous media is modeled by non deformable material, and density is 2500 kg/m3. The specific heat capacity of the water and porous skeleton are 4181 J/kg.K and 835 J/kg.K respectively. The thermal conductivity of the water and porous skeleton are 0.598 W/m.K and 0.4 W/m.K. The volume fraction of porous media $\phi_s$ is 0.6 which is equivalent to the porosity of 0.4 and the average grain diameter $d$ is 1mm. The model is discretized in 20 x 20 finite element with 4 material point per element. Figure \ref{fig:thermal} shows a good agreement of numerical results of the model compared with the numerical solution of the finite element method.
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %_______________________________
 \subsection{\textsf{Underwater debris flow}}
 %
 %
@@ -1486,99 +1487,391 @@ The numerical is validated by comparing with the numerical solution of the finit
 \end {figure}
 %
 %
-The numerical example is validated by Rzadkiewicz et al.'s experiment on submarine debris flow \cite{Rzadkiewicz}. During the experiment, sand in a triangular box is released and then slides along a rigid bed inclined 45 degrees under water, see Figure \ref{fig:SandBoxModel}.\\
-%
-%
-\begin{figure}
-\center
-%add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
-%(or a blank line to force the subfigure onto a new line)
-\begin{subfigure}[c]{0.5\linewidth}
-\includegraphics[width=\linewidth]{1.jpg}
-\caption{0.4 seconds}
-\label{0.4s}
-\end {subfigure}\hfill    
-\begin{subfigure}[d]{0.5\linewidth}
-\includegraphics[width=\linewidth]{2.jpg}
-\caption{0.8 seconds}
-\label{0.8s}
-\end {subfigure}
-\caption{Simulation of underwater debris flow}
-\label{fig:debris}
-\end {figure}
-%
-%
+\DIFaddbegin 
+
+\DIFaddend The numerical example is validated \DIFdelbegin \DIFdel{by }\DIFdelend \DIFaddbegin \DIFadd{using the experimental work of }\DIFaddend Rzadkiewicz et al. \DIFdelbegin \DIFdel{'s experiment }\DIFdelend on submarine debris flow \cite{Rzadkiewicz}. \DIFdelbegin \DIFdel{During the }\DIFdelend \DIFaddbegin \DIFadd{In their }\DIFaddend experiment, sand \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{within }\DIFaddend a triangular box is released and \DIFdelbegin \DIFdel{then }\DIFdelend slides along a rigid bed inclined \DIFaddbegin \DIFadd{at }\DIFaddend 45 degrees under water \DIFdelbegin \DIFdel{, }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend see Figure \ref{fig:SandBoxModel}\DIFdelbegin \DIFdel{.}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+%DIFDELCMD < \begin{figure}
+%DIFDELCMD < \center
+%DIFDELCMD < %%%
+%DIF < add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF < (or a blank line to force the subfigure onto a new line)
+%DIFDELCMD < \begin{subfigure}[c]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{1.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{0.4 seconds}}
+%DIFAUXCMD
+%DIFDELCMD < \label{0.4s}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }\hfill    
+%DIFDELCMD < \begin{subfigure}[d]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{2.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{0.8 seconds}}
+%DIFAUXCMD
+%DIFDELCMD < \label{0.8s}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{Simulation of underwater debris flow}}
+%DIFAUXCMD
+%DIFDELCMD < \label{fig:debris}
+%DIFDELCMD < \end {%%%
+\DIFdel{figure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+%DIFDELCMD < \begin{table}[h]
+%DIFDELCMD < \center
+%DIFDELCMD < \begin{tabular}{|c|c|c|c|c|c|c|}
+%DIFDELCMD < \hline
+%DIFDELCMD < %%%
+\textbf{\DIFdel{Materials}}                                                 %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Bulk }%DIFDELCMD < \\ %%%
+\DIFdel{modul}%DIFDELCMD < \\ %%%
+\DIFdel{(Pa)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Shear }%DIFDELCMD < \\ %%%
+\DIFdel{modul}%DIFDELCMD < \\ %%%
+\DIFdel{(Pa)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Density}%DIFDELCMD < \\ %%%
+\DIFdel{(kg/m3)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Temp}%DIFDELCMD < \\ %%%
+\DIFdel{(C)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Dynamic }%DIFDELCMD < \\ %%%
+\DIFdel{vicosity}%DIFDELCMD < \\ %%%
+\DIFdel{(Pa s)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < & %%%
+\textbf{%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Yield }%DIFDELCMD < \\ %%%
+\DIFdel{stress}%DIFDELCMD < \\ %%%
+\DIFdel{(Pa)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }%%%
+} %DIFAUXCMD
+%DIFDELCMD < \\ \hline
+%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Water}%DIFDELCMD < \\ %%%
+\DIFdel{(at surface)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }       & %%%
+\DIFdel{2.15e9                                                                  }%DIFDELCMD < & %%%
+\DIFdel{-                                                                        }%DIFDELCMD < & %%%
+\DIFdel{999.8                                                              }%DIFDELCMD < & %%%
+\DIFdel{5                                                           }%DIFDELCMD < & %%%
+\DIFdel{855e-6                                                                        }%DIFDELCMD < & %%%
+\DIFdel{-                                                                       }%DIFDELCMD < \\ \hline
+%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Air}%DIFDELCMD < \\ %%%
+\DIFdel{(at top }%DIFDELCMD < \\ %%%
+\DIFdel{boundary)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < } & %%%
+\DIFdel{-                                                                       }%DIFDELCMD < & %%%
+\DIFdel{-                                                                        }%DIFDELCMD < & %%%
+\DIFdel{1.177                                                              }%DIFDELCMD < & %%%
+\DIFdel{5                                                           }%DIFDELCMD < & %%%
+\DIFdel{18.45e-6                                                                      }%DIFDELCMD < & %%%
+\DIFdel{-                                                                       }%DIFDELCMD < \\ \hline
+%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Sand}%DIFDELCMD < \\ %%%
+\DIFdel{(porous }%DIFDELCMD < \\ %%%
+\DIFdel{media)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }   & %%%
+\DIFdel{8.33e6                                                                  }%DIFDELCMD < & %%%
+\DIFdel{20e6                                                                     }%DIFDELCMD < & %%%
+\DIFdel{1985                                                               }%DIFDELCMD < & %%%
+\DIFdel{5                                                           }%DIFDELCMD < & %%%
+\DIFdel{-                                                                             }%DIFDELCMD < & %%%
+\DIFdel{200                                                                     }%DIFDELCMD < \\ \hline
+%DIFDELCMD < \begin{tabular}[c]{@{}c@{}}%%%
+\DIFdel{Rigid bed}%DIFDELCMD < \\ %%%
+\DIFdel{(solid)}%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }        & %%%
+\DIFdel{117e7                                                                 }%DIFDELCMD < & %%%
+\DIFdel{43.8e7                                                                   }%DIFDELCMD < & %%%
+\DIFdel{8900                                                               }%DIFDELCMD < & %%%
+\DIFdel{5                                                           }%DIFDELCMD < & %%%
+\DIFdel{-                                                                             }%DIFDELCMD < & %%%
+\DIFdel{-                                                                       }%DIFDELCMD < \\ \hline
+%DIFDELCMD < \end {%%%
+\DIFdel{tabular}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{Numerical parameters for the underwater submarine debris}}
+%DIFAUXCMD
+%DIFDELCMD < \label{table2}
+%DIFDELCMD < \end {%%%
+\DIFdel{table}%DIFDELCMD < }
+%DIFDELCMD < %%%
+\DIFdel{In }\DIFdelend \DIFaddbegin \DIFadd{). The material properties in }\DIFaddend the numerical model \DIFdelbegin \DIFdel{, the material properties }\DIFdelend are selected based on the experiment by Rzadkiewicz et al\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
+\cite{Rzadkiewicz}}\hskip0pt%DIFAUXCMD
+. Sand has }\DIFdelend \DIFaddbegin \DIFadd{. \mbox{%DIFAUXCMD
+\cite{Rzadkiewicz}}\hskip0pt%DIFAUXCMD
+. The sand is characterized by }\DIFaddend a saturated density of 1985 $kg/m^3$ and \DIFdelbegin \DIFdel{yield stress of 200 Pa. }\DIFdelend \DIFaddbegin \DIFadd{a friction angle of 10 degrees. The effect of }\DIFaddend Young's modulus \DIFdelbegin \DIFdel{has little effect }\DIFdelend on debris flow run-out \DIFdelbegin \DIFdel{because of the extreme large }\DIFdelend \DIFaddbegin \DIFadd{is negligible due to the extreme }\DIFaddend deformation of the debris\DIFdelbegin \DIFdel{. Therefore, we select 50 MPa }\DIFdelend \DIFaddbegin \DIFadd{, so a }\DIFaddend Young's modulus \DIFdelbegin \DIFdel{with 0.25 }\DIFdelend \DIFaddbegin \DIFadd{of 50 MPa with a }\DIFaddend Poisson's ratio \DIFaddbegin \DIFadd{of 0.25 is chosen}\DIFaddend . The rigid bed\DIFdelbegin \DIFdel{is much stifferwith }\DIFdelend \DIFaddbegin \DIFadd{, being much stiffer, has }\DIFaddend bulk modulus and shear modulus \DIFaddbegin \DIFadd{values }\DIFaddend of $117E^7$ Pa and $43.8E^7$ Pa\DIFdelbegin \DIFdel{. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45E^{-3}$  mPa s and 1  mPa s }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend respectively. The numerical parameters used in this example are presented in Table \ref{table2}.\\
+\DIFdelbegin \DIFdel{On }\DIFdelend \DIFaddbegin \DIFadd{The boundary conditions imposed in the numerical model are as follows: on }\DIFaddend all boundary faces, the \DIFdelbegin \DIFdel{Dirichlet boundary condition is imposed for velocity (u }\DIFdelend \DIFaddbegin \DIFadd{velocity is set to zero (U }\DIFaddend = 0 m/s) and \DIFdelbegin \DIFdel{temperature }\DIFdelend \DIFaddbegin \DIFadd{the temperature is set to 5 degrees Celsius }\DIFaddend (T = 5\DIFdelbegin \DIFdel{Celcius degrees), while the Neuman boundary condition is imposed at the top boundaryfor pressure (}\DIFdelend \DIFaddbegin \DIFadd{°C). At the top boundary, the pressure has a Neumann boundary condition of }\DIFaddend dp/dx = 0 kPa\DIFdelbegin \DIFdel{) and density (}\DIFdelend \DIFaddbegin \DIFadd{, and the density has a Neumann boundary condition of }\DIFaddend d$\rho$/dx = 0 $kg/m^3$\DIFdelbegin \DIFdel{). For the background mesh , there are }\DIFdelend \DIFaddbegin \DIFadd{. The background mesh consists of }\DIFaddend 700 x 400 \DIFdelbegin \DIFdel{= 280.000 cells. In each cell of }\DIFdelend \DIFaddbegin \DIFadd{cells, resulting in a total of 280,000 cells. Each cell in }\DIFaddend the debris flow and rigid bed \DIFdelbegin \DIFdel{, there are }\DIFdelend \DIFaddbegin \DIFadd{contains }\DIFaddend 2 x 2 material points.\\
+%DIF < 
+%DIF < 
+\DIFdelbegin %DIFDELCMD < \begin{figure}
+%DIFDELCMD < \center
+%DIFDELCMD < %%%
+%DIF < add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF < (or a blank line to force the subfigure onto a new line)
+%DIFDELCMD < \begin{subfigure}[c]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{0.4swater.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{0.4 seconds}}
+%DIFAUXCMD
+%DIFDELCMD < \label{0.4swater}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }\hfill    
+%DIFDELCMD < \begin{subfigure}[d]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{0.8swater.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{0.8 seconds}}
+%DIFAUXCMD
+%DIFDELCMD < \label{0.8swater}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{Simulation of underwater debris flow}}
+%DIFAUXCMD
+%DIFDELCMD < \label{watersurface}
+%DIFDELCMD < \end {%%%
+\DIFdel{figure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+\DIFdel{Figure \ref{0.4s} and  \ref{0.8s} show }\DIFdelend \DIFaddbegin \DIFadd{Figure \ref{saturatedflowb} illustrates }\DIFaddend snapshots of the \DIFaddbegin \DIFadd{underwater }\DIFaddend debris flow sliding\DIFdelbegin \DIFdel{in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \mbox{%DIFAUXCMD
+\cite{Rzadkiewicz}}\hskip0pt%DIFAUXCMD
+. The model also captures }\DIFdelend \DIFaddbegin \DIFadd{, demonstrating that the model captures the }\DIFaddend typical hydroplaning mechanism of the \DIFdelbegin \DIFdel{underwater debris flow(hydroplaning means the }\DIFdelend debris flow\DIFdelbegin \DIFdel{is lifted up and no longer in }\DIFdelend \DIFaddbegin \DIFadd{. Hydroplaning refers to the lifting of the debris flow, causing it to lose }\DIFaddend contact with the bottom layer\DIFdelbegin \DIFdel{)}\DIFdelend . The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. \DIFdelbegin \DIFdel{Once again, our computed results were consistent with both the experiment and others computational }\DIFdelend \DIFaddbegin \DIFadd{Our computed results align well with the experimental }\DIFaddend results \cite{Zhang2019}.\DIFaddbegin \\
+\DIFaddend Unlike other computational models \DIFdelbegin \DIFdel{based }\DIFdelend \DIFaddbegin \DIFadd{that rely }\DIFaddend on total stress analysis \DIFdelbegin \DIFdel{, the proposed model based on the }\DIFdelend \DIFaddbegin \DIFadd{\mbox{%DIFAUXCMD
+\cite{Tran2019, Capone2010, Zhang2019, Dey2016}}\hskip0pt%DIFAUXCMD
+, our proposed model utilizes }\DIFaddend effective stress analysis\DIFdelbegin \DIFdel{which allows to analyze the }\DIFdelend \DIFaddbegin \DIFadd{, enabling the analysis of }\DIFaddend water pressure and temperature \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{within }\DIFaddend the debris flow. \DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+%DIFDELCMD < \begin{figure}
+%DIFDELCMD < \center
+%DIFDELCMD < %%%
+%DIF < add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF < (or a blank line to force the subfigure onto a new line)
+%DIFDELCMD < \begin{subfigure}[c]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{SHMPM.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{saturated debris flow using MPM}}
+%DIFAUXCMD
+%DIFDELCMD < \label{saturatedflowa}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }\hfill    
+%DIFDELCMD < \begin{subfigure}[d]{0.5\linewidth}
+%DIFDELCMD < \includegraphics[width=\linewidth]{MPMICE_debris.jpg}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{underwater debris flow using MPMICE}}
+%DIFAUXCMD
+%DIFDELCMD < \label{saturatedflowb}
+%DIFDELCMD < \end {%%%
+\DIFdel{subfigure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdel{Simulation of underwater debris flow}}
+%DIFAUXCMD
+%DIFDELCMD < \label{saturatedflow}
+%DIFDELCMD < \end {%%%
+\DIFdel{figure}%DIFDELCMD < }
+%DIFDELCMD < %%%
+%DIF < 
+%DIF < 
+\DIFdel{We also explore the difference }\DIFdelend \DIFaddbegin \DIFadd{Additionally, we investigate the differences }\DIFaddend between underwater debris flow and saturated debris flow in terms of \DIFdelbegin \DIFdel{interacting with obstacle}\DIFdelend \DIFaddbegin \DIFadd{their interaction with obstacles}\DIFaddend . Figure \ref{saturatedflow} \DIFdelbegin \DIFdel{shows the snapshot of the simulations of }\DIFdelend \DIFaddbegin \DIFadd{presents snapshots of simulations of both }\DIFaddend underwater and saturated debris flow. The saturated debris flow (\DIFdelbegin \DIFdel{see }\DIFdelend Figure \ref{saturatedflowa}) \DIFdelbegin \DIFdel{behaves like frictional flowas grain }\DIFdelend \DIFaddbegin \DIFadd{exhibits behavior similar to frictional flow, where grains }\DIFaddend have contact forces with each other. \DIFdelbegin \DIFdel{On the other hand}\DIFdelend \DIFaddbegin \DIFadd{Conversely}\DIFaddend , the underwater debris flow (\DIFdelbegin \DIFdel{see }\DIFdelend Figure \ref{saturatedflowb}) behaves like \DIFdelbegin \DIFdel{tubulent flowas grains are }\DIFdelend \DIFaddbegin \DIFadd{turbulent flow, with grains being }\DIFaddend separated from each other and \DIFdelbegin \DIFdel{exhibit }\DIFdelend \DIFaddbegin \DIFadd{exhibiting }\DIFaddend no contact forces \DIFdelbegin \DIFdel{between grains.
+}\DIFdelend \DIFaddbegin \DIFadd{(as reflected by the near-zero effective stress in the turbulence domain).
+%DIF > 
+%DIF > 
+%DIF > \begin{figure}
+%DIF > \center
+%DIF > add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF > (or a blank line to force the subfigure onto a new line)
+%DIF > \begin{subfigure}[c]{0.5\linewidth}
+%DIF > \includegraphics[width=\linewidth]{1.jpg}
+%DIF > \caption{0.4 seconds}
+%DIF > \label{0.4s}
+%DIF > \end {subfigure}\hfill    
+%DIF > \begin{subfigure}[d]{0.5\linewidth}
+%DIF > \includegraphics[width=\linewidth]{2.jpg}
+%DIF > \caption{0.8 seconds}
+%DIF > \label{0.8s}
+%DIF > \end {subfigure}
+%DIF > \caption{Simulation of underwater debris flow}
+%DIF > \label{fig:debris}
+%DIF > \end {figure}
+%DIF > 
+%DIF > 
+}
+
 \begin{table}[h]
 \center
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-\textbf{Materials}                                                 & \textbf{\begin{tabular}[c]{@{}c@{}}Bulk \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Shear \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Density\\ (kg/m3)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Temp\\ (C)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Dynamic \\ vicosity\\ (Pa s)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Yield \\ stress\\ (Pa)\end {tabular}} \\ \hline
+\textbf{Materials}                                                 & \textbf{\begin{tabular}[c]{@{}c@{}}Bulk \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Shear \\ modul\\ (Pa)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Density\\ (kg/m3)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Temp\\ (C)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Dynamic \\ vicosity\\ (Pa s)\end {tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Friction \\ angle\\ (degrees)\end {tabular}} \\ \hline
 \begin{tabular}[c]{@{}c@{}}Water\\ (at surface)\end {tabular}       & 2.15e9                                                                  & -                                                                        & 999.8                                                              & 5                                                           & 855e-6                                                                        & -                                                                       \\ \hline
 \begin{tabular}[c]{@{}c@{}}Air\\ (at top \\ boundary)\end {tabular} & -                                                                       & -                                                                        & 1.177                                                              & 5                                                           & 18.45e-6                                                                      & -                                                                       \\ \hline
-\begin{tabular}[c]{@{}c@{}}Sand\\ (porous \\ media)\end {tabular}   & 8.33e6                                                                  & 20e6                                                                     & 1985                                                               & 5                                                           & -                                                                             & 200                                                                     \\ \hline
+\begin{tabular}[c]{@{}c@{}}Sand\\ (porous \\ media)\end {tabular}   & 8.33e6                                                                  & 20e6                                                                     & 1985                                                               & 5                                                           & -                                                                             & 10                                                                     \\ \hline
 \begin{tabular}[c]{@{}c@{}}Rigid bed\\ (solid)\end {tabular}        & 117e7                                                                 & 43.8e7                                                                   & 8900                                                               & 5                                                           & -                                                                             & -                                                                       \\ \hline
 \end {tabular}
 \caption{Numerical parameters for the underwater submarine debris}
 \label{table2}
 \end {table}
-In the numerical model, the material properties are selected based on the experiment by Rzadkiewicz et al \cite{Rzadkiewicz}. Sand has a saturated density of 1985 $kg/m^3$ and yield stress of 200 Pa. Young's modulus has little effect on debris flow run-out because of the extreme large deformation of the debris. Therefore, we select 50 MPa Young's modulus with 0.25 Poisson's ratio. The rigid bed is much stiffer with bulk modulus and shear modulus of $117E^7$ Pa and $43.8E^7$ Pa. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45E^{-3}$  mPa s and 1  mPa s respectively. The numerical parameters used in this example are presented in Table \ref{table2}.   \\
-On all boundary faces, the Dirichlet boundary condition is imposed for velocity (u = 0 m/s) and temperature (T = 5 Celcius degrees), while the Neuman boundary condition is imposed at the top boundary for pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). For the background mesh, there are 700 x 400 = 280.000 cells. In each cell of the debris flow and rigid bed, there are 2 x 2 material points. \\
-%
-%
-\begin{figure}
+
+%DIF > 
+%DIF > 
+\begin{figure}[H]
 \center
-%add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
-%(or a blank line to force the subfigure onto a new line)
+%DIF > add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF > (or a blank line to force the subfigure onto a new line)
 \begin{subfigure}[c]{0.5\linewidth}
 \includegraphics[width=\linewidth]{0.4swater.jpg}
-\caption{0.4 seconds}
+\caption{\DIFadd{0.4 seconds}}
 \label{0.4swater}
-\end {subfigure}\hfill    
+\end{subfigure}
+ {\DIFadd{subfigure}}\hfill    
 \begin{subfigure}[d]{0.5\linewidth}
 \includegraphics[width=\linewidth]{0.8swater.jpg}
-\caption{0.8 seconds}
+\caption{\DIFadd{0.8 seconds}}
 \label{0.8swater}
-\end {subfigure}
-\caption{Simulation of underwater debris flow}
+\end{subfigure}
+ {\DIFadd{subfigure}}
+\caption{\DIFadd{Evolution of water level in the simulation of underwater debris flow}}
 \label{watersurface}
-\end {figure}
-%
-%
-Figure \ref{0.4s} and  \ref{0.8s} show snapshots of the debris flow sliding in the plane at 0.4 s and 0.8 s. Our simulations match the computed results from Rzadkiewicz et al. \cite{Rzadkiewicz}. The model also captures typical hydroplaning mechanism of the underwater debris flow (hydroplaning means the debris flow is lifted up and no longer in contact with the bottom layer). The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Once again, our computed results were consistent with both the experiment and others computational results \cite{Zhang2019}. Unlike other computational models based on total stress analysis\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
-\cite{Tran2019, Capone2010,Zhang2019, Dey2016}}\hskip0pt%DIFAUXCMD
-}\DIFdelend , the proposed model based on the effective stress analysis which allows to analyze the water pressure  and temperature in the debris flow.\\
-%
-%
-\begin{figure}
+\end{figure}
+ {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+%DIF > 
+%DIF > 
+\begin{figure}[]
 \center
-%add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
-%(or a blank line to force the subfigure onto a new line)
+%DIF > add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+%DIF > (or a blank line to force the subfigure onto a new line)
 \begin{subfigure}[c]{0.5\linewidth}
 \includegraphics[width=\linewidth]{SHMPM.jpg}
-\caption{saturated debris flow using MPM}
+\caption{\DIFadd{saturated debris flow using MPM}}
 \label{saturatedflowa}
-\end {subfigure}\hfill    
+\end{subfigure} {\DIFadd{subfigure}}\hfill    
 \begin{subfigure}[d]{0.5\linewidth}
 \includegraphics[width=\linewidth]{MPMICE_debris.jpg}
-\caption{underwater debris flow using MPMICE}
+\caption{\DIFadd{underwater debris flow using MPMICE}}
 \label{saturatedflowb}
-\end {subfigure}
-\caption{Simulation of underwater debris flow}
+\end{subfigure} {\DIFadd{subfigure}}
+\caption{\DIFadd{Simulation of Debris Flow: Mean Effective Stress Distribution (Green Color Indicates Near-Zero Effective Stress)}}
 \label{saturatedflow}
-\end {figure}
-%
-%
-We also explore the difference between underwater debris flow and saturated debris flow in terms of interacting with obstacle. Figure \ref{saturatedflow} shows the snapshot of the simulations of underwater and saturated debris flow. The saturated debris flow (see Figure \ref{saturatedflowa}) behaves like frictional flow as grain have contact forces with each other. On the other hand, the underwater debris flow (see Figure \ref{saturatedflowb}) behaves like \DIFdelbegin \DIFdel{turbulent }\DIFdelend \DIFaddbegin \DIFadd{tubulent }\DIFaddend flow as grains are separated from each other and exhibit no contact forces between grains.  \\
-%_______________________________
-\subsection{\textsf{Earthquake-induced submarine landslides}}
+\end{figure} {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+
+\DIFaddend %_______________________________
+\subsection{\DIFaddbegin \textsf{\DIFadd{Validation of soil response to the seismic loading}}}
+%DIF > 
+%DIF > 
+\begin{figure}[H]
+\center
+\includegraphics[scale=0.25]{vel.jpg}
+\caption{\DIFadd{Seismic loading}}
+\label{fig:vel_profile}
+\end{figure} {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+\begin{figure}[H]
+\center
+\includegraphics[scale=0.75]{MPM_seismic.jpg}
+\caption{\DIFadd{Material points prescribed velocity as kinematic boundary condition \mbox{%DIFAUXCMD
+\cite{Alsardi}}\hskip0pt%DIFAUXCMD
+}}
+\label{fig:seismic_method}
+\end{figure} {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+\DIFadd{An experimental study conducted by Hiraoka et al. \mbox{%DIFAUXCMD
+\cite{Hiraoka} }\hskip0pt%DIFAUXCMD
+aimed to investigate the influence of seismic shaking on the deformation of a 0.5 m-high sand slope. The sand used in the experiment was partially saturated, with a moisture content of 10 percent. The provided soil parameters for the Mohr Coulomb model include the effective friction angle of 23 degrees, apparent cohesion of 0.78 kPa, Young's modulus of 2.57 MPa, and Poisson's ratio of 0.33, and moist unit weight of 16.5 kN/m3. The soil's dilatancy angle was assumed to be 0 \mbox{%DIFAUXCMD
+\cite{Hiraoka}}\hskip0pt%DIFAUXCMD
+. The experimental setup consisted of a shaking table box with a steel horizontal base and smooth glass vertical sidewalls. Laser sensors were used to monitor the displacement of the slope's toe and crest. Figure \ref{fig:vel_profile} displays the velocity-time history employed in the experiment. 
+%DIF > 
+%DIF > 
+}\begin{figure}[H]
+\center
+\includegraphics[scale=0.75]{seismic.jpg}
+\caption{\DIFadd{Numerical model of the seismic-induced slope failure with displacement color}}
+\label{fig:seismic}
+\end{figure} {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+
+\DIFadd{To simulate the seismic loading in our numerical model, we adopted a method presented by Alsardi et al. \mbox{%DIFAUXCMD
+\cite{Alsardi}}\hskip0pt%DIFAUXCMD
+, which involves specifying the velocity at the corresponding material points representing either the shaking table or the bedrock at the site (see Figure \ref{fig:seismic_method}). In our simulation, we considered the horizontal base to be fully rough and the vertical contact to be fully smooth. The initial stress condition was initiated using gravity and seismic loading induced the slope failure (see Figure \ref{fig:seismic}).}\\
+\DIFadd{Previous studies by Bhandari et al. \mbox{%DIFAUXCMD
+\cite{Bhandari}}\hskip0pt%DIFAUXCMD
+, Alsardi et al. \mbox{%DIFAUXCMD
+\cite{Alsardi}}\hskip0pt%DIFAUXCMD
+, and Hiraoka et al. \mbox{%DIFAUXCMD
+\cite{Hiraoka} }\hskip0pt%DIFAUXCMD
+attempted to model this experiment using MPM and SPH models. In this study, we compared our results with those obtained from other particle-based methods (Figure \ref{fig:Toe}). The main difference is that we did not apply 5 percent numerical damping in our model, unlike the other methods. We found that the final displacement of the slope toe in our MPM model was higher than that observed in the experiment. Nevertheless, the validation of the Mohr-Coulomb model under seismic response demonstrated a reasonable soil behavior in terms of displacement.
+%DIF > 
+%DIF > 
+}\begin{figure}[H]
+\center
+\includegraphics[scale=0.5]{Toe.jpg}
+\caption{\DIFadd{Displacement of the toe of the slope}}
+\label{fig:Toe}
+\end{figure} {\DIFadd{figure}}
+%DIF > 
+%DIF > 
+
+%DIF > _______________________________
+\subsection{\DIFaddend \textsf{Earthquake-induced submarine landslides}}
 %
 %
 \begin{figure}[H]
 \center
 \includegraphics[scale=0.5]{schematic.jpeg}
-\caption{Numerical model of the earthquake-induced submarine landslide}
+\caption{Numerical \DIFdelbegin \DIFdel{model }\DIFdelend \DIFaddbegin \DIFadd{simulation }\DIFaddend of the earthquake-induced submarine landslide}
 \label{fig:scheme}
-\end {figure}
+\end{figure} {figure}
 %
 %
 \begin{figure}[H]
@@ -1598,8 +1891,10 @@ We also explore the difference between underwater debris flow and saturated debr
 \caption{Ground acceleration profile, frequency of 2Hz and magnitude of 1g}
 \label{groundacceleration}
 \end {figure}
-In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the \DIFdelbegin \DIFdel{constanct }\DIFdelend \DIFaddbegin \DIFadd{peak }\DIFaddend ground acceleration of 1g and \DIFdelbegin \DIFdel{a constant }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). \DIFdelbegin \DIFdel{An }\DIFdelend \DIFaddbegin \DIFadd{The }\DIFaddend earthquake of this magnitude \DIFdelbegin \DIFdel{is possible. For instance, in the case of the 2023 Turkey-Syria Earthquake, significant ground shaking with peak ground acceleration exceeding 1g was observed at numerous locations. This serves as an example of the practical occurrence of such high levels of ground acceleration during seismic events. }\DIFdelend \DIFaddbegin \DIFadd{can occured typically for the earthquake of magnitude of more than 6. }\DIFaddend \\
-%
+In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the \DIFdelbegin \DIFdel{peak }\DIFdelend \DIFaddbegin \DIFadd{constanct }\DIFaddend ground acceleration of 1g and \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{a constant }\DIFaddend frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). \DIFdelbegin \DIFdel{The }\DIFdelend \DIFaddbegin \DIFadd{An }\DIFaddend earthquake of this magnitude \DIFdelbegin \DIFdel{can occured typically for the earthquake of magnitude of more than 6. }%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{is possible. For instance, in the case of the 2023 Turkey-Syria Earthquake, significant ground shaking with peak ground acceleration exceeding 1g was observed at numerous locations. This serves as an example of the practical occurrence of such high levels of ground acceleration during seismic events. To generate the seismic loading, the same method was used as presented in the previous numerical example.
+}\DIFaddend %
 %
 \begin{figure}[H]
 \center
@@ -1609,9 +1904,9 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end {figure}
 %
 %
-A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the density of 2650 kg/$m^3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is governed following the softening curve (see Figure \ref{fig:model}) with the peak friction angle $\phi^\prime_p$ of 45 degrees and the residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is 0.3 and the average grain size of the soil is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the \DIFdelbegin \DIFdel{Rowe's stress dilatancy theory  \mbox{%DIFAUXCMD
+A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the density of 2650 kg/$m^3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is governed following the softening curve (see Figure \ref{fig:model}) with the peak friction angle $\phi^\prime_p$ of 45 degrees and the residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is 0.3 and the average grain size of the soil is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the \DIFdelbegin \DIFdel{Row-stress dilatancy }\DIFdelend \DIFaddbegin \DIFadd{Rowe's stress dilatancy theory  \mbox{%DIFAUXCMD
 \cite{Wood} }\hskip0pt%DIFAUXCMD
-}\DIFdelend \DIFaddbegin \DIFadd{Row-stress dilatancy }\DIFaddend as follow:
+}\DIFaddend as follow:
 %
 %
 \begin{equation}
@@ -1619,8 +1914,10 @@ A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the
 \end {equation}
 %
 %
-The solid plane is modeled as a rigid body acted as a shaking table. The contact between horizontal plane and the sand is the frictional contact with the friction coefficient of 0.1. No artificial damping is applied in the simulation. The contact between vertical plane and the sand is \DIFdelbegin \DIFdel{considered }\DIFdelend \DIFaddbegin \DIFadd{consdered }\DIFaddend to be smooth with zero friction coefficient. Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 \DIFdelbegin \DIFdel{Celsius }\DIFdelend \DIFaddbegin \DIFadd{Celcius }\DIFaddend degrees, air and water have viscosity of $18.45e^{-3}$  mPa s and 1  mPa s respectively. On all boundary faces, the symmetric boundary condition is imposed, while the \DIFdelbegin \DIFdel{Neumman }\DIFdelend \DIFaddbegin \DIFadd{Neuman }\DIFaddend boundary condition is imposed at the top \DIFdelbegin \DIFdel{boundary for }\DIFdelend \DIFaddbegin \DIFadd{boundaryfor }\DIFaddend pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). The mesh size is 0.25 x 025m with 300852 element cells and 142316 material points. The simulation takes a couple of hours to perform 60 seconds of the simulation using 4096 CPUs. \\
-%
+The solid plane is modeled as a rigid body acted as a shaking table. The contact between horizontal plane and the sand is the frictional contact with the friction coefficient of 0.1. No artificial damping is applied in the simulation. The contact between vertical plane and the sand is \DIFdelbegin \DIFdel{consdered }\DIFdelend \DIFaddbegin \DIFadd{considered }\DIFaddend to be smooth with zero friction coefficient. \DIFdelbegin \DIFdel{Under gravity, the density of the water at the surface is 999.8 $kg/m^3$ at the pressure of 1 atm. At the top boundary, the air has a density of 1.17 $kg/m^3$ at the atmospheric pressure of 1 atm. At 5 Celcius degrees, air and water have viscosity of $18.45e^{-3}$  mPa s and 1  mPa s respectively. }\DIFdelend On all boundary faces, the symmetric boundary condition is imposed, while the \DIFdelbegin \DIFdel{Neuman }\DIFdelend \DIFaddbegin \DIFadd{Neumman }\DIFaddend boundary condition is imposed at the top \DIFdelbegin \DIFdel{boundaryfor }\DIFdelend \DIFaddbegin \DIFadd{boundary for }\DIFaddend pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). \DIFaddbegin \DIFadd{Symmetric boundary condition refers to a condition where the normal component of the velocity at the boundary face is set to zero, and the tangential component is equal to the tangential component of the neighboring cells. }\DIFaddend The mesh size is 0.25 x 025m with 300852 element cells and 142316 material points. The simulation takes a couple of hours to perform 60 seconds of the simulation using 4096 CPUs.
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend %
 \begin{figure}[H]
 \center
 \includegraphics[scale=0.5]{landslide_gamma.jpeg}
@@ -1629,8 +1926,10 @@ The solid plane is modeled as a rigid body acted as a shaking table. The contact
 \end {figure}
 %
 %
-We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water \DIFdelbegin \DIFdel{pressure }\DIFdelend \DIFaddbegin \DIFadd{ressure }\DIFaddend in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be \DIFdelbegin \DIFdel{characterized }\DIFdelend \DIFaddbegin \DIFadd{charaterized }\DIFaddend as the progressive failure mechanism. Here are some numerical observation:\\
-\begin{enumerate}
+We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water \DIFdelbegin \DIFdel{ressure }\DIFdelend \DIFaddbegin \DIFadd{pressure }\DIFaddend in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be \DIFdelbegin \DIFdel{charaterized }\DIFdelend \DIFaddbegin \DIFadd{characterized }\DIFaddend as the progressive failure mechanism. Here are some numerical observation:
+\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \begin{enumerate}
 \item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 4 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3m towards the slide direction.
 %
 \begin{figure}[H]
@@ -1645,7 +1944,7 @@ We demonstrate the entire process and the mechanism of the earthquake-induced su
 \item  When the seismic loading ends at 23 seconds, the last shear band is mobilized and the slope soon reaches to the final deposition. No more progressive failure developed in the slope. The turbulent flow developed as the interaction between debris flow and seawater.
 \end {enumerate}
 %
-Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the \DIFdelbegin \DIFdel{development }\DIFdelend \DIFaddbegin \DIFadd{delvelopment }\DIFaddend of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
+Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the \DIFdelbegin \DIFdel{delvelopment }\DIFdelend \DIFaddbegin \DIFadd{development }\DIFaddend of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
 %
 %
 \begin{figure}[H]
@@ -1688,7 +1987,7 @@ we use some definition following \cite{Kashiwa} as below:
 \end {gather}
 %
 %
-Then, the rate of volume with incompressible solid grains are calculated as below:
+Then, the rate of volume with incompressible solid grains are calculated as \DIFdelbegin \DIFdel{below}\DIFdelend \DIFaddbegin \DIFadd{belows}\DIFaddend :
 %
 %
 \begin{equation}
@@ -1702,7 +2001,7 @@ Then, the rate of volume with incompressible solid grains are calculated as belo
 \subsection{\textsf{Evolution of porosity}}
 %
 %
-Solving the solid mass balance equation (\ref{massbalance}) with the definition of solid mass in equation (\ref{mass}), it leads to the rate of porosity as below:
+Solving the solid mass balance equation (\ref{massbalance}) with the definition of solid mass in equation (\ref{mass}), it leads to the rate of porosity as \DIFdelbegin \DIFdel{below}\DIFdelend \DIFaddbegin \DIFadd{belows}\DIFaddend :
 %
 %
 \begin{equation}
@@ -1710,8 +2009,8 @@ Solving the solid mass balance equation (\ref{massbalance}) with the definition 
 \end {equation}
 %
 %
-The soil grains are assumed to be incompressible, therefore, term 2 in the right hand side is zero. 
-%
+The soil grains are assumed to be incompressible, therefore, term 2 in the right hand side is zero. \DIFaddbegin \DIFadd{leading to:
+}\DIFaddend %
 %
 \begin{equation}
   V \frac{D_s \phi_s}{Dt} + \phi_s \frac{D_s V}{Dt} = 0  
@@ -1731,7 +2030,7 @@ Dividing all terms with $V$ with the equation $\frac{1}{V} \frac{D_s V}{Dt} = \n
 \label{Momentum}
 %
 %
-The linear momentum balance equation for the fluid phases based on mixture theory is:\\
+The linear momentum balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the fluid phases based on mixture theory \DIFdelbegin \DIFdel{is}\DIFdelend \DIFaddbegin \DIFadd{are}\DIFaddend :\\
 %
 %
 \begin{equation}
@@ -1740,15 +2039,17 @@ The linear momentum balance equation for the fluid phases based on mixture theor
 \end {equation}
 %
 %
-On the right hand sand, the first term is the divergence of partial fluid phase stress, the third term is the body force, the fourth term is the drag force (momentum exchange) and the fifth term is the buoyant force described in \cite{DRUMHELLER} for the immiscible mixtures. The buoyant force is in the form:\\
-%
+On the right hand sand, the first term is the divergence of partial fluid phase stress, the third term is the body force, the fourth term is the drag force (momentum exchange) and the fifth term is the buoyant force described in \cite{DRUMHELLER} for the immiscible mixtures. The buoyant force is in the form \DIFdelbegin \DIFdel{:}%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{as belows:
+}\DIFaddend %
 %
 \begin{equation}
     \pmb{f}_b = \pmb{\sigma}_f\nabla (n)
 \end {equation}
 %
 %
-As a result, the linear momentum balance equation for the fluid phases becomes:
+As a result, the linear momentum balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the fluid phases \DIFdelbegin \DIFdel{becomes}\DIFdelend \DIFaddbegin \DIFadd{become as}\DIFaddend :
 %
 %
 \begin{equation}
@@ -1769,7 +2070,7 @@ The Reynolds stress component can be included in the term $\pmb{\tau}_f$ to cons
 \end {equation}
 %
 %
-Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with equation (\ref{fluidmom}), we obtain the linear momentum balance equation for the solid phase as:
+Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with equation (\ref{fluidmom}), we obtain the linear momentum balance \DIFdelbegin \DIFdel{equation }\DIFdelend \DIFaddbegin \DIFadd{equations }\DIFaddend for the solid phase as:
 %
 %
 \begin{equation}
@@ -1780,7 +2081,7 @@ Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with e
 \end {equation}
 %
 %
-Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure \DIFdelbegin \DIFdel{interfaces}\DIFdelend \DIFaddbegin \DIFadd{interaces}\DIFaddend .
+Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure \DIFdelbegin \DIFdel{interaces}\DIFdelend \DIFaddbegin \DIFadd{interfaces}\DIFaddend .
 \subsection{\textsf{Energy conservation}}
 We adopt the general form of the total energy balance equation for the porous media from \cite{Hassanizadeh}, the total energy balance equations for the fluid phases are:
 %
@@ -1809,7 +2110,7 @@ Combining equations (\ref{fluidmom}), (\ref{e1}), (\ref{e2}), we obtain the fina
 \end {equation}
 %
 %
-On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we introduce the rate of the internal energy  for the thermoelastic materials as a function of elastic strain tensor $\pmb{\epsilon}_s^e$ and temperature $T_s$:
+On the right hand side, the terms include the average pressure-volume work, the average viscous dissipation, the thermal transport and the energy exchange between solid and fluid respectively. The heat flux is $\pmb{q}_f = \overline{\rho}_f \beta_f \nabla T_f$ with $\beta_f$ being the thermal conductivity coefficient. To derive the internal energy balance equation for the solid phase, we introduce the rate of the internal energy  for the thermoelastic materials as a function of elastic strain tensor $\pmb{\epsilon}_s^e$ and temperature $T_s$ \DIFaddbegin \DIFadd{as belows}\DIFaddend :
 %
 %
 \begin{equation}
@@ -1849,12 +2150,12 @@ On the right hand side, the terms include the work rate from frictional sliding 
 %
 %
 \subsection{\textsf{Advanced Fluid Pressure}}
-The discretization of the pressure equation begins with the Lagrangian face-centered velocity and the equation for the pressure
-%
+The discretization of the pressure equation begins with the Lagrangian \DIFdelbegin \DIFdel{face-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend velocity and the equation for the pressure \DIFaddbegin \DIFadd{as:
+}\DIFaddend %
 \begin{equation}
  \label{append:pressure1}
   \overline{\rho}_{f,FC} \frac{\pmb{U}_{f,FC}^{n+1} - \pmb{U}_{f,FC}^{n}}{dt} 
-  = n \nabla^{FC} P_{fc}^{n+1} + \overline{\rho}_{f,FC} \pmb{b}
+  = n \nabla^{FC} P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n+1} + \overline{\rho}_{f,FC} \pmb{b}
 \end {equation}
 %
 %
@@ -1863,33 +2164,33 @@ The discretization of the pressure equation begins with the Lagrangian face-cent
   \kappa \frac{dP}{dt} = \nabla^c \cdot \pmb{U}_{f,FC}^{n+1}
 \end {equation}
 %
-The divergence of the equation (\ref{append:pressure1}) with $ \nabla \cdot \pmb{b} = 0$ is
-%
+The divergence of the equation (\ref{append:pressure1}) with $ \nabla \cdot \pmb{b} = 0$ is\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \label{append:pressure3}
   \nabla^c \cdot \pmb{U}_{f,FC}^{n+1} - \nabla^c \cdot \pmb{U}_{f,FC}^{n}
-  = \nabla^c \frac{\delt}{\rho_{f,FC}^n} \cdot \nabla^{FC} (P_{fc}^{n} + \Delta P_{fc}^{n})
+  = \nabla^c \frac{\delt}{\rho_{f,FC}^n} \cdot \nabla^{FC} (P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n} + \Delta P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n})
 \end {equation}
 %
-To solve this equation, we define the face-centered intermediate velocity $ \pmb{U}_{f,FC}^{*}$ as:
+To solve this equation, we define the \DIFdelbegin \DIFdel{face-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend intermediate velocity $ \pmb{U}_{f,FC}^{*}$ as:
 %
 \begin{equation}
  \label{append:pressure4}
   \overline{\rho}_{f,FC} \frac{\pmb{U}_{f,FC}^{*} - \pmb{U}_{f,FC}^{n}}{\delt} 
-  = n \nabla^{FC} P_{fc}^{n} + \overline{\rho}_{f,FC} \pmb{b}
+  = n \nabla^{FC} P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n} + \overline{\rho}_{f,FC} \pmb{b}
 \end {equation}
 %
 %
-The divergence of the equation (\ref{append:pressure4}) is
-%
+The divergence of the equation (\ref{append:pressure4}) is\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \label{append:pressure5}
   \nabla^c \cdot \pmb{U}_{f,FC}^{*} - \nabla^c \cdot \pmb{U}_{f,FC}^{n}
-  = \nabla^c \frac{\delt}{\rho_{f,FC}^n} \cdot \nabla^{FC} P_{fc}^{n}
+  = \nabla^c \frac{\delt}{\rho_{f,FC}^n} \cdot \nabla^{FC} P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n}
 \end {equation}
 %
-Combining equations (\ref{append:pressure2}, \ref{append:pressure3}, \ref{append:pressure5}), it leads to
-\begin{equation}
+Combining equations (\ref{append:pressure2}, \ref{append:pressure3}, \ref{append:pressure5}), it leads to\DIFaddbegin \DIFadd{:
+}\DIFaddend \begin{equation}
 \label{append:pressure6}
   \left(  
    \kappa - \nabla^c \frac{\delt}{\rho_{f,FC}^n} \cdot \nabla^{FC}
@@ -1901,45 +2202,47 @@ When the fluid is incompressible, $\kappa$ approaches to zero and the equation (
 \subsection{\textsf{Momentum and Energy exchange with an implicit solver}}
 %
 %
-Considering the fluid momentum balance equation as 
-%
+Considering the fluid momentum balance equation as\DIFaddbegin \DIFadd{: 
+}\DIFaddend %
 \begin{equation}
-  (m\pmb{U})_{f,FC}^{n+1} =  (m\pmb{U})_{f,FC}^{n} - \delt (V n \nabla^{FC} P_{fc}^{n} + m_f \pmb{b}) + V K \delt (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
+  (m\pmb{U})_{f,FC}^{n+1} =  (m\pmb{U})_{f,FC}^{n} - \delt (V n \nabla^{FC} P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n} + m_f \pmb{b}) + V K \delt (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
 \end {equation}
 %
 %
-Assuming $m_{f,FC}^{n+1} = m_{f,FC}^n$ we get
-%
+\DIFdelbegin \DIFdel{Assuming }\DIFdelend \DIFaddbegin \DIFadd{And assuming }\DIFaddend $m_{f,FC}^{n+1} = m_{f,FC}^n$\DIFdelbegin \DIFdel{we get
+}\DIFdelend \DIFaddbegin \DIFadd{, we get:
+}\DIFaddend %
 \begin{equation}
   \pmb{U}_{f,FC}^{n+1} =  \pmb{U}_{f,FC}^{n} - \delt (\frac{\nabla^{FC} P_{fc}^{n}}{\rho_{f,FC}^n} + \pmb{b}) + \frac{\delt K}{\overline{\rho}_{f,FC}^n} (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
 \end {equation}
 %
 %
-As defined in the section 'Advanced Fluid Pressure', the face-centered intermediate fluid velocity $\pmb{U}_{f,FC}^{*} = \delt (\nabla^{FC} P_{fc}^{n} / \rho_{f,FC}^n + \pmb{b})$ leading to
-%
+As defined in the section 'Advanced Fluid Pressure', the \DIFdelbegin \DIFdel{face-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend intermediate fluid velocity $\pmb{U}_{f,FC}^{*} = \delt (\nabla^{FC} P_{fc}^{n} / \rho_{f,FC}^n + \pmb{b})$ \DIFdelbegin \DIFdel{leading to
+}\DIFdelend \DIFaddbegin \DIFadd{is computed as:
+}\DIFaddend %
 \begin{equation}
 \label{append:exchange1}
   \pmb{U}_{f,FC}^{n+1} =  \pmb{U}_{f,FC}^{*} +  \frac{\delt K}{\overline{\rho}_{f,FC}^n} (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
 \end {equation}
 %
 %
-Considering the solid momentum balance equation as
-%
+Considering the solid momentum balance equation as\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
-  (m\pmb{U})_{s,FC}^{n+1} =  (m\pmb{U})_{s,FC}^{n} - \delt (V \nabla^{FC} \cdot \pmb{\sigma}^{'n} - V (1-n) \nabla^{FC} P_{fc}^{n} + m_s \pmb{b}) - V K \delt (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
+  (m\pmb{U})_{s,FC}^{n+1} =  (m\pmb{U})_{s,FC}^{n} - \delt (V \nabla^{FC} \cdot \pmb{\sigma}^{'n} - V (1-n) \nabla^{FC} P_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n} + m_s \pmb{b}) - V K \delt (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
 \end {equation}
 %
 %
-We define the face-centered intermediate solid velocity as $\pmb{U}_{s,FC}^{*} = \delt (\nabla^{FC} \cdot \pmb{\sigma}_c^{'n} / \overline{\rho}_{s,FC}  - \nabla^{FC} P_{fc}^{n} / \rho_s + \pmb{b})$ leading to
-%
+We define the \DIFdelbegin \DIFdel{face-centered }\DIFdelend \DIFaddbegin \DIFadd{cell face }\DIFaddend intermediate solid velocity as \DIFdelbegin \DIFdel{$\pmb{U}_{s,FC}^{*} = \delt (\nabla^{FC} \cdot \pmb{\sigma}_c^{'n} / \overline{\rho}_{s,FC}  - \nabla^{FC} P_{fc}^{n} / \rho_s + \pmb{b})$ leading to}\DIFdelend \DIFaddbegin \DIFadd{$\pmb{U}_{s,FC}^{*} = \delt (\nabla^{FC} \cdot \pmb{\sigma}_c^{'n} / \overline{\rho}_{s,FC}  - \nabla^{FC} P_{f,c}^{n} / \rho_s + \pmb{b})$ leading to:
+}\DIFaddend %
 \begin{equation}
 \label{append:exchange2}
   \pmb{U}_{s,FC}^{n+1} =  \pmb{U}_{s,FC}^{*} -  \frac{\delt K}{\overline{\rho}_{s,FC}^n} (\pmb{U}_{s,FC}^{n+1} - \pmb{U}_{f,FC}^{n+1})
 \end {equation}
 %
 %
-Combining equation (\ref{append:exchange1}) and (\ref{append:exchange2}) we get
-%
+Combining equation (\ref{append:exchange1}) and (\ref{append:exchange2}) we get\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
 \label{append:exchange3}
@@ -1949,8 +2252,8 @@ Combining equation (\ref{append:exchange1}) and (\ref{append:exchange2}) we get
 \end {equation}
 %
 %
-Rearranging the equation (\ref{append:exchange3}), it leads to the linear system of equations
-%
+Rearranging the equation (\ref{append:exchange3}), it leads to the linear system of equations \DIFaddbegin \DIFadd{as belows:
+}\DIFaddend %
 \[ \begin{vmatrix} (1 + \beta_{12,FC})  &  -\beta_{12,FC} \\
                   -\beta_{21,FC}       &  (1 + \beta_{21,FC})
     \end {vmatrix}
@@ -1964,31 +2267,31 @@ Rearranging the equation (\ref{append:exchange3}), it leads to the linear system
 \]
 %
 %
-Solving this linear equations with $\beta_{12,FC} = (\delt K)/\overline{\rho}_{f,FC}^n$ and $\beta_{21,FC} = (\delt K)/\overline{\rho}_{s,FC}^n$ with K is the momentum exchange coefficient. Similar derivation can be performed to computed the cell-center velocity increment leading to
-%
+Solving this linear equations with $\beta_{12,FC} = (\delt K)/\overline{\rho}_{f,FC}^n$ and $\beta_{21,FC} = (\delt K)/\overline{\rho}_{s,FC}^n$ with K is the momentum exchange coefficient. Similar derivation can be performed to computed the cell-center velocity increment leading to\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \[ \begin{vmatrix} (1 + \beta_{12c})  &  -\beta_{12c} \\
                   -\beta_{21c}       &  (1 + \beta_{21c})
     \end {vmatrix}
-    \begin{vmatrix} \Delta \pmb{U}_{fc} \\
+    \begin{vmatrix} \Delta \pmb{U}\DIFdelbegin \DIFdel{_{fc} }\DIFdelend \DIFaddbegin \DIFadd{_{f,c} }\DIFaddend \\
                     \Delta \pmb{U}_{sc}
     \end {vmatrix}
     =
-    \begin{vmatrix}  \beta_{12c}(\pmb{U}_{sc}^{*} - \pmb{U}_{fc}^{*}) \\
-                    \beta_{21c}(\pmb{U}_{fc}^{*} - \pmb{U}_{sc}^{*})
+    \begin{vmatrix}  \beta_{12c}(\pmb{U}_{sc}^{*} - \pmb{U}\DIFdelbegin \DIFdel{_{fc}}\DIFdelend \DIFaddbegin \DIFadd{_{f,c}}\DIFaddend ^{*}) \\
+                    \beta_{21c}(\pmb{U}\DIFdelbegin \DIFdel{_{fc}}\DIFdelend \DIFaddbegin \DIFadd{_{f,c}}\DIFaddend ^{*} - \pmb{U}_{sc}^{*})
     \end {vmatrix}                
 \]
 %
 %
-with $\beta_{12c} = (\delt K)/\overline{\rho}_{fc}^n$ and $\beta_{21c} = (\delt K)/\overline{\rho}_{sc}^n$ and the cell-centered intermediate velocity can be calculated by
-%
+with \DIFdelbegin \DIFdel{$\beta_{12c} = (\delt K)/\overline{\rho}_{fc}^n$ }\DIFdelend \DIFaddbegin \DIFadd{$\beta_{12c} = (\delt K)/\overline{\rho}_{f,c}^n$ }\DIFaddend and $\beta_{21c} = (\delt K)/\overline{\rho}_{sc}^n$ and the cell-centered intermediate velocity can be calculated by\DIFaddbegin \DIFadd{:
+}\DIFaddend %
 \begin{equation}
 \begin{gathered}
-\pmb{U}_{fc}^{*} = \pmb{U}_{fc}^{n} + \delt (-\frac{\nabla P_{fc}^{n+1}}{\rho_{fc}^n}  + \frac{\nabla \cdot \pmb{\tau}_{fc}^{n}}{\overline{\rho}^n_{fc}} + \pmb{b}) \\
-\pmb{U}_{sc}^{*} = \pmb{U}_{sc}^{n} + \delt (\frac{\nabla \cdot \pmb{\sigma}_c^{'n}}{\overline{\rho}^n_{sc}}    - \frac{\nabla P_{fc}^{n+1}}{\rho_s}  + \pmb{b})
+\pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{*} = \pmb{U}_{\DIFdelbegin \DIFdel{fc}\DIFdelend \DIFaddbegin \DIFadd{f,c}\DIFaddend }^{n} + \delt (-\DIFdelbegin \DIFdel{\frac{\nabla P_{fc}^{n+1}}{\rho_{fc}^n}  }\DIFdelend \DIFaddbegin \DIFadd{\frac{\nabla P_{f,c}^{n+1}}{\rho_{f,c}^n}  }\DIFaddend + \DIFdelbegin \DIFdel{\frac{\nabla \cdot \pmb{\tau}_{fc}^{n}}{\overline{\rho}^n_{fc}} }\DIFdelend \DIFaddbegin \DIFadd{\frac{\nabla \cdot \pmb{\tau}_{f,c}^{n}}{\overline{\rho}^n_{f,c}} }\DIFaddend + \pmb{b}) \\
+\pmb{U}_{sc}^{*} = \pmb{U}_{sc}^{n} + \delt (\frac{\nabla \cdot \pmb{\sigma}_c^{'n}}{\overline{\rho}^n_{sc}}    - \DIFdelbegin \DIFdel{\frac{\nabla P_{fc}^{n+1}}{\rho_s}  }\DIFdelend \DIFaddbegin \DIFadd{\frac{\nabla P_{f,c}^{n+1}}{\rho_s}  }\DIFaddend + \pmb{b})
 \end {gathered}
 \end {equation}
 %
-For generalize multi materials i,j = 1:N, the linear equations is in the form:
+For generalize multi materials i,j = 1:N, the linear equations is in the form \DIFaddbegin \DIFadd{as}\DIFaddend :
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
