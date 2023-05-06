@@ -52,7 +52,7 @@ using namespace std; using namespace Uintah;
 MatsuokaNakai::MatsuokaNakai(ProblemSpecP& ps,MPMFlags* Mflag)
   : ConstitutiveModel(Mflag)
 {
-  d_NBASICINPUTS=5;
+  d_NBASICINPUTS=12;
   d_NMGDC=0;
 
 // Total number of properties
@@ -163,7 +163,9 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
 
     if (time < Consolidationtime) {
         // high friction to initialize stress
-        double Phi = 90;                                  // Friction angle
+         Phi = 45;                                  // Friction angle
+         M = 2 * sqrt(2) * tan(Phi * 3.1415 / 180);
+         N = 0;
     }
 
     for (int i = 0; i < 6; i++) {
@@ -422,9 +424,12 @@ void MatsuokaNakai::Calculate_Stress(int& ninsv, double& dt,
 
        } while (abs(f)>0.001);
 
-       // Update stress and state variables
-       svarg[2] = Phi;  // Friction
-       svarg[3] = N;    // Dilatancy
+       if (time > Consolidationtime) {
+           // Update stress and state variables
+           svarg[2] = Phi;  // Friction
+           svarg[3] = N;    // Dilatancy
+       }
+
 
        // Update stress (it needs to change the sign of previous stress as the MN code read compression as possitive)
        for (int i = 0; i < 6; i++) {
