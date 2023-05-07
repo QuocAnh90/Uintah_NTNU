@@ -71,7 +71,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 47;
+    d_NBASICINPUTS = 46;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -172,7 +172,7 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Phi_CS", UI[36]);
     cm_ps->appendElement("Phi_P", UI[37]);
 
-    cm_ps->appendElement("Intial_Stress", UI[38]);
+    cm_ps->appendElement("strain0", UI[38]);
 
     cm_ps->appendElement("Usetransition1", UI[39]);
     cm_ps->appendElement("m", UI[40]);
@@ -183,8 +183,6 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Use_dilation", UI[43]);
     cm_ps->appendElement("Psi_CS", UI[44]);
     cm_ps->appendElement("Psi_P", UI[45]);
-
-    cm_ps->appendElement("strain0", UI[46]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -576,6 +574,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             shear_strain_local = 1.0 / 2.0 * sqrt(2 * (pow((strain11 - strain22), 2.0) + pow((strain11 - strain33), 2.0) + pow((strain22 - strain33), 2.0)) + 3.0 * (pow(strain12, 2.0) + pow(strain13, 2.0) + pow(strain23, 2.0)));
             shear_strain_rate = 1.0 / 2.0 * sqrt(2 * (pow((e11 - e22), 2) + pow((e11 - e33), 2) + pow((e22 - e33), 2)) + 3 * (pow(e12, 2) + pow(e13, 2) + pow(e23, 2)));
 
+            // Store strain tensor
             svarg[6] = strain11;
             svarg[7] = strain22;
             svarg[8] = strain33;
@@ -600,7 +599,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             svarg[32] = volumetric_strain;
 
             // Calling the external model here
-            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, sigargFilter, time);
+            CalculateStress(nblk, d_NINSV, dt, UI, sigarg, Dlocal, svarg, USM, shear_strain_nonlocal, shear_strain_rate_nonlocal, sigargFilter, time, ConsolidationTime);
 
             // Unload ISVs from 1D array into ISVs_new
             for (int i = 0; i < d_NINSV; i++) {
@@ -835,8 +834,7 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("strain2", UI[35], 0.0);
     ps->getWithDefault("Phi_CS", UI[36], 0.0);
     ps->getWithDefault("Phi_P", UI[37], 0.0);  
-
-    ps->getWithDefault("Intial_Stress", UI[38], 0.0);
+    ps->getWithDefault("strain0", UI[38], 0.0);
 
     ps->getWithDefault("Use_pressure_dependence", UI[39], 0.0);
     ps->getWithDefault("m", UI[40], 0.0);
@@ -847,8 +845,6 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("Use_dilation", UI[43], 0.0);
     ps->getWithDefault("Psi_CS", UI[44], 0.0);
     ps->getWithDefault("Psi_P", UI[45], 0.0);
-
-    ps->getWithDefault("strain0", UI[46], 0.0);
 }
 
 void
@@ -899,8 +895,7 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("strain2");
     ISVNames.push_back("Phi_CS");
     ISVNames.push_back("Phi_P");
-
-    ISVNames.push_back("Intial_Stress");
+    ISVNames.push_back("strain 0");
 
     ISVNames.push_back("Use_pressure_dependence");
     ISVNames.push_back("m");
@@ -912,7 +907,6 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Psi_CS");
     ISVNames.push_back("Psi_P");
 
-    ISVNames.push_back("strain 0");
 
     for (int i = 0; i < d_NINSV; i++) {
         ISVLabels.push_back(VarLabel::create(ISVNames[i],
@@ -925,7 +919,7 @@ MohrCoulomb::initializeLocalMPMLabels()
 //CODE ADDED BY WTS FOR SHENGMOHRCOULOMB BELOW
 void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     double UI[], double stress[], double D[],
-    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double stressFilter[], double time)
+    double svarg[], double& USM, double shear_strain_nonlocal, double shear_strain_rate_nonlocal, double stressFilter[], double time, double ConsolidationTime)
 
 
     /*
@@ -1029,8 +1023,6 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     }
 
     double mu = 0;
-    double ConsolidationTime = UI[38];
-
     // We do not want to apply softening during Consolidation time
     if (time < ConsolidationTime) {
         // high cohesion to initialize stress
@@ -1038,7 +1030,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     }
 
     double Use_friction = UI[33];
-    double strain0 = UI[46];
+    double strain0 = UI[38];
     double strain1 = UI[34];
     double strain2 = UI[35];
     double Phi_CS = UI[36];
