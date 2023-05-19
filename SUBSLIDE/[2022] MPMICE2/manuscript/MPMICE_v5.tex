@@ -344,7 +344,7 @@ The mass balance equations for both fluid (e.g., water, air) and solid phases ar
    \frac{1}{V}\frac{D_sm_s}{Dt} = 0    
 \end {equation}
 %
-Solving the mass balance equation leads to:
+Solving the mass balance equation of the solid phase leads to:
 %
 %
 \begin{equation}
@@ -435,12 +435,12 @@ Then, before calling the constitutive model, the stress and strain rate tensor a
 %
 %
 \begin{equation}
-     \pmb{\sigma}^{\prime,n*} =  (\pmb{R}_s^{n+1})^T \pmb{\sigma}^{\prime,n*} \pmb{R}_s^{n+1}
+     \pmb{\sigma}^{\prime,n*} =  (\pmb{R}_s^{n+1})^T \pmb{\sigma}^{\prime,n} \pmb{R}_s^{n+1}
 \end {equation}
 %
 %
 \begin{equation}
-    \delta \pmb{\epsilon}^{n*} =  (\pmb{R}_s^{n+1})^T \delta \pmb{\epsilon}_s^{n*} \pmb{R}_s^{n+1}
+    \delta \pmb{\epsilon}^{n*} =  (\pmb{R}_s^{n+1})^T \delta \pmb{\epsilon}^{n} \pmb{R}_s^{n+1}
 \end {equation}
 %
 %
@@ -465,13 +465,13 @@ where $\lambda$ and $\mu$ are bulk and shear modulus ad J is the determinant of 
 %
 \begin{equation}
 \begin{gathered}
-   f =  \sigma_1^{\prime} -  \sigma_3^{\prime} -2c^{\prime} cos(\phi^{\prime}) - (\sigma_1^{\prime} +  \sigma_3^{\prime})sin(\phi^{\prime})\\
-   g =  \sigma_1^{\prime} -  \sigma_3^{\prime} -2c^{\prime} cos(\psi^{\prime}) - (\sigma_1^{\prime} +  \sigma_3^{\prime})sin(\psi^{\prime})
+   f =  -\sigma_1^{\prime} +  \sigma_3^{\prime} +2c^{\prime} cos(\phi^{\prime}) + (\sigma_1^{\prime} +  \sigma_3^{\prime})sin(\phi^{\prime})\\
+   g =  -\sigma_1^{\prime} +  \sigma_3^{\prime} +2c^{\prime} cos(\psi^{\prime}) + (\sigma_1^{\prime} +  \sigma_3^{\prime})sin(\psi^{\prime})
 \end {gathered}
 \end {equation}
 %
 %
-where the $c^{\prime}$, $\phi^{\prime}$ and $\psi^{\prime}$ are cohesion and friction angle and dilation angle. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ are maximum and minimum principal stress.
+In the equations, $c^{\prime}$, $\phi^{\prime}$, and $\psi^{\prime}$ represent the cohesion, friction angle, and dilation angle, respectively. $\sigma_1^{\prime}$ and $\sigma_3^{\prime}$ denote the maximum and minimum principal stresses, with the condition $\sigma_1^{\prime}<\sigma_3^{\prime}<0$. It is important to note that in our assumptions, stress is considered positive during extension, which means the signs of the stresses in these equations are opposite to those in standard Soil Mechanic's textbooks.
 %_______________________________
 \subsubsection{Turbulent model}
 The turbulent effect is modelled using a statistical approach namely large-eddy simulation. In this approach, the micro-scale turbulent influence in the dynamics of the macro-scale motion is computed through simple models like Smagorinsky model. In the Smagorinsky model, the residual stress tensor is:
@@ -577,7 +577,6 @@ When validating the model with analytical solution, it requires to know the hydr
 %
 \begin{equation}
      \pmb{f}_{d} = \frac{180 \phi_s^2\mu_f}{D_p^2 (1-\phi_s)} (\pmb{U}_s - \pmb{U}_f)  
-\label{fd}
 \end {equation}
 %
 %
@@ -689,7 +688,7 @@ where $R$ is the gas constant. For the water, a simple linear equation of state 
 %
 %
 \begin{equation}
-    P_f = P_{ref} + K_f (\rho_f - \rho_{ref} - \alpha_f(T_f - T_{ref}))
+    P_f = P_{ref} + K_f (\rho_f - \rho_{ref} + \alpha_f(T_f - T_{ref}))
 \label{waterEOS}
 \end {equation}
 %
@@ -765,7 +764,7 @@ The nodal internal forces is calculated by:
 \end {equation}
 %
 %
-The nodal external forces $f_{si}^{ext,n}$ and the nodal frictional forces $f_{si}^{fric}$ from contact between materials are computed here.\\
+The nodal external forces $f_{si}^{ext,n}$ and the frictional forces from soil-structure interaction $f_{fric,si}^{n}$ from contact between materials are computed here.\\
 Then we compute the solid cell variables as:
 %
 %
@@ -1037,7 +1036,7 @@ where the cell-centered intermediate velocity can be calculated by:
 \end {equation}
 %
 %
-And the increment of the velocity $\pmb{U}_{f,c}$, $\Delta \pmb{U}_{sc}$ can be computed by solving the linear equation with i,j = 1 : $N$ as:
+And the increment of the velocity $\pmb{U}_{f,c}$, $\Delta \pmb{U}_{sc}$ can be computed by solving the linear equation with i,j = 1:$N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \beta_{ij})  &  -\beta_{ij} \\
@@ -1073,7 +1072,7 @@ T_{sc}^{L-} = \frac{(m T)_{sc}^{L-}}{m_{sc}^L c_v}
 \end {equation}
 %
 %
-And the increment of the velocity can be computed by solving the linear equation with i,j = 1 : $N$ as:
+And the increment of the velocity can be computed by solving the linear equation with i,j = 1:$N$ as:
 %
 %
 \[ \begin{vmatrix} (1 + \eta_{ij})  &  -\eta_{ij} \\
@@ -1198,7 +1197,7 @@ First we interpolate the acceleration, velocity and temperature rate to the node
 \end {equation}
 %
 %
-Then the boundary condition and contact forces $f_{si}^{fric}$ are applied to the nodal velocity and the acceleration is modified by:
+Then the boundary condition and contact forces $f_{si}^{fric}$ are applied to the nodal velocity, and then accelerations are modified by:
 %
 %
 \begin{equation}
