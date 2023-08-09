@@ -620,6 +620,14 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             // ROTATE pstress_new: S=R*tensorSig*R^T
             pstress_new[idx] = (tensorR * tensorSig) * (tensorR.Transpose());
 
+
+            // tension cutoff??
+            I1 = pstress_new[idx].Trace();
+
+            if (I1<0){
+                pstress_new[idx]=Matrix3(0.0);;
+            }
+
             c_dil = sqrt(USM / rho_cur);
 
             // Compute the strain energy for all the particles
