@@ -71,7 +71,7 @@ using std::cerr; using namespace Uintah;
 MohrCoulomb::MohrCoulomb(ProblemSpecP& ps, MPMFlags* Mflag)
     : ConstitutiveModel(Mflag)
 {
-    d_NBASICINPUTS = 46;
+    d_NBASICINPUTS = 47;
     d_NMGDC = 0;
 
     // Total number of properties
@@ -183,6 +183,8 @@ void MohrCoulomb::outputProblemSpec(ProblemSpecP& ps, bool output_cm_tag)
     cm_ps->appendElement("Use_dilation", UI[43]);
     cm_ps->appendElement("Psi_CS", UI[44]);
     cm_ps->appendElement("Psi_P", UI[45]);
+
+    cm_ps->appendElement("tension_cut_off", UI[46]);
 }
 
 MohrCoulomb* MohrCoulomb::clone()
@@ -622,10 +624,14 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
 
 
             // tension cutoff??
-            I1 = pstress_new[idx].Trace();
+            double tension = UI[46];
 
-            if (I1<0){
-                pstress_new[idx]=Matrix3(0.0);;
+            if (tension>0){
+                I1 = pstress_new[idx].Trace();
+
+                if (I1<0){
+                    pstress_new[idx]=Matrix3(0.0);;
+                }
             }
 
             c_dil = sqrt(USM / rho_cur);
@@ -853,6 +859,7 @@ MohrCoulomb::getInputParameters(ProblemSpecP& ps)
     ps->getWithDefault("Use_dilation", UI[43], 0.0);
     ps->getWithDefault("Psi_CS", UI[44], 0.0);
     ps->getWithDefault("Psi_P", UI[45], 0.0);
+    ps->getWithDefault("tension_cut_off", UI[46], 0.0);
 }
 
 void
@@ -914,6 +921,7 @@ MohrCoulomb::initializeLocalMPMLabels()
     ISVNames.push_back("Use_dilation");
     ISVNames.push_back("Psi_CS");
     ISVNames.push_back("Psi_P");
+    ISVNames.push_back("tension_cut_off");
 
 
     for (int i = 0; i < d_NINSV; i++) {
