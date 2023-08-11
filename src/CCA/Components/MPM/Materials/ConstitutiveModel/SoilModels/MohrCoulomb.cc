@@ -627,7 +627,7 @@ void MohrCoulomb::computeStressTensor(const PatchSubset* patches,
             double tension = UI[46];
 
             if (tension>0){
-                I1 = pstress_new[idx].Trace();
+                double I1 = pstress_new[idx].Trace();
 
                 if (I1<0){
                     pstress_new[idx]=Matrix3(0.0);;

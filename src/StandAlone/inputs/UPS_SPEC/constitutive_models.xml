@@ -1067,7 +1067,8 @@
     <Phi      spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <Psi      spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <Version  spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
-	
+
+	  <tension_cut_off     spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
 	
     <Usetransition     spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
     <A1                spec="OPTIONAL DOUBLE" need_applies_to="type MohrCoulomb"/>
