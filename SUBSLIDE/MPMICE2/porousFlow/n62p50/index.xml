@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_DataArchive>
+  <numberOfProcessors>1</numberOfProcessors>
+  <ParticlePosition>p.x</ParticlePosition>
+  <outputFormat>UDA</outputFormat>
+  <Meta>
+    <username>NTNU</username>
+    <date>Fri Nov  5 04:22:10 2021</date>
+    <endianness>little_endian</endianness>
+    <nBits>64</nBits>
+  </Meta>
+  <globals/>
+  <variables>
+    <variable type="CCVariable&lt;double&gt;" name="press_CC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="c.mass" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.pressure" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.volume" numMaterials="1"/>
+    <variable type="NCVariable&lt;double&gt;" name="g.volume" numMaterials="2"/>
+    <variable type="NCVariable&lt;double&gt;" name="g.mass" numMaterials="2"/>
+    <variable type="NCVariable&lt;Vector&gt;" name="g.velocity" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="rho_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;Vector&gt;" name="vel_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="sp_vol_CC" numMaterials="2"/>
+    <variable type="ParticleVariable&lt;Point&gt;" name="p.x" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.velocity" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.stress" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.mass" numMaterials="1"/>
+    <variable type="SFCXVariable&lt;double&gt;" name="uvel_FC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="vol_frac_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="Porosity_CC" numMaterials="1"/>
+    <variable type="SFCXVariable&lt;double&gt;" name="pressX_FC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="TMV_CC" numMaterials="1"/>
+  </variables>
+  <timesteps>
+    <timestep href="t00001/timestep.xml" time="1e-08" oldDelt="1e-08">1</timestep>
+    <timestep href="t00307/timestep.xml" time="0.10013962737949014" oldDelt="0.00034179624778785361">307</timestep>
+  </timesteps>
+</Uintah_DataArchive>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_DataArchive>
+  <numberOfProcessors>1</numberOfProcessors>
+  <ParticlePosition>p.x</ParticlePosition>
+  <outputFormat>UDA</outputFormat>
+  <Meta>
+    <username>NTNU</username>
+    <date>Fri Nov  5 04:05:06 2021</date>
+    <endianness>little_endian</endianness>
+    <nBits>64</nBits>
+  </Meta>
+  <variables>
+    <variable type="NCVariable&lt;double&gt;" name="NC_CCweight" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="heatRate_CC" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.bElBar" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.deformationMeasure" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.displacement" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;int&gt;" name="p.localizedMPM" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.mass" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;long64&gt;" name="p.particleID" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.size" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Matrix3&gt;" name="p.stress" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.temperature" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.temperatureGradient" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Vector&gt;" name="p.velocity" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;double&gt;" name="p.volume" numMaterials="1"/>
+    <variable type="ParticleVariable&lt;Point&gt;" name="p.x" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="press_CC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="rho_CC" numMaterials="1"/>
+    <variable type="CCVariable&lt;double&gt;" name="sp_vol_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;double&gt;" name="temp_CC" numMaterials="2"/>
+    <variable type="CCVariable&lt;Vector&gt;" name="vel_CC" numMaterials="1"/>
+  </variables>
+  <globals>
+    <variable type="ReductionVariable&lt;double&gt;" name="delT" numMaterials="1"/>
+  </globals>
+  <timesteps>
+    <timestep href="t00309/timestep.xml" time="0.10015472703575021" oldDelt="0.00033940824738700951">309</timestep>
+  </timesteps>
+</Uintah_DataArchive>

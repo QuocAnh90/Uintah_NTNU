@@ -31,7 +31,7 @@
 
        <Face side = "x-">
         <BCType id = "0"   label = "Pressure"     var = "Dirichlet">
-                              <value> 202650.00   </value>
+                              <value> 151987.5   </value>
         </BCType>
 		
 		<BCType id = "all" label = "Velocity"     var = "Neumann">
@@ -98,7 +98,7 @@
     <!--____________________________________________________________________-->
    <DataArchiver>
       <filebase>porous.uda</filebase>
-      <outputInterval>1.0e-3</outputInterval>
+      <outputInterval>1.0e-1</outputInterval>
       <save label="press_CC"/>
 	  <save label="c.mass"/>
 	  <save label="p.pressure"/>
@@ -184,7 +184,6 @@
     <MaterialProperties>
        <MPM>	 
 		 <material name = "bed">
-		 <grain_size>             0.001         </grain_size>
             <density>             2650.0           </density>
 			<permeability>0.001</permeability>
 			<seismic_plate>true </seismic_plate>
@@ -206,7 +205,7 @@
               <res>               [1,1,1]         </res>
               <velocity>          [0.0,0.0,0.0]   </velocity>
               <temperature>       300             </temperature>
-			  <volumeFraction>      0.6           </volumeFraction>
+			  <volumeFraction>      0.62           </volumeFraction>
             </geom_object>
          </material>		   	 	 
       </MPM>
@@ -265,7 +264,7 @@
               <density>              999.8             </density> 
               <pressure>             101325.0          </pressure>
               <temperature>          300.0             </temperature>  
-			   <volumeFraction>      0.4           </volumeFraction>
+			   <volumeFraction>      0.38            </volumeFraction>
             </geom_object>
 			
 			

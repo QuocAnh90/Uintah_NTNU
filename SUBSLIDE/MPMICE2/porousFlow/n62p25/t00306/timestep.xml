@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_timestep>
+  <Meta>
+    <endianness>little_endian</endianness>
+    <nBits>64</nBits>
+    <numProcs>1</numProcs>
+  </Meta>
+  <Time>
+    <timestepNumber>306</timestepNumber>
+    <currentTime>0.10012876751331871</currentTime>
+    <oldDelt>0.00034297939172931379</oldDelt>
+  </Time>
+  <Grid>
+    <numLevels>1</numLevels>
+    <Level>
+      <numPatches>1</numPatches>
+      <totalCells>198</totalCells>
+      <extraCells>[1, 1, 1]</extraCells>
+      <anchor>[0, 0, 0]</anchor>
+      <id>0</id>
+      <cellspacing>[0.10000000000000001, 1, 1]</cellspacing>
+      <Patch>
+        <id>0</id>
+        <proc>0</proc>
+        <lowIndex>[-1, -1, -1]</lowIndex>
+        <highIndex>[21, 2, 2]</highIndex>
+        <interiorLowIndex>[0, 0, 0]</interiorLowIndex>
+        <interiorHighIndex>[20, 1, 1]</interiorHighIndex>
+        <nnodes>368</nnodes>
+        <lower>[-0.10000000000000001, -1, -1]</lower>
+        <upper>[2.1000000000000001, 2, 2]</upper>
+        <totalCells>198</totalCells>
+      </Patch>
+    </Level>
+  </Grid>
+  <Data>
+    <Datafile href="l0/p00000.xml" proc="0"/>
+  </Data>
+  <MPM>
+    <gravity>[0, 0, 0]</gravity>
+    <time_integrator>explicit</time_integrator>
+    <interpolator>linear</interpolator>
+    <cpdi_lcrit>10000000000</cpdi_lcrit>
+    <AMR>false</AMR>
+    <SingleFieldMPM>false</SingleFieldMPM>
+    <axisymmetric>false</axisymmetric>
+    <withColor>false</withColor>
+    <artificial_damping_coeff>0</artificial_damping_coeff>
+    <artificial_viscosity>false</artificial_viscosity>
+    <artificial_viscosity_heating>false</artificial_viscosity_heating>
+    <artificial_viscosity_coeff1>0.20000000000000001</artificial_viscosity_coeff1>
+    <artificial_viscosity_coeff2>2</artificial_viscosity_coeff2>
+    <refine_particles>false</refine_particles>
+    <XPIC2>false</XPIC2>
+    <use_cohesive_zones>false</use_cohesive_zones>
+    <use_load_curves>false</use_load_curves>
+    <use_CBDI_boundary_condition>false</use_CBDI_boundary_condition>
+    <exactDeformation>false</exactDeformation>
+    <DoImplicitHeatConduction>false</DoImplicitHeatConduction>
+    <DoTransientImplicitHeatConduction>true</DoTransientImplicitHeatConduction>
+    <DoExplicitHeatConduction>true</DoExplicitHeatConduction>
+    <DeleteGeometryObjects>false</DeleteGeometryObjects>
+    <DoPressureStabilization>false</DoPressureStabilization>
+    <DoCapDensity>false</DoCapDensity>
+    <computeNodalHeatFlux>false</computeNodalHeatFlux>
+    <computeScaleFactor>false</computeScaleFactor>
+    <DoThermalExpansion>true</DoThermalExpansion>
+    <UseGradientEnhancedVelocityProjection>false</UseGradientEnhancedVelocityProjection>
+    <do_grid_reset>true</do_grid_reset>
+    <minimum_particle_mass>2.9999999999999998e-15</minimum_particle_mass>
+    <minimum_subcycles_for_F>1</minimum_subcycles_for_F>
+    <minimum_mass_for_acc>0</minimum_mass_for_acc>
+    <maximum_particle_velocity>3.0000000000000001e+105</maximum_particle_velocity>
+    <UsePrescribedDeformation>false</UsePrescribedDeformation>
+    <coupled_flow_analysis>false</coupled_flow_analysis>
+    <water_damping_coef>0</water_damping_coef>
+    <solid_damping_coef>0</solid_damping_coef>
+    <PorePressureFilter>false</PorePressureFilter>
+    <Use_MPMICE2>true</Use_MPMICE2>
+    <RunMMSProblem/>
+    <InsertParticles>false</InsertParticles>
+    <do_contact_friction_heating>false</do_contact_friction_heating>
+    <computeNormals>false</computeNormals>
+    <useLogisticRegression>false</useLogisticRegression>
+    <computeColinearNormals>true</computeColinearNormals>
+    <restartOnLargeNodalVelocity>false</restartOnLargeNodalVelocity>
+    <extra_solver_flushes>0</extra_solver_flushes>
+    <boundary_traction_faces>[]</boundary_traction_faces>
+    <do_scalar_diffusion>false</do_scalar_diffusion>
+    <d_ndim>1</d_ndim>
+    <testForNegTemps_mpm>false</testForNegTemps_mpm>
+  </MPM>
+  <MaterialProperties>
+    <MPM>
+      <material name="bed" index="0">
+        <density>2650</density>
+        <thermal_conductivity>400</thermal_conductivity>
+        <specific_heat>386</specific_heat>
+        <C_p>386</C_p>
+        <room_temp>294</room_temp>
+        <melt_temp>2950000000000</melt_temp>
+        <is_rigid>false</is_rigid>
+        <seismic_plate>true</seismic_plate>
+        <constitutive_model type="UCNH">
+          <bulk_modulus>8330000</bulk_modulus>
+          <shear_modulus>3840000</shear_modulus>
+          <useModifiedEOS>true</useModifiedEOS>
+          <usePlasticity>false</usePlasticity>
+          <useInitialStress>false</useInitialStress>
+        </constitutive_model>
+        <damage_model type="null"/>
+        <geom_object>
+          <box label="bed"/>
+          <temperature>300</temperature>
+          <volumeFraction>0.62</volumeFraction>
+          <affineTransformation_A0>[1, 0, 0]</affineTransformation_A0>
+          <affineTransformation_A1>[0, 1, 0]</affineTransformation_A1>
+          <affineTransformation_A2>[0, 0, 1]</affineTransformation_A2>
+          <affineTransformation_b>[0, 0, 0]</affineTransformation_b>
+          <velocity>[0, 0, 0]</velocity>
+          <res>[1, 1, 1]</res>
+        </geom_object>
+      </material>
+      <contact>
+        <type>null</type>
+        <materials>[]</materials>
+      </contact>
+    </MPM>
+    <ICE>
+      <material name="Water" index="1">
+        <EOS type="KnaussSeaWater">
+          <a>0.17999999999999999</a>
+          <b>0.78000000000000003</b>
+          <k>4.6512000000000003e-07</k>
+          <T0>300</T0>
+          <P0>300</P0>
+          <S>0</S>
+          <S0>0</S0>
+          <rho0>999.79999999999995</rho0>
+        </EOS>
+        <thermal_conductivity>0</thermal_conductivity>
+        <specific_heat>4145.3762776499998</specific_heat>
+        <dynamic_viscosity>0.001</dynamic_viscosity>
+        <gamma>1.0000089999999999</gamma>
+        <isSurroundingMatl>false</isSurroundingMatl>
+        <includeFlowWork>true</includeFlowWork>
+        <tiny_rho>9.9999999999999998e-13</tiny_rho>
+        <geom_object>
+          <box label="water1"/>
+          <density>999.79999999999995</density>
+          <pressure>101325</pressure>
+          <temperature>300</temperature>
+          <velocity>[0, 0, 0]</velocity>
+          <res>[1, 1, 1]</res>
+        </geom_object>
+        <geom_object>
+          <box label="water2"/>
+          <density>999.79999999999995</density>
+          <pressure>101325</pressure>
+          <temperature>300</temperature>
+          <velocity>[0, 0, 0]</velocity>
+          <res>[1, 1, 1]</res>
+        </geom_object>
+        <geom_object>
+          <box label="water3"/>
+          <density>999.79999999999995</density>
+          <pressure>101325</pressure>
+          <temperature>300</temperature>
+          <volumeFraction>0.38</volumeFraction>
+          <velocity>[0, 0, 0]</velocity>
+          <res>[1, 1, 1]</res>
+        </geom_object>
+      </material>
+    </ICE>
+    <exchange_properties>
+      <heatExchangeCoeff>constant</heatExchangeCoeff>
+      <exchange_coefficients>
+        <momentum>[0]</momentum>
+        <heat>[0]</heat>
+      </exchange_coefficients>
+    </exchange_properties>
+  </MaterialProperties>
+  <PhysicalBC>
+    <MPM/>
+  </PhysicalBC>
+  <Models/>
+</Uintah_timestep>

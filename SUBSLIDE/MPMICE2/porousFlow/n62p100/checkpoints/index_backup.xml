@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_DataArchive>
+  <numberOfProcessors>1</numberOfProcessors>
+  <ParticlePosition>p.x</ParticlePosition>
+  <outputFormat>UDA</outputFormat>
+  <Meta>
+    <username>NTNU</username>
+    <date>Fri Nov  5 04:05:06 2021</date>
+    <endianness>little_endian</endianness>
+    <nBits>64</nBits>
+  </Meta>
+</Uintah_DataArchive>

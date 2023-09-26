@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Uintah_specification>
+  <!--Please use a consistent set of units, (mks, cgs,...)-->
+  <Meta>
+    <title>gravity</title>
+  </Meta>
+  <!-- <Solver type="hypre"/>-->
+  <SimulationComponent type="mpmice"/>
+  <!--____________________________________________________________________-->
+  <!--      T  I  M  E     V  A  R  I  A  B  L  E  S                      -->
+  <!--__________________________________________________
+	_________________-->
+  <Time>
+    <maxTime>             0.1          </maxTime>
+    <initTime>           0.0         </initTime>
+    <delt_min>           1.0e-8      </delt_min>
+    <delt_max>           1.0e0       </delt_max>
+    <delt_init>          1.0e-8      </delt_init>
+    <max_delt_increase>    1.0       </max_delt_increase>
+    <timestep_multiplier>  0.5       </timestep_multiplier>
+  </Time>
+  <!--____________________________________________________________________-->
+  <!--      G  R  I  D     V  A  R  I  A  B  L  E  S                      -->
+  <!--____________________________________________________________________-->
+  <Grid>
+    <BoundaryConditions>
+      <Face side="x-">
+        <BCType id="0" label="Pressure" var="Dirichlet">
+          <value> 202650.0   </value>
+        </BCType>
+        <BCType id="all" label="Velocity" var="Neumann">
+          <value> [0.,0.,0.] </value>
+        </BCType>
+        <BCType id="all" label="Temperature" var="Dirichlet">
+          <value> 300.0  </value>
+        </BCType>
+        <BCType id="all" label="Density" var="Neumann">
+          <value> 0.0  </value>
+        </BCType>
+      </Face>
+      <Face side="x+">
+        <BCType id="0" label="Pressure" var="Dirichlet">
+          <value> 101325.0   </value>
+        </BCType>
+        <BCType id="all" label="Velocity" var="Neumann">
+          <value> [0.,0.,0.] </value>
+        </BCType>
+        <BCType id="all" label="Temperature" var="Dirichlet">
+          <value> 300.0  </value>
+        </BCType>
+        <BCType id="all" label="Density" var="Neumann">
+          <value> 0.0  </value>
+        </BCType>
+      </Face>
+      <Face side="y-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      <Face side="y+">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      <Face side="z-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      <Face side="z+">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+    </BoundaryConditions>
+    <Level>
+      <Box label="1">
+        <lower>        [0,  0.0, 0]   </lower>
+        <upper>        [2,  1.0, 1]   </upper>
+        <extraCells>   [1,1,1]          </extraCells>
+        <patches>      [1,1,1]          </patches>
+      </Box>
+      <spacing>        [0.1,1,1]     </spacing>
+    </Level>
+  </Grid>
+  <!--____________________________________________________________________-->
+  <!--   O  U  P  U  T     V  A  R  I  A  B  L  E  S                      -->
+  <!--____________________________________________________________________-->
+  <DataArchiver>
+    <filebase>porous.uda</filebase>
+    <outputInterval>1.0e-1</outputInterval>
+    <save label="press_CC"/>
+    <save label="c.mass"/>
+    <save label="p.pressure"/>
+    <save label="p.volume"/>
+    <save label="g.volume"/>
+    <save label="g.mass"/>
+    <save label="g.velocity"/>
+    <save label="rho_CC"/>
+    <save label="vel_CC"/>
+    <save label="sp_vol_CC"/>
+    <save label="p.x"/>
+    <save label="p.velocity"/>
+    <save label="p.stress"/>
+    <save label="p.mass"/>
+    <save label="uvel_FC"/>
+    <save label="vol_frac_CC"/>
+    <save label="Porosity_CC"/>
+    <save label="pressX_FC"/>
+    <save label="TMV_CC"/>
+    <checkpoint interval="0.1" cycle="2"/>
+  </DataArchiver>
+  <!--____________________________________________________________________-->
+  <!--    M  P   M  I  C  E     P  A  R  A  M  E  T  E  R  S              -->
+  <!--____________________________________________________________________-->
+  <CFD>
+    <cfl>0.1</cfl>
+    <ICE>
+      <advection type="SecondOrder"/>
+      <TimeStepControl>
+        <Scheme_for_delT_calc> aggressive   </Scheme_for_delT_calc>
+        <knob_for_speedSound>  0.01           </knob_for_speedSound>
+      </TimeStepControl>
+      <applyHydrostaticPressure>false </applyHydrostaticPressure>
+      <ClampSpecificVolume>     false  </ClampSpecificVolume>
+      <ImplicitSolver>
+        <max_outer_iterations>      20     </max_outer_iterations>
+        <outer_iteration_tolerance> 1e-7  </outer_iteration_tolerance>
+        <iters_before_timestep_restart> 4 </iters_before_timestep_restart>
+        <Parameters variable="implicitPressure">
+          <!--
+              <tolerance>     1.e-20   </tolerance>
+               The solver tolerance is relative high to prevent checker boarding -->
+          <tolerance>     1.e-8   </tolerance>
+          <solver>         cg      </solver>
+          <preconditioner> pfmg    </preconditioner>
+          <maxiterations>  7500    </maxiterations>
+          <npre>           1       </npre>
+          <npost>          1       </npost>
+          <skip>           1       </skip>
+          <jump>           0       </jump>
+          <relax_type>     2       </relax_type>
+        </Parameters>
+      </ImplicitSolver>
+    </ICE>
+  </CFD>
+  <!--The node MPM has been removed.  Its original values are
+    in input.xml.orig, and values used for restarts are in checkpoints/t*****/timestep.xml-->
+  <!--____________________________________________________________________-->
+  <!--     P  H  Y  S  I  C  A  L     C  O  N  S  T  A  N  T  S           -->
+  <!--____________________________________________________________________-->
+  <PhysicalConstants>
+    <gravity>            [0,0,0]   </gravity>
+    <reference_pressure> 101325.0  </reference_pressure>
+  </PhysicalConstants>
+  <!--____________________________________________________________________-->
+  <!--    MATERIAL PROPERTIES INITIAL CONDITIONS                          -->
+  <!--____________________________________________________________________-->
+  <!--The node MaterialProperties has been removed.  Its original values are
+    in input.xml.orig, and values used for restarts are in checkpoints/t*****/timestep.xml-->
+</Uintah_specification>
