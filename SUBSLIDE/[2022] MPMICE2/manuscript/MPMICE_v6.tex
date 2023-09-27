@@ -1254,8 +1254,7 @@ Finally, the effective stress $(\pmb{\sigma}^\prime)^{n+1}$ is updated from the 
 %
 %_______________________________
 \section{\textsf{Numerical validation}}
-All input files and the analytical calculations in this section are provided in the Github repository (https://github.com/QuocAnh90/Uintah\textunderscore NTNU) for the reproduction of the numerical results.\\
-For all simulations, the water has a bulk modulus of 2 GPa, a density of 998 kg/m3 at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1atm), a dynamic viscosity $\mu_f$ of 1 mPa s).  The air has a ideal gas with a density of 1.17 kg/m3 at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1atm), a dynamic viscosity $\mu_f$ of $18.45E^{-3}$ mPa s). 
+For all simulations, water is characterized by a bulk modulus of 2 GPa, a density of 998 kg/m3 at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1 atm), and a dynamic viscosity denoted as $\mu_f$ of 1 mPa s. The air is treated as an ideal gas with a density of 1.17 kg/m$^{3}$ at a reference temperature of 5 degrees Celsius and a reference pressure of 10325 Pa (1 atm), and it possesses a dynamic viscosity $\mu_f$ of $18.45 \times 10^{-3}$ mPa s."
 %_______________________________
 \subsection{\textsf{Fluid Flow through isothermal porous media}}
 %
@@ -1296,7 +1295,7 @@ If the Carman-Kozeny formula is adopted $F = 10\phi_s/(1-\phi_s)^2$, the hydraul
 
 %
 %
-Our numerical model is validated by modeling fluid flow through a 1m long porous media. The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is [0.6, 0.62, 0.66, 0.68, 0.7] and the average grain diameter $d$ is 1mm. The model is discretized in 20 finite element and the porous media in 10 finite element with 1 material point per element. The pressure gradient is applied with three different value [0.25, 0.5, 1] atm. Figure \ref{fig:porousflow} shows a good agreement of fluid flow prediction between the theory and the model.
+Our numerical model's validity is confirmed through the simulation of fluid flow in a 1m long porous medium. This porous medium is represented by an elastic material with the following properties: Young's modulus of 10 MPa, Poisson's ratio of 0.3, and a density of 2650 kg/m$^{3}$. The volume fraction of the porous medium, denoted as $\phi_s$, is varied as [0.6, 0.62, 0.66, 0.68, 0.7], while the average grain diameter $d$ is set at 1mm. The model is discretized into 20 finite elements, with the porous medium represented by 10 finite elements, each containing one material point per element. We apply pressure gradients with three different values: [0.25, 0.5, 1] atm. As depicted in Figure \ref{fig:porousflow}, our model demonstrates excellent agreement with theoretical predictions in simulating fluid flow.
 %
 %_______________________________
 \subsection{\textsf{Isothermal consolidation}}
@@ -1310,16 +1309,15 @@ Our numerical model is validated by modeling fluid flow through a 1m long porous
 \end {figure}
 %
 %
-A common benchmark for a fully saturated porous media is the simulation of one-dimensional consolidation. Using the Carman-Kozeny formula, the time-dependent pressure can be calculated as:
-%
-%
+A common benchmark for fully saturated porous media is the simulation of one-dimensional consolidation. Using the Carman-Kozeny formula, the time-dependent pressure can be calculated as:
+
 \begin{equation}
-  p_f  = \sum_{m=1}^{\infty} \frac{2F_{ext}}{M} \sin (\frac{Mz}{H}) e^{-M^2T_V} \textrm{    with    }   M = \frac{\pi}{2} (2m+1)
+p_f = \sum_{m=1}^{\infty} \frac{2F_{ext}}{M} \sin (\frac{Mz}{H}) e^{-M^2T_V} \textrm{ with } M = \frac{\pi}{2} (2m+1)
 \end {equation}
-%
-%
-where the consolidation rate $T_v =C_vt/H^2$, the consolidation coefficient $C_v = E_v n^3 d^2/(180(1-n)^2\mu) $ and the Oedometer modulus $E_v = E(1-\upsilon)/(1+\upsilon)/(1-2\upsilon)$.
-Our numerical model is validated by modeling the consolidation of a 1m column. The porous media is modeled by elastic material with Young's modulus is 10 MPa, Poisson's ratio is 0.3, and density is 2650 kg/m3. The volume fraction of porous media $\phi_s$ is 0.7 which is equivalent to the porosity of 0.3 and the average grain diameter $d$ is 1mm. The model is discretized in 100 finite element with 1 material point per element. The external pressure applies to the top of the column is 10 kPa. Figure \ref{fig:consolidation} shows a good agreement of fluid flow prediction between the theory and the model.
+
+Here, the consolidation rate is defined as $T_v =C_vt/H^2$, the consolidation coefficient as $C_v = E_v n^3 d^2/(180(1-n)^2\mu)$, and the Oedometer modulus as $E_v = E(1-\upsilon)/(1+\upsilon)/(1-2\upsilon)$.
+
+To validate our numerical model, we simulated the consolidation of a 1m column of porous media. The porous media is modeled as an elastic material with a Young's modulus of 10 MPa, a Poisson's ratio of 0.3, and a density of 2650 kg/m$^{3}$. The volume fraction of porous media $\phi_s$ is set to 0.7, equivalent to a porosity of 0.3, and the average grain diameter $d$ is 1 mm. The model is discretized into 100 finite elements, each with 1 material point per element. An external pressure of 10 kPa is applied to the top of the column. Figure \ref{fig:consolidation} demonstrates a strong agreement between the predicted fluid flow and theoretical results.
 %_______________________________
 \subsection{\textsf{Thermal induced cavity flow}}
 %
@@ -1349,7 +1347,8 @@ Our numerical model is validated by modeling the consolidation of a 1m column. T
 \end {figure}
 %
 %
-Another benchmark is the thermal induced cavity flow in porous media. Temperature and velocity distributions are calculated for a square non-deformable saturated porous media The top and bottom walls are insulated, and the left and right walls are at fixed temperature gradient of 1 degree. The fluid motion at stead state are cavity flow due to the temperature induced density variation. The numerical is validated by comparing with the numerical solution of the finite element method. The porous media is modeled by non deformable material, and density is 2500 kg/m3. The specific heat capacity of the water and porous skeleton are 4181 J/kg.K and 835 J/kg.K respectively. The thermal conductivity of the water and porous skeleton are 0.598 W/m.K and 0.4 W/m.K. The volume fraction of porous media $\phi_s$ is 0.6 which is equivalent to the porosity of 0.4 and the average grain diameter $d$ is 1mm. The model is discretized in 20 x 20 finite element with 4 material point per element. Figure \ref{fig:thermal} shows a good agreement of numerical results of the model compared with the numerical solution of the finite element method.
+Another benchmark involves the study of thermally-induced cavity flow in porous media. This simulation calculates temperature and velocity distributions within a square, non-deformable, saturated porous medium. The top and bottom walls are insulated, while the left and right walls maintain a fixed temperature gradient of 1 degree, leading to fluid motion in the form of cavity flow due to temperature-induced density variation. Our numerical model is validated by comparing it with the numerical solution obtained using the finite element method.\\
+The porous medium in this simulation is modeled as a non-deformable material with a density of 2500 kg/m$^{3}$. The specific heat capacity of the water and porous skeleton is 4181 J/kg·K and 835 J/kg·K, respectively. Thermal conductivity values are 0.598 W/m·K for water and 0.4 W/m·K for the porous skeleton. The volume fraction of porous media $\phi_s$ is set at 0.6, equivalent to a porosity of 0.4, and the average grain diameter $d$ is 1mm. The model is discretized into a 20x20 grid of finite elements, with 4 material points per element. Figure \ref{fig:thermal} demonstrates that our numerical results align well with the numerical solution obtained using the finite element method.
 %_______________________________
 \section{\textsf{Numerical examples}}
 \subsection{\textsf{Underwater debris flow}}
@@ -1363,10 +1362,10 @@ Another benchmark is the thermal induced cavity flow in porous media. Temperatur
 \end {figure}
 %
 %
-The numerical example is compared using the experimental work of Rzadkiewicz et al. on submarine debris flow \cite{Rzadkiewicz}. In their experiment, sand within a triangular box is released and slides along a rigid bed inclined at 45 degrees under water (see Figure \ref{fig:SandBoxModel}). The material properties in the numerical model are selected based on the experiment by Rzadkiewicz et al. \cite{Rzadkiewicz}. The sand is characterized by a saturated density of 1985 $kg/m^3$ and a friction angle of 10 degrees. The effect of Young's modulus on debris flow run-out is negligible due to the extreme deformation of the debris, so a Young's modulus of 50 MPa with a Poisson's ratio of 0.25 is chosen. The rigid bed, being much stiffer, has bulk modulus and shear modulus values of $117E^7$ Pa and $43.8E^7$ Pa, respectively. The numerical parameters used in this example are presented in Table \ref{table2}.\\
-The boundary conditions imposed in the numerical model are as follows: on all boundary faces, the velocity is set to zero (U = 0 m/s) and the temperature is set to 5 degrees Celsius (T = 5°C). At the top boundary, the pressure has a Neumann boundary condition of dp/dx = 0 kPa, and the density has a Neumann boundary condition of d$\rho$/dx = 0 $kg/m^3$. The background mesh consists of 700 x 400 cells, resulting in a total of 280,000 cells. Each cell in the debris flow and rigid bed contains 2 x 2 material points.\\
-Figure \ref{saturatedflowb} illustrates snapshots of the underwater debris flow sliding, demonstrating that the model captures the typical hydroplaning mechanism of the debris flow. Hydroplaning refers to the lifting of the debris flow, causing it to lose contact with the bottom layer. The elevation of the free surface at 0.4s and 0.8s is compared between our proposed method and other methods in Figure \ref{watersurface}. Our computed results align well with the experimental results \cite{Zhang2019}.\\
-Unlike other computational models that rely on total stress analysis \cite{Tran2019, Capone2010, Zhang2019, Dey2016}, our proposed model utilizes effective stress analysis, enabling the analysis of water pressure and temperature within the debris flow. Additionally, we investigate the differences between underwater debris flow and saturated debris flow in terms of their interaction with obstacles. Figure \ref{saturatedflow} presents snapshots of simulations of both underwater and saturated debris flow. The saturated debris flow (Figure \ref{saturatedflowa}) exhibits behavior similar to frictional flow, where grains have contact forces with each other. Conversely, the underwater debris flow (Figure \ref{saturatedflowb}) behaves like turbulent flow, with grains being separated from each other and exhibiting no contact forces (as reflected by the near-zero effective stress in the turbulence domain).
+The numerical example is compared to the experimental work of Rzadkiewicz et al. on submarine debris flow \cite{Rzadkiewicz}. In their experiment, sand within a triangular box is released and slides along a rigid bed inclined at 45 degrees underwater (see Figure \ref{fig:SandBoxModel}). The material properties in the numerical model are chosen based on Rzadkiewicz et al.'s experiment \cite{Rzadkiewicz}. The sand has a saturated density of 1985 $kg/m^3$ and a friction angle of 10 degrees. Young's modulus, despite its negligible effect on debris flow run-out due to extreme deformation, is set at 50 MPa with a Poisson's ratio of 0.25. The rigid bed, significantly stiffer, possesses bulk modulus and shear modulus values of $117E^7$ Pa and $43.8E^7$ Pa, respectively. The numerical parameters used in this example are outlined in Table \ref{table2}.\\
+The boundary conditions applied in the numerical model are as follows: all boundary faces have zero velocity (U = 0 m/s) and a temperature of 5 degrees Celsius (T = 5°C). At the top boundary, pressure has a Neumann boundary condition of dp/dx = 0 kPa, and density has a Neumann boundary condition of d$\rho$/dx = 0 $kg/m^3$. The background mesh comprises 700 x 400 cells, resulting in a total of 280,000 cells. Each cell within the debris flow and rigid bed contains 2 x 2 material points.\\
+Figure \ref{saturatedflowb} illustrates snapshots of underwater debris flow sliding, effectively capturing the typical hydroplaning mechanism of the debris flow. Hydroplaning refers to the lifting of the debris flow, causing it to lose contact with the bottom layer. In addition, Figure \ref{watersurface} compares the elevation of the free surface at 0.4s and 0.8s between our proposed method and other methods, demonstrating the alignment of our computed results with experimental results \cite{Zhang2019}.\\
+What sets our model apart is its utilization of effective stress analysis instead of total stress analysis. This allows for the analysis of water pressure and temperature within the debris flow. Furthermore, we investigate the differences between underwater debris flow and saturated debris flow in terms of their interaction with obstacles. Figure \ref{saturatedflow} presents snapshots of simulations of both underwater and saturated debris flow. The saturated debris flow (Figure \ref{saturatedflowa}) exhibits behavior similar to frictional flow, with grains in contact with each other. Conversely, underwater debris flow (Figure \ref{saturatedflowb}) behaves like turbulent flow, with grains separated and showing no contact forces, as reflected by the near-zero effective stress in the turbulence domain.
 %
 %
 %\begin{figure}
@@ -1463,7 +1462,6 @@ Unlike other computational models that rely on total stress analysis \cite{Tran2
 \end {figure}
 %
 %
-An experimental study conducted by Hiraoka et al. \cite{Hiraoka} aimed to investigate the influence of seismic shaking on the deformation of a 0.5 m-high sand slope. The sand used in the experiment was partially saturated, with a moisture content of 10 percent. The provided soil parameters for the Mohr Coulomb model include the effective friction angle of 23 degrees, apparent cohesion of 0.78 kPa, Young's modulus of 2.57 MPa, and Poisson's ratio of 0.33, and moist unit weight of 16.5 kN/m3. The soil's dilatancy angle was assumed to be 0 \cite{Hiraoka}. The experimental setup consisted of a shaking table box with a steel horizontal base and smooth glass vertical sidewalls. Laser sensors were used to monitor the displacement of the slope's toe and crest. Figure \ref{fig:vel_profile} displays the velocity-time history employed in the experiment. 
 %
 %
 \begin{figure}[H]
@@ -1474,14 +1472,14 @@ An experimental study conducted by Hiraoka et al. \cite{Hiraoka} aimed to invest
 \end {figure}
 %
 %
-
-To simulate the seismic loading in our numerical model, we adopted a method presented by Alsardi et al. \cite{Alsardi}, which involves specifying the velocity at the corresponding material points representing either the shaking table or the bedrock at the site (see Figure \ref{fig:seismic_method}). In our simulation, we considered the horizontal base to be fully rough and the vertical contact to be fully smooth. The initial stress condition was initiated using gravity and seismic loading induced the slope failure (see Figure \ref{fig:seismic}).\\
-Previous studies by Bhandari et al. \cite{Bhandari}, Alsardi et al. \cite{Alsardi}, and Hiraoka et al. \cite{Hiraoka} attempted to model this experiment using MPM and SPH models. In this study, we compared our results with those obtained from other particle-based methods (Figure \ref{fig:Toe}). The main difference is that we did not apply 5 percent numerical damping in our model, unlike the other methods. We found that the final displacement of the slope toe in our MPM model was higher than that observed in the experiment. Nevertheless, the validation of the Mohr-Coulomb model under seismic response demonstrated a reasonable soil behavior in terms of displacement.
+An experimental study conducted by Hiraoka et al. \cite{Hiraoka} aimed to investigate the influence of seismic shaking on the deformation of a 0.5 m-high sand slope. The sand used in the experiment was partially saturated, with a moisture content of 10 percent. The provided soil parameters for the Mohr Coulomb model include the effective friction angle of 23 degrees, apparent cohesion of 0.78 kPa, Young's modulus of 2.57 MPa, Poisson's ratio of 0.33, and moist unit weight of 16.5 kN/m3. The soil's dilatancy angle was assumed to be 0 \cite{Hiraoka}. The experimental setup consisted of a shaking table box with a steel horizontal base and smooth glass vertical sidewalls. Laser sensors were used to monitor the displacement of the slope's toe and crest. Figure \ref{fig:vel_profile} displays the velocity-time history employed in the experiment.\\
+To simulate the seismic loading in our numerical model, we adopted a method presented by Alsardi et al. \cite{Alsardi}, which involves specifying the velocity at the corresponding material points representing either the shaking table or the bedrock at the site (see Figure \ref{fig:seismic_method}). In our simulation, we considered the horizontal base to be fully rough and the vertical contact to be fully smooth. The initial stress condition was initiated using gravity, and seismic loading induced the slope failure (see Figure \ref{fig:seismic}).\\
+Previous studies by Bhandari et al. \cite{Bhandari}, Alsardi et al. \cite{Alsardi}, and Hiraoka et al. \cite{Hiraoka} attempted to model this experiment using MPM and SPH models. In this study, we compared our results with those obtained from other particle-based methods (Figure \ref{fig:Toe}). The main difference is that we did not apply 5 percent numerical damping in our model, unlike the other methods. We found that the final displacement of the slope toe in our MPM model was higher than that observed in the experiment. Nevertheless, the validation of the Mohr-Coulomb model under seismic response demonstrated reasonable soil behavior in terms of displacement.
 %
 %
 \begin{figure}[H]
 \center
-\includegraphics[scale=0.5]{Toe.jpg}
+\includegraphics[scale=0.4]{Toe.jpg}
 \caption{Displacement of the toe of the slope}
 \label{fig:Toe}
 \end {figure}
@@ -1517,7 +1515,7 @@ Previous studies by Bhandari et al. \cite{Bhandari}, Alsardi et al. \cite{Alsard
 \caption{Ground acceleration profile, frequency of 2Hz and magnitude of 1g}
 \label{groundacceleration}
 \end {figure}
-In the final example, we perform numerical analysis of the earthquake induced submarine landslides. A plane strain model with the slope under water is shown in Figure \ref{fig:scheme}. A 20m high slope with slope gradient of 45 degrees is placed in a horizontal and vertical structure which was used to be a skaing table to apply earthquake loading. We simplify the earthquake loading by simulating the ground shaking for 20 seconds with the constanct ground acceleration of 1g and a constant frequency of 2Hz (Figure \ref{groundacceleration_accerleration}). The ground motion is applied in terms of velocity (Figure \ref{groundacceleration_velocity}). An earthquake of this magnitude is possible. For instance, in the case of the 2023 Turkey-Syria Earthquake, significant ground shaking with peak ground acceleration exceeding 1g was observed at numerous locations. This serves as an example of the practical occurrence of such high levels of ground acceleration during seismic events. To generate the seismic loading, the same method was used as presented in the previous numerical example.
+In the final example, we conduct a numerical analysis of earthquake-induced submarine landslides. We utilize a plane strain model featuring an underwater slope, as depicted in Figure \ref{fig:scheme}. This model consists of a 20m high slope with a gradient of 45 degrees, placed within a horizontal and vertical structure formerly used as a shaking table to apply earthquake loading. To simplify the earthquake loading, we simulate ground shaking for 20 seconds, maintaining a constant ground acceleration of 1g and a consistent frequency of 2 Hz (Figure \ref{groundacceleration_accerleration}). This magnitude of earthquake is plausible; for instance, during the 2023 Turkey-Syria Earthquake, significant ground shaking with peak ground acceleration exceeding 1g was recorded at numerous locations. This real-world example demonstrates the practical occurrence of such high levels of ground acceleration during seismic events. To generate the seismic loading, we employ the same method as presented in the previous numerical example.
 %
 %
 \begin{figure}[H]
@@ -1528,15 +1526,13 @@ In the final example, we perform numerical analysis of the earthquake induced su
 \end {figure}
 %
 %
-A non-associated Mohr-Coulomb model is used for the soil. The soil grain has the density of 2650 kg/$m^3$, Young's modulus of 10 kPa and Poisson's ratio of 0.3 and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is governed following the softening curve (see Figure \ref{fig:model}) with the peak friction angle $\phi^\prime_p$ of 45 degrees and the residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is 0.3 and the average grain size of the soil is around 0.1 $\mu$m to mimic the undrained behavior. The mobilized dilatancy angle is calculated from the Rowe's stress dilatancy theory  \cite{Wood} as follow:
-%
-%
+A non-associated Mohr-Coulomb model is employed to represent the soil in our simulation. The soil grains have a density of 2650 kg/$m^3$, a Young's modulus of 10 kPa, a Poisson's ratio of 0.3, and zero cohesion. The mobilized friction angle $\phi^\prime_m$ is determined based on the softening curve (as depicted in Figure \ref{fig:model}), with a peak friction angle $\phi^\prime_p$ of 45 degrees and a residual friction angle $\phi^\prime_r$ of 10 degrees. The porosity is set to 0.3, and the average grain size of the soil is approximately 0.1 $\mu$m to mimic undrained behavior. The mobilized dilatancy angle is calculated using Rowe's stress dilatancy theory \cite{Wood} as follows:
 \begin{equation}
-  \sin{\psi^\prime}_m = \frac{\sin{\phi^\prime}_m - \sin{\phi^\prime}_{r}}{1 - (\sin{\phi^\prime}_{r}\sin{\phi^\prime}_m)}
-\end {equation}
-%
-%
-The solid plane is modeled as a rigid body acted as a shaking table. The contact between horizontal plane and the sand is the frictional contact with the friction coefficient of 0.1. No artificial damping is applied in the simulation. The contact between vertical plane and the sand is considered to be smooth with zero friction coefficient. On all boundary faces, the symmetric boundary condition is imposed, while the Neumman boundary condition is imposed at the top boundary for pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). Symmetric boundary condition refers to a condition where the normal component of the velocity at the boundary face is set to zero, and the tangential component is equal to the tangential component of the neighboring cells. The mesh size is 0.25 m x 025 m with 300852 element cells and 142316 material points. The simulation takes a couple of hours to perform 60 seconds of the simulation using 4096 CPUs.
+\sin{\psi^\prime}m = \frac{\sin{\phi^\prime}m - \sin{\phi^\prime}{r}}{1 - (\sin{\phi^\prime}{r}\sin{\phi^\prime}_m)}
+\end{equation}
+The solid plane is modeled as a rigid body, acting as a shaking table. Frictional contact with a friction coefficient of 0.1 is considered between the horizontal plane and the sand. No artificial damping is applied in the simulation. The contact between the vertical plane and the sand is treated as smooth, with a zero friction coefficient.\\
+Symmetric boundary conditions are imposed on all boundary faces, while Neumann boundary conditions are applied at the top boundary for pressure (dp/dx = 0 kPa) and density (d$\rho$/dx = 0 $kg/m^3$). In the context of the simulation, a symmetric boundary condition means that the normal component of the velocity at the boundary face is set to zero, and the tangential component matches the tangential component of the neighboring cells.\\
+The mesh size is set to 0.25 m x 0.25 m, resulting in 300,852 element cells and 142,316 material points. The simulation takes several hours to complete 60 seconds of simulation time, utilizing 4,096 CPUs.
 %
 \begin{figure}[H]
 \center
@@ -1546,9 +1542,14 @@ The solid plane is modeled as a rigid body acted as a shaking table. The contact
 \end {figure}
 %
 %
-We demonstrate the entire process and the mechanism of the earthquake-induced submarine landslides by showing the shear strain (Figure \ref{fig:gamma}), the pore water pressure in atm (Figure \ref{fig:PWP}) and the velocity (Figure \ref{fig:vel}). The failure mechanism can be characterized as the progressive failure mechanism. Here are some numerical observation:
+We have illustrated the entire process and mechanism of earthquake-induced submarine landslides by presenting the shear strain (Figure \ref{fig:gamma}), pore water pressure in atm (Figure \ref{fig:PWP}), and velocity (Figure \ref{fig:vel}). The failure mechanism can be characterized as a progressive failure mechanism, and here are some key numerical observations:
 \begin{enumerate}
-\item At the initial of the seismic event, the seismic loading triggers the first slide at 3 seconds. At 4 seconds, the debris start to move with the maximum speed of around 2-3 m/s with multiple shear band developed in the slope. The wave generated from the submarine slide is around 2-3 m towards the slide direction.
+\item At the onset of the seismic event, the seismic loading triggers the initial slide at 3 seconds. By 4 seconds, the debris starts moving at a maximum speed of around 2-3 m/s, with multiple shear bands developing in the slope. A wave is generated from the submarine slide, propagating with approximately 2-3 m high in the direction of the slide.
+\item When the onset of the shear band occurs in the slope (e.g., at 4 seconds and 20 seconds), negative excess pore water pressure develops along this shear band, with pore water pressure dropping below 1 atm. This behavior is typical of dilatancy when the soil undergoes rapid shearing in an undrained state.
+\item  As the seismic loading ends at 23 seconds, the last shear band is mobilized, and the slope quickly reaches its final deposition. There are no further progressive failures in the slope at this stage. A turbulent flow develops due to the interaction between the debris flow and seawater.
+\end {enumerate}
+%
+In summary, we have presented a comprehensive view of the earthquake-induced submarine landslides, covering (1) the earthquake-triggering mechanism, (2) the initiation of shear bands with the development of negative excess pore water pressure, (3) the progressive failure mechanism, and (4) the generation of submarine landslide-induced waves leading to the final deposition of debris.
 %
 \begin{figure}[H]
 \center
@@ -1558,11 +1559,6 @@ We demonstrate the entire process and the mechanism of the earthquake-induced su
 \end {figure}
 %
 %
-\item When the onset of the shear band occurs in the slope (for example at 4 seconds and 20 seconds), the negative excess pore water pressure is developed along this shear band with pore water pressure is under 1atm. This is a typical dilatancy behavior when the soil is sheared rapidly in the undrained behavior. 
-\item  When the seismic loading ends at 23 seconds, the last shear band is mobilized and the slope soon reaches to the final deposition. No more progressive failure developed in the slope. The turbulent flow developed as the interaction between debris flow and seawater.
-\end {enumerate}
-%
-Overall, we show the completed process of the earthquake-induced submarine landslides involving (1) earthquake triggering mechanism, (2) the onset of the shear band with the development of negative excess pore water pressure, (3) progressive failure mechanism, (4) submarine landslide induced wave to final deposition.
 %
 %
 \begin{figure}[H]
@@ -1575,80 +1571,65 @@ Overall, we show the completed process of the earthquake-induced submarine lands
 %
 %_______________________________
 \section{\textsf{Conclusions}}
-We have presented a numerical approach MPMICE for the simulation of large deformation soil-fluid-structure interaction, emphasizing the simulation of the earthquake-induced submarine landslides. The model uses (1) the Material Point Method for capturing the large deformation of iso-thermal porous media and solid structures and (2) Implicit Continuous Eulerian (compressible, conservative multi-material CFD formulation) for modeling the complex fluid flow including turbulence. This model is implemented in the high-performance Uintah computational framework and validated against analytical solution and experiment. We then demonstrate the capability of the model to simulate the entire process of the earthquake induced submarine landslides.
+We have introduced a numerical approach called MPMICE for simulating large deformation soil-fluid-structure interactions, with a specific focus on earthquake-induced submarine landslides. This model leverages two key components: Material Point Method (MPM): MPM is employed to accurately capture the large deformations occurring in iso-thermal porous media and solid structures. Implicit Continuous Eulerian (CFD Formulation): This component is used for modeling the intricate fluid flow, including turbulence, within the system. It adopts a compressible, conservative multi-material CFD formulation. Our model has been implemented within the high-performance Uintah computational framework and rigorously validated through comparisons with analytical solutions and experimental data. Subsequently, we have demonstrated the model's capabilities in simulating the complete process of earthquake-induced submarine landslides.
 
 %_______________________________
 \section{\textsf{Acknowledgements}}
 The authors gratefully acknowledge Dr. James Guilkey and Dr. Todd Harman from the University of Utah for sharing the insight on the theoretical framework of MPMICE which this work is based. This project has received funding from the European Union’s Horizon 2020 research and innovation program under the Marie Skłodowska-Curie Actions (MSCA) Individual Fellowship (Project SUBSLIDE “Submarine landslides and their impacts on offshore infrastructures”) grant agreement 101022007. The authors would also like to acknowledge the support from the Research Council of Norway through its Centers of Excellence funding scheme, project number 262644 Porelab. The computations were performed on High Performance Computing resources provided by UNINETT Sigma2 - the National Infrastructure for High Performance Computing and Data Storage in Norway.
 
 %_______________________________
+\section{\textsf{Data Availability Statement}}
+The authors confirm that the data supporting the findings of this study are available within the article. All input files and the analytical calculations in this section are provided in the Github repository\\
+ (https://github.com/QuocAnh90/Uintah\textunderscore NTNU) for the reproduction of the numerical results.
+%_______________________________
 %\appendix
-
 \section{\textsf{Appendix: Equation derivation}}
 %
 %
 Before deriving the governing equation, we define the Lagrangian derivative for a state variable $f$ as:
-%
-%
 \begin{equation}
-\frac{D_f f}{Dt} =  \frac{\partial f}{\partial t} + \pmb{U_f} \cdot \nabla f \qquad
-\frac{D_s f}{Dt} =  \frac{\partial f}{\partial t} + \pmb{U_s} \cdot \nabla f
-\end {equation}
-%
-%
-we use some definition following \cite{Kashiwa} as below:
-%
-%
-\begin{gather}
--\frac{1}{V} \left[ \frac{\partial V_f}{\partial p} \right] \equiv \kappa_f \qquad \mbox{ isothermal compressibility of fluid} \\
-\frac{1}{V} \left[ \frac{\partial V_f}{\partial T} \right] \equiv \alpha_f \qquad \mbox{ contant pressure thermal expansivity of fluid}
-\end {gather}
-%
-%
-Then, the rate of volume with incompressible solid grains are calculated as belows:
-%
-%
+\frac{D_f f}{Dt} = \frac{\partial f}{\partial t} + \pmb{U}_f \cdot \nabla f
+\end{equation}
+\begin{equation}
+\frac{D_s f}{Dt} = \frac{\partial f}{\partial t} + \pmb{U}_s \cdot \nabla f
+\end{equation}
+We adopt the following definitions as per \cite{Kashiwa}:
+\begin{equation}
+-\frac{1}{V} \left[ \frac{\partial V_f}{\partial p} \right] \equiv \kappa_f \quad \text{isothermal compressibility of fluid}
+\end{equation}
+\begin{equation}
+\frac{1}{V} \left[ \frac{\partial V_f}{\partial T} \right] \equiv \alpha_f \quad \text{constant pressure thermal expansivity of fluid}
+\end{equation}
+Then, we calculate the rate of volume within incompressible solid grains as follows:
 \begin{equation}
 \label{fluidvolumerate}
 \begin{gathered}
-   \frac{1}{V} \frac{D_f V_f}{Dt} = \frac{1}{V} \left( \left[ \frac{\partial V_f}{\partial p} \right] \frac{D_f P_{eq}}{D t} + \left[ \frac{\partial V_f}{\partial T_f} \right] \frac{D_f T}{D t} \right) = \frac{1}{V} \left( -\kappa_f \frac{D_f P_{eq}}{D t} + \alpha_f \frac{D_f T_f}{D t} \right) \\
-\end {gathered}
-\end {equation}
-%
-%
+\frac{1}{V} \frac{D_f V_f}{Dt} = \frac{1}{V} \left( \left[ \frac{\partial V_f}{\partial p} \right] \frac{D_f P_{eq}}{Dt} + \left[ \frac{\partial V_f}{\partial T_f} \right] \frac{D_f T}{Dt} \right) \
+= \frac{1}{V} \left( -\kappa_f \frac{D_f P_{eq}}{Dt} + \alpha_f \frac{D_f T_f}{Dt} \right)
+\end{gathered}
+\end{equation}
+
 \subsection{\textsf{Evolution of porosity}}
 %
 %
-Solving the solid mass balance equation (\ref{massbalance}) with the definition of solid mass in equation (\ref{mass}), it leads to the rate of porosity as belows:
-%
-%
+Solving the solid mass balance equation (\ref{massbalance}) with the definition of solid mass in equation (\ref{mass}), we obtain the rate of porosity as:
 \begin{equation}
-   \frac{D_sm_s}{Dt} = \frac{D_s(\phi_s \rho_s V)}{Dt} = \rho_s V \frac{D_s \phi_s}{Dt} + \phi_s V \frac{D_s \rho_s}{Dt} + \phi_s \rho_s  \frac{D_s V}{Dt} = 0  
-\end {equation}
-%
-%
-The soil grains are assumed to be incompressible, therefore, term 2 in the right hand side is zero. leading to:
-%
-%
+\frac{D_s m_s}{Dt} = \frac{D_s(\phi_s \rho_s V)}{Dt} = \rho_s V \frac{D_s \phi_s}{Dt} + \phi_s V \frac{D_s \rho_s}{Dt} + \phi_s \rho_s \frac{D_s V}{Dt} = 0
+\end{equation}
+Since soil grains are assumed to be incompressible, term 2 on the right-hand side is zero, resulting in:
 \begin{equation}
-  V \frac{D_s \phi_s}{Dt} + \phi_s \frac{D_s V}{Dt} = 0  
-\end {equation}
-%
-%
-Dividing all terms with $V$ with the equation $\frac{1}{V} \frac{D_s V}{Dt} = \nabla \cdot \pmb{U}_s $, it leads to:
-%
-%
+V \frac{D_s \phi_s}{Dt} + \phi_s \frac{D_s V}{Dt} = 0
+\end{equation}
+Dividing all terms by "V" and using the equation $\frac{1}{V} \frac{D_s V}{Dt} = \nabla \cdot \pmb{U}_s $, we get:
 \begin{equation}
-  \frac{D_s n}{Dt} = \frac{\partial n}{\partial t} + \pmb{U}_s \cdot \nabla n = 
-  \phi_s \nabla \cdot \pmb{U}_s  
-\end {equation}
-%
-%
+\frac{D_s n}{Dt} = \frac{\partial n}{\partial t} + \pmb{U}_s \cdot \nabla n = \phi_s \nabla \cdot \pmb{U}_s
+\end{equation}
+
 \subsection{\textsf{Momentum conservation}}
 \label{Momentum}
 %
 %
-The linear momentum balance equations for the fluid phases based on mixture theory are:\\
+The linear momentum balance equations for the fluid phases based on mixture theory are given by:\\
 %
 %
 \begin{equation}
@@ -1657,7 +1638,7 @@ The linear momentum balance equations for the fluid phases based on mixture theo
 \end {equation}
 %
 %
-On the right hand sand, the first term is the divergence of partial fluid phase stress, the third term is the body force, the fourth term is the drag force (momentum exchange) and the fifth term is the buoyant force described in \cite{DRUMHELLER} for the immiscible mixtures. The buoyant force is in the form as belows:
+On the right hand side, the terms include the divergence of partial fluid phase stress, body force, drag force (momentum exchange) and buoyant force as described in \cite{DRUMHELLER} for immiscible mixtures, which takes the form:
 %
 %
 \begin{equation}
@@ -1665,12 +1646,12 @@ On the right hand sand, the first term is the divergence of partial fluid phase 
 \end {equation}
 %
 %
-As a result, the linear momentum balance equations for the fluid phases become as:
+Hence, the linear momentum balance equations for the fluid phases become:
 %
 %
 \begin{equation}
     \label{fluidmom}
-     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} =  \frac{1}{V} \left[ \frac{\partial (m_f \pmb{U}_f)}{\partial t} + \nabla \cdot  (m_f \pmb{U}_f \pmb{U}_f) \right] = -\phi_f \nabla p_f + \nabla \cdot \pmb{\tau}_f +  \overline{\rho}_f \pmb{b} +  \sum  \pmb{f}_{d}
+     \frac{1}{V}\frac{D_f(m_f \pmb{U}_f)}{Dt} = -\phi_f \nabla p_f + \nabla \cdot \pmb{\tau}_f +  \overline{\rho}_f \pmb{b} +  \sum  \pmb{f}_{d}
 \end {equation}
 %
 %
@@ -1699,7 +1680,7 @@ Combining Terzaghi's equation (\ref{Terzaghi}) and subtracting both sides with e
 %
 Here the $\pmb{f}_{fric}$ stems from the soil-structure interaction following the contact law between the soil/structure interfaces.
 \subsection{\textsf{Energy conservation}}
-We adopt the general form of the total energy balance equation for the porous media from \cite{Hassanizadeh}, the total energy balance equations for the fluid phases are:
+We utilize the general form of the total energy balance equation for porous media from \cite{Hassanizadeh}. The total energy balance equations for the fluid phases take the following form:
 %
 %
 \begin{equation}
@@ -1708,7 +1689,7 @@ We adopt the general form of the total energy balance equation for the porous me
 \end {equation}
 %
 %
-Applying the product rule $D(m\pmb{U}^2)=D(m \pmb{U} \cdot \pmb{U}) = 2 \pmb{U} \cdot D(m \pmb{U})$, the left hand side of equation (\ref{e1}) becomes:\\
+By applying the product rule $D(m\pmb{U}^2)=D(m \pmb{U} \cdot \pmb{U}) = 2 \pmb{U} \cdot D(m \pmb{U})$, we can express the left-hand side of equation (\ref{e1}) as:
 %
 %
 \begin{equation}
@@ -1717,7 +1698,7 @@ Applying the product rule $D(m\pmb{U}^2)=D(m \pmb{U} \cdot \pmb{U}) = 2 \pmb{U} 
 \end {equation}
 %
 %
-Combining equations (\ref{fluidmom}), (\ref{e1}), (\ref{e2}), we obtain the final form of the internal energy balance equation for the fluid phases as:
+Combining equations (\ref{fluidmom}), (\ref{e1}), and (\ref{e2}), we derive the final form of the internal energy balance equation for the fluid phases as:
 %
 %
 \begin{equation}
