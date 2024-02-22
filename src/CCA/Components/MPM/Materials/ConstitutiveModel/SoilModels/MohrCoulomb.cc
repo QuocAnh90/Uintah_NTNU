@@ -219,6 +219,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         if (flag->d_initial_Su_file != "") {
             std::ifstream is(flag->d_initial_Su_file.c_str());
 
+            // Cannot open file error
             if (!is) {
                 throw ProblemSetupException("ERROR: opening Su_reference_line_file '" + flag->d_initial_Su_file + "'\nFailed to find profile file",
                     __FILE__, __LINE__);
@@ -245,7 +246,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
     }
 
 
-    for (int i = 0; i < d_NINSV; i++) {
+    for (int i = 0; i < d_NINSV; i++) { // loop constitutive parameters
         new_dw->allocateAndPut(ISVs[i], ISVLabels[i], pset);
         ParticleSubset::iterator iter = pset->begin();
 
@@ -312,7 +313,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
     computeStableTimestep(patch, matl, new_dw);
 
-    if (flag->d_initial_stress == "Erik") {
+    if (flag->d_initial_stress == "initial_stress") {
         ParticleVariable<Matrix3> pStress;
         new_dw->getModifiable(pStress, lb->pStressLabel, pset);
 
@@ -321,12 +322,33 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
         double rho_orig = matl->getInitialDensity();
 
+         if (flag->d_initial_stress_file != "") {
+            std::ifstream is(flag->d_initial_stress_file.c_str());
+
+
+            // Cannot open file error
+            if (!is) {
+                throw ProblemSetupException("ERROR: opening d_initial_stress_file '" + flag->d_initial_stress_file + "'\nFailed to find profile file",
+                    __FILE__, __LINE__);
+            }
+
+            int j = 0;
+            while (is && j<5) { // max 5 materials
+                double read1, read2;
+                is >> read1 >> read2;
+                y_o[j] = read1; stress_o[j] = read2;
+                j = j + 1;
+            }
+         }
+
         ParticleSubset::iterator iter = pset->begin();
         for (; iter != pset->end(); ++iter)
         {
             particleIndex idx = *iter;
 
-            double p = rho_orig * (px[idx](1) - 0);
+            d_matlIndx = matl->getDWIndex();
+
+            double p = rho_orig * (px[idx](1) - y_o[d_matlIndx]) + stress_o[d_matlIndx];
 
             Matrix3 stressInitial(p, 0.0, 0.0,
                 0.0, p, 0.0,

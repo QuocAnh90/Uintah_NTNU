@@ -1,0 +1,238 @@
+%% 
+%% Copyright 2007-2020 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+
+%% Template article for Elsevier's document class `elsarticle'
+%% with numbered style bibliographic references
+%% SP 2008/03/01
+%%
+%% 
+%%
+%% $Id: elsarticle-template-num.tex 190 2020-11-23 11:12:32Z rishi $
+%%
+%%
+\documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+%%\usepackage{wrapfig}
+\usepackage{lscape}
+\usepackage{rotating}
+%%\usepackage{epstopdf}
+\usepackage[font={small,it}]{caption}
+\usepackage{subcaption}
+\graphicspath{{figures/}}
+\usepackage{lineno}
+\linenumbers
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end {linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\journal{International Journal for Numerical Methods in Engineering}
+
+\begin{document}
+\include{newcommands}
+%
+%  RESET THE COUNTERS
+\setcounter{equation}{0}
+\setcounter{figure}{0}
+\setcounter{section}{0}
+%
+\bibliographystyle{elsarticle-num} 
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{MPMICE: A hybrid MPM-CFD model for simulating coupled problems in porous media. Application to earthquake-induced submarine landslides}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author[label1,label2]{Quoc Anh Tran}
+\author[label1]{Gustav Grimstad}
+\author[label1]{Seyed Ali Ghoreishian Amiri}
+
+\affiliation[label1]{organization={Norwegian University of Science and Technology},%Department and Organization
+           addressline={}, 
+           city={Trondheim},
+           postcode={7034}, 
+           country={Norway}}
+\affiliation[label2]{quoc.a.tran@ntnu.no}
+
+
+\begin{abstract}
+%% Text of abstract
+In this paper, we describe a soil-fluid-structure interaction model that combines soil mechanics (saturated sediments), fluid mechanics (seawater or air), and solid mechanics (structures). The formulation combines the Material Point Method, which models large deformation of the porous media and the structure, with the Implicit Continuous-fluid Eulerian, which models complex fluid flows. We validate the model and simulate the whole process of earthquake-induced submarine landslides. We show that this model captures complex interactions between saturated sediment, seawater, and structure, so we can use the model to estimate the impact of potential submarine landslides on offshore structures.
+
+\end {abstract}
+
+\begin{keyword}
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+Material Point Method 
+\sep MPMICE
+\sep submarine landslide.
+\end {keyword}
+\end {frontmatter}
+%
+%
+%
+%______________________________________________________________________
+%   Table of Contents    
+%______________________________________________________________________
+\newpage
+\setcounter{secnumdepth}{-2}
+%% \linenumbers
+
+%______________________________________________________________________
+\newpage
+\section{\textsf{Nomenclature}}
+\begin{tabular}{lll}
+\\
+\pmb{General variables}\\
+\underline{\textsf{Variable}} & \underline{\textsf{Dimensions}} & \underline{\textsf{Description} }\\
+$V$      				&   $[L^3]$     			& Representative volume\\
+$n$      				&           				& Porosity\\
+$\pmb{\sigma}$ 		&  $[ML^{-1}t^{-2}]$ 	& Total stress tensor\\
+$\delt$       			&  $[t]$      				& Time increment\\
+$\pmb{b}$ 		      &  $[ML^{1}t^{-2}]$ 	    	& Body force\\
+$c_v$                   	&  $[L^2t^{-2}T^{-1}]$  	& Constant volume specific heat\\
+$f_{d}$ 		  	    	&  $[MLt^{-2}]$ 			& Drag forces in momentum exchange term\\
+$f^{int}$ 		  	&  $[MLt^{-2}]$ 			& Internal forces\\
+$f^{ext}$ 		  	&  $[MLt^{-2}]$ 			& External forces\\
+$q_{fs}$ 		  		&  $[MLt^{-2}]$ 			& Heat exchange term\\
+$S$ 		  	    		&            				& Weighting function\\
+$\nabla S$ 			&            				& Gradient of weighting function\\
+
+\pmb{Solid phase}\\
+\underline{\textsf{Variable}} & \underline{\textsf{Dimensions}} & \underline{\textsf{Description} }\\
+$m_s   $       				&    $[M]$      		& Solid mass\\
+$\rho_s$					&	$[ML^{-3}]$  	& Solid density\\
+$\phi_s$				      &		  			& Solid volume fraction\\
+$\overline{\rho}_s$			&	$[ML^{-3}]$  	& Bulk Solid density\\
+$\pmb{x}_s$   			&  	$[L]$    			& Solid Position vector\\
+$\pmb{U}_s$   			&  	$[Lt^{-1}]$    	& Solid Velocity vector\\
+$\pmb{a}_s$   			&  	$[Lt^{-2}]$   	& Solid Acceleration vector\\
+$\pmb{\sigma}^\prime$ 	&  	$[ML^{-1}t^{-2}]$ 	& Effective Stress tensor\\
+$ \pmb{\epsilon}$ 	&  			 	& Strain tensor\\
+$e_s$         				&  	$[L^2t^{-2}]$  	& Solid Internal energy per unit mass\\   
+$T_s$           			&  	$[T]$      		& Solid Temperature\\
+$\pmb{F}_s$     			&       	    			& Solid Deformation gradient\\
+$V_s$     				&  	$[L^3]$      		& Solid Volume\\
+\end {tabular}
+
+\newpage
+\begin{tabular}{lll}
+\\
+\pmb{Fluid phase}\\
+\underline{\textsf{Variable}} & \underline{\textsf{Dimensions}} & \underline{\textsf{Description} }\\
+$m_f   $       				&  $[M]$      				& Fluid mass\\
+$\rho_f$	    		           	&   $[ML^{-3}]$  		& Fluid density\\
+$\phi_f$				      &     					& Fluid volume fraction\\
+$\overline{\rho}_f$			&  $[ML^{-3}]$  			& Bulk Fluid density\\
+$\pmb{U}_f$   			&  $[Lt^{-1}]$    			& Fluid Velocity vector\\
+$\pmb{\sigma}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid stress tensor\\
+$p_f$ 				&  $[ML^{-1}t^{-2}]$ 	& Fluid isotropic pressure\\
+$\pmb{\tau}_f$ 			&  $[ML^{-1}t^{-2}]$ 	& Fluid shear stress tensor\\
+$e_f$         				&  $[L^2t^{-2}]$  		& Fluid Internal energy per unit mass\\   
+$T_f$           				&  $[T]$      				& Fluid Temperature\\
+$\upsilon_f$    			&  $[L^3/M]$  			& Fluid Specific volume $\frac{1}{\rho_f}$\\
+$\alpha_f$    		    		&  $[1/T]$  				& Thermal expansion\\
+$\mu$    		    			&  $[ML^{-1}t^{-1}]$  	& Fluid vicousity\\
+$V_f$     				&  	$[L^3]$      		& Fluid Volume\\
+
+\pmb{Superscript}\\
+\underline{\textsf{Variable}} & \underline{\textsf{Dimensions}} & \underline{\textsf{Description} }\\
+$n$           			&             &    Current time step\\
+$L$           			&             &    Lagrangian values\\
+$n+1$         			&             &    Next time step\\
+\pmb{Subscript}\\
+$c$           			&             &    Cell-centered quantity\\
+$p$           			&             &    Particle quantity\\
+$i$           			&             &    Node quantity\\
+$FC$           			&             &    Cell face quantity\\
+$L, R $       			&             &    Left and Right cell faces\\
+\end {tabular}
+
+\end{document}
+\endinput
+%%
+%% End of file `elsarticle-template-num.tex'.
