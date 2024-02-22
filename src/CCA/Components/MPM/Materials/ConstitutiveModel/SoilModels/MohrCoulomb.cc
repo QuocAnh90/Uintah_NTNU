@@ -210,6 +210,8 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
     double y_ref[10];
     double dSu[10];
     double Su_ref[10];
+    double y_o[10]; 
+    double stress_o[10];
 
     // Right now every partile needs to read the file so Need to find the way to put this reading out of the loop
     if (flag->d_initial_stress == "linearSu") {
@@ -346,7 +348,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
         {
             particleIndex idx = *iter;
 
-            d_matlIndx = matl->getDWIndex();
+            double d_matlIndx = matl->getDWIndex();
 
             double p = rho_orig * (px[idx](1) - y_o[d_matlIndx]) - stress_o[d_matlIndx];
 
