@@ -350,6 +350,8 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
 
             int d_matlIndx = matl->getDWIndex();
 
+            cerr << " y " << y_o[d_matlIndx] << endl;
+            cerr << " stress_o " << stress_o[d_matlIndx] << endl;
             double p = rho_orig * (px[idx](1) - y_o[d_matlIndx]) - stress_o[d_matlIndx];
 
             Matrix3 stressInitial(p, 0.0, 0.0,
@@ -357,6 +359,8 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                 0.0, 0.0, p);
 
             pStress[idx] = stressInitial;
+            cerr << " pStress " << pStress[idx] << endl;
+
         }
     }
 
