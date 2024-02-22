@@ -316,6 +316,7 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
     computeStableTimestep(patch, matl, new_dw);
 
     if (flag->d_initial_stress == "initial_stress") {
+        cerr << " read initial stress " << endl;
         ParticleVariable<Matrix3> pStress;
         new_dw->getModifiable(pStress, lb->pStressLabel, pset);
 
