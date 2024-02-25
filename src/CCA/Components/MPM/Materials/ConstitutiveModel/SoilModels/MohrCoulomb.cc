@@ -1083,7 +1083,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     // We do not want to apply softening during Consolidation time
     if (time < ConsolidationTime) {
         // high cohesion to initialize stress
-        c = 1000000;
+        //c = 1000000;
     }
 
     double Use_friction = UI[33];
