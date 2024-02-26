@@ -316,7 +316,6 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
     computeStableTimestep(patch, matl, new_dw);
 
     if (flag->d_initial_stress == "initial_stress") {
-        cerr << " read initial stress " << endl;
         ParticleVariable<Matrix3> pStress;
         new_dw->getModifiable(pStress, lb->pStressLabel, pset);
 
@@ -350,10 +349,6 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
             particleIndex idx = *iter;
 
             int d_matlIndx = matl->getDWIndex();
-
-            cerr << " d_matlIndx " << d_matlIndx << endl;
-            cerr << " y " << y_o[d_matlIndx] << endl;
-            cerr << " stress_o " << stress_o[d_matlIndx] << endl;
             double p = rho_orig * (px[idx](1) - y_o[d_matlIndx]) - stress_o[d_matlIndx];
 
             Matrix3 stressInitial(p, 0.0, 0.0,
@@ -361,7 +356,6 @@ void MohrCoulomb::initializeCMData(const Patch* patch,
                 0.0, 0.0, p);
 
             pStress[idx] = stressInitial;
-            cerr << " pStress " << pStress[idx] << endl;
 
         }
     }
@@ -1083,7 +1077,7 @@ void MohrCoulomb::CalculateStress(int& nblk, int& ninsv, double& dt,
     // We do not want to apply softening during Consolidation time
     if (time < ConsolidationTime) {
         // high cohesion to initialize stress
-        //c = 1000000;
+        c = 1000000;
     }
 
     double Use_friction = UI[33];
@@ -1295,5 +1289,4 @@ void MohrCoulomb::CheckModel(double UI[])
     if (UI[3] < 0.0) cerr << "Friction angle in the Mohr-Coulomb Model is set to: " << UI[3] << " This will cause the code to malfuncion. Any results obtained are invalid." << endl;
     if (UI[4] < 0.0) cerr << "Dilation angle in the Mohr-Coulomb Model is set to: " << UI[4] << " This will cause the code to malfuncion. Any results obtained are invalid." << endl;
     if (UI[5] < 1.0) cerr << "Version of the Mohr-Coulomb Model is set to: " << UI[5] << " This will cause the code to malfuncion. Any results obtained are invalid." << endl;
-
 }

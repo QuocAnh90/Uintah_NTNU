@@ -5,6 +5,9 @@
     "\\CCA\\Components",
     "\\CCA\\Components\\Models",
     "\\CCA\\Components\\Models\\MultiMatlExchange",
+    "\\CCA\\Components\\MPM",
+    "\\CCA\\Components\\MPM\\Core",
+    "\\CCA\\Components\\MPM\\Materials",
     "\\StandAlone",
     "\\StandAlone\\inputs",
     "\\StandAlone\\inputs\\UPS_SPEC"
