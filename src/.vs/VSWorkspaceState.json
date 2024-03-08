@@ -3,13 +3,12 @@
     "",
     "\\CCA",
     "\\CCA\\Components",
-    "\\CCA\\Components\\Models",
-    "\\CCA\\Components\\Models\\MultiMatlExchange",
     "\\CCA\\Components\\MPM",
-    "\\CCA\\Components\\MPM\\Core",
     "\\CCA\\Components\\MPM\\Materials",
+    "\\CCA\\Components\\MPM\\Materials\\Contact",
     "\\StandAlone",
     "\\StandAlone\\inputs",
+    "\\StandAlone\\inputs\\MPM",
     "\\StandAlone\\inputs\\UPS_SPEC"
   ],
   "PreviewInSolutionExplorer": false
