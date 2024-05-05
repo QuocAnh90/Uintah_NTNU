@@ -56,6 +56,8 @@
       <exactDeformation                   spec="OPTIONAL BOOLEAN" /> 
       <InsertParticles                    spec="OPTIONAL BOOLEAN" /> 
       <InsertParticlesFile                spec="OPTIONAL STRING" />
+		<InsertGravity                    spec="OPTIONAL BOOLEAN" />
+		<InsertGravityFile                spec="OPTIONAL STRING" />
 	  <InsertUndrainedShearStrength       spec="OPTIONAL BOOLEAN" />
 	  <InsertUndrainedShearStrengthFile   spec="OPTIONAL STRING" />
    	  <withColor                          spec="OPTIONAL BOOLEAN" />

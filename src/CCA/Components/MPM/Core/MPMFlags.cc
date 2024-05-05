@@ -101,6 +101,7 @@ MPMFlags::MPMFlags(const ProcessorGroup* myworld)
   d_prescribedDeformationFile          =  "time_defgrad_rotation";
   d_exactDeformation                   =  false;
   d_insertParticles                    =  false;
+  d_insertGravity                      =  false;
   d_insertUndrainedShearStrength       = false;
   d_doGridReset                        =  true;
   d_min_part_mass                      =  3.e-15;
@@ -280,6 +281,11 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("InsertParticles",d_insertParticles);
   if(d_insertParticles){
     mpm_flag_ps->require("InsertParticlesFile",d_insertParticlesFile);
+  }
+
+  mpm_flag_ps->get("InsertGravity",d_insertGravity);
+  if(d_insertGravity){
+    mpm_flag_ps->require("InsertGravityFile",d_insertGravityFile);
   }
 
   mpm_flag_ps->get("InsertUndrainedShearStrength", d_insertUndrainedShearStrength);
@@ -487,6 +493,11 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("InsertParticles",d_insertParticles);
   if(d_insertParticles){
     ps->appendElement("InsertParticlesFile",d_insertParticlesFile);
+  }
+
+  ps->appendElement("InsertGravity",d_insertGravity);
+  if(d_insertParticles){
+    ps->appendElement("InsertGravityFile",d_insertGravityFile);
   }
 
   ps->appendElement("InsertUndrainedShearStrength", d_insertUndrainedShearStrength);

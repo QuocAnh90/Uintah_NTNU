@@ -577,6 +577,8 @@ protected:
 
   void readInsertParticlesFile(std::string filename);
   
+  void readInsertGravityFile(std::string filename);
+
   virtual void scheduleSwitchTest(const LevelP& level, SchedulerP& sched);
 
   //__________________________________
@@ -647,6 +649,11 @@ protected:
   std::vector<double> d_IPColor;
   std::vector<Vector> d_IPTranslate;
   std::vector<Vector> d_IPVelNew;
+
+   // The following are used iff the d_insertGravity flag is true.
+  std::vector<double> d_G_Times;
+  std::vector<Vector> d_Gravity_New;
+
 
 
 //  bool             d_fracture;

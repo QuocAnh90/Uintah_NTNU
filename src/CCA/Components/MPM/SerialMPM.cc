@@ -278,6 +278,10 @@ void SerialMPM::problemSetup(const ProblemSpecP& prob_spec,
     readInsertParticlesFile(flags->d_insertParticlesFile);
   }
 
+  if (flags->d_insertGravity){
+    readInsertGravityFile(flags->d_insertGravityFile);
+  }
+
   setParticleGhostLayer(Ghost::AroundNodes, NGP);
 
   MPMPhysicalBCFactory::create(restart_mat_ps, grid, flags);
@@ -2177,6 +2181,26 @@ void SerialMPM::readInsertParticlesFile(string filename)
   }
 }
 
+void SerialMPM::readInsertGravityFile(string filename)
+{
+
+ if(filename!="") {
+    std::ifstream is(filename.c_str());
+    if (!is ){
+      throw ProblemSetupException("ERROR Opening particle insertion file '"+filename+"'\n",
+                                  __FILE__, __LINE__);
+    }
+    while(is) {
+        double t,G_x,G_y,G_z;
+        is >> t >> G_x >> G_y >> G_z;
+        if(is) {
+            d_G_Times.push_back(t);
+            d_Gravity_New.push_back(Vector(G_x,G_y,G_z));
+        }
+    }
+  }
+}
+
 void SerialMPM::actuallyComputeStableTimestep(const ProcessorGroup*,
                                               const PatchSubset* patches,
                                               const MaterialSubset* ,
@@ -3068,6 +3092,29 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
 
     Ghost::GhostType  gnone = Ghost::None;
     Vector gravity = flags->d_gravity;
+
+    // Overwrite the gravity
+    if(flags->d_insertGravity){
+   // Get the current simulation time
+    simTime_vartype simTimeVar;
+    old_dw->get(simTimeVar, lb->simulationTimeLabel);
+    double time = simTimeVar;
+
+    delt_vartype delT;
+    old_dw->get(delT, lb->delTLabel, getLevel(patches) );
+
+    int index = -999;
+    for(int i = 0; i<(int) d_G_Times.size(); i++){
+      if(time+delT > d_G_Times[i] && time <= d_G_Times[i]){
+        index = i;
+        if(index>=0){
+
+            gravity = d_Gravity_New[index];
+        }       // end if
+      }         // end if
+    }           // end for
+    }
+
     for(unsigned int m = 0; m < m_materialManager->getNumMatls( "MPM" ); m++){
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int dwi = mpm_matl->getDWIndex();
@@ -3102,7 +3149,7 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
           acc -= damp_coef*velocity[c];
         }
         acceleration[c]  = acc +  gravity;
-        velocity_star[c] = velocity[c] + acceleration[c] * delT;
+       velocity_star[c] = velocity[c] + acceleration[c] * delT;
       }
 
       // Check the integrated nodal velocity and if the product of velocity
