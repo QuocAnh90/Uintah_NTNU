@@ -3093,9 +3093,6 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
     Ghost::GhostType  gnone = Ghost::None;
     Vector gravity = flags->d_gravity;
 
-    // Overwrite the gravity
-    if(flags->d_insertGravity){
-   // Get the current simulation time
     simTime_vartype simTimeVar;
     old_dw->get(simTimeVar, lb->simulationTimeLabel);
     double time = simTimeVar;
@@ -3103,12 +3100,14 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
     delt_vartype delT;
     old_dw->get(delT, lb->delTLabel, getLevel(patches) );
 
+    // Overwrite the gravity
+    if(flags->d_insertGravity){
+   // Get the current simulation time
     int index = -999;
     for(int i = 0; i<(int) d_G_Times.size(); i++){
-      if(time+delT > d_G_Times[i] && time <= d_G_Times[i]){
+      if(time+delT > d_G_Times[i] && time <= d_G_Times[i+1]){
         index = i;
         if(index>=0){
-
             gravity = d_Gravity_New[index];
         }       // end if
       }         // end if
@@ -3123,8 +3122,8 @@ void SerialMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
       constNCVariable<Vector> internalforce, externalforce, velocity;
       constNCVariable<double> mass;
 
-      delt_vartype delT;
-      old_dw->get(delT, lb->delTLabel, getLevel(patches) );
+      //delt_vartype delT;
+      //old_dw->get(delT, lb->delTLabel, getLevel(patches) );
 
       new_dw->get(internalforce,lb->gInternalForceLabel, dwi, patch, gnone, 0);
       new_dw->get(externalforce,lb->gExternalForceLabel, dwi, patch, gnone, 0);
