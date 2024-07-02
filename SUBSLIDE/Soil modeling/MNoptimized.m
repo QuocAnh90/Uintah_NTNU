@@ -1,20 +1,22 @@
 % Simple DP Mob
 function [] = MN()
-E = 10000;                                      % Young's modulus
+E = 12000;                                      % Young's modulus
 nuy = 0.3;                                      % Poisson's ratio
 lambda_c = 1;                                  % Dilatancy parameters
-M = 2 * sqrt(2) * tan (30/180*pi());            % Friction parameters
+M = 2 * sqrt(2) * tan (27/180*pi());            % Friction parameters
 % Epsilon_v_cs = 0.05;                             % Critical state volume strain
 % N0 = M*(-1+exp(-lambda_c*(Epsilon_v_cs-0)));     % Dilatancy state variables
-N0 = -0.2;
+N0 = 0.05;
+
+Sigma1(1,1) = 150;
 
 % Intial stress
-Sigma = [150 0 0; 0 150 0;0 0 150];  
+Sigma = [Sigma1(1,1) 0 0; 0 Sigma1(1,1) 0;0 0 Sigma1(1,1)];  
 sig0 =  [Sigma(1,1); Sigma(2,2); Sigma(3,3); Sigma(1,2); Sigma(1,3); Sigma(2,3)];
 sig = sig0;
 
 % 3 x 3 Stress tensor
-Sigma1(1,1) = 150; Sigma1(1,2) = 0;
+SSigma1(1,2) = 0;
 % Elastic matrix
 D = E/(1+nuy)/(1-2*nuy)*[ 1-nuy nuy nuy 0 0 0 ...
                         ; nuy 1-nuy nuy 0 0 0 ...
@@ -28,7 +30,7 @@ deps = [0.0001; -0.00005; -0.00005; 0; 0; 0];
 N=N0;
 Nk(1,1) = N0;
 
-for k = 2:5000
+for k = 2:2000
     k
     
     x = deps(1);
@@ -53,6 +55,8 @@ for k = 2:5000
 %     yk(1,k) = y;
           
 end
+
+% Sigma1=Sigma1';
 
 figure (1)    
 subplot(2,2,1); hold on;
