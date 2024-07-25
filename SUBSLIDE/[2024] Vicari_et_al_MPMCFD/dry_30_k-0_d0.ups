@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Uintah_specification> 
+<!--Please use a consistent set of units, (mks, cgs,...)-->
+
+   <Meta>
+       <title>30</title>
+   </Meta>
+   <!-- <Solver type="hypre"/>-->
+   <SimulationComponent type="mpm" />
+    
+    <!--____________________________________________________________________-->
+    <!--      T  I  M  E     V  A  R  I  A  B  L  E  S                      -->
+    <!--__________________________________________________
+	_________________-->
+   <Time>
+       <maxTime>            2.0        </maxTime>
+       <initTime>           0.0         </initTime>
+       <delt_min>           0.0         </delt_min>
+       <delt_max>           5.0e-6        </delt_max>
+       <delt_init>          1.0e-8      </delt_init>
+       <max_delt_increase>    1.0       </max_delt_increase>
+       <timestep_multiplier>  0.5       </timestep_multiplier>
+   </Time>
+   
+    <!--____________________________________________________________________-->
+    <!--      G  R  I  D     V  A  R  I  A  B  L  E  S                      -->
+    <!--____________________________________________________________________-->
+    <Grid>
+    <BoundaryConditions>
+
+       <Face side = "x-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      
+      <Face side = "x+">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>     
+          
+      <Face side = "y-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>                  
+
+      <Face side = "y+">
+         <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>     
+      
+      <Face side = "z-">
+          <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      
+      <Face side = "z+">
+          <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+
+    </BoundaryConditions>
+       <Level>
+         <Box label="1">
+            <lower>        [-0.25, -0.35, -0.005]   </lower>
+            <upper>        [  1.6,     1,  0.005]   </upper>
+            <extraCells>   [1,1,1]          </extraCells>
+            <patches>      [8,8,1]          </patches>
+         </Box>
+         <spacing>        [0.01,0.01,0.01]     </spacing>
+       </Level>
+    </Grid>
+    
+    <!--____________________________________________________________________-->
+    <!--   O  U  P  U  T     V  A  R  I  A  B  L  E  S                      -->
+    <!--____________________________________________________________________-->
+   <DataArchiver>
+      <filebase>dry_30_k-0_d0.uda</filebase>
+      <outputInterval>0.1</outputInterval>
+      <save label = "p.x"/>
+	  <save label = "p.velocity"/>
+	  <save label = "p.particleID"/>
+            <save label = "p.volume"/>
+	  <save label = "p.displacement"/>
+	  <save label = "shear_strain"/>
+	  <save label = "p.stressVizual"/>
+<checkpoint interval="1.0" cycle="1"/>
+   </DataArchiver>
+
+    <!--____________________________________________________________________-->
+    <!--    M  P   M  I  C  E     P  A  R  A  M  E  T  E  R  S              -->
+    <!--____________________________________________________________________-->
+   
+    <MPM>
+        <time_integrator>     explicit  </time_integrator>
+        <interpolator>        gimp      </interpolator>
+		<DoCapDensity>false      </DoCapDensity>
+		<lowerboundDensity>  0.99      </lowerboundDensity>
+		<upperboundDensity>  1.01    </upperboundDensity>
+		<artificial_damping_coeff>	0.00	</artificial_damping_coeff>
+		<DoPressureStabilization>false</DoPressureStabilization>
+      <XPIC2>true</XPIC2>
+		<maximum_particle_velocity>1000</maximum_particle_velocity>
+		<Use_MPMICE2>        false      </Use_MPMICE2>
+		<withColor> true </withColor>
+		<restartOnLargeNodalVelocity> true </restartOnLargeNodalVelocity>
+
+    </MPM>
+
+    <!--____________________________________________________________________-->
+    <!--     P  H  Y  S  I  C  A  L     C  O  N  S  T  A  N  T  S           -->
+    <!--____________________________________________________________________-->   
+    <PhysicalConstants>
+       <gravity>            [0,-9.8,0]   </gravity>
+    </PhysicalConstants>
+
+
+    <!--____________________________________________________________________-->
+    <!--    MATERIAL PROPERTIES INITIAL CONDITIONS                          -->
+    <!--____________________________________________________________________-->
+    <MaterialProperties>
+      <MPM>	 
+	   
+	   <material name="bed">
+		<grain_size>  0.000001  </grain_size>
+		<density>7800.0</density>
+		<TimeForConsolidation>0.0</TimeForConsolidation>
+		<DGrainForConsolidation>    0.1 </DGrainForConsolidation>
+	        <seismic_plate>true</seismic_plate>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>2.52E8</bulk_modulus>
+                 <shear_modulus>0.96E8</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+              
+		<geom_object>
+	      <union>
+	      <union>
+	      <union>
+		<box label = "bed1">
+                       <min>  [ -0.21, 0.0, -0.005]  </min>   
+                       <max> [  -0.19,  0.7,  0.005] </max>   
+                </box> 	
+		<box label = "bed2">
+                       <min>  [ -0.21, -0.27, -0.005]  </min>   
+                       <max> [  0.0,  0.0, 0.005] </max>   
+                </box> 	
+		</union>
+		<box label = "bed3">
+                       <min>  [ 0.0, -0.27,-0.005]  </min>   
+                       <max> [  1.4,  -0.25, 0.005] </max>    
+                </box> 
+		</union>
+		<box label = "bed4">
+                       <min>  [ 1.4, -0.27,-0.005]  </min>   
+                       <max> [  1.5,  0.0, 0.005] </max>    
+                </box> 
+		</union>
+		
+				
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>300</temperature>
+		<color>0</color>
+               </geom_object>			   		   
+           </material>		   
+	
+
+		<material name = "soil_dry">
+	         <grain_size> 0.001 </grain_size>
+                 <density>    1584.0 </density>	
+                 <TimeForConsolidation>    1.0 </TimeForConsolidation>
+		 <DGrainForConsolidation>    0.001 </DGrainForConsolidation>				
+		 <constitutive_model type="MohrCoulomb"> 
+                 <K>32.5E6</K>
+                 <G>15E6</G>
+		 <c>1</c>
+                 <Phi>30</Phi>
+		 <Psi>0</Psi>
+		 <Version>11</Version>			 				
+               </constitutive_model>	
+			   
+            <thermal_conductivity>  400.0         </thermal_conductivity>
+            <specific_heat>         386.0         </specific_heat>
+            <geom_object>
+	    
+		<box label = "dry">
+                       <min>  [ -0.18 ,  0.01,  -0.005 ]  </min>   
+                       <max>  [   0.0 ,   0.6,   0.005 ] </max>   
+                </box>
+		
+              <res>               [2,2,1]         </res>
+              <velocity>          [0.0,0.0,0.0]   </velocity>
+              <temperature>       300             </temperature>
+		 <color>0</color>
+            </geom_object>
+			
+         </material>		
+	 
+		   
+		<material name = "eroded bed">
+	         <grain_size> 0.001 </grain_size>
+                 <density>    1984.0 </density>	
+                 <TimeForConsolidation>    1.0 </TimeForConsolidation>
+		 <DGrainForConsolidation>    0.001 </DGrainForConsolidation>				
+		 <constitutive_model type="MohrCoulomb"> 
+                 <K>32.5E6</K>
+                 <G>15E6</G>
+		 <c>1</c>
+                 <Phi>30</Phi>
+		 <Psi>0</Psi>
+		 <Version>11</Version>			 				
+               </constitutive_model>	
+			   
+            <thermal_conductivity>  400.0         </thermal_conductivity>
+            <specific_heat>         386.0         </specific_heat>
+            <geom_object>
+
+		<box label = "wetbed">
+                       <min>  [ 0.01 ,  -0.24,  -0.005 ]  </min>   
+                       <max>  [ 1.39,     0.0,   0.005 ] </max>   
+                </box>
+		
+              <res>               [2,2,1]         </res>
+              <velocity>          [0.0,0.0,0.0]   </velocity>
+              <temperature>       300             </temperature>
+		 <color>0</color>
+            </geom_object>
+			
+         </material>		
+   	 	 
+	<!--     FRICTION CONTACTS     -->
+	<!--Friction contact flow-base:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[0,1]</materials>
+			 <mu>0.577</mu>
+        </contact>	 
+	<!--Friction contact erodible bed-bed:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[0,2]</materials>
+			 <mu>0.577</mu>
+        </contact>
+	<!--Friction contact flow-erodible bed:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[1,2]</materials>
+			 <mu>0.577</mu>
+        </contact>
+	
+      </MPM>
+      
+    </MaterialProperties>
+
+       
+</Uintah_specification>
