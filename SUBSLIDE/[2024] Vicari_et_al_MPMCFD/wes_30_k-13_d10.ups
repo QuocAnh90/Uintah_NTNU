@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Uintah_specification> 
+<!--Please use a consistent set of units, (mks, cgs,...)-->
+
+   <Meta>
+       <title>column</title>
+   </Meta>
+    <Solver type="hypre"/>
+   <SimulationComponent type="mpmice" />
+    
+    <!--____________________________________________________________________-->
+    <!--      T  I  M  E     V  A  R  I  A  B  L  E  S                      -->
+    <!--__________________________________________________
+	_________________-->
+   <Time>
+       <maxTime>            2.0        </maxTime>
+       <initTime>           0.0         </initTime>
+       <delt_min>           0.0         </delt_min>
+       <delt_max>           1.0        </delt_max>
+       <delt_init>          1.0e-8      </delt_init>
+       <max_delt_increase>    1.0       </max_delt_increase>
+       <timestep_multiplier>  0.5       </timestep_multiplier>
+   </Time>
+   
+    <!--____________________________________________________________________-->
+    <!--      G  R  I  D     V  A  R  I  A  B  L  E  S                      -->
+    <!--____________________________________________________________________-->
+    <Grid>
+    <BoundaryConditions>
+
+       <Face side = "x-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      
+      <Face side = "x+">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      
+          
+       <Face side = "y-">
+         <BCType id = "0"   label = "Pressure"     var = "Neumann">
+                              <value> 0.0   </value>
+        </BCType>
+        <BCType id = "all" label = "Velocity"     var = "Dirichlet">
+                              <value> [0.,0.,0.] </value>
+        </BCType>
+        <BCType id = "all" label = "Temperature"  var = "Dirichlet">
+                              <value> 300.0  </value>
+        </BCType>
+        <BCType id = "all" label = "Density"      var = "Neumann">
+                              <value> 0.0  </value>
+        </BCType>
+      </Face>                  
+
+       <Face side = "y+">
+        <BCType id = "0"   label = "Pressure"     var = "Neumann">
+                              <value> 0.0   </value>
+        </BCType>
+        <BCType id = "all" label = "Velocity"     var = "Dirichlet">
+                              <value> [0.,0.,0.] </value>
+        </BCType>
+        <BCType id = "all" label = "Temperature"  var = "Dirichlet">
+                              <value> 300.0  </value>
+        </BCType>
+        <BCType id = "all" label = "Density"      var = "Neumann">
+                              <value> 0.0  </value>
+        </BCType>
+      </Face>                   
+      
+      <Face side = "z-">
+        <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+      
+      <Face side = "z+">
+         <BCType id="all" label="Symmetric" var="symmetry"> </BCType>
+      </Face>
+
+    </BoundaryConditions>
+       <Level>
+         <Box label="1">
+            <lower>        [-0.25, -0.35, -0.005]   </lower>
+            <upper>        [  1.6,     1,  0.005]   </upper>
+            <extraCells>   [1,1,1]          </extraCells>
+            <patches>      [8,8,1]          </patches>
+         </Box>
+         <spacing>        [0.01,0.01,0.01]     </spacing>
+       </Level>
+    </Grid>
+    
+    <!--____________________________________________________________________-->
+    <!--   O  U  P  U  T     V  A  R  I  A  B  L  E  S                      -->
+    <!--____________________________________________________________________-->
+   <DataArchiver>
+      <filebase>wes_30_k-5_d10.uda</filebase>
+      <outputInterval>0.1</outputInterval>
+      <save label = "p.x"/>
+	  <save label = "p.velocity"/>
+	  <save label = "p.particleID"/>
+            <save label = "p.volume"/>
+	  <save label = "p.pressure"/>
+	  <save label = "p.displacement"/>
+	  <save label = "shear_strain"/>
+	  <save label = "press_CC"/>
+      	  <save label = "rho_CC"/>
+	  <save label = "vel_CC"/>
+	  <save label = "p.stressVizual"/>
+<checkpoint interval="1.0" cycle="1"/>
+   </DataArchiver>
+
+    <!--____________________________________________________________________-->
+    <!--    M  P   M  I  C  E     P  A  R  A  M  E  T  E  R  S              -->
+    <!--____________________________________________________________________-->
+   
+    <CFD>
+         <cfl>0.1</cfl>
+       <ICE>
+        <advection type = "FirstOrder" />
+        <TimeStepControl>
+          <Scheme_for_delT_calc> aggressive   </Scheme_for_delT_calc>
+          <knob_for_speedSound>  0.01           </knob_for_speedSound>
+        </TimeStepControl>
+
+        <applyHydrostaticPressure>true </applyHydrostaticPressure>
+        <ClampSpecificVolume>     true  </ClampSpecificVolume>
+		
+        <ImplicitSolver>
+           <max_outer_iterations>      10     </max_outer_iterations>
+           <outer_iteration_tolerance> 1e-2  </outer_iteration_tolerance>
+           <iters_before_timestep_restart> 4 </iters_before_timestep_restart>
+           
+           <Parameters variable="implicitPressure">
+		   <!--
+              <tolerance>     1.e-20   </tolerance>
+               The solver tolerance is relative high to prevent checker boarding -->
+              
+              <solver>         cg      </solver>
+              <preconditioner> pfmg    </preconditioner>
+              <maxiterations>  7500    </maxiterations>
+              <npre>           1       </npre>
+              <npost>          1       </npost>
+              <skip>           1       </skip>
+              <jump>           0       </jump>
+              <relax_type>     2       </relax_type>
+           </Parameters>
+        </ImplicitSolver>
+
+      </ICE>        
+    </CFD>
+    <MPM>
+        <time_integrator>     explicit  </time_integrator>
+        <interpolator>        gimp      </interpolator>
+		<DoCapDensity>false      </DoCapDensity>
+		<lowerboundDensity>  0.99      </lowerboundDensity>
+		<upperboundDensity>  1.01    </upperboundDensity>
+		<artificial_damping_coeff>	0.00	</artificial_damping_coeff>
+		<DoPressureStabilization>false</DoPressureStabilization>
+		<maximum_particle_velocity>1000</maximum_particle_velocity>
+		<Use_MPMICE2>        true      </Use_MPMICE2>
+		<withColor> true </withColor>
+		<restartOnLargeNodalVelocity> false </restartOnLargeNodalVelocity>
+
+    </MPM>
+	
+    <!--____________________________________________________________________-->
+    <!--     P  H  Y  S  I  C  A  L     C  O  N  S  T  A  N  T  S           -->
+    <!--____________________________________________________________________-->   
+    <PhysicalConstants>
+       <gravity>            [0,-9.8,0]   </gravity>
+	    <reference_pressure> 101325  </reference_pressure>
+    </PhysicalConstants>
+
+
+    <!--____________________________________________________________________-->
+    <!--    MATERIAL PROPERTIES INITIAL CONDITIONS                          -->
+    <!--____________________________________________________________________-->
+    <MaterialProperties>
+       <MPM>	 
+	   
+	   <material name="bed">
+			  <grain_size>  0.000001  </grain_size>
+              <density>7800.0</density>
+<TimeForConsolidation>0.0</TimeForConsolidation>
+<DGrainForConsolidation>    0.1 </DGrainForConsolidation>
+			  <seismic_plate>true</seismic_plate>
+              <constitutive_model type="comp_neo_hook"> 
+                 <bulk_modulus>2.52E8</bulk_modulus>
+                 <shear_modulus>0.96E8</shear_modulus>
+               </constitutive_model>
+              <thermal_conductivity>1.0</thermal_conductivity>
+              <specific_heat>5</specific_heat>
+              
+		<geom_object>
+	      <union>
+	      <union>
+	      <union>
+		<box label = "bed1">
+                       <min>  [ -0.21, 0.0, -0.005]  </min>   
+                       <max> [  -0.19,  0.7,  0.005] </max>   
+                </box> 	
+		<box label = "bed2">
+                       <min>  [ -0.21, -0.27, -0.005]  </min>   
+                       <max> [  0.0,  0.0, 0.005] </max>   
+                </box> 	
+		</union>
+		<box label = "bed3">
+                       <min>  [ 0.0, -0.27,-0.005]  </min>   
+                       <max> [  1.4,  -0.25, 0.005] </max>    
+                </box> 
+		</union>
+		<box label = "bed4">
+                       <min>  [ 1.4, -0.27,-0.005]  </min>   
+                       <max> [  1.5,  0.0, 0.005] </max>    
+                </box> 
+		</union>
+		
+				
+                  <res>[2,2,1]</res>
+                  <velocity>[0,0,0]</velocity>
+                  <temperature>300</temperature>
+		<volumeFraction>      0.9           </volumeFraction>
+		<color>0</color>
+               </geom_object>			   		   
+           </material>		   
+	
+
+		<material name = "soil_dry">
+	         <grain_size> 0.001 </grain_size>
+                 <density>    2640.0 </density>	
+                 <TimeForConsolidation>    1.0 </TimeForConsolidation>
+		 <DGrainForConsolidation>    0.001 </DGrainForConsolidation>				
+		 <constitutive_model type="MohrCoulomb"> 
+                 <K>32.5E6</K>
+                 <G>15E6</G>
+		 <c>0</c>
+                 <Phi>30</Phi>
+		 <Psi>1</Psi>
+		 <Version>11</Version>			 				
+               </constitutive_model>	
+			   
+            <thermal_conductivity>  400.0         </thermal_conductivity>
+            <specific_heat>         386.0         </specific_heat>
+            <geom_object>
+	    
+		<box label = "dry">
+                       <min>  [ -0.18 ,  0.01,  -0.005 ]  </min>   
+                       <max>  [   0.0 ,   0.6,   0.005 ] </max>   
+                </box>
+		
+              <res>               [2,2,1]         </res>
+              <velocity>          [0.0,0.0,0.0]   </velocity>
+              <temperature>       300             </temperature>
+		<volumeFraction>      0.6          </volumeFraction>
+		 <color>0</color>
+            </geom_object>
+			
+         </material>		
+	 
+		   
+		<material name = "eroded bed">
+	         <grain_size> 0.00001 </grain_size>
+                 <density>    2640.0 </density>	
+                 <TimeForConsolidation>    1.0 </TimeForConsolidation>
+		 <DGrainForConsolidation>    0.001 </DGrainForConsolidation>				
+		 <constitutive_model type="MohrCoulomb"> 
+                 <K>32.5E6</K>
+                 <G>15E6</G>
+		 <c>1</c>
+                 <Phi>30</Phi>
+		 <Psi>10</Psi>
+		 <Version>11</Version>		
+			<Use_dilation>1</Use_dilation>
+                <strain0>0.0</strain0>
+		<strain1>0.15</strain1>
+		<strain2>0.6</strain2>
+		<Psi_CS>0</Psi_CS>
+		<Psi_P>10</Psi_P>
+		<Phi_CS>30 </Phi_CS>		 				
+               </constitutive_model>	
+			   
+            <thermal_conductivity>  400.0         </thermal_conductivity>
+            <specific_heat>         386.0         </specific_heat>
+            <geom_object>
+
+		<box label = "wetbed">
+                       <min>  [ 0.01 ,  -0.24,  -0.005 ]  </min>   
+                       <max>  [ 1.39,     0.0,   0.005 ] </max>   
+                </box>
+		
+              <res>               [2,2,1]         </res>
+              <velocity>          [0.0,0.0,0.0]   </velocity>
+              <temperature>       300             </temperature>
+		<volumeFraction>      0.6          </volumeFraction>
+		 <color>0</color>
+            </geom_object>
+			
+         </material>		
+   	 	 
+	<!--     FRICTION CONTACTS     -->
+	<!--Friction contact flow-base:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[0,1]</materials>
+			 <mu>0.577</mu>
+        </contact>	 
+	<!--Friction contact erodible bed-bed:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[0,2]</materials>
+			 <mu>0.577</mu>
+        </contact>
+	<!--Friction contact flow-erodible bed:-->
+	<contact>
+             <type>friction_bard</type>
+			 <materials>[1,2]</materials>
+			 <mu>0.577</mu>
+        </contact>
+      </MPM>
+      
+       <ICE>
+          <material name = "Water">
+		  <isSurroundingMatl>          true            </isSurroundingMatl>
+           <EOS type="KnaussSeaWater">
+              <a>  0.18        </a>    <!-- ( kg/m3 C)     -->    
+              <b>  0.78        </b>    <!-- (kg/m3 S) -->
+              <K> 0.00000046512  </K>   <!-- (J/Kg K)   -->
+              <S> 0            </S>   <!-- (1/Pa)     -->
+			  <S0> 0           </S0>   <!-- (1/Pa)     -->
+              <T0> 300       </T0>   <!-- (K)        -->
+              <P0>  101325     </P0>    <!-- (1/K^2)    -->
+              <rho0> 999.8      </rho0>   <!-- (m^3/kg)   -->
+            </EOS>
+
+            <dynamic_viscosity>    0.001           </dynamic_viscosity>
+            <thermal_conductivity> 0           </thermal_conductivity>
+            <specific_heat>        4145.37627765 </specific_heat>
+            <gamma>                1.000009      </gamma>
+			<includeFlowWork>     false  </includeFlowWork>
+
+            <geom_object>
+	<union>
+	      <union>
+	      <union>
+		<box label = "bed2"/>
+		</union>
+		<box label = "bed3"/>
+		</union>
+		<box label = "bed4"/>
+		</union>		
+
+				
+              <res>               [2,2,1]         </res>
+              <velocity>          [0.0,0.0,0.0]   </velocity>
+             <density>              999.8             </density> 
+              <pressure>             101325            </pressure>
+              <temperature>          300.0             </temperature>  
+			  <volumeFraction>      0.1           </volumeFraction>
+            </geom_object>
+			
+            <geom_object>
+	      <difference>
+	      <difference>
+	      <difference>
+	      <difference>
+                   <box label = "water_box">
+                       <min>  [  -0.25,  -0.35,  -0.005 ]  </min>   
+                       <max>  [   1.6,    0.0,    0.005 ] </max>   
+                   </box>
+		<box label = "wetbed"/>		
+              </difference>
+	      <box label = "bed2"/>
+	      </difference>
+	      <box label = "bed3"/>
+	      </difference>
+	      <box label = "bed4"/>
+	      </difference>
+			   	  
+               <res>                [2,2,1]            </res>  
+               <velocity>           [0.0,0.0,0.0]      </velocity>
+              
+              <density>              999.8             </density> 
+              <pressure>             101325            </pressure>
+              <temperature>          300.0             </temperature>  
+            </geom_object>
+					
+			<geom_object>
+				 			  
+	      <box label = "wetbed"/>		
+	
+               <res>                [2,2,1]            </res>  
+               <velocity>           [0.0,0.0,0.0]      </velocity>
+              
+              <density>              999.8             </density> 
+              <pressure>             101325            </pressure>
+              <temperature>          300.0             </temperature>  
+	      	      <volumeFraction>      0.4           </volumeFraction>			   
+
+            </geom_object>
+			
+          </material>       
+  
+         <material name = "Air">
+           <EOS type = "ideal_gas">                     </EOS>
+           <dynamic_viscosity>          1.8E-5             </dynamic_viscosity>
+           <thermal_conductivity>       0.0             </thermal_conductivity>
+           <specific_heat>              716.0           </specific_heat>
+           <gamma>                      1.4             </gamma>    
+           <includeFlowWork>     false  </includeFlowWork>
+           <geom_object>
+
+		<difference>
+		<difference>
+                   <box label = "air_box">
+                       <min>  [  -0.25,  0.0,  -0.005 ]  </min>   
+                       <max>  [   1.6,   1.0,   0.005 ] </max>   
+                   </box>
+		<box label = "bed1"/>
+                 </difference>
+		 <box label = "dry"/>
+		 </difference>
+		 
+               <res>                      [2,2,1]       </res>
+               <velocity>           [0.0,0.0,0.0]       </velocity>
+               <temperature>        300.0               </temperature>
+               <density>        1.17682926829      </density>
+               <pressure>       101325                </pressure>
+           </geom_object>
+		   
+		   
+            <!--     AIR WITHIN THE FLOW     -->
+	  <geom_object>
+	  <box label = "dry"/>
+	  
+               <res>                      [2,2,1]       </res>
+               <velocity>           [0.0,0.0,0.0]       </velocity>
+               <temperature>        300.0               </temperature>
+               <density>        1.17682926829      </density>
+               <pressure>       101325                </pressure> 
+	       <volumeFraction>      0.4          </volumeFraction>
+            </geom_object>
+	    
+	    <geom_object>
+	  <box label = "bed1"/>
+	  
+               <res>                      [2,2,1]       </res>
+               <velocity>           [0.0,0.0,0.0]       </velocity>
+               <temperature>        300.0               </temperature>
+               <density>        1.17682926829      </density>
+               <pressure>       101325                </pressure> 
+	       <volumeFraction>      0.1          </volumeFraction>
+            </geom_object>
+		   
+         </material>
+		
+      </ICE>       
+       
+      <exchange_properties> 
+        <Model type="Reynolds">
+         </Model>
+		
+        <exchange_coefficients>
+              <momentum>           [1e15 1e15 1e15 1e15 1e15 1e15 1e15 1e15 1e15 1e15]          </momentum>
+              <heat>               [1e1 1e1 1e1 1e1 1e1 1e1 1e1 1e1 1e1 1e1]           </heat>
+        </exchange_coefficients>
+      </exchange_properties> 
+	  
+    </MaterialProperties>
+
+       
+</Uintah_specification>
+  
